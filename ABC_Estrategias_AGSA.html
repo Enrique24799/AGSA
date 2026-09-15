@@ -109,6 +109,17 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
 .acc.l2>.acc-h .tt{font-size:13px;color:var(--accent2);}
 .acc.l2>.acc-b{padding:0 12px 12px;}
 .lvl-tag{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--tl);margin-right:6px;}
+/* ---------- Parametrización ---------- */
+.pbox{border:1px solid var(--border);border-radius:10px;padding:14px;background:#fbfcfd;}
+.pbox h4{font-size:13px;color:var(--primary);margin-bottom:4px;}
+.phelp{font-size:11px;color:var(--tl);line-height:1.5;margin-bottom:10px;}
+.pin{width:72px;padding:4px 6px;border:1px solid var(--accent);border-radius:5px;font-size:12px;text-align:right;background:#fff;font-weight:600;}
+.pin.w{width:108px;}
+.pin:focus{outline:2px solid rgba(0,180,216,.3);}
+.pfix{color:var(--tl);font-size:11px;}
+.mtx td,.mtx th{text-align:center;}
+.mtx td:first-child,.mtx th:first-child{text-align:left;}
+.mtx tfoot td{font-weight:700;background:#f8f9fa;}
 .espin{width:64px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right;}
 /* ---------- Modales ---------- */
 .mo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
@@ -150,6 +161,7 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
   <div class="st">Maestros</div>
   <div class="ni sub" id="nav-materiales" onclick="nav('materiales',this)">📦 Maestro de Materiales</div>
   <div class="ni sub" id="nav-familias" onclick="nav('familias',this)">🧩 Familias de Materiales</div>
+  <div class="ni sub" id="nav-param" onclick="nav('param',this)">🎚️ Parametrización ABC</div>
   <div class="st">Inputs Ventas</div>
   <div class="ni sub" id="nav-pedidos" onclick="nav('pedidos',this)">📋 Pedidos de Venta</div>
   <div class="ni sub" id="nav-analisis" onclick="nav('analisis',this)">📈 Análisis Ventas</div>
@@ -184,6 +196,7 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
       <ol style="font-size:13px;line-height:2;padding-left:18px;color:var(--text)">
         <li><b>Maestro de Materiales</b> → carga el Excel de materiales con la estructura de AGSA (se añaden a los existentes).</li>
         <li><b>Familias de Materiales</b> → árbol de tres niveles <b>máquina → familia (redondo) → medida</b>. El catálogo de redondos de AGSA viene cargado; solo hay que indicar en cada medida el <b>espesor mín./máx.</b> (si se dejan vacíos valen todos) y la <b>máquina</b>. Cada material toma de aquí su familia y su máquina.</li>
+        <li><b>Parametrización ABC</b> → umbrales de las clases A/B/C y a/b/c y las tres variables que definen si una materia prima es estándar (1) o no (0).</li>
         <li><b>Pedidos de Venta</b> → carga masiva del Excel de pedidos y filtra por cliente, año-mes, material, acabado y calidad.</li>
         <li><b>Análisis Ventas</b> → gráficos de ventas/facturación y clasificación ABC de materiales y clientes.</li>
       </ol>
@@ -275,6 +288,50 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
     <div class="tw" style="max-height:340px"><table id="tHuerf"><thead><tr>
       <th>Tipo de material</th><th>Medida</th><th class="num">Espesor mín.</th><th class="num">Espesor máx.</th><th class="num">Materiales</th><th>Acción</th>
     </tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+
+<!-- ===================== PARAMETRIZACIÓN ABC ===================== -->
+<div class="pg" id="p-param">
+  <div class="info-bar">🎚️ <strong>Parámetros de clasificación</strong>
+    <span style="opacity:.8">Se guardan en el navegador y los usan la clasificación ABC y el cálculo de estrategias</span></div>
+  <div class="toolbar">
+    <button class="btn bp" onclick="usarCalculados()">🔄 Usar los percentiles calculados</button>
+    <button class="btn bo" onclick="resetParam()">↩️ Restaurar valores por defecto</button>
+    <button class="btn bo" onclick="exportParam()">📤 Exportar parámetros</button>
+    <span style="font-size:11px;color:var(--tl);margin-left:auto">Los cambios se guardan al salir de cada celda</span>
+  </div>
+
+  <div class="cd">
+    <h3>🏷️ ABC Producto Terminado</h3>
+    <div class="sub">Cada producto terminado recibe un código de tres posiciones:
+      <b>volumen</b> (A/B/C) + <b>frecuencia</b> (a/b/c) + <b>materia prima</b> (1/0). Ejemplo:
+      <span class="b A">A</span> <span class="b g">a</span> <span class="b bl">1</span> = mayor volumen, muchos pedidos y materia prima estándar.</div>
+    <div class="cg3">
+      <div class="pbox" id="pVol"></div>
+      <div class="pbox" id="pFrec"></div>
+      <div class="pbox" id="pMP"></div>
+    </div>
+    <div id="pPrev" style="margin-top:18px"></div>
+  </div>
+
+  <div class="cd">
+    <h3>🧪 Estandarización MMPP</h3>
+    <div class="sub">Una materia prima es <b>estándar (1)</b> cuando <b>supera las tres variables</b>; si falla alguna, es <b>no estándar (0)</b>.
+      El valor por defecto de cada variable es el percentil indicado, calculado con los pedidos cargados, pero puede fijarse a mano.</div>
+    <div class="fl" style="margin-bottom:14px">
+      <div class="fg"><label>Agrupación de MMPP (provisional)</label>
+        <select id="pGrupo" onchange="setP('mmpp.grupo',this.value)">
+          <option value="redondo_esp">Familia (redondo) + espesor</option>
+          <option value="redondo">Familia (redondo)</option>
+          <option value="redondo_esp_cal">Familia (redondo) + espesor + calidad</option>
+        </select></div>
+      <div class="fg" style="flex:1;min-width:280px"><label>&nbsp;</label>
+        <div class="phelp" style="margin:0">Hasta que exista la pantalla de materias primas, la MMPP se identifica con esta agrupación.
+          Los materiales sin redondo (chapa, fleje, bobina) se agrupan por tipo y medida.</div></div>
+    </div>
+    <div id="pMMPP"></div>
+    <div id="pMMPPPrev" style="margin-top:18px"></div>
   </div>
 </div>
 
@@ -551,7 +608,7 @@ const SINMAQ='SIN MÁQUINA';
 
 /** Valores distintos ya presentes en el maestro para un campo (alimentan los desplegables) */
 function valoresDe(k){return uniqSort(ST.materiales.map(m=>up(m[k])));}
-const ST={materiales:[],familias:[],reglas:[],pedidos:[],maquinas:MAQ_BASE.slice()};
+const ST={materiales:[],familias:[],reglas:[],pedidos:[],maquinas:MAQ_BASE.slice(),param:null};
 const LS_KEY='agsa_abc_estrategias_v1';
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
@@ -566,6 +623,7 @@ function load(){
     const o=JSON.parse(raw);
     ST.materiales=o.materiales||[];ST.familias=o.familias||[];ST.reglas=o.reglas||[];
     ST.pedidos=o.pedidos||[];ST.maquinas=(o.maquinas&&o.maquinas.length)?o.maquinas:MAQ_BASE.slice();
+    ST.param=o.param||null;PARAM();
     migra();
   }catch(e){toast('No se pudieron leer los datos guardados: '+e.message,'err');}
 }
@@ -711,7 +769,7 @@ function efect(p,campo){
 }
 
 /* ---------- Navegación ---------- */
-const TT={inicio:'Inicio',materiales:'Maestro de Materiales',familias:'Familias de Materiales',pedidos:'Pedidos de Venta',analisis:'Análisis de Ventas'};
+const TT={inicio:'Inicio',materiales:'Maestro de Materiales',familias:'Familias de Materiales',param:'Parametrización ABC',pedidos:'Pedidos de Venta',analisis:'Análisis de Ventas'};
 function nav(id,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   const p=document.getElementById('p-'+id);if(p)p.classList.add('on');
@@ -721,6 +779,7 @@ function nav(id,el){
   if(id==='inicio')rInicio();
   if(id==='materiales')rMat();
   if(id==='familias')rFam();
+  if(id==='param')rParam();
   if(id==='pedidos')rPed();
   if(id==='analisis')rAna();
   window.scrollTo(0,0);
@@ -763,12 +822,13 @@ function importBackup(input){
       if(!confirm('Se sustituirán los datos actuales por los del backup. ¿Continuar?'))return;
       ST.materiales=o.materiales||[];ST.familias=o.familias||[];ST.reglas=o.reglas||[];
       ST.pedidos=o.pedidos||[];ST.maquinas=(o.maquinas&&o.maquinas.length)?o.maquinas:MAQ_BASE.slice();
+      ST.param=o.param||null;PARAM();
       invalidateMat();save();refreshAll();toast('Backup restaurado','ok');
     }catch(err){toast('No se pudo leer el backup: '+err.message,'err');}
   };
   fr.readAsText(f);
 }
-function refreshAll(){rInicio();rMat();rFam();rPed();rAna();lsInfo();}
+function refreshAll(){rInicio();rMat();rFam();rParam();rPed();rAna();lsInfo();}
 
 /* ============================================================
    IMPORTACIÓN DE EXCEL (mapeo de columnas asistido)
@@ -1378,6 +1438,256 @@ function delMaquina(m){
 }
 
 /* ============================================================
+   PANTALLA · PARAMETRIZACIÓN ABC
+   ============================================================ */
+const PARAM_DEF={
+  abcVol:{A:80,B:95,metrica:'imp'},
+  abcPed:{c:3,b:12},
+  mmpp:{grupo:'redondo_esp',peso:{pct:70,valor:null},pos:{pct:70,valor:null},cli:{pct:70,valor:null}}
+};
+const MMPP_VARS=[
+  {k:'peso',l:'Peso de los pedidos',u:'kg',d:0,h:'Kilos totales de los pedidos que tiran de esa materia prima'},
+  {k:'pos',l:'Pedidos-posición diferentes',u:'',d:0,h:'Número de líneas de pedido distintas (pedido + posición)'},
+  {k:'cli',l:'Clientes diferentes',u:'',d:0,h:'Número de clientes distintos que la consumen'}
+];
+
+/** Devuelve los parámetros completando solo lo que falte, sin recrear los objetos */
+function completa(dest,def){
+  Object.keys(def).forEach(k=>{
+    if(def[k]&&typeof def[k]==='object'&&!Array.isArray(def[k])){
+      if(!dest[k]||typeof dest[k]!=='object')dest[k]={};
+      completa(dest[k],def[k]);
+    }else if(dest[k]===undefined)dest[k]=def[k];
+  });
+  return dest;
+}
+function PARAM(){
+  if(!ST.param||typeof ST.param!=='object')ST.param={};
+  return completa(ST.param,PARAM_DEF);
+}
+/** Clase por volumen acumulado de ventas */
+function claseVol(cum){const P=PARAM().abcVol;return cum<=P.A+1e-9?'A':(cum<=P.B+1e-9?'B':'C');}
+/** Clase por número de pedidos-posición */
+function claseFrec(n){const P=PARAM().abcPed;return n<=P.c?'c':(n<=P.b?'b':'a');}
+/** Percentil con interpolación lineal (equivalente a PERCENTIL.INC de Excel) */
+function percentil(arr,p){
+  const a=arr.filter(x=>x!=null&&isFinite(x)).sort((x,y)=>x-y);
+  if(!a.length||p==null||!isFinite(p))return null;
+  const pos=(a.length-1)*Math.min(100,Math.max(0,p))/100,lo=Math.floor(pos),hi=Math.ceil(pos);
+  return lo===hi?a[lo]:a[lo]+(a[hi]-a[lo])*(pos-lo);
+}
+
+/** Clave provisional de materia prima a partir del material */
+function mmppKeyOf(m,modo){
+  const base=famOf(m)||(up(m.tipo)+' '+medOf(m));
+  if(modo==='redondo')return base;
+  const esp=num(m.espesor);
+  const k=base+' · e'+(esp==null?'—':numTxt(esp));
+  return modo==='redondo_esp_cal'?k+' · '+(up(m.calidadDef)||'—'):k;
+}
+/** Indicadores de cada MMPP a partir de los pedidos de venta */
+function mmppStats(){
+  const modo=PARAM().mmpp.grupo,g={};
+  ST.pedidos.forEach(p=>{
+    const m=matOf(p.material);if(!m)return;
+    const k=mmppKeyOf(m,modo);
+    const x=g[k]=g[k]||{k:k,peso:0,imp:0,_pos:new Set(),_cli:new Set(),_mat:new Set()};
+    x.peso+=p.cantidad||0;x.imp+=p.importe||0;
+    x._pos.add(norm(p.pedido)+'|'+norm(p.pos));x._cli.add(norm(p.cliente));x._mat.add(norm(p.material));
+  });
+  return Object.values(g).map(x=>({k:x.k,peso:x.peso,imp:x.imp,pos:x._pos.size,cli:x._cli.size,mat:x._mat.size}));
+}
+/** Umbral aplicable de cada variable: el valor fijado a mano o, si no, el percentil calculado */
+function umbrales(stats){
+  const P=PARAM().mmpp,r={};
+  MMPP_VARS.forEach(v=>{
+    const calc=percentil(stats.map(x=>x[v.k]),P[v.k].pct);
+    const manual=P[v.k].valor!=null&&isFinite(P[v.k].valor);
+    r[v.k]={calc:calc,valor:manual?P[v.k].valor:calc,manual:manual,pct:P[v.k].pct};
+  });
+  return r;
+}
+function esEstandar(x,u){return MMPP_VARS.every(v=>u[v.k].valor!=null&&x[v.k]>=u[v.k].valor);}
+/** 1 / 0 de cada material según la estandarización de su materia prima */
+function mapaMMPP(){
+  const stats=mmppStats(),u=umbrales(stats),m={};
+  stats.forEach(x=>{m[x.k]=esEstandar(x,u)?1:0;});
+  return {mapa:m,umbrales:u,stats:stats};
+}
+
+/** Productos terminados con sus tres dígitos, con los datos de pedidos cargados */
+function abcProductos(){
+  const g={},P=PARAM();
+  ST.pedidos.forEach(p=>{
+    const x=g[p.material]=g[p.material]||{k:p.material,imp:0,kg:0,_pos:new Set()};
+    x.imp+=p.importe||0;x.kg+=p.cantidad||0;x._pos.add(norm(p.pedido)+'|'+norm(p.pos));
+  });
+  const arr=Object.values(g).map(x=>({k:x.k,imp:x.imp,kg:x.kg,pos:x._pos.size}));
+  const met=P.abcVol.metrica==='kg'?'kg':'imp';
+  const tot=arr.reduce((s,x)=>s+x[met],0);
+  arr.sort((a,b)=>b[met]-a[met]);
+  const mm=mapaMMPP(),modo=P.mmpp.grupo;
+  let acc=0;
+  arr.forEach(x=>{
+    acc+=x[met];x.cum=tot?acc/tot*100:0;
+    x.vol=claseVol(x.cum);x.frec=claseFrec(x.pos);
+    const m=matOf(x.k);
+    x.mp=m?(mm.mapa[mmppKeyOf(m,modo)]||0):0;
+    x.codigo=x.vol+x.frec+x.mp;
+  });
+  return arr;
+}
+
+function rParam(){
+  const P=PARAM();
+  document.getElementById('pGrupo').value=P.mmpp.grupo;
+  // --- 1 · Volumen de ventas
+  document.getElementById('pVol').innerHTML='<h4>1 · Volumen de ventas → A / B / C</h4>'+
+    '<div class="phelp">Productos ordenados de mayor a menor % de ventas; se acumula el porcentaje y se corta en estos umbrales.</div>'+
+    '<table><thead><tr><th>Clase</th><th class="num">% acum. desde</th><th class="num">% acum. hasta</th></tr></thead><tbody>'+
+    '<tr><td><span class="b A">A</span></td><td class="num">0 %</td><td class="num"><input class="pin" type="number" step="any" value="'+P.abcVol.A+'" onchange="setP(\'abcVol.A\',this.value)"> %</td></tr>'+
+    '<tr><td><span class="b B">B</span></td><td class="num">'+fmtN(P.abcVol.A,1)+' %</td><td class="num"><input class="pin" type="number" step="any" value="'+P.abcVol.B+'" onchange="setP(\'abcVol.B\',this.value)"> %</td></tr>'+
+    '<tr><td><span class="b C">C</span></td><td class="num">'+fmtN(P.abcVol.B,1)+' %</td><td class="num">100 % <span class="pfix">(fijo)</span></td></tr>'+
+    '</tbody></table>'+
+    '<div style="margin-top:10px;font-size:11px;color:var(--tl)">Volumen medido en '+
+    '<select onchange="setP(\'abcVol.metrica\',this.value)" style="padding:4px;border:1px solid var(--border);border-radius:5px;font-size:11px">'+
+    '<option value="imp"'+(P.abcVol.metrica!=='kg'?' selected':'')+'>Facturación (€)</option>'+
+    '<option value="kg"'+(P.abcVol.metrica==='kg'?' selected':'')+'>Cantidad (kg)</option></select></div>';
+  // --- 2 · Nº de pedidos-posición
+  document.getElementById('pFrec').innerHTML='<h4>2 · Nº de pedidos-posición → a / b / c</h4>'+
+    '<div class="phelp">Número de líneas de pedido distintas (pedido + posición) de cada producto en el periodo analizado.</div>'+
+    '<table><thead><tr><th>Clase</th><th class="num">Desde</th><th class="num">Hasta (incluido)</th></tr></thead><tbody>'+
+    '<tr><td><span class="b C">c</span></td><td class="num">0</td><td class="num"><input class="pin" type="number" step="1" value="'+P.abcPed.c+'" onchange="setP(\'abcPed.c\',this.value)"></td></tr>'+
+    '<tr><td><span class="b B">b</span></td><td class="num">'+fmtN(P.abcPed.c+1)+'</td><td class="num"><input class="pin" type="number" step="1" value="'+P.abcPed.b+'" onchange="setP(\'abcPed.b\',this.value)"></td></tr>'+
+    '<tr><td><span class="b A">a</span></td><td class="num">'+fmtN(P.abcPed.b+1)+'</td><td class="num">sin límite <span class="pfix">(&gt; '+fmtN(P.abcPed.b)+')</span></td></tr>'+
+    '</tbody></table>';
+  // --- 3 · Materia prima
+  document.getElementById('pMP').innerHTML='<h4>3 · Materia prima → 1 / 0</h4>'+
+    '<div class="phelp">Valor fijo, no parametrizable. Lo determina el bloque <b>Estandarización MMPP</b> de esta misma hoja.</div>'+
+    '<table><thead><tr><th>Valor</th><th>Significado</th></tr></thead><tbody>'+
+    '<tr><td><span class="b bl">1</span></td><td>Materia prima <b>estándar</b>: supera las tres variables</td></tr>'+
+    '<tr><td><span class="b gr">0</span></td><td>Materia prima <b>no estándar</b></td></tr>'+
+    '</tbody></table>';
+  rParamPrev();rParamMMPP();lsInfo();
+}
+
+/** Vista previa del ABC de producto terminado con los datos cargados */
+function rParamPrev(){
+  const box=document.getElementById('pPrev');
+  if(!ST.pedidos.length){
+    box.innerHTML='<div class="note">Carga los pedidos de venta para ver cómo quedarían clasificados los productos con estos parámetros.</div>';
+    return;
+  }
+  const arr=abcProductos(),P=PARAM();
+  const mtx={},tv={A:0,B:0,C:0},tf={a:0,b:0,c:0};
+  ['A','B','C'].forEach(v=>{mtx[v]={a:0,b:0,c:0};});
+  arr.forEach(x=>{mtx[x.vol][x.frec]++;tv[x.vol]++;tf[x.frec]++;});
+  const est=arr.filter(x=>x.mp===1).length;
+  box.innerHTML='<h3 style="font-size:13px;margin-bottom:8px">Vista previa con los datos actuales</h3>'+
+    '<div class="tw" style="max-height:none;max-width:560px"><table class="mtx"><thead><tr><th>Volumen \\ Frecuencia</th>'+
+    '<th>a (&gt;'+fmtN(P.abcPed.b)+')</th><th>b</th><th>c (≤'+fmtN(P.abcPed.c)+')</th><th>Total</th></tr></thead><tbody>'+
+    ['A','B','C'].map(v=>'<tr><td><span class="b '+v+'">'+v+'</span></td>'+
+      ['a','b','c'].map(fq=>'<td>'+fmtN(mtx[v][fq])+'</td>').join('')+'<td><b>'+fmtN(tv[v])+'</b></td></tr>').join('')+
+    '</tbody><tfoot><tr><td>Total</td>'+['a','b','c'].map(fq=>'<td>'+fmtN(tf[fq])+'</td>').join('')+
+    '<td>'+fmtN(arr.length)+'</td></tr></tfoot></table></div>'+
+    '<div class="note">'+fmtN(arr.length)+' productos con ventas · volumen medido en '+(P.abcVol.metrica==='kg'?'kg':'facturación')+
+    ' · <b>'+fmtN(est)+'</b> con materia prima estándar (1) y <b>'+fmtN(arr.length-est)+'</b> no estándar (0).</div>';
+}
+
+/** Tabla de variables de estandarización de materia prima */
+function rParamMMPP(){
+  const stats=mmppStats(),u=umbrales(stats),P=PARAM().mmpp;
+  document.getElementById('pMMPP').innerHTML=
+    '<div class="tw" style="max-height:none"><table><thead><tr>'+
+    '<th>Variable</th><th class="num">Percentil</th><th class="num">Valor calculado</th><th class="num">Valor a aplicar (≥)</th><th style="width:46px"></th></tr></thead><tbody>'+
+    MMPP_VARS.map(v=>{
+      const c=u[v.k];
+      return '<tr><td><b>'+esc(v.l)+'</b><div class="phelp" style="margin:0">'+esc(v.h)+'</div></td>'+
+        '<td class="num"><input class="pin" type="number" step="any" value="'+P[v.k].pct+'" onchange="setP(\'mmpp.'+v.k+'.pct\',this.value)"> %</td>'+
+        '<td class="num">'+(c.calc==null?'—':fmtN(c.calc,v.d)+(v.u?' '+v.u:''))+'</td>'+
+        '<td class="num"><input class="pin w" type="number" step="any" value="'+(c.valor==null?'':(Math.round(c.valor*100)/100))+'" onchange="setP(\'mmpp.'+v.k+'.valor\',this.value)"> '+
+        (c.manual?'<span class="b y">manual</span>':'<span class="pfix">calculado</span>')+'</td>'+
+        '<td>'+(c.manual?'<button class="ia" title="Volver al valor calculado" onclick="setP(\'mmpp.'+v.k+'.valor\',\'\')">↺</button>':'')+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  // KPIs + vista previa
+  const est=stats.filter(x=>esEstandar(x,u)).length;
+  const prev=document.getElementById('pMMPPPrev');
+  if(!stats.length){
+    prev.innerHTML='<div class="note">Carga los pedidos de venta y el maestro de materiales para calcular los percentiles.</div>';
+    return;
+  }
+  const top=stats.slice().sort((a,b)=>b.peso-a.peso).slice(0,20);
+  const cel=(x,v)=>{const ok=u[v.k].valor!=null&&x[v.k]>=u[v.k].valor;
+    return '<td class="num"'+(ok?' style="color:var(--success);font-weight:700"':'')+'>'+fmtN(x[v.k],v.d)+'</td>';};
+  prev.innerHTML='<div class="kg" style="margin-bottom:14px">'+
+    '<div class="kc"><div class="kl">MMPP analizadas</div><div class="kv">'+fmtN(stats.length)+'</div><div class="ks">con ventas en los pedidos</div></div>'+
+    '<div class="kc s"><div class="kl">Estándar (1)</div><div class="kv">'+fmtN(est)+'</div><div class="ks">'+(stats.length?fmtN(est*100/stats.length,1):'0')+' % del total</div></div>'+
+    '<div class="kc w"><div class="kl">No estándar (0)</div><div class="kv">'+fmtN(stats.length-est)+'</div><div class="ks">no superan alguna variable</div></div>'+
+    '</div>'+
+    '<h3 style="font-size:13px;margin-bottom:8px">20 materias primas con más kilos</h3>'+
+    '<div class="tw"><table><thead><tr><th>Materia prima (provisional)</th><th class="num">Materiales</th>'+
+    '<th class="num">Peso (kg)</th><th class="num">Pedidos-posición</th><th class="num">Clientes</th><th>Estándar</th></tr></thead><tbody>'+
+    top.map(x=>'<tr><td><b>'+esc(x.k)+'</b></td><td class="num">'+fmtN(x.mat)+'</td>'+
+      cel(x,MMPP_VARS[0])+cel(x,MMPP_VARS[1])+cel(x,MMPP_VARS[2])+
+      '<td>'+(esEstandar(x,u)?'<span class="b bl">1</span>':'<span class="b gr">0</span>')+'</td></tr>').join('')+
+    '</tbody></table></div>'+
+    '<div class="note">En verde los valores que superan el umbral. Una materia prima es estándar solo si supera las tres variables.</div>';
+}
+
+function setP(path,val){
+  const parts=path.split('.'),k=parts[parts.length-1];
+  const nodo=()=>{let o=PARAM();for(let i=0;i<parts.length-1;i++)o=o[parts[i]];return o;};
+  const prev=nodo()[k];
+  if(k==='metrica'||k==='grupo')nodo()[k]=val;
+  else if(k==='valor'&&(val==null||String(val).trim()===''))nodo()[k]=null;
+  else{
+    const n=num(val);
+    if(n==null){toast('Valor no válido','err');rParam();return;}
+    nodo()[k]=n;
+  }
+  const err=validaParam();
+  if(err){nodo()[k]=prev;toast(err,'err',5000);rParam();return;}
+  save();rParam();
+  if(path.indexOf('abc')===0)rAna();
+}
+function validaParam(){
+  const P=PARAM();
+  if(!(P.abcVol.A>0&&P.abcVol.A<100))return 'El umbral de la clase A debe estar entre 0 y 100 %';
+  if(!(P.abcVol.B>P.abcVol.A&&P.abcVol.B<=100))return 'El umbral de la clase B debe ser mayor que el de A y como máximo 100 %';
+  if(!(P.abcPed.c>=0))return 'El número de pedidos de la clase c no puede ser negativo';
+  if(!(P.abcPed.b>P.abcPed.c))return 'El límite de la clase b debe ser mayor que el de la clase c';
+  for(const v of MMPP_VARS){
+    const pc=P.mmpp[v.k].pct;
+    if(!(pc>=0&&pc<=100))return 'El percentil de «'+v.l+'» debe estar entre 0 y 100';
+    if(P.mmpp[v.k].valor!=null&&P.mmpp[v.k].valor<0)return 'El valor de «'+v.l+'» no puede ser negativo';
+  }
+  return '';
+}
+function usarCalculados(){
+  const P=PARAM();MMPP_VARS.forEach(v=>{P.mmpp[v.k].valor=null;});
+  save();rParam();toast('Las tres variables vuelven al percentil calculado','ok');
+}
+function resetParam(){
+  if(!confirm('¿Restaurar todos los parámetros a sus valores por defecto (80 / 95 %, 3 / 12 pedidos y percentil 70)?'))return;
+  ST.param=JSON.parse(JSON.stringify(PARAM_DEF));save();refreshAll();toast('Parámetros restaurados','ok');
+}
+function exportParam(){
+  const P=PARAM(),u=umbrales(mmppStats());
+  dlRows([
+    {'Bloque':'ABC Producto Terminado','Variable':'A (volumen)','Parámetro':'% acumulado hasta','Valor':P.abcVol.A},
+    {'Bloque':'ABC Producto Terminado','Variable':'B (volumen)','Parámetro':'% acumulado hasta','Valor':P.abcVol.B},
+    {'Bloque':'ABC Producto Terminado','Variable':'C (volumen)','Parámetro':'% acumulado hasta','Valor':100},
+    {'Bloque':'ABC Producto Terminado','Variable':'Volumen','Parámetro':'Métrica','Valor':P.abcVol.metrica==='kg'?'Cantidad (kg)':'Facturación (€)'},
+    {'Bloque':'ABC Producto Terminado','Variable':'c (frecuencia)','Parámetro':'Pedidos-posición hasta','Valor':P.abcPed.c},
+    {'Bloque':'ABC Producto Terminado','Variable':'b (frecuencia)','Parámetro':'Pedidos-posición hasta','Valor':P.abcPed.b},
+    {'Bloque':'ABC Producto Terminado','Variable':'a (frecuencia)','Parámetro':'Pedidos-posición desde','Valor':P.abcPed.b+1},
+    {'Bloque':'ABC Producto Terminado','Variable':'1 / 0','Parámetro':'Materia prima estándar','Valor':'Fijo (Estandarización MMPP)'}
+  ].concat(MMPP_VARS.map(v=>({'Bloque':'Estandarización MMPP','Variable':v.l,'Parámetro':'Percentil '+P.mmpp[v.k].pct+' %','Valor':u[v.k].valor==null?'':Math.round(u[v.k].valor*100)/100,'Origen':u[v.k].manual?'Manual':'Calculado'})))
+   .concat([{'Bloque':'Estandarización MMPP','Variable':'Agrupación','Parámetro':'MMPP identificada por','Valor':P.mmpp.grupo}]),
+   'Parametrizacion_ABC_AGSA.xlsx','Parámetros');
+}
+
+/* ============================================================
    PANTALLA · PEDIDOS DE VENTA
    ============================================================ */
 function famOfPed(p){const m=matOf(p.material);return m?famOf(m):'';}
@@ -1564,13 +1874,13 @@ function group(list,keyFn){
   });
   return Object.values(g);
 }
-/** Clasificación ABC de Pareto sobre la métrica activa (80 % / 95 %) */
+/** Clasificación ABC de Pareto con los umbrales de Parametrización ABC */
 function clasifica(arr){
   const met=anaMetric()==='imp'?'imp':'kg';
   const tot=arr.reduce((s,x)=>s+x[met],0);
   arr.sort((a,b)=>b[met]-a[met]);
   let acc=0;
-  arr.forEach(x=>{acc+=x[met];x.cum=tot?acc/tot*100:0;x.clase=x.cum<=80.0001?'A':(x.cum<=95.0001?'B':'C');});
+  arr.forEach(x=>{acc+=x[met];x.cum=tot?acc/tot*100:0;x.clase=claseVol(x.cum);});
   return {arr:arr,total:tot};
 }
 function estrategia(x,nMeses){

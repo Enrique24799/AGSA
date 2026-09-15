@@ -56,6 +56,10 @@ tr.fr input{width:100%;min-width:70px;padding:3px 5px;border:1px solid var(--bor
 td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
 tbody tr:hover td{background:rgba(0,180,216,.05);}
 td.num,th.num{text-align:right;}
+th.stk{left:0;z-index:7;}
+td.stk{position:sticky;left:0;background:var(--card);z-index:3;box-shadow:1px 0 0 var(--border);font-weight:600;}
+tbody tr:hover td.stk{background:#eaf7fd;}
+#mMatForm input[hidden]{display:none;}
 tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);position:sticky;bottom:0;}
 .empty{padding:40px;text-align:center;color:var(--tl);font-size:13px;}
 .dflt{color:var(--accent2);font-style:italic;}
@@ -93,10 +97,18 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
 .acc-h .tt{font-size:14px;font-weight:700;color:var(--primary);letter-spacing:.5px;}
 .acc-h .mt{font-size:11px;color:var(--tl);}
 .acc-h .ac-btns{margin-left:auto;display:flex;gap:6px;}
-.acc-b{display:none;padding:0 18px 18px;}
-.acc.open .acc-b{display:block;}
-.acc .car{transition:.2s;font-size:11px;color:var(--tl);}
-.acc.open .car{transform:rotate(90deg);}
+.acc>.acc-b{display:none;padding:0 18px 18px;}
+.acc.open>.acc-b{display:block;}
+.acc .car{transition:.2s;font-size:11px;color:var(--tl);display:inline-block;}
+.acc.open>.acc-h .car{transform:rotate(90deg);}
+.acc.l1>.acc-h{border-left-color:var(--primary);background:#f4f7fa;}
+.acc.l1>.acc-h .tt{font-size:14px;}
+.acc.l1.nomaq>.acc-h{border-left-color:var(--warning);background:#fff8f0;}
+.acc.l2{box-shadow:none;border:1px solid var(--border);border-radius:8px;margin:8px 0;}
+.acc.l2>.acc-h{padding:9px 14px;border-left:3px solid var(--success);}
+.acc.l2>.acc-h .tt{font-size:13px;color:var(--accent2);}
+.acc.l2>.acc-b{padding:0 12px 12px;}
+.lvl-tag{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--tl);margin-right:6px;}
 .espin{width:64px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right;}
 /* ---------- Modales ---------- */
 .mo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
@@ -161,17 +173,17 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
     <span style="opacity:.75">Carga los maestros y los pedidos de venta para alimentar el análisis</span></div>
   <div class="kg">
     <div class="kc"><div class="kl">Materiales</div><div class="kv" id="kInMat">0</div><div class="ks">en el maestro</div></div>
-    <div class="kc b"><div class="kl">Reglas familia/medida</div><div class="kv" id="kInFam">0</div><div class="ks">asignación a máquina</div></div>
+    <div class="kc b"><div class="kl">Reglas medida/espesor</div><div class="kv" id="kInFam">0</div><div class="ks">redondo y máquina</div></div>
     <div class="kc s"><div class="kl">Líneas de pedido</div><div class="kv" id="kInPed">0</div><div class="ks">inputs de ventas</div></div>
-    <div class="kc w"><div class="kl">Materiales sin máquina</div><div class="kv" id="kInSin">0</div><div class="ks">sin regla aplicable</div></div>
+    <div class="kc w"><div class="kl">Materiales sin redondo</div><div class="kv" id="kInSin">0</div><div class="ks">sin regla aplicable</div></div>
   </div>
   <div class="cg">
     <div class="cd">
       <h3>🚀 Cómo empezar</h3>
       <div class="sub">Flujo recomendado de carga de datos</div>
       <ol style="font-size:13px;line-height:2;padding-left:18px;color:var(--text)">
-        <li><b>Maestro de Materiales</b> → carga el Excel de materiales (se añaden a los existentes).</li>
-        <li><b>Familias de Materiales</b> → auto-genera familia + medida desde el maestro, define espesor mín./máx. y asigna máquinas.</li>
+        <li><b>Maestro de Materiales</b> → carga el Excel de materiales con la estructura de AGSA (se añaden a los existentes).</li>
+        <li><b>Familias de Materiales</b> → árbol de tres niveles <b>máquina → familia (redondo) → medida</b>. El catálogo de redondos de AGSA viene cargado; solo hay que indicar en cada medida el <b>espesor mín./máx.</b> (si se dejan vacíos valen todos) y la <b>máquina</b>. Cada material toma de aquí su familia y su máquina.</li>
         <li><b>Pedidos de Venta</b> → carga masiva del Excel de pedidos y filtra por cliente, año-mes, material, acabado y calidad.</li>
         <li><b>Análisis Ventas</b> → gráficos de ventas/facturación y clasificación ABC de materiales y clientes.</li>
       </ol>
@@ -213,16 +225,17 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
   </div>
   <div class="kg">
     <div class="kc"><div class="kl">Materiales</div><div class="kv" id="kMatTot">0</div><div class="ks" id="kMatVis">visibles: 0</div></div>
-    <div class="kc b"><div class="kl">Familias</div><div class="kv" id="kMatFam">0</div><div class="ks">distintas en el maestro</div></div>
+    <div class="kc b"><div class="kl">Familias (redondos)</div><div class="kv" id="kMatFam">0</div><div class="ks">asignadas a materiales</div></div>
     <div class="kc s"><div class="kl">Con máquina asignada</div><div class="kv" id="kMatAsig">0</div><div class="ks" id="kMatAsigPct">0 %</div></div>
     <div class="kc w"><div class="kl">Sin regla aplicable</div><div class="kv" id="kMatSin">0</div><div class="ks">revisar en Familias</div></div>
   </div>
   <div class="fl">
-    <div class="fg"><label>Familia</label><select id="fMatFam" onchange="rMat()"></select></div>
+    <div class="fg"><label>Tipo de material</label><select id="fMatTipo" onchange="rMat()"></select></div>
+    <div class="fg"><label>Familia (redondo)</label><select id="fMatFam" onchange="rMat()"></select></div>
     <div class="fg"><label>Máquina</label><select id="fMatMaq" onchange="rMat()"></select></div>
     <div class="fg"><label>Asignación</label><select id="fMatAsig" onchange="rMat()">
       <option value="">(todas)</option><option value="si">Con máquina</option><option value="no">Sin máquina</option></select></div>
-    <div class="fg"><label>Buscar (código / descripción / calidad / acabado)</label>
+    <div class="fg"><label>Buscar (código / nombre / calidad / acabado)</label>
       <input type="text" id="fMatQ" placeholder="ej. 60x40 · S235 · galvanizado" oninput="rMat()" style="min-width:280px"></div>
     <div class="fg spacer"><label>&nbsp;</label><button class="btn bo" onclick="clearMatFilters()">✖ Limpiar filtros</button></div>
   </div>
@@ -235,31 +248,32 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
 <!-- ===================== FAMILIAS DE MATERIALES ===================== -->
 <div class="pg" id="p-familias">
   <div class="toolbar">
-    <button class="btn bs" onclick="editFamilia()">➕ Añadir familia</button>
-    <button class="btn bp" onclick="autoGenFamilias()">🔄 Auto-generar desde maestro</button>
+    <button class="btn bs" onclick="editFamilia()">➕ Añadir familia (redondo)</button>
+    <button class="btn bp" onclick="cargarCatalogo()">📥 Cargar catálogo de familias</button>
     <button class="btn bo" onclick="openMaquinas()">⚙️ Máquinas de tubos</button>
     <button class="btn bo" onclick="exportFamilias()">📤 Exportar reglas</button>
     <button class="btn bd bsm" onclick="clearFamilias()">🗑️ Vaciar reglas</button>
-    <span style="font-size:11px;color:var(--tl);margin-left:auto">Cada regla asigna <b>máquina</b> según <b>familia + medida + rango de espesor</b></span>
+    <span style="font-size:11px;color:var(--tl);margin-left:auto">Nivel 1 <b>máquina</b> · nivel 2 <b>familia (redondo)</b> · nivel 3 <b>medida</b> con su rango de espesor</span>
   </div>
   <div class="kg">
-    <div class="kc"><div class="kl">Familias</div><div class="kv" id="kFamTot">0</div><div class="ks">dadas de alta</div></div>
-    <div class="kc b"><div class="kl">Medidas / reglas</div><div class="kv" id="kFamReg">0</div><div class="ks">familia + medida + espesor</div></div>
-    <div class="kc s"><div class="kl">Materiales cubiertos</div><div class="kv" id="kFamCob">0</div><div class="ks" id="kFamCobPct">0 %</div></div>
+    <div class="kc"><div class="kl">Familias (redondos)</div><div class="kv" id="kFamTot">0</div><div class="ks">dadas de alta</div></div>
+    <div class="kc b"><div class="kl">Medidas / reglas</div><div class="kv" id="kFamReg">0</div><div class="ks">medida + rango de espesor</div></div>
+    <div class="kc s"><div class="kl">Materiales con redondo</div><div class="kv" id="kFamCob">0</div><div class="ks" id="kFamCobPct">0 %</div></div>
     <div class="kc w"><div class="kl">Reglas sin máquina</div><div class="kv" id="kFamSinMaq">0</div><div class="ks">pendientes de asignar</div></div>
   </div>
   <div class="fl">
-    <div class="fg"><label>Familia</label><select id="fFamFam" onchange="rFam()"></select></div>
+    <div class="fg"><label>Familia (redondo)</label><select id="fFamFam" onchange="rFam()"></select></div>
     <div class="fg"><label>Máquina</label><select id="fFamMaq" onchange="rFam()"></select></div>
     <div class="fg"><label>Buscar medida</label><input type="text" id="fFamQ" placeholder="ej. 60x40" oninput="rFam()"></div>
     <div class="fg spacer"><label>&nbsp;</label><button class="btn bo" onclick="document.getElementById('fFamFam').value='';document.getElementById('fFamMaq').value='';document.getElementById('fFamQ').value='';rFam()">✖ Limpiar filtros</button></div>
   </div>
   <div id="famList"></div>
   <div class="cd" id="famHuerfanos" style="display:none;border-left:4px solid var(--warning)">
-    <h3>⚠️ Materiales sin regla aplicable</h3>
-    <div class="sub">Combinaciones de familia + medida + espesor presentes en el maestro que ninguna regla cubre. Crea la regla con un clic.</div>
+    <h3>📐 Medidas del maestro sin familia (redondo)</h3>
+    <div class="sub">Medidas y espesores presentes en el maestro que todavía no tiene ninguna regla. Crea la regla con un clic y elige el redondo del que parten.
+      Es normal que chapas, flejes y algunos perfiles se queden aquí: por ahora no tienen redondo.</div>
     <div class="tw" style="max-height:340px"><table id="tHuerf"><thead><tr>
-      <th>Familia</th><th>Medida</th><th class="num">Espesor mín.</th><th class="num">Espesor máx.</th><th class="num">Materiales</th><th>Acción</th>
+      <th>Tipo de material</th><th>Medida</th><th class="num">Espesor mín.</th><th class="num">Espesor máx.</th><th class="num">Materiales</th><th>Acción</th>
     </tr></thead><tbody></tbody></table></div>
   </div>
 </div>
@@ -304,7 +318,8 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
     <div class="fg"><label>Desde (Año_Mes)</label><select id="aDesde" onchange="rAna()"></select></div>
     <div class="fg"><label>Hasta (Año_Mes)</label><select id="aHasta" onchange="rAna()"></select></div>
     <div class="fg"><label>Cliente</label><select id="aCli" onchange="rAna()"></select></div>
-    <div class="fg"><label>Familia</label><select id="aFam" onchange="rAna()"></select></div>
+    <div class="fg"><label>Tipo de material</label><select id="aTipo" onchange="rAna()"></select></div>
+    <div class="fg"><label>Familia (redondo)</label><select id="aFam" onchange="rAna()"></select></div>
     <div class="fg"><label>Calidad</label><select id="aCal" onchange="rAna()"></select></div>
     <div class="fg"><label>Acabado</label><select id="aAca" onchange="rAna()"></select></div>
     <div class="fg"><label>Métrica de los gráficos</label><select id="aMet" onchange="rAna()">
@@ -334,8 +349,8 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
       <div class="cc tall"><canvas id="chCli"></canvas></div>
     </div>
     <div class="cd">
-      <h3>🧱 Reparto por familia de material</h3>
-      <div class="sub">Peso de cada familia sobre el total</div>
+      <h3>🧱 Reparto por tipo de material</h3>
+      <div class="sub">Peso de cada tipo de material sobre el total</div>
       <div class="cc tall"><canvas id="chFam"></canvas></div>
     </div>
   </div>
@@ -384,7 +399,7 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
     <h3>🔎 Detalle de materiales (ABC + rotación)</h3>
     <div class="sub">Meses con demanda y nº de pedidos son los indicadores que alimentarán la propuesta de estrategia</div>
     <div class="tw"><table id="tAnaMat"><thead><tr>
-      <th>Material</th><th>Descripción</th><th>Familia</th><th>Medida</th><th>Máquina</th><th class="num" id="thMatMet">Importe</th><th class="num">% acum.</th>
+      <th>Material</th><th>Descripción</th><th>Tipo</th><th>Familia · redondo</th><th>Medida</th><th>Máquina</th><th class="num" id="thMatMet">Importe</th><th class="num">% acum.</th>
       <th>Clase</th><th class="num">Kg</th><th class="num">€/kg</th><th class="num">Pedidos</th><th class="num">Clientes</th><th class="num">Meses con demanda</th><th>Estrategia sugerida</th>
     </tr></thead><tbody></tbody></table></div>
     <div class="note">La <b>estrategia sugerida</b> es una primera orientación a partir de clase ABC y regularidad de la demanda (meses con demanda sobre el periodo filtrado). La pantalla definitiva de cálculo MTS / ATO / MTO se construirá sobre estos mismos datos.</div>
@@ -399,30 +414,18 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
   <button class="cm" onclick="clM('modalMat')">×</button>
   <h3 id="mMatTit">Material</h3>
   <input type="hidden" id="mMatId">
-  <div class="grid2">
-    <div class="fg"><label>Código *</label><input type="text" id="mMatCod"></div>
-    <div class="fg"><label>Familia *</label><input list="dlFam" id="mMatFam" placeholder="CHAPA / TUBO / FLEJE / PERFIL / BOBINA"><datalist id="dlFam"></datalist></div>
-  </div>
-  <div class="fg"><label>Descripción</label><input type="text" id="mMatDes"></div>
-  <div class="grid2">
-    <div class="fg"><label>Ancho (mm)</label><input type="number" step="any" id="mMatAnc" oninput="prevMedida()"></div>
-    <div class="fg"><label>Alto (mm)</label><input type="number" step="any" id="mMatAlt" oninput="prevMedida()"></div>
-    <div class="fg"><label>Espesor (mm)</label><input type="number" step="any" id="mMatEsp"></div>
-    <div class="fg"><label>Longitud (mm)</label><input type="number" step="any" id="mMatLon"></div>
-    <div class="fg"><label>Calidad por defecto</label><input list="dlCal" id="mMatCal"><datalist id="dlCal"></datalist></div>
-    <div class="fg"><label>Acabado por defecto</label><input list="dlAca" id="mMatAca"><datalist id="dlAca"></datalist></div>
-    <div class="fg"><label>Peso (kg/m o kg/ud)</label><input type="number" step="any" id="mMatPes"></div>
-    <div class="fg"><label>Proveedor</label><input type="text" id="mMatPro"></div>
-  </div>
-  <div class="info-bar" style="margin:6px 0 0"><span id="mMatPrev">Medida: —</span></div>
+  <div class="info-bar" id="mMatPrev">—</div>
+  <div class="grid2" id="mMatForm"></div>
+  <div class="note">⚙ La <b>familia (redondo)</b>, la <b>medida</b> y la <b>máquina</b> no se editan: se calculan a partir de <b>ancho × alto</b> y <b>espesor</b> con las reglas de <b>Familias de Materiales</b>. Chapas, flejes y algunos perfiles no tienen redondo.<br>
+  Los campos de texto se eligen entre los valores que ya existen en el maestro; usa <b>➕ Nuevo valor…</b> para introducir uno nuevo.</div>
   <div class="br"><button class="btn bo" onclick="clM('modalMat')">Cancelar</button><button class="btn bp" onclick="saveMaterial()">Guardar</button></div>
 </div></div>
 
 <div class="mo" id="modalFam"><div class="ml" style="width:440px">
   <button class="cm" onclick="clM('modalFam')">×</button>
-  <h3>➕ Añadir familia</h3>
-  <div class="fg"><label>Nombre de la familia *</label><input list="dlFam2" type="text" id="mFamNom" placeholder="CHAPA, TUBO, FLEJE, PERFIL, BOBINA…"><datalist id="dlFam2"></datalist></div>
-  <div class="note">La familia aparecerá en el listado aunque todavía no tenga medidas. Después añade medidas dentro de ella con <b>+ Añadir medida</b>.</div>
+  <h3>➕ Añadir familia (redondo)</h3>
+  <div class="fg"><label>Redondo *</label><input list="dlFam2" type="text" id="mFamNom" placeholder="ej. Ø 63,5 · Ø 76,1 · Ø 101,6"><datalist id="dlFam2"></datalist></div>
+  <div class="note" id="mFamCtx"></div>
   <div class="br"><button class="btn bo" onclick="clM('modalFam')">Cancelar</button><button class="btn bp" onclick="saveFamilia()">Añadir</button></div>
 </div></div>
 
@@ -431,7 +434,7 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
   <h3 id="mMedTit">Medida</h3>
   <input type="hidden" id="mMedId">
   <div class="grid2">
-    <div class="fg"><label>Familia *</label><input list="dlFam3" type="text" id="mMedFam"><datalist id="dlFam3"></datalist></div>
+    <div class="fg"><label>Familia · redondo *</label><input list="dlFam3" type="text" id="mMedFam" placeholder="ej. Ø 63,5"><datalist id="dlFam3"></datalist></div>
     <div class="fg"><label>Medida (se calcula: ancho × alto)</label><input type="text" id="mMedMed" readonly style="background:#f1f3f5;font-weight:700"></div>
     <div class="fg"><label>Ancho (mm) *</label><input type="number" step="any" id="mMedAnc" oninput="prevMed2()"></div>
     <div class="fg"><label>Alto (mm)</label><input type="number" step="any" id="mMedAlt" oninput="prevMed2()" placeholder="vacío = medida simple"></div>
@@ -439,7 +442,7 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
     <div class="fg"><label>Espesor máximo (mm) *</label><input type="number" step="any" id="mMedEmax"></div>
   </div>
   <div class="fg"><label>Máquinas de tubos</label><div class="mq-grid" id="mMedMaq"></div></div>
-  <div class="note">El material se asigna a la máquina cuando coinciden familia y medida y su espesor está dentro del rango (mín. ≤ espesor ≤ máx.).</div>
+  <div class="note">Los materiales cuya <b>medida</b> coincida y cuyo <b>espesor</b> esté dentro del rango (mín. ≤ espesor ≤ máx.) tomarán este <b>redondo</b> y estas <b>máquinas</b>.</div>
   <div class="br"><button class="btn bo" onclick="clM('modalMed')">Cancelar</button><button class="btn bp" onclick="saveMedida()">Guardar</button></div>
 </div></div>
 
@@ -472,8 +475,82 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
    ============================================================ */
 
 /* ---------- Estado ---------- */
-const FAM_BASE=['CHAPA','TUBO','FLEJE','PERFIL','BOBINA'];
-const MAQ_BASE=['T1','T2','T3','T4','T5','T6','T7','T8'];
+const FAM_BASE=['TUBO','CHAPA','FLEJE','PERFIL','BOBINA'];
+const MAQ_BASE=['TUBOS_08','TUBOS_16','TUBOS_17','TUBOS_20','TUBOS_28'];
+const MAQ_LEGACY=['T1','T2','T3','T4','T5','T6','T7','T8'];
+
+/* Estructura del maestro de materiales = columnas del Excel de AGSA.
+   t: 'num' numérico · 'txt' texto libre · 'sel' desplegable con los valores ya existentes en el maestro
+   edit:false → no se puede editar (se calcula automáticamente) */
+const MAT_SPEC=[
+  {k:'tipo',l:'Tipo Material',t:'sel',al:['tipo material','tipo','tipo de material','familia material','familia','familia de material']},
+  {k:'codigo',l:'Codigo Material',t:'txt',req:true,al:['codigo material','codigo','cod material','material','referencia','sku']},
+  {k:'nombre',l:'Nombre Material',t:'txt',al:['nombre material','nombre','descripcion material','descripcion','denominacion']},
+  {k:'forma',l:'Forma Tubo',t:'sel',al:['forma tubo','forma','forma del tubo']},
+  {k:'ancho',l:'Ancho',t:'num',d:1,al:['ancho','ancho mm','anchura']},
+  {k:'alto',l:'Alto',t:'num',d:1,al:['alto','alto mm','altura']},
+  {k:'espesor',l:'Espesor',t:'num',d:2,al:['espesor','espesor mm','esp','grosor']},
+  {k:'largo',l:'Largo',t:'num',d:0,al:['largo','largo mm','longitud','long']},
+  {k:'color',l:'Color',t:'sel',al:['color']},
+  {k:'acabadoDef',l:'Acabado Por Defecto',t:'sel',al:['acabado por defecto','acabado defecto','acabado']},
+  {k:'acabadoInt',l:'Acabado Intercambiable',t:'sel',al:['acabado intercambiable','acabados intercambiables']},
+  {k:'calidadDef',l:'Calidad Por Defecto',t:'sel',al:['calidad por defecto','calidad defecto','calidad']},
+  {k:'calidadInt',l:'Calidad Intercambiable',t:'sel',al:['calidad intercambiable','calidades intercambiables']},
+  {k:'calidadTuboDef',l:'Calidad Tubo Defecto',t:'sel',al:['calidad tubo defecto','calidad tubo por defecto']},
+  {k:'calidadTuboInt',l:'Calidad Tubo Intercambiable',t:'sel',al:['calidad tubo intercambiable']},
+  {k:'recubDef',l:'Recubrimiento Por Defecto',t:'sel',al:['recubrimiento por defecto','recubrimiento defecto','recubrimiento']},
+  {k:'recubInt',l:'Recurbimiento Intercambiable',t:'sel',al:['recurbimiento intercambiable','recubrimiento intercambiable']},
+  {k:'galvDef',l:'Acabado Galvanizado Por Defecto',t:'sel',al:['acabado galvanizado por defecto','acabado galvanizado defecto','galvanizado por defecto']},
+  {k:'galvInt',l:'Acabado Galvanizado Intercambiable',t:'sel',al:['acabado galvanizado intercambiable','galvanizado intercambiable']},
+  {k:'udsPaquete',l:'Unidades Paquete',t:'num',d:0,al:['unidades paquete','uds paquete','unidades por paquete','uds por paquete']},
+  {k:'variante',l:'Variante',t:'sel',al:['variante','variantes']},
+  {k:'clasificacion',l:'Clasificacion',t:'sel',al:['clasificacion']},
+  {k:'abc',l:'ABC',t:'sel',al:['abc','clase abc']},
+  {k:'estrategia',l:'Estrategia',t:'sel',al:['estrategia','estrategia produccion','estrategia de produccion']}
+];
+/* Catálogo de familias (redondos) de AGSA: [redondo, medida, medida, …] con la medida en formato ancho_alto */
+const CAT_FAMILIAS=[
+  ['Ø12','12_0'],
+  ['Ø13','12_10','10_10','14_0'],
+  ['Ø15','12_12'],
+  ['Ø16','16_0','16_10'],
+  ['Ø18','14_14','18_0'],
+  ['Ø19','20_10','19_0'],
+  ['Ø20','16_16','20_0','21_0'],
+  ['Ø22','20_15','18_18','22_0','25_10'],
+  ['Ø25','20_20','25_0','30_10','25_15'],
+  ['Ø28','30_15','28_0','25_20','35_10'],
+  ['Ø30','30_0'],
+  ['Ø32','25_25','30_20','32_0','35_15','40_10'],
+  ['Ø35','35_0','35_20','40_15','30_25'],
+  ['Ø38','30_30','40_20','50_10','45_15','38_0','35_25'],
+  ['Ø40','40_0'],
+  ['Ø42','42_0','45_20','40_25','50_15'],
+  ['Ø45','35_35','40_30','60_10','45_0','50_20'],
+  ['Ø48','48_0','50_25','60_15'],
+  ['Ø50','40_40','50_0','50_30','60_20'],
+  ['Ø58','45_45','50_40','60_30','70_20'],
+  ['Ø60','60_0'],
+  ['Ø64','50_50','60_40','80_20','70_30'],
+  ['Ø70','70_40','80_30','70_0','60_50'],
+  ['Ø76','60_60','80_40','76_0','100_20','70_50'],
+  ['Ø80','80_0'],
+  ['Ø83','100_30','90_40','80_50'],
+  ['Ø89','70_70','80_60','100_40','90_0'],
+  ['Ø95','100_50'],
+  ['Ø100','80_80','100_0','100_60','120_40'],
+  ['Ø113','120_60','100_80','90_90'],
+  ['Ø125','100_100','120_80','140_60','150_50','125_0'],
+  ['Ø138','140_80','120_100'],
+  ['Ø152','120_120','125_125','160_80','180_140','140_100','150_100','152_0'],
+  ['Ø178','140_140','200_80','180_100','160_120'],
+  ['Ø189','150_150','200_100'],
+  ['Ø200','160_160','200_120']
+];
+const SINMAQ='SIN MÁQUINA';
+
+/** Valores distintos ya presentes en el maestro para un campo (alimentan los desplegables) */
+function valoresDe(k){return uniqSort(ST.materiales.map(m=>up(m[k])));}
 const ST={materiales:[],familias:[],reglas:[],pedidos:[],maquinas:MAQ_BASE.slice()};
 const LS_KEY='agsa_abc_estrategias_v1';
 
@@ -489,7 +566,29 @@ function load(){
     const o=JSON.parse(raw);
     ST.materiales=o.materiales||[];ST.familias=o.familias||[];ST.reglas=o.reglas||[];
     ST.pedidos=o.pedidos||[];ST.maquinas=(o.maquinas&&o.maquinas.length)?o.maquinas:MAQ_BASE.slice();
+    migra();
   }catch(e){toast('No se pudieron leer los datos guardados: '+e.message,'err');}
+}
+/** Adapta los datos guardados con la estructura antigua del maestro */
+function migra(){
+  let n=0;
+  ST.materiales.forEach(m=>{
+    if(m.tipo===undefined){
+      m.tipo=up(m.familiaExcel||m.familia||'');
+      if(m.nombre===undefined)m.nombre=m.descripcion||'';
+      if(m.calidadDef===undefined)m.calidadDef=m.calidad||'';
+      if(m.acabadoDef===undefined)m.acabadoDef=m.acabado||'';
+      if(m.largo===undefined)m.largo=m.longitud==null?null:m.longitud;
+      n++;
+    }
+    ['familiaExcel','familia','descripcion','calidad','acabado','longitud','peso','proveedor','medida'].forEach(k=>delete m[k]);
+  });
+  if(ST.maquinas.join(',')===MAQ_LEGACY.join(',')){
+    ST.maquinas=MAQ_BASE.slice();ST.reglas.forEach(r=>{r.maquinas=[];});
+    toast('Se ha actualizado el catálogo de máquinas (TUBOS_08…TUBOS_28). Vuelve a asignarlas en <b>Familias de Materiales</b>.','warn',8000);
+    n++;
+  }
+  if(n){invalidateMat();save();}
 }
 function lsInfo(){
   let kb=0;try{kb=Math.round((localStorage.getItem(LS_KEY)||'').length/1024);}catch(e){}
@@ -499,7 +598,7 @@ function lsInfo(){
 }
 
 /* ---------- Utilidades ---------- */
-function norm(s){return (s==null?'':String(s)).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+function norm(s){return (s==null?'':String(s)).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/ø/g,'o').replace(/[^a-z0-9]+/g,' ').trim();}
 function up(s){return (s==null?'':String(s)).trim().toUpperCase();}
 
 /** Convierte a número admitiendo 1.234,56 / 1,234.56 / 1234.56 */
@@ -545,41 +644,44 @@ function p2(x){return String(x).padStart(2,'0');}
 function ym(iso){return iso&&iso.length>=7?iso.slice(0,7):'';}
 function fmtFecha(iso){if(!iso)return '—';const p=iso.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso;}
 
-/** Medida = concatenación de ancho y alto */
+/** Medida = concatenación de ancho y alto con el formato de AGSA: 60_40 · 12_0 */
 function medidaOf(ancho,alto){
   const a=num(ancho),b=num(alto);
   if(a==null&&b==null)return '';
-  if(b==null||b===0)return numTxt(a);
-  if(a==null||a===0)return numTxt(b);
-  return numTxt(a)+'x'+numTxt(b);
+  return numTxt(a||0)+'_'+numTxt(b||0);
 }
-function medKey(s){return norm(s).replace(/\s/g,'');}
+/** Clave de medida: admite 60_40, 60x40 o 60 40 y normaliza a ancho_alto */
+function medKey(s){
+  const n=(String(s==null?'':s).match(/\d+(?:[.,]\d+)?/g)||[]).map(x=>parseFloat(x.replace(',','.')));
+  if(!n.length)return '';
+  return numTxt(n[0])+'_'+numTxt(n[1]||0);
+}
 
-/* ---------- Asignación material → máquina ---------- */
+/* ---------- Clasificación automática: medida + espesor → familia y máquina ---------- */
 let _ruleIdx=null;
 function ruleIndex(){
   if(_ruleIdx)return _ruleIdx;
   _ruleIdx={};
-  ST.reglas.forEach(r=>{
-    const k=norm(r.familia)+'|'+medKey(r.medida);
-    (_ruleIdx[k]=_ruleIdx[k]||[]).push(r);
-  });
+  ST.reglas.forEach(r=>{const k=medKey(r.medida);(_ruleIdx[k]=_ruleIdx[k]||[]).push(r);});
   return _ruleIdx;
 }
-function invalidateRules(){_ruleIdx=null;}
-
-/** Devuelve la regla aplicable a un material (familia + medida + espesor en rango) */
-function ruleFor(m){
-  const k=norm(m.familia)+'|'+medKey(m.medida||medidaOf(m.ancho,m.alto));
-  const list=ruleIndex()[k];if(!list||!list.length)return null;
-  const e=num(m.espesor);
-  for(const r of list){
-    const mn=r.espMin==null?-Infinity:r.espMin, mx=r.espMax==null?Infinity:r.espMax;
-    if(e==null){ if(r.espMin==null&&r.espMax==null)return r; continue; }
-    if(e>=mn-1e-9&&e<=mx+1e-9)return r;
-  }
-  return null;
+function invalidateRules(){_ruleIdx=null;_ruleCnt=null;}
+function espIn(r,e){
+  const mn=r.espMin==null?-Infinity:r.espMin,mx=r.espMax==null?Infinity:r.espMax;
+  if(e==null)return r.espMin==null&&r.espMax==null;
+  return e>=mn-1e-9&&e<=mx+1e-9;
 }
+/** Medida del material: concatenación de ancho y alto (siempre calculada, nunca editable) */
+function medOf(m){return medidaOf(m.ancho,m.alto);}
+/** Regla aplicable a un material: misma medida y espesor dentro del rango */
+function ruleFor(m){
+  const list=ruleIndex()[medKey(medOf(m))];if(!list||!list.length)return null;
+  const e=num(m.espesor);
+  return list.find(r=>espIn(r,e))||null;
+}
+/** Familia = REDONDO del que parte el tubo. La define la regla de Familias de Materiales.
+    Chapas, flejes y algunos perfiles no tienen redondo: devuelven cadena vacía. */
+function famOf(m){const r=ruleFor(m);return r?up(r.familia):'';}
 function maqOf(m){const r=ruleFor(m);return r&&r.maquinas?r.maquinas:[];}
 function maqTxt(m){const l=maqOf(m);return l.length?l.join(', '):'';}
 function chipsMaq(list){
@@ -599,11 +701,12 @@ function invalidateMat(){_matIdx=null;invalidateRules();}
 function matOf(cod){return matIndex()[norm(cod)]||null;}
 
 /** Acabado / calidad efectivos de una línea de pedido (valor propio o por defecto del maestro) */
+const DEF_FIELD={acabado:'acabadoDef',calidad:'calidadDef'};
 function efect(p,campo){
   const own=(p[campo]||'').trim();
   if(own)return {v:up(own),def:false};
   const m=matOf(p.material);
-  const d=m?up(m[campo]||''):'';
+  const d=m?up(m[DEF_FIELD[campo]]||''):'';
   return {v:d,def:!!d};
 }
 
@@ -670,19 +773,7 @@ function refreshAll(){rInicio();rMat();rFam();rPed();rAna();lsInfo();}
 /* ============================================================
    IMPORTACIÓN DE EXCEL (mapeo de columnas asistido)
    ============================================================ */
-const MAT_FIELDS=[
-  {k:'codigo',l:'Código *',al:['codigo','codigo material','cod material','cod','material','referencia','ref','articulo','codigo articulo','cod articulo','sku']},
-  {k:'descripcion',l:'Descripción',al:['descripcion','descripcion material','denominacion','texto breve','texto','desc','nombre']},
-  {k:'familia',l:'Familia *',al:['familia','familia material','familia de material','grupo articulos','grupo','tipo material','tipo']},
-  {k:'ancho',l:'Ancho (mm)',al:['ancho','ancho mm','anchura','a mm','ancho nominal']},
-  {k:'alto',l:'Alto (mm)',al:['alto','alto mm','altura','h mm','canto','alto nominal']},
-  {k:'espesor',l:'Espesor (mm)',al:['espesor','espesor mm','esp','grosor','e mm','espesor nominal']},
-  {k:'longitud',l:'Longitud (mm)',al:['longitud','longitud mm','largo','largo mm','long']},
-  {k:'calidad',l:'Calidad por defecto',al:['calidad','calidad por defecto','calidad defecto','calidad material','grado','grade']},
-  {k:'acabado',l:'Acabado por defecto',al:['acabado','acabado por defecto','acabado defecto','recubrimiento','revestimiento','finish']},
-  {k:'peso',l:'Peso (kg/m o kg/ud)',al:['peso','peso kg','peso kg m','kg m','kg ml','peso unitario','peso teorico','peso metro']},
-  {k:'proveedor',l:'Proveedor',al:['proveedor','suministrador','fabricante','vendor']}
-];
+const MAT_FIELDS=MAT_SPEC.map(f=>({k:f.k,l:f.l+(f.req?' *':''),al:f.al}));
 const PED_FIELDS=[
   {k:'pedido',l:'Nº pedido *',al:['pedido','n pedido','num pedido','numero pedido','no pedido','doc ventas','documento ventas','pedido venta','pedido de venta','pedido cliente','orden venta','ov']},
   {k:'pos',l:'Posición',al:['posicion','pos','linea','n linea','item','pos pedido']},
@@ -764,7 +855,7 @@ function renderImport(){
   document.getElementById('mImpInfo').innerHTML='📄 <strong>'+IMP.rows.length.toLocaleString('es-ES')+' filas</strong> detectadas · '+det+' columnas reconocidas de '+IMP.headers.length;
   document.getElementById('mImpNote').innerHTML=IMP.target==='mat'
     ? '<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text)"><input type="checkbox" id="optActualiza" checked> Actualizar los materiales existentes que tengan el mismo <b>código</b> (si se desmarca, se omiten)</label>'
-      +'<div style="margin-top:6px">Los materiales importados <b>se añaden</b> a los ya cargados. La <b>medida</b> se calcula como <b>ancho × alto</b>.</div>'
+      +'<div style="margin-top:6px">Los materiales importados <b>se añaden</b> a los ya cargados. La <b>medida</b> (ancho × alto), la <b>familia (redondo)</b> y la <b>máquina</b> se calculan con las reglas de <b>Familias de Materiales</b>.</div>'
     : '<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text)"><input type="checkbox" id="optDup" checked> Omitir líneas duplicadas (mismo nº de pedido + posición + material)</label>'
       +'<div style="margin-top:6px">Si falta el importe se calcula como cantidad × precio (y viceversa). Acabado y calidad vacíos se toman del maestro de materiales.</div>';
 }
@@ -784,12 +875,11 @@ function confirmImport(){
     IMP.rows.forEach(r=>{
       const cod=(get(r,'codigo')==null?'':String(get(r,'codigo')).trim());
       if(!cod){sin++;return;}
-      const o={codigo:cod,descripcion:txt(get(r,'descripcion')),familia:up(get(r,'familia')),
-        ancho:num(get(r,'ancho')),alto:num(get(r,'alto')),espesor:num(get(r,'espesor')),longitud:num(get(r,'longitud')),
-        calidad:up(get(r,'calidad')),acabado:up(get(r,'acabado')),peso:num(get(r,'peso')),proveedor:txt(get(r,'proveedor'))};
-      o.medida=medidaOf(o.ancho,o.alto);
+      const o={};
+      MAT_SPEC.forEach(fd=>{const v=get(r,fd.k);o[fd.k]=fd.t==='num'?num(v):(fd.t==='txt'?txt(v):up(v));});
+      o.codigo=cod;
       const ex=ST.materiales.find(m=>norm(m.codigo)===norm(cod));
-      if(ex){ if(!actualiza){omit++;return;} Object.keys(o).forEach(k=>{if(o[k]!==''&&o[k]!=null)ex[k]=o[k];}); act++; }
+      if(ex){ if(!actualiza){omit++;return;} MAT_SPEC.forEach(fd=>{if(o[fd.k]!==''&&o[fd.k]!=null)ex[fd.k]=o[fd.k];}); act++; }
       else { o.id=uid(); ST.materiales.push(o); nuevos++; }
     });
     invalidateMat();save();clM('modalImp');refreshAll();
@@ -826,9 +916,9 @@ function dlSheet(aoa,nombre,hoja){
 }
 function tplMateriales(){
   dlSheet([
-    ['Código','Descripción','Familia','Ancho','Alto','Espesor','Longitud','Calidad','Acabado','Peso','Proveedor'],
-    ['TUB-60040-20','Tubo estructural 60x40x2,0','TUBO',60,40,2,6000,'S235JR','NEGRO',2.87,'ArcelorMittal'],
-    ['CHA-1500-30','Chapa laminada 1500x3000x3,0','CHAPA',1500,3000,3,3000,'S275JR','DECAPADO',35.3,'Megasa']
+    MAT_SPEC.map(f=>f.l),
+    ['TUBO','TUB-60040-20','Tubo estructural 60x40x2,0','RECTANGULAR',60,40,2,6000,'NEGRO','NEGRO','GALVANIZADO','S235JR','S275JR','S235JR','S275JR','NINGUNO','PINTADO','Z275','Z140',50,'ESTANDAR','ESTRUCTURAL','A','MTS'],
+    ['TUBO','TUB-50050-15','Tubo estructural 50x50x1,5','CUADRADO',50,50,1.5,6000,'GALVANIZADO','GALVANIZADO','NEGRO','S235JR','S355JR','S235JR','S355JR','GALVANIZADO','NINGUNO','Z275','Z200',60,'ESTANDAR','ESTRUCTURAL','B','MTO']
   ],'Plantilla_Maestro_Materiales.xlsx','Materiales');
   toast('Plantilla descargada','ok');
 }
@@ -852,20 +942,19 @@ function dlRows(rows,nombre,hoja){
 /* ============================================================
    PANTALLA · MAESTRO DE MATERIALES
    ============================================================ */
-const MAT_COLS=[
-  {k:'codigo',l:'Código',g:m=>m.codigo},
-  {k:'descripcion',l:'Descripción',g:m=>m.descripcion},
-  {k:'familia',l:'Familia',g:m=>m.familia,r:m=>'<span class="b bl">'+esc(m.familia||'—')+'</span>'},
-  {k:'medida',l:'Medida',g:m=>m.medida,r:m=>'<b>'+esc(m.medida||'—')+'</b>'},
-  {k:'ancho',l:'Ancho',n:1,g:m=>m.ancho},
-  {k:'alto',l:'Alto',n:1,g:m=>m.alto},
-  {k:'espesor',l:'Espesor',n:1,g:m=>m.espesor},
-  {k:'longitud',l:'Longitud',n:1,g:m=>m.longitud},
-  {k:'calidad',l:'Calidad',g:m=>m.calidad},
-  {k:'acabado',l:'Acabado',g:m=>m.acabado},
-  {k:'peso',l:'Peso',n:1,g:m=>m.peso},
-  {k:'maquina',l:'Máquina',g:m=>maqTxt(m),r:m=>chipsMaq(maqOf(m))}
+const MAT_CALC=[
+  {k:'codigo',l:'Codigo Material',stk:1,g:m=>m.codigo,r:m=>'<b>'+esc(m.codigo||'—')+'</b>'},
+  {k:'nombre',l:'Nombre Material',g:m=>m.nombre},
+  {k:'tipo',l:'Tipo Material',g:m=>m.tipo,r:m=>m.tipo?'<span class="b bl">'+esc(m.tipo)+'</span>':'—'},
+  {k:'familia',l:'Familia · redondo ⚙',g:m=>famOf(m),r:m=>{
+    const v=famOf(m);
+    return v?'<span class="b g" title="Redondo calculado con las reglas de Familias de Materiales">'+esc(v)+'</span>'
+      :'<span class="chip none" title="Ninguna regla cubre esta medida y espesor">sin familia</span>';}},
+  {k:'medida',l:'Medida ⚙',g:m=>medOf(m),r:m=>'<b>'+esc(medOf(m)||'—')+'</b>'},
+  {k:'maquina',l:'Máquina ⚙',g:m=>maqTxt(m),r:m=>chipsMaq(maqOf(m))}
 ];
+const MAT_COLS=MAT_CALC.concat(MAT_SPEC.filter(fd=>['codigo','nombre','tipo'].indexOf(fd.k)<0)
+  .map(fd=>({k:fd.k,l:fd.l,n:fd.t==='num'?1:0,d:fd.d,g:m=>m[fd.k]})));
 let matSort={k:'codigo',d:1},matPage=1;const MAT_PP=50;
 
 function sortMat(k){matSort.d=(matSort.k===k)?-matSort.d:1;matSort.k=k;matPage=1;rMat();}
@@ -877,16 +966,18 @@ function cmp(a,b){
 }
 
 function matFiltrados(){
-  const fFam=document.getElementById('fMatFam').value,fMaq=document.getElementById('fMatMaq').value,
+  const fTipo=document.getElementById('fMatTipo').value,fFam=document.getElementById('fMatFam').value,
+        fMaq=document.getElementById('fMatMaq').value,
         fAsig=document.getElementById('fMatAsig').value,q=norm(document.getElementById('fMatQ').value);
   return ST.materiales.filter(m=>{
-    if(fFam&&up(m.familia)!==fFam)return false;
+    if(fTipo&&up(m.tipo)!==fTipo)return false;
+    if(fFam&&famOf(m)!==fFam)return false;
     const mq=maqOf(m);
     if(fMaq&&mq.indexOf(fMaq)<0)return false;
     if(fAsig==='si'&&!mq.length)return false;
     if(fAsig==='no'&&mq.length)return false;
     if(q){
-      const hay=norm([m.codigo,m.descripcion,m.familia,m.medida,m.calidad,m.acabado,m.proveedor,mq.join(' ')].join(' '));
+      const hay=norm(MAT_SPEC.map(fd=>m[fd.k]).concat([famOf(m),medOf(m),mq.join(' ')]).join(' '));
       if(q.split(' ').some(t=>hay.indexOf(t)<0))return false;
     }
     return true;
@@ -894,7 +985,8 @@ function matFiltrados(){
 }
 
 function rMat(){
-  fillSelect('fMatFam',uniqSort(ST.materiales.map(m=>up(m.familia))),'(todas las familias)');
+  fillSelect('fMatTipo',uniqSort(ST.materiales.map(m=>up(m.tipo))),'(todos los tipos)');
+  fillSelect('fMatFam',uniqSort(ST.materiales.map(m=>famOf(m))),'(todas las familias)');
   fillSelect('fMatMaq',ST.maquinas.slice(),'(todas las máquinas)');
   const col=MAT_COLS.find(c=>c.k===matSort.k)||MAT_COLS[0];
   const list=matFiltrados().sort((a,b)=>matSort.d*cmp(col.g(a),col.g(b)));
@@ -902,13 +994,13 @@ function rMat(){
   const asign=ST.materiales.filter(m=>maqOf(m).length).length;
   document.getElementById('kMatTot').textContent=fmtN(ST.materiales.length);
   document.getElementById('kMatVis').textContent='visibles: '+fmtN(list.length);
-  document.getElementById('kMatFam').textContent=uniqSort(ST.materiales.map(m=>up(m.familia))).length;
+  document.getElementById('kMatFam').textContent=uniqSort(ST.materiales.map(m=>famOf(m))).length;
   document.getElementById('kMatAsig').textContent=fmtN(asign);
   document.getElementById('kMatAsigPct').textContent=ST.materiales.length?Math.round(asign*100/ST.materiales.length)+' % del maestro':'0 %';
   document.getElementById('kMatSin').textContent=fmtN(ST.materiales.length-asign);
   // Cabecera
   document.querySelector('#tMat thead').innerHTML='<tr>'+MAT_COLS.map(c=>
-    '<th class="srt'+(c.n?' num':'')+'" onclick="sortMat(\''+c.k+'\')">'+c.l+(matSort.k===c.k?' <span class="ar">'+(matSort.d>0?'▲':'▼')+'</span>':'')+'</th>').join('')
+    '<th class="srt'+(c.n?' num':'')+(c.stk?' stk':'')+'" onclick="sortMat(\''+c.k+'\')">'+c.l+(matSort.k===c.k?' <span class="ar">'+(matSort.d>0?'▲':'▼')+'</span>':'')+'</th>').join('')
     +'<th style="width:70px">Acciones</th></tr>';
   // Cuerpo
   const tot=Math.max(1,Math.ceil(list.length/MAT_PP));matPage=Math.min(matPage,tot);
@@ -918,8 +1010,8 @@ function rMat(){
     tb.innerHTML='<tr><td colspan="'+(MAT_COLS.length+1)+'" class="empty">'+(ST.materiales.length?'Ningún material coincide con los filtros.':'Todavía no hay materiales. Carga un Excel con <b>⬆️ Cargar Excel de materiales</b> o añádelos manualmente.')+'</td></tr>';
   }else{
     tb.innerHTML=pageRows.map(m=>'<tr>'+MAT_COLS.map(c=>{
-      const v=c.r?c.r(m):(c.n?fmtN(c.g(m),c.k==='ancho'||c.k==='alto'||c.k==='longitud'?0:2):esc(c.g(m)||'—'));
-      return '<td'+(c.n?' class="num"':'')+'>'+v+'</td>';
+      const v=c.r?c.r(m):(c.n?fmtN(c.g(m),c.d||0):esc(c.g(m)||'—'));
+      return '<td'+(c.n?' class="num"':'')+(c.stk?' class="stk"':'')+'>'+v+'</td>';
     }).join('')+'<td><button class="ia" title="Editar" onclick="editMaterial(\''+m.id+'\')">✏️</button>'+
       '<button class="ia" title="Eliminar" onclick="delMaterial(\''+m.id+'\')">🗑️</button></td></tr>').join('');
   }
@@ -937,46 +1029,59 @@ function pager(total,page,pp,varName,fn){
     '<button onclick="'+varName+'='+tot+';'+fn+'()" '+(page>=tot?'disabled':'')+'>»</button>';
 }
 
-function clearMatFilters(){['fMatFam','fMatMaq','fMatAsig','fMatQ'].forEach(i=>document.getElementById(i).value='');matPage=1;rMat();}
+function clearMatFilters(){['fMatTipo','fMatFam','fMatMaq','fMatAsig','fMatQ'].forEach(i=>document.getElementById(i).value='');matPage=1;rMat();}
 
 function editMaterial(id){
   const m=id?ST.materiales.find(x=>x.id===id):null;
   document.getElementById('mMatTit').textContent=m?'✏️ Editar material':'➕ Nuevo material';
   document.getElementById('mMatId').value=m?m.id:'';
-  const set=(i,v)=>document.getElementById(i).value=(v==null?'':v);
-  set('mMatCod',m&&m.codigo);set('mMatDes',m&&m.descripcion);set('mMatFam',m&&m.familia);
-  set('mMatAnc',m&&m.ancho);set('mMatAlt',m&&m.alto);set('mMatEsp',m&&m.espesor);set('mMatLon',m&&m.longitud);
-  set('mMatCal',m&&m.calidad);set('mMatAca',m&&m.acabado);set('mMatPes',m&&m.peso);set('mMatPro',m&&m.proveedor);
-  const fams=uniqSort(FAM_BASE.concat(ST.materiales.map(x=>up(x.familia))).concat(ST.familias.map(up)));
-  document.getElementById('dlFam').innerHTML=fams.map(f=>'<option value="'+esc(f)+'">').join('');
-  document.getElementById('dlCal').innerHTML=uniqSort(ST.materiales.map(x=>up(x.calidad))).map(f=>'<option value="'+esc(f)+'">').join('');
-  document.getElementById('dlAca').innerHTML=uniqSort(ST.materiales.map(x=>up(x.acabado))).map(f=>'<option value="'+esc(f)+'">').join('');
-  prevMedida();oM('modalMat');
+  document.getElementById('mMatForm').innerHTML=MAT_SPEC.filter(fd=>fd.edit!==false).map(fd=>{
+    const v=m?m[fd.k]:'';
+    if(fd.t==='num')return campoFG(fd,'<input type="number" step="any" id="f_'+fd.k+'" value="'+(v==null?'':esc(v))+'" oninput="matPrev()">');
+    if(fd.t==='txt')return campoFG(fd,'<input type="text" id="f_'+fd.k+'" value="'+esc(v||'')+'">');
+    const cur=up(v),vals=uniqSort(valoresDe(fd.k).concat(cur?[cur]:[]));
+    return campoFG(fd,'<select id="f_'+fd.k+'" onchange="selNuevo(\''+fd.k+'\')">'+
+      '<option value="">(vacío)</option>'+
+      vals.map(x=>'<option value="'+esc(x)+'"'+(x===cur?' selected':'')+'>'+esc(x)+'</option>').join('')+
+      '<option value="__new__">➕ Nuevo valor…</option></select>'+
+      '<input type="text" id="n_'+fd.k+'" hidden placeholder="Escribe el nuevo valor" style="margin-top:5px">');
+  }).join('');
+  matPrev();oM('modalMat');
 }
-function prevMedida(){
-  const med=medidaOf(document.getElementById('mMatAnc').value,document.getElementById('mMatAlt').value);
-  const esp=num(document.getElementById('mMatEsp').value),fam=up(document.getElementById('mMatFam').value);
-  const mq=maqOf({familia:fam,medida:med,espesor:esp});
-  document.getElementById('mMatPrev').innerHTML='Medida: <b>'+(med||'—')+'</b> · Máquina asignada: <b>'+(mq.length?mq.join(', '):'ninguna regla aplicable')+'</b>';
+function campoFG(fd,html){return '<div class="fg"><label>'+esc(fd.l)+'</label>'+html+'</div>';}
+function selNuevo(k){
+  const sel=document.getElementById('f_'+k),inp=document.getElementById('n_'+k);
+  if(sel.value==='__new__'){inp.hidden=false;inp.focus();}else{inp.hidden=true;inp.value='';}
+}
+function valSel(k){
+  const sel=document.getElementById('f_'+k);if(!sel)return '';
+  return sel.value==='__new__'?up(document.getElementById('n_'+k).value):up(sel.value);
+}
+/** Vista previa de los tres campos calculados */
+function matPrev(){
+  const t={ancho:num(document.getElementById('f_ancho').value),alto:num(document.getElementById('f_alto').value),
+    espesor:num(document.getElementById('f_espesor').value)};
+  const r=ruleFor(t),fam=famOf(t);
+  document.getElementById('mMatPrev').innerHTML='⚙ Medida: <strong>'+(medOf(t)||'—')+'</strong>'+
+    ' · Familia (redondo): <strong>'+(fam||'sin familia')+'</strong>'+
+    ' · Máquina: <strong>'+(r&&r.maquinas&&r.maquinas.length?r.maquinas.join(', '):'ninguna regla aplicable')+'</strong>';
 }
 function saveMaterial(){
-  const cod=document.getElementById('mMatCod').value.trim(),fam=up(document.getElementById('mMatFam').value);
-  if(!cod){toast('El código es obligatorio','err');return;}
-  if(!fam){toast('La familia es obligatoria','err');return;}
+  const cod=document.getElementById('f_codigo').value.trim();
+  if(!cod){toast('El código de material es obligatorio','err');return;}
   const id=document.getElementById('mMatId').value;
-  const dup=ST.materiales.find(m=>norm(m.codigo)===norm(cod)&&m.id!==id);
-  if(dup){toast('Ya existe un material con el código '+esc(cod),'err');return;}
-  const o={codigo:cod,descripcion:document.getElementById('mMatDes').value.trim(),familia:fam,
-    ancho:num(document.getElementById('mMatAnc').value),alto:num(document.getElementById('mMatAlt').value),
-    espesor:num(document.getElementById('mMatEsp').value),longitud:num(document.getElementById('mMatLon').value),
-    calidad:up(document.getElementById('mMatCal').value),acabado:up(document.getElementById('mMatAca').value),
-    peso:num(document.getElementById('mMatPes').value),proveedor:document.getElementById('mMatPro').value.trim()};
-  o.medida=medidaOf(o.ancho,o.alto);
-  if(id){Object.assign(ST.materiales.find(m=>m.id===id),o);}
+  if(ST.materiales.some(m=>norm(m.codigo)===norm(cod)&&m.id!==id)){toast('Ya existe un material con el código '+esc(cod),'err');return;}
+  const o={};
+  MAT_SPEC.filter(fd=>fd.edit!==false).forEach(fd=>{
+    o[fd.k]=fd.t==='num'?num(document.getElementById('f_'+fd.k).value)
+      :(fd.t==='txt'?document.getElementById('f_'+fd.k).value.trim():valSel(fd.k));
+  });
+  o.codigo=cod;
+  if(id)Object.assign(ST.materiales.find(m=>m.id===id),o);
   else{o.id=uid();ST.materiales.push(o);}
-  if(fam&&ST.familias.indexOf(fam)<0&&!ST.reglas.some(r=>up(r.familia)===fam))ST.familias.push(fam);
   invalidateMat();save();clM('modalMat');refreshAll();
-  toast(id?'Material actualizado':'Material añadido','ok');
+  const mq=maqTxt(o);
+  toast((id?'Material actualizado':'Material añadido')+' · '+(mq?'familia '+esc(famOf(o))+' · máquina '+esc(mq):'<b>sin familia (redondo)</b>'),'ok',5000);
 }
 function delMaterial(id){
   const m=ST.materiales.find(x=>x.id===id);if(!m)return;
@@ -990,95 +1095,157 @@ function clearMateriales(){
   ST.materiales=[];invalidateMat();save();refreshAll();toast('Maestro de materiales vaciado','ok');
 }
 function exportMateriales(){
-  dlRows(matFiltrados().map(m=>({'Código':m.codigo,'Descripción':m.descripcion,'Familia':m.familia,'Medida':m.medida,
-    'Ancho':m.ancho,'Alto':m.alto,'Espesor':m.espesor,'Longitud':m.longitud,'Calidad':m.calidad,'Acabado':m.acabado,
-    'Peso':m.peso,'Proveedor':m.proveedor,'Máquina':maqTxt(m)})),'Maestro_Materiales_AGSA.xlsx','Materiales');
+  dlRows(matFiltrados().map(m=>{
+    const o={};
+    MAT_SPEC.forEach(fd=>{o[fd.l]=m[fd.k];});
+    o['Familia (calculada)']=famOf(m);o['Medida (calculada)']=medOf(m);o['Maquina (calculada)']=maqTxt(m);
+    return o;
+  }),'Maestro_Materiales_AGSA.xlsx','Materiales');
 }
 
 /* ============================================================
    PANTALLA · FAMILIAS DE MATERIALES (medida + espesor → máquina)
    ============================================================ */
-let famOpen=new Set();
+let famOpen=new Set(),maqOpen=new Set(),_tree=null,_ruleCnt=null;
 
-function famAll(){return uniqSort(ST.familias.map(up).concat(ST.reglas.map(r=>up(r.familia))).concat(ST.materiales.map(m=>up(m.familia))));}
+function famAll(){return uniqSort(ST.familias.map(up).concat(ST.reglas.map(r=>up(r.familia))));}
 function reglasDe(fam){return ST.reglas.filter(r=>up(r.familia)===up(fam));}
+/** Nº de materiales que cuelgan de cada regla (cacheado por render) */
 function matsDeRegla(r){
-  return ST.materiales.filter(m=>{
-    if(up(m.familia)!==up(r.familia))return false;
-    if(medKey(m.medida||medidaOf(m.ancho,m.alto))!==medKey(r.medida))return false;
-    const e=num(m.espesor);
-    if(e==null)return r.espMin==null&&r.espMax==null;
-    return e>=(r.espMin==null?-Infinity:r.espMin)-1e-9&&e<=(r.espMax==null?Infinity:r.espMax)+1e-9;
-  }).length;
+  if(!_ruleCnt){_ruleCnt={};ST.materiales.forEach(m=>{const x=ruleFor(m);if(x)_ruleCnt[x.id]=(_ruleCnt[x.id]||0)+1;});}
+  return _ruleCnt[r.id]||0;
+}
+/** Ordena redondos por diámetro (Ø12 antes que Ø113) */
+function diam(f){const n=String(f).match(/\d+(?:[.,]\d+)?/);return n?parseFloat(n[0].replace(',','.')):1e9;}
+function ordenFam(a,b){return diam(a)-diam(b)||cmp(a,b);}
+
+/** Nivel 1: máquina (incluida SIN MÁQUINA) · Nivel 2: familia · Nivel 3: medidas */
+function buildTree(){
+  const t={};
+  const add=(mq,fam,r)=>{const g=t[mq]=t[mq]||{};const l=g[fam]=g[fam]||[];if(r)l.push(r);};
+  ST.reglas.forEach(r=>{
+    const mqs=(r.maquinas&&r.maquinas.length)?r.maquinas:[SINMAQ];
+    mqs.forEach(mq=>add(mq,up(r.familia),r));
+  });
+  famAll().forEach(f=>{if(!ST.reglas.some(r=>up(r.familia)===f))add(SINMAQ,f,null);});
+  return t;
 }
 
 function rFam(){
-  const fams=famAll();
-  fillSelect('fFamFam',fams,'(todas las familias)');
-  fillSelect('fFamMaq',ST.maquinas.slice(),'(todas las máquinas)');
-  const fFam=document.getElementById('fFamFam').value,fMaq=document.getElementById('fFamMaq').value,q=medKey(document.getElementById('fFamQ').value);
-  // KPIs
+  _ruleCnt=null;
+  fillSelect('fFamFam',famAll(),'(todas las familias)');
+  fillSelect('fFamMaq',ST.maquinas.concat([SINMAQ]),'(todas las máquinas)');
+  const fFam=document.getElementById('fFamFam').value,fMaq=document.getElementById('fFamMaq').value,
+        q=document.getElementById('fFamQ').value.trim().toLowerCase();
+  // ---- KPIs
   const cub=ST.materiales.filter(m=>ruleFor(m)).length;
-  document.getElementById('kFamTot').textContent=fams.length;
+  document.getElementById('kFamTot').textContent=famAll().length;
   document.getElementById('kFamReg').textContent=ST.reglas.length;
   document.getElementById('kFamCob').textContent=fmtN(cub);
   document.getElementById('kFamCobPct').textContent=ST.materiales.length?Math.round(cub*100/ST.materiales.length)+' % de los materiales':'0 %';
   document.getElementById('kFamSinMaq').textContent=ST.reglas.filter(r=>!r.maquinas||!r.maquinas.length).length;
-  // Acordeón por familia
+  // ---- Árbol
+  const tree=buildTree();
+  const orden=[SINMAQ].concat(ST.maquinas.filter(m=>m!==SINMAQ));
+  Object.keys(tree).forEach(m=>{if(orden.indexOf(m)<0)orden.push(m);});
+  _tree={mq:[],fam:[]};
+  let html='';
+  orden.forEach(mq=>{
+    if(fMaq&&mq!==fMaq)return;
+    const grp=tree[mq];if(!grp)return;
+    let fams=Object.keys(grp).sort(ordenFam);
+    if(fFam)fams=fams.filter(x=>x===fFam);
+    if(q)fams=fams.filter(x=>x.toLowerCase().indexOf(q)>=0||grp[x].some(r=>String(r.medida).toLowerCase().indexOf(q)>=0));
+    if(!fams.length)return;
+    const i=_tree.mq.length;_tree.mq.push(mq);_tree.fam.push(fams);
+    const nMed=fams.reduce((a,x)=>a+grp[x].length,0);
+    const nMat=fams.reduce((a,x)=>a+grp[x].reduce((b,r)=>b+matsDeRegla(r),0),0);
+    const open=maqOpen.has(mq)||!!fFam||!!q||!!fMaq;
+    if(open)maqOpen.add(mq);
+    html+='<div class="acc l1'+(mq===SINMAQ?' nomaq':'')+(open?' open':'')+'">'+
+      '<div class="acc-h" onclick="togMaq('+i+',event)"><span class="car">▶</span>'+
+      '<span class="lvl-tag">Máquina</span><span class="tt">'+(mq===SINMAQ?'⚠️ ':'🛠 ')+esc(mq)+'</span>'+
+      '<span class="mt">'+fams.length+' familias · '+nMed+' medidas · '+fmtN(nMat)+' materiales</span>'+
+      '<span class="ac-btns"><button class="btn bs bsm" onclick="event.stopPropagation();editFamilia('+i+')">➕ Añadir familia</button></span>'+
+      '</div><div class="acc-b">'+fams.map((fam,j)=>famCard(mq,fam,grp[fam],i,j,q)).join('')+'</div></div>';
+  });
   const cont=document.getElementById('famList');
-  const visibles=fams.filter(f=>!fFam||f===fFam);
-  if(!visibles.length){
-    cont.innerHTML='<div class="cd"><div class="empty">Todavía no hay familias.<br><br>'+
-      '<button class="btn bp" onclick="autoGenFamilias()">🔄 Auto-generar desde el maestro de materiales</button> '+
-      '<button class="btn bo" onclick="editFamilia()">➕ Añadir familia manualmente</button></div></div>';
-  }else{
-    cont.innerHTML=visibles.map(f=>{
-      let rs=reglasDe(f);
-      if(fMaq)rs=rs.filter(r=>(r.maquinas||[]).indexOf(fMaq)>=0);
-      if(q)rs=rs.filter(r=>medKey(r.medida).indexOf(q)>=0);
-      const nMat=ST.materiales.filter(m=>up(m.familia)===f).length;
-      const open=famOpen.has(f)||!!fFam||!!q;
-      if(open)famOpen.add(f);
-      const rows=rs.length?rs.sort((a,b)=>cmp(a.medida,b.medida)).map(r=>
-        '<tr><td><b>'+esc(r.medida||'—')+'</b></td>'+
-        '<td class="num">'+fmtN(r.ancho,0)+'</td><td class="num">'+(r.alto==null?'—':fmtN(r.alto,0))+'</td>'+
-        '<td class="num"><input class="espin" type="number" step="any" value="'+(r.espMin==null?'':r.espMin)+'" onchange="setEsp(\''+r.id+'\',\'espMin\',this.value)"></td>'+
-        '<td class="num"><input class="espin" type="number" step="any" value="'+(r.espMax==null?'':r.espMax)+'" onchange="setEsp(\''+r.id+'\',\'espMax\',this.value)"></td>'+
-        '<td style="white-space:normal;max-width:260px">'+chipsMaq(r.maquinas)+'</td>'+
-        '<td class="num">'+fmtN(matsDeRegla(r))+'</td>'+
-        '<td><button class="ia" title="Editar" onclick="editMedida(\''+r.id+'\')">✏️</button>'+
-        '<button class="ia" title="Eliminar" onclick="delMedida(\''+r.id+'\')">🗑️</button></td></tr>').join('')
-        :'<tr><td colspan="8" class="empty" style="padding:18px">Esta familia todavía no tiene medidas. Añade una con <b>+ Añadir medida</b>.</td></tr>';
-      return '<div class="acc'+(open?' open':'')+'" id="acc-'+esc(f)+'">'+
-        '<div class="acc-h" onclick="toggleFam(\''+esc(f)+'\',event)"><span class="car">▶</span>'+
-        '<span class="tt">'+esc(f)+'</span>'+
-        '<span class="mt">'+reglasDe(f).length+' medidas · '+nMat+' materiales</span>'+
-        '<span class="ac-btns">'+
-          '<button class="btn bp bsm" onclick="event.stopPropagation();editMedida(null,\''+esc(f)+'\')">➕ Añadir medida</button>'+
-          '<button class="btn bo bsm" onclick="event.stopPropagation();delFamilia(\''+esc(f)+'\')">🗑️</button>'+
-        '</span></div>'+
-        '<div class="acc-b"><div class="tw" style="max-height:none"><table><thead><tr>'+
-        '<th>Medida</th><th class="num">Ancho</th><th class="num">Alto</th><th class="num">Espesor mín.</th><th class="num">Espesor máx.</th>'+
-        '<th>Máquina</th><th class="num">Materiales</th><th style="width:70px">Acciones</th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
-    }).join('');
-  }
+  cont.innerHTML=html||'<div class="cd"><div class="empty">'+
+    (ST.reglas.length||ST.familias.length?'Nada coincide con los filtros.':
+     'Todavía no hay familias.<br>Carga el catálogo de redondos de AGSA o da de alta el primero a mano.<br><br>'+
+     '<button class="btn bp" onclick="cargarCatalogo()">📥 Cargar catálogo de familias</button> '+
+     '<button class="btn bo" onclick="editFamilia()">➕ Añadir familia (redondo)</button>')+'</div></div>';
   rHuerfanos();lsInfo();
 }
-function toggleFam(f,e){
+
+/** Nivel 2 + nivel 3 */
+function famCard(mq,fam,reglas,i,j,q){
+  let rs=(reglas||[]).slice();
+  if(q&&fam.toLowerCase().indexOf(q)<0)rs=rs.filter(r=>String(r.medida).toLowerCase().indexOf(q)>=0);
+  rs.sort((a,b)=>cmp(a.ancho,b.ancho)||cmp(a.alto,b.alto));
+  const open=famOpen.has(mq+'|'+fam)||!!q;
+  const nMat=rs.reduce((a,r)=>a+matsDeRegla(r),0);
+  const filas=rs.length?rs.map(r=>
+    '<tr><td><b>'+esc(r.medida||'—')+'</b></td>'+
+    '<td class="num">'+fmtN(r.ancho,0)+'</td><td class="num">'+(r.alto?fmtN(r.alto,0):'—')+'</td>'+
+    '<td class="num"><input class="espin" type="number" step="any" placeholder="todos" value="'+(r.espMin==null?'':r.espMin)+'" onchange="setEsp(\''+r.id+'\',\'espMin\',this.value)"></td>'+
+    '<td class="num"><input class="espin" type="number" step="any" placeholder="todos" value="'+(r.espMax==null?'':r.espMax)+'" onchange="setEsp(\''+r.id+'\',\'espMax\',this.value)"></td>'+
+    '<td style="white-space:normal;max-width:280px">'+chipsMaq(r.maquinas)+'</td>'+
+    '<td class="num">'+fmtN(matsDeRegla(r))+'</td>'+
+    '<td><button class="ia" title="Editar" onclick="editMedida(\''+r.id+'\')">✏️</button>'+
+    '<button class="ia" title="Eliminar" onclick="delMedida(\''+r.id+'\')">🗑️</button></td></tr>').join('')
+    :'<tr><td colspan="8" class="empty" style="padding:14px">Esta familia todavía no tiene medidas. Añádelas con <b>+ Añadir medida</b>.</td></tr>';
+  return '<div class="acc l2'+(open?' open':'')+'">'+
+    '<div class="acc-h" onclick="togFam('+i+','+j+',event)"><span class="car">▶</span>'+
+    '<span class="lvl-tag">Familia</span><span class="tt">'+esc(fam)+'</span>'+
+    '<span class="mt">'+rs.length+' medidas · '+fmtN(nMat)+' materiales</span>'+
+    '<span class="ac-btns">'+
+      '<button class="btn bp bsm" onclick="event.stopPropagation();editMedida(null,\''+esc(fam)+'\',null,\''+esc(mq)+'\')">➕ Añadir medida</button>'+
+      '<button class="btn bo bsm" onclick="event.stopPropagation();delFamilia(\''+esc(fam)+'\')">🗑️</button>'+
+    '</span></div>'+
+    '<div class="acc-b"><div class="tw" style="max-height:none"><table><thead><tr>'+
+    '<th>Medida</th><th class="num">Ancho</th><th class="num">Alto</th><th class="num">Espesor mín.</th><th class="num">Espesor máx.</th>'+
+    '<th>Máquinas</th><th class="num">Materiales</th><th style="width:70px">Acciones</th></tr></thead><tbody>'+filas+'</tbody></table></div>'+
+    '<div class="note">Si no se indican espesores, <b>todos los espesores</b> de esa medida van a las máquinas marcadas.</div></div></div>';
+}
+function togMaq(i,e){
   if(e&&e.target.closest('button'))return;
-  const el=document.getElementById('acc-'+f);if(!el)return;
-  el.classList.toggle('open');
-  if(el.classList.contains('open'))famOpen.add(f);else famOpen.delete(f);
+  const mq=_tree.mq[i];if(maqOpen.has(mq))maqOpen.delete(mq);else maqOpen.add(mq);rFam();
+}
+function togFam(i,j,e){
+  if(e&&e.target.closest('button'))return;
+  const k=_tree.mq[i]+'|'+_tree.fam[i][j];
+  if(famOpen.has(k))famOpen.delete(k);else famOpen.add(k);rFam();
+}
+
+/** Carga el catálogo de redondos de AGSA (medidas sin espesor ni máquina: se definen en la herramienta) */
+function cargarCatalogo(silencioso){
+  let add=0,skip=0;
+  CAT_FAMILIAS.forEach(row=>{
+    const fam=row[0];
+    if(famAll().indexOf(up(fam))<0&&ST.familias.indexOf(fam)<0)ST.familias.push(fam);
+    row.slice(1).forEach(med=>{
+      const k=medKey(med);
+      if(ST.reglas.some(r=>medKey(r.medida)===k)){skip++;return;}
+      const n=k.split('_').map(x=>parseFloat(String(x).replace(',','.')));
+      ST.reglas.push({id:uid(),familia:fam,medida:medidaOf(n[0],n[1]),ancho:n[0],alto:n[1]||null,espMin:null,espMax:null,maquinas:[]});
+      add++;
+    });
+  });
+  invalidateRules();save();
+  if(silencioso)return;
+  refreshAll();
+  toast('📥 Catálogo cargado: <b>'+add+'</b> medidas nuevas'+(skip?' ('+skip+' ya existían)':'')+'. Asigna espesores y máquinas en cada medida.','ok',7000);
 }
 
 function rHuerfanos(){
   const g={};
   ST.materiales.forEach(m=>{
     if(ruleFor(m))return;
-    const med=m.medida||medidaOf(m.ancho,m.alto);
-    const k=up(m.familia)+'|'+med;
+    const med=medOf(m);if(!med)return;
+    const k=up(m.tipo)+'|'+med;
     const e=num(m.espesor);
-    if(!g[k])g[k]={familia:up(m.familia),medida:med,ancho:num(m.ancho),alto:num(m.alto),min:e,max:e,n:0};
+    if(!g[k])g[k]={tipo:up(m.tipo),medida:med,ancho:num(m.ancho),alto:num(m.alto),min:e,max:e,n:0};
     g[k].n++;
     if(e!=null){g[k].min=g[k].min==null?e:Math.min(g[k].min,e);g[k].max=g[k].max==null?e:Math.max(g[k].max,e);}
   });
@@ -1086,36 +1253,42 @@ function rHuerfanos(){
   const box=document.getElementById('famHuerfanos');
   box.style.display=list.length?'block':'none';
   document.querySelector('#tHuerf tbody').innerHTML=list.slice(0,120).map(h=>
-    '<tr><td><span class="b bl">'+esc(h.familia||'—')+'</span></td><td><b>'+esc(h.medida||'—')+'</b></td>'+
+    '<tr><td><span class="b bl">'+esc(h.tipo||'—')+'</span></td><td><b>'+esc(h.medida||'—')+'</b></td>'+
     '<td class="num">'+(h.min==null?'—':numTxt(h.min))+'</td><td class="num">'+(h.max==null?'—':numTxt(h.max))+'</td>'+
     '<td class="num">'+fmtN(h.n)+'</td>'+
     '<td><button class="btn bp bsm" onclick=\'crearRegla('+JSON.stringify(h).replace(/'/g,"&#39;")+')\'>➕ Crear regla</button></td></tr>').join('');
 }
-function crearRegla(h){editMedida(null,h.familia,h);}
+function crearRegla(h){editMedida(null,'',h);}
 
 /* ---------- Familias ---------- */
-function editFamilia(){
+let famMaqCtx='';
+function editFamilia(i){
+  famMaqCtx=(typeof i==='number'&&_tree&&_tree.mq[i]&&_tree.mq[i]!==SINMAQ)?_tree.mq[i]:'';
   document.getElementById('mFamNom').value='';
+  document.getElementById('mFamCtx').innerHTML=famMaqCtx
+    ?'La nueva familia se creará vacía; al añadir su primera medida se marcará la máquina <b>'+esc(famMaqCtx)+'</b>.'
+    :'Mientras no tenga medidas con máquina, la familia aparecerá en el grupo <b>'+SINMAQ+'</b>.';
   document.getElementById('dlFam2').innerHTML=uniqSort(FAM_BASE.concat(famAll())).map(f=>'<option value="'+esc(f)+'">').join('');
   oM('modalFam');
 }
 function saveFamilia(){
   const f=up(document.getElementById('mFamNom').value);
   if(!f){toast('Indica el nombre de la familia','err');return;}
-  if(famAll().indexOf(f)>=0){toast('La familia '+esc(f)+' ya existe','warn');clM('modalFam');famOpen.add(f);rFam();return;}
-  ST.familias.push(f);famOpen.add(f);save();clM('modalFam');rFam();
+  if(famAll().indexOf(f)>=0){toast('La familia '+esc(f)+' ya existe','warn');clM('modalFam');rFam();return;}
+  ST.familias.push(f);famOpen.add(SINMAQ+'|'+f);maqOpen.add(SINMAQ);save();clM('modalFam');rFam();
   toast('Familia <b>'+esc(f)+'</b> añadida. Añade ahora sus medidas.','ok');
 }
 function delFamilia(f){
   const n=reglasDe(f).length;
-  if(!confirm('¿Eliminar la familia '+f+(n?' y sus '+n+' medidas':'')+'?\n\nLos materiales del maestro no se borran, solo dejarán de tener máquina asignada.'))return;
+  if(!confirm('¿Eliminar la familia (redondo) '+f+(n?' y sus '+n+' medidas':'')+'?\n\nLos materiales del maestro no se borran, solo dejarán de tener redondo y máquina.'))return;
   ST.familias=ST.familias.filter(x=>up(x)!==up(f));
   ST.reglas=ST.reglas.filter(r=>up(r.familia)!==up(f));
-  famOpen.delete(f);invalidateRules();save();refreshAll();toast('Familia eliminada','ok');
+  [...famOpen].forEach(k=>{if(k.endsWith('|'+up(f)))famOpen.delete(k);});
+  invalidateRules();save();refreshAll();toast('Familia eliminada','ok');
 }
 
 /* ---------- Medidas (reglas) ---------- */
-function editMedida(id,fam,pre){
+function editMedida(id,fam,pre,mqCtx){
   const r=id?ST.reglas.find(x=>x.id===id):null;
   document.getElementById('mMedTit').textContent=r?'✏️ Editar medida':'➕ Añadir medida';
   document.getElementById('mMedId').value=r?r.id:'';
@@ -1125,7 +1298,8 @@ function editMedida(id,fam,pre){
   document.getElementById('mMedEmin').value=r?(r.espMin==null?'':r.espMin):(pre&&pre.min!=null?pre.min:'');
   document.getElementById('mMedEmax').value=r?(r.espMax==null?'':r.espMax):(pre&&pre.max!=null?pre.max:'');
   document.getElementById('dlFam3').innerHTML=uniqSort(FAM_BASE.concat(famAll())).map(f=>'<option value="'+esc(f)+'">').join('');
-  const sel=(r&&r.maquinas)||[];
+  const ctx=mqCtx&&mqCtx!==SINMAQ?mqCtx:(famMaqCtx||'');
+  const sel=r?(r.maquinas||[]):(ctx?[ctx]:[]);
   document.getElementById('mMedMaq').innerHTML=ST.maquinas.map(m=>
     '<label><input type="checkbox" value="'+esc(m)+'"'+(sel.indexOf(m)>=0?' checked':'')+'>'+esc(m)+'</label>').join('')
     +'<label style="border-style:dashed;justify-content:center" onclick="clM(\'modalMed\');openMaquinas()">➕ gestionar</label>';
@@ -1138,21 +1312,22 @@ function saveMedida(){
   const fam=up(document.getElementById('mMedFam').value);
   const ancho=num(document.getElementById('mMedAnc').value),alto=num(document.getElementById('mMedAlt').value);
   const eMin=num(document.getElementById('mMedEmin').value),eMax=num(document.getElementById('mMedEmax').value);
-  if(!fam){toast('Indica la familia','err');return;}
+  if(!fam){toast('Indica la familia (redondo)','err');return;}
   if(ancho==null){toast('El ancho es obligatorio','err');return;}
   if(eMin!=null&&eMax!=null&&eMin>eMax){toast('El espesor mínimo no puede ser mayor que el máximo','err');return;}
   const medida=medidaOf(ancho,alto);
   const maquinas=[...document.querySelectorAll('#mMedMaq input:checked')].map(c=>c.value);
   const id=document.getElementById('mMedId').value;
-  const solapa=ST.reglas.find(r=>r.id!==id&&up(r.familia)===fam&&medKey(r.medida)===medKey(medida)&&
+  const solapa=ST.reglas.find(r=>r.id!==id&&medKey(r.medida)===medKey(medida)&&
     (eMin==null||r.espMax==null||eMin<=r.espMax)&&(eMax==null||r.espMin==null||eMax>=r.espMin));
-  if(solapa&&!confirm('Ya existe una regla para '+fam+' '+medida+' con un rango de espesor que se solapa ('+numTxt(solapa.espMin)+'–'+numTxt(solapa.espMax)+' mm).\n\nSe aplicará la primera regla que encaje. ¿Guardar igualmente?'))return;
+  if(solapa&&!confirm('Ya existe una regla para la medida '+medida+' en la familia '+solapa.familia+' con un rango de espesor que se solapa ('+numTxt(solapa.espMin)+'–'+numTxt(solapa.espMax)+' mm).\n\nUn material solo puede tener un redondo: se aplicará la primera regla que encaje. ¿Guardar igualmente?'))return;
   const o={familia:fam,medida:medida,ancho:ancho,alto:alto,espMin:eMin,espMax:eMax,maquinas:maquinas};
   if(id)Object.assign(ST.reglas.find(r=>r.id===id),o);
   else{o.id=uid();ST.reglas.push(o);}
   if(ST.familias.indexOf(fam)<0)ST.familias.push(fam);
-  famOpen.add(fam);invalidateRules();save();clM('modalMed');refreshAll();
-  toast(id?'Medida actualizada':'Medida <b>'+esc(medida)+'</b> añadida a '+esc(fam),'ok');
+  (maquinas.length?maquinas:[SINMAQ]).forEach(mq=>{maqOpen.add(mq);famOpen.add(mq+'|'+fam);});
+  invalidateRules();save();clM('modalMed');refreshAll();
+  toast(id?'Medida actualizada':'Medida <b>'+esc(medida)+'</b> añadida al redondo '+esc(fam),'ok');
 }
 function delMedida(id){
   const r=ST.reglas.find(x=>x.id===id);if(!r)return;
@@ -1167,33 +1342,13 @@ function setEsp(id,campo,val){
   r[campo]=v;invalidateRules();save();refreshAll();
 }
 
-function autoGenFamilias(){
-  if(!ST.materiales.length){toast('Carga primero el maestro de materiales','warn');return;}
-  const g={};
-  ST.materiales.forEach(m=>{
-    const fam=up(m.familia);if(!fam)return;
-    const med=m.medida||medidaOf(m.ancho,m.alto);if(!med)return;
-    const k=fam+'|'+medKey(med);const e=num(m.espesor);
-    if(!g[k])g[k]={familia:fam,medida:med,ancho:num(m.ancho),alto:num(m.alto),min:e,max:e};
-    if(e!=null){g[k].min=g[k].min==null?e:Math.min(g[k].min,e);g[k].max=g[k].max==null?e:Math.max(g[k].max,e);}
-  });
-  let add=0,skip=0;
-  Object.values(g).forEach(x=>{
-    if(ST.reglas.some(r=>up(r.familia)===x.familia&&medKey(r.medida)===medKey(x.medida))){skip++;return;}
-    ST.reglas.push({id:uid(),familia:x.familia,medida:x.medida,ancho:x.ancho,alto:x.alto,espMin:x.min,espMax:x.max,maquinas:[]});
-    if(ST.familias.indexOf(x.familia)<0)ST.familias.push(x.familia);
-    add++;
-  });
-  invalidateRules();save();refreshAll();
-  toast('🔄 <b>'+add+'</b> medidas creadas desde el maestro'+(skip?' ('+skip+' ya existían)':'')+'. Asigna ahora las máquinas.','ok',6000);
-}
 function clearFamilias(){
   if(!ST.reglas.length){toast('No hay reglas que borrar','warn');return;}
   if(!confirm('Se eliminarán las '+ST.reglas.length+' reglas de familia/medida. ¿Continuar?'))return;
   ST.reglas=[];invalidateRules();save();refreshAll();toast('Reglas eliminadas','ok');
 }
 function exportFamilias(){
-  dlRows(ST.reglas.map(r=>({'Familia':r.familia,'Medida':r.medida,'Ancho':r.ancho,'Alto':r.alto,
+  dlRows(ST.reglas.map(r=>({'Familia (redondo)':r.familia,'Medida':r.medida,'Ancho':r.ancho,'Alto':r.alto,
     'Espesor mínimo':r.espMin,'Espesor máximo':r.espMax,'Máquina':(r.maquinas||[]).join(', '),'Materiales':matsDeRegla(r)})),
     'Familias_Materiales_AGSA.xlsx','Familias');
 }
@@ -1225,10 +1380,11 @@ function delMaquina(m){
 /* ============================================================
    PANTALLA · PEDIDOS DE VENTA
    ============================================================ */
-function famOfPed(p){const m=matOf(p.material);return m?up(m.familia):'';}
-function medOfPed(p){const m=matOf(p.material);return m?(m.medida||medidaOf(m.ancho,m.alto)):'';}
+function famOfPed(p){const m=matOf(p.material);return m?famOf(m):'';}
+function tipoOfPed(p){const m=matOf(p.material);return m?up(m.tipo):'';}
+function medOfPed(p){const m=matOf(p.material);return m?medOf(m):'';}
 function maqOfPed(p){const m=matOf(p.material);return m?maqOf(m):[];}
-function desOfPed(p){const m=matOf(p.material);return p.descripcion||(m?m.descripcion:'');}
+function desOfPed(p){const m=matOf(p.material);return p.descripcion||(m?m.nombre:'');}
 
 const PED_COLS=[
   {k:'pedido',l:'Pedido',g:p=>p.pedido},
@@ -1236,7 +1392,8 @@ const PED_COLS=[
   {k:'cliente',l:'Cliente',g:p=>p.cliente},
   {k:'material',l:'Material',g:p=>p.material},
   {k:'descripcion',l:'Descripción',g:p=>desOfPed(p)},
-  {k:'familia',l:'Familia',g:p=>famOfPed(p),r:p=>famOfPed(p)?'<span class="b bl">'+esc(famOfPed(p))+'</span>':'—'},
+  {k:'tipo',l:'Tipo',g:p=>tipoOfPed(p),r:p=>tipoOfPed(p)?'<span class="b bl">'+esc(tipoOfPed(p))+'</span>':'—'},
+  {k:'familia',l:'Familia · redondo',g:p=>famOfPed(p),r:p=>famOfPed(p)?'<span class="b g">'+esc(famOfPed(p))+'</span>':'—'},
   {k:'medida',l:'Medida',g:p=>medOfPed(p)},
   {k:'cantidad',l:'Cantidad',n:1,d:0,g:p=>p.cantidad},
   {k:'um',l:'UM',g:p=>p.um},
@@ -1347,7 +1504,7 @@ function clearPedidos(){
 }
 function exportPedidos(){
   dlRows(pedFiltrados().map(p=>({'Pedido':p.pedido,'Posición':p.pos,'Cliente':p.cliente,'Material':p.material,
-    'Descripción':desOfPed(p),'Familia':famOfPed(p),'Medida':medOfPed(p),'Cantidad':p.cantidad,'UM':p.um,
+    'Descripción':desOfPed(p),'Tipo':tipoOfPed(p),'Familia (redondo)':famOfPed(p),'Medida':medOfPed(p),'Cantidad':p.cantidad,'UM':p.um,
     'Precio':p.precio,'Importe':p.importe,'Fecha creación':p.fCrea,'Año_Mes creación':ym(p.fCrea),
     'Fecha entrega':p.fEnt,'Año_Mes entrega':ym(p.fEnt),'Acabado':efect(p,'acabado').v,'Calidad':efect(p,'calidad').v,
     'Máquina':maqOfPed(p).join(', '),'Estado':p.estado})),'Pedidos_Venta_AGSA.xlsx','Pedidos');
@@ -1378,6 +1535,7 @@ function anaFiltrados(){
   const eje=document.getElementById('aEje').value,
         d=document.getElementById('aDesde').value,h=document.getElementById('aHasta').value,
         cli=document.getElementById('aCli').value,fam=document.getElementById('aFam').value,
+        tipo=document.getElementById('aTipo').value,
         cal=document.getElementById('aCal').value,aca=document.getElementById('aAca').value;
   return ST.pedidos.filter(p=>{
     const m=ym(p[eje]);
@@ -1386,6 +1544,7 @@ function anaFiltrados(){
     if(h&&m>h)return false;
     if(cli&&p.cliente!==cli)return false;
     if(fam&&famOfPed(p)!==fam)return false;
+    if(tipo&&tipoOfPed(p)!==tipo)return false;
     if(cal&&efect(p,'calidad').v!==cal)return false;
     if(aca&&efect(p,'acabado').v!==aca)return false;
     return true;
@@ -1429,6 +1588,7 @@ function rAna(){
   const meses=uniqSort(ST.pedidos.map(p=>ym(p[eje])));
   fillSelect('aDesde',meses,'(desde el principio)');fillSelect('aHasta',meses,'(hasta el final)');
   fillSelect('aCli',uniqSort(ST.pedidos.map(p=>p.cliente)),'(todos los clientes)');
+  fillSelect('aTipo',uniqSort(ST.pedidos.map(p=>tipoOfPed(p))),'(todos los tipos)');
   fillSelect('aFam',uniqSort(ST.pedidos.map(p=>famOfPed(p))),'(todas las familias)');
   fillSelect('aCal',uniqSort(ST.pedidos.map(p=>efect(p,'calidad').v)),'(todas las calidades)');
   fillSelect('aAca',uniqSort(ST.pedidos.map(p=>efect(p,'acabado').v)),'(todos los acabados)');
@@ -1458,7 +1618,7 @@ function rAna(){
     ['chEvol','chCli','chFam','chCal','chAca','chABC'].forEach(destroyChart);
     document.querySelector('#tABCres tbody').innerHTML='<tr><td colspan="6" class="empty">Sin datos</td></tr>';
     document.querySelector('#tABCcli tbody').innerHTML='<tr><td colspan="6" class="empty">Sin datos</td></tr>';
-    document.querySelector('#tAnaMat tbody').innerHTML='<tr><td colspan="14" class="empty">'+(ST.pedidos.length?'Ninguna línea coincide con los filtros.':'Carga primero los pedidos de venta.')+'</td></tr>';
+    document.querySelector('#tAnaMat tbody').innerHTML='<tr><td colspan="15" class="empty">'+(ST.pedidos.length?'Ninguna línea coincide con los filtros.':'Carga primero los pedidos de venta.')+'</td></tr>';
     document.getElementById('kAnA').textContent='0';document.getElementById('kAnAPct').textContent='— % de la facturación';
     return;
   }
@@ -1479,9 +1639,9 @@ function rAna(){
       data:top.map(x=>met==='imp'?x.imp:x.kg),backgroundColor:SERIES[0],borderRadius:4,borderWidth:2,borderColor:'#fff',barPercentage:.8}]},
     options:baseOpts({horizontal:true,legend:false,tooltip:v=>fmtMet(v)})});
 
-  // ---- Familias (donut) — color estable por entidad
-  const catFam=uniqSort(ST.pedidos.map(p=>famOfPed(p)||'(sin dato)'));
-  donut('chFam',group(list,p=>famOfPed(p)),catFam,met);
+  // ---- Tipos de material (donut) — color estable por entidad
+  const catTipo=uniqSort(ST.pedidos.map(p=>tipoOfPed(p)||'(sin dato)'));
+  donut('chFam',group(list,p=>tipoOfPed(p)),catTipo,met);
   // ---- Acabados (donut)
   const catAca=uniqSort(ST.pedidos.map(p=>efect(p,'acabado').v||'(sin dato)'));
   donut('chAca',group(list,p=>efect(p,'acabado').v),catAca,met);
@@ -1525,9 +1685,10 @@ function rAna(){
   // Detalle materiales
   document.querySelector('#tAnaMat tbody').innerHTML=mats.arr.slice(0,80).map(x=>{
     const m=matOf(x.k),es=estrategia(x,nMeses);
-    return '<tr><td><b>'+esc(x.k)+'</b></td><td>'+esc(m?m.descripcion:'—')+'</td>'+
-      '<td>'+(m&&m.familia?'<span class="b bl">'+esc(m.familia)+'</span>':'—')+'</td>'+
-      '<td>'+esc(m?(m.medida||''):'')+'</td><td>'+(m?chipsMaq(maqOf(m)):'—')+'</td>'+
+    return '<tr><td><b>'+esc(x.k)+'</b></td><td>'+esc(m?m.nombre:'—')+'</td>'+
+      '<td>'+(m&&m.tipo?'<span class="b bl">'+esc(m.tipo)+'</span>':'—')+'</td>'+
+      '<td>'+(m&&famOf(m)?'<span class="b g">'+esc(famOf(m))+'</span>':'—')+'</td>'+
+      '<td>'+esc(m?medOf(m):'')+'</td><td>'+(m?chipsMaq(maqOf(m)):'—')+'</td>'+
       '<td class="num">'+(met==='imp'?fmtE(x.imp):fmtN(x.kg))+'</td><td class="num">'+fmtN(x.cum,1)+' %</td>'+
       '<td><span class="b '+x.clase+'">'+x.clase+'</span></td><td class="num">'+fmtN(x.kg)+'</td>'+
       '<td class="num">'+(x.kg?fmtN(x.imp/x.kg,3):'—')+'</td><td class="num">'+x.pedidos.size+'</td>'+
@@ -1564,7 +1725,7 @@ function baseOpts(o){
           callback:function(v){return o.horizontal?this.getLabelForValue(v):fmtMetK(v);}},border:{color:GRID}}}};
 }
 function clearAnaFilters(){
-  ['aDesde','aHasta','aCli','aFam','aCal','aAca'].forEach(i=>document.getElementById(i).value='');
+  ['aDesde','aHasta','aCli','aTipo','aFam','aCal','aAca'].forEach(i=>document.getElementById(i).value='');
   rAna();
 }
 
@@ -1575,7 +1736,7 @@ function rInicio(){
   document.getElementById('kInMat').textContent=fmtN(ST.materiales.length);
   document.getElementById('kInFam').textContent=fmtN(ST.reglas.length);
   document.getElementById('kInPed').textContent=fmtN(ST.pedidos.length);
-  document.getElementById('kInSin').textContent=fmtN(ST.materiales.filter(m=>!maqOf(m).length).length);
+  document.getElementById('kInSin').textContent=fmtN(ST.materiales.filter(m=>!famOf(m)).length);
   lsInfo();
 }
 
@@ -1585,33 +1746,65 @@ function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.i
 function loadDemo(){
   const R=rng(20260915);
   const pick=a=>a[Math.floor(R()*a.length)];
-  const defs=[
-    {fam:'TUBO',med:[[40,20],[50,30],[60,40],[80,40],[100,50],[120,60]],esp:[1.5,2,2.5,3],lon:6000,cal:['S235JR','S275JR'],aca:['NEGRO','GALVANIZADO','PINTADO'],maq:[['T1','T2'],['T1','T2'],['T3','T4'],['T3','T4'],['T5','T6'],['T5','T6']]},
-    {fam:'CHAPA',med:[[1000,2000],[1250,2500],[1500,3000]],esp:[2,3,4,5,6],lon:null,cal:['S235JR','S355JR','DX51D'],aca:['DECAPADO','NEGRO','GALVANIZADO'],maq:[['T7'],['T7'],['T7','T8']]},
-    {fam:'FLEJE',med:[[200,null],[300,null],[400,null]],esp:[1,1.5,2,2.5],lon:null,cal:['DX51D','S235JR'],aca:['GALVANIZADO','NEGRO'],maq:[['T1'],['T2'],['T3']]},
-    {fam:'PERFIL',med:[[60,60],[80,80],[100,100]],esp:[2,3,4],lon:6000,cal:['S275JR','S355JR'],aca:['NEGRO','PINTADO'],maq:[['T5'],['T6'],['T6']]},
-    {fam:'BOBINA',med:[[1000,null],[1250,null],[1500,null]],esp:[1.5,2,3],lon:null,cal:['DX51D','S235JR'],aca:['GALVANIZADO','DECAPADO'],maq:[['T8'],['T8'],['T7','T8']]}
-  ];
-  const mats=[],reglas=[],fams=[];
-  defs.forEach(d=>{
-    fams.push(d.fam);
-    d.med.forEach((md,i)=>{
-      const medida=medidaOf(md[0],md[1]);
-      reglas.push({id:uid(),familia:d.fam,medida:medida,ancho:md[0],alto:md[1],espMin:d.esp[0],espMax:d.esp[d.esp.length-1],maquinas:d.maq[i].slice()});
-      d.esp.forEach(e=>{
-        const cod=d.fam.slice(0,3)+'-'+String(md[0])+(md[1]?'x'+md[1]:'')+'-'+String(e).replace('.',',');
-        const per=(md[1]?2*(md[0]+md[1]):md[0])*e*7.85/1000000*1000; // kg/m aprox.
-        mats.push({id:uid(),codigo:cod,descripcion:d.fam.charAt(0)+d.fam.slice(1).toLowerCase()+' '+medida+' e='+String(e).replace('.',',')+' mm',
-          familia:d.fam,ancho:md[0],alto:md[1],medida:medida,espesor:e,longitud:d.lon,
-          calidad:pick(d.cal),acabado:pick(d.aca),peso:Math.round(per*100)/100,proveedor:pick(['ArcelorMittal','Megasa','Celsa','Acerinox'])});
-      });
+  // 1) Catálogo real de redondos (medidas sin espesor ni máquina)
+  ST.familias=[];ST.reglas=[];ST.maquinas=MAQ_BASE.slice();
+  cargarCatalogo(true);
+  // 2) Máquina por diámetro (en la herramienta se asigna a mano); ~15 % se dejan pendientes
+  const maqDe=d=>d<=25?['TUBOS_08']:d<=45?['TUBOS_16']:d<=76?['TUBOS_17']:d<=113?['TUBOS_20']:['TUBOS_28'];
+  ST.reglas.forEach(r=>{
+    r.maquinas=R()<.15?[]:maqDe(diam(r.familia));
+    if(r.maquinas.length&&R()<.2){r.espMin=1;r.espMax=4;}   // algunas medidas acotan el espesor
+  });
+  invalidateRules();
+  // 3) Maestro de materiales
+  const OPC={
+    color:['NEGRO','GRIS','BLANCO','SIN PINTAR'],
+    acabado:['NEGRO','GALVANIZADO','PINTADO','DECAPADO'],
+    calidad:['S235JR','S275JR','S355JR','DX51D'],
+    calidadTubo:['S235JR','S275JR','S355JR'],
+    recub:['NINGUNO','Z275','PINTURA','IMPRIMACION'],
+    galv:['Z140','Z200','Z275','NO APLICA'],
+    variante:['ESTANDAR','ESPECIAL'],clasif:['ESTRUCTURAL','DECORATIVO','INDUSTRIAL'],
+    abc:['A','B','C'],estr:['MTS','ATO','MTO']
+  };
+  const catMed=[];CAT_FAMILIAS.forEach(row=>row.slice(1).forEach(m=>catMed.push(m)));
+  const tubos=[],usadas={};
+  while(tubos.length<45){const m=pick(catMed);if(usadas[m])continue;usadas[m]=1;tubos.push(m);}
+  const mats=[];
+  const nuevo=(tipo,anc,alt,esp,largo)=>{
+    const medida=medidaOf(anc,alt);
+    const acaD=pick(OPC.acabado),calD=pick(OPC.calidad),calTD=pick(OPC.calidadTubo),recD=pick(OPC.recub),galD=pick(OPC.galv);
+    mats.push({id:uid(),tipo:tipo,codigo:tipo.slice(0,3)+'-'+medida+'-'+String(esp).replace('.',','),
+      nombre:tipo.charAt(0)+tipo.slice(1).toLowerCase()+' '+medida+' e='+String(esp).replace('.',',')+' mm',
+      forma:tipo==='TUBO'?(!alt?'REDONDO':(alt===anc?'CUADRADO':'RECTANGULAR')):'',
+      ancho:anc,alto:alt||null,espesor:esp,largo:largo,
+      color:pick(OPC.color),
+      acabadoDef:acaD,acabadoInt:pick(OPC.acabado.filter(x=>x!==acaD)),
+      calidadDef:calD,calidadInt:pick(OPC.calidad.filter(x=>x!==calD)),
+      calidadTuboDef:calTD,calidadTuboInt:pick(OPC.calidadTubo.filter(x=>x!==calTD)),
+      recubDef:recD,recubInt:pick(OPC.recub.filter(x=>x!==recD)),
+      galvDef:galD,galvInt:pick(OPC.galv.filter(x=>x!==galD)),
+      udsPaquete:10*(2+Math.floor(R()*7)),
+      variante:pick(OPC.variante),clasificacion:pick(OPC.clasif),abc:pick(OPC.abc),estrategia:pick(OPC.estr)});
+  };
+  tubos.forEach(med=>{
+    const n=med.split('_').map(parseFloat);
+    [1.5,2,2.5,3].filter(()=>R()<.7).concat([2]).slice(0,3).forEach(e=>{
+      if(!mats.some(m=>m.ancho===n[0]&&m.alto===(n[1]||null)&&m.espesor===e))nuevo('TUBO',n[0],n[1],e,6000);
     });
   });
+  // Perfiles: unos con redondo del catálogo y otros sin él
+  [[80,80],[90,90]].forEach(md=>[3,4].forEach(e=>nuevo('PERFIL',md[0],md[1],e,6000)));
+  [[110,110],[130,130]].forEach(md=>[3,4].forEach(e=>nuevo('PERFIL',md[0],md[1],e,6000)));
+  // Chapa, fleje y bobina: por ahora sin redondo
+  [[1000,2000],[1250,2500],[1500,3000]].forEach(md=>[2,3,4,5].forEach(e=>nuevo('CHAPA',md[0],md[1],e,null)));
+  [[200,0],[300,0],[400,0]].forEach(md=>[1,1.5,2].forEach(e=>nuevo('FLEJE',md[0],md[1],e,null)));
+  [[1000,0],[1250,0],[1500,0]].forEach(md=>[1.5,2,3].forEach(e=>nuevo('BOBINA',md[0],md[1],e,null)));
+  // 4) Pedidos de venta (18 meses, demanda concentrada tipo Pareto)
   const clientes=['METALURGIA DEL NORTE S.L.','TALLERES ARANDA S.A.','ESTRUCTURAS VEGA','CARPINTERIA METALICA LUZ','INDUSTRIAS BERGARA',
     'MOBILIARIO URBANO SUR','AGRICOLA CAMPOS S.L.','NAVES Y CUBIERTAS S.A.','AUTOMOCION DELTA','FERRETERIA MAYORISTA RIOS',
     'CONSTRUCCIONES OLMO','TUBOS Y PERFILES LEVANTE'];
-  // Pesos de rotación: unos pocos materiales concentran la mayor parte de la demanda (Pareto)
-  const pesos=mats.map((m,i)=>i<8?18:i<22?7:i<45?3:1);
+  const pesos=mats.map((m,i)=>i<10?18:i<28?7:i<60?3:1);
   const acum=[];let tp=0;pesos.forEach(p=>{tp+=p;acum.push(tp);});
   const pickMat=()=>{const r=R()*tp;return mats[acum.findIndex(a=>a>r)];};
   const hoy=new Date(),peds=[];let nped=100000;
@@ -1622,29 +1815,28 @@ function loadDemo(){
       nped++;
       const cli=pick(clientes),dia=1+Math.floor(R()*28);
       const fc=new Date(base.getFullYear(),base.getMonth(),dia);
-      const nl=1+Math.floor(R()*3);
-      for(let l=0;l<nl;l++){
-        const m=pickMat();
+      for(let l=0,nl=1+Math.floor(R()*3);l<nl;l++){
+        const m=pickMat();if(!m)continue;
         const fe=new Date(fc.getTime()+(10+Math.floor(R()*60))*86400000);
         const cant=Math.round((500+R()*22000)/50)*50;
-        const precio=Math.round((.72+R()*.75+(m.familia==='TUBO'?.08:0))*1000)/1000;
+        const precio=Math.round((.72+R()*.75+(m.tipo==='TUBO'?.08:0))*1000)/1000;
         peds.push({id:uid(),pedido:'PV-'+nped,pos:String((l+1)*10),cliente:cli,clienteCod:'C'+p2(clientes.indexOf(cli)+1),
-          material:m.codigo,descripcion:m.descripcion,cantidad:cant,um:'KG',precio:precio,importe:Math.round(cant*precio*100)/100,
+          material:m.codigo,descripcion:m.nombre,cantidad:cant,um:'KG',precio:precio,importe:Math.round(cant*precio*100)/100,
           fCrea:isoOf(new Date(Date.UTC(fc.getFullYear(),fc.getMonth(),fc.getDate()))),
           fEnt:isoOf(new Date(Date.UTC(fe.getFullYear(),fe.getMonth(),fe.getDate()))),
-          acabado:R()<.35?pick(defs.find(d=>d.fam===m.familia).aca):'',
-          calidad:R()<.3?pick(defs.find(d=>d.fam===m.familia).cal):'',
+          acabado:R()<.35?pick(OPC.acabado):'',calidad:R()<.3?pick(OPC.calidad):'',
           estado:R()<.72?'Abierto':'Servido'});
       }
     }
   }
-  ST.materiales=mats;ST.reglas=reglas;ST.familias=fams;ST.pedidos=peds;ST.maquinas=MAQ_BASE.slice();
+  ST.materiales=mats;ST.pedidos=peds;
   invalidateMat();save();refreshAll();
-  toast('🎭 Datos demo cargados: <b>'+mats.length+'</b> materiales, <b>'+reglas.length+'</b> reglas y <b>'+peds.length.toLocaleString('es-ES')+'</b> líneas de pedido','ok',6000);
+  toast('🎭 Datos demo: <b>'+mats.length+'</b> materiales, <b>'+ST.familias.length+'</b> redondos, <b>'+ST.reglas.length+'</b> medidas y <b>'+peds.length.toLocaleString('es-ES')+'</b> líneas de pedido','ok',6000);
 }
 
 /* ---------- Arranque ---------- */
 load();
+if(!ST.reglas.length&&!ST.familias.length&&!ST.materiales.length)cargarCatalogo(true);
 rInicio();rMat();rFam();rPed();rAna();
 </script>
 </body>

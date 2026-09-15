@@ -60,7 +60,7 @@ th.stk{left:0;z-index:7;}
 td.stk{position:sticky;left:0;background:var(--card);z-index:3;box-shadow:1px 0 0 var(--border);font-weight:600;}
 tbody tr:hover td.stk{background:#eaf7fd;}
 #mMatForm input[hidden]{display:none;}
-tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);position:sticky;bottom:0;}
+tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);position:sticky;bottom:0;z-index:6;}
 .empty{padding:40px;text-align:center;color:var(--tl);font-size:13px;}
 .dflt{color:var(--accent2);font-style:italic;}
 /* ---------- Badges / chips ---------- */
@@ -120,6 +120,15 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
 .mtx td,.mtx th{text-align:center;}
 .mtx td:first-child,.mtx th:first-child{text-align:left;}
 .mtx tfoot td{font-weight:700;background:#f8f9fa;}
+tbody tr.pend td{background:#fffbeb;}
+tbody tr.pend td.stk{background:#fff5d6;}
+.confsel{padding:3px 5px;border:1px solid var(--border);border-radius:5px;font-size:11px;background:#fff;}
+.confsel.man{border-color:var(--warning);font-weight:700;}
+.umb{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.umb .u{border:1px solid var(--border);border-radius:9px;padding:12px 14px;background:#fbfcfd;}
+.umb .u .ul{font-size:11px;color:var(--tl);text-transform:uppercase;letter-spacing:.5px;}
+.umb .u .uv{font-size:22px;font-weight:700;color:var(--primary);margin-top:4px;}
+.umb .u .us{font-size:11px;color:var(--tl);margin-top:3px;}
 .espin{width:64px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;font-size:11px;text-align:right;}
 /* ---------- Modales ---------- */
 .mo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
@@ -165,6 +174,8 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
   <div class="st">Inputs Ventas</div>
   <div class="ni sub" id="nav-pedidos" onclick="nav('pedidos',this)">📋 Pedidos de Venta</div>
   <div class="ni sub" id="nav-analisis" onclick="nav('analisis',this)">📈 Análisis Ventas</div>
+  <div class="st">Output ABC / Estrategias</div>
+  <div class="ni sub" id="nav-mmpp" onclick="nav('mmpp',this)">🧪 Cálculos MMPP</div>
   <div class="foot">Datos guardados en este navegador<br><span id="lsInfo">—</span></div>
 </div>
 
@@ -199,6 +210,7 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
         <li><b>Parametrización ABC</b> → umbrales de las clases A/B/C y a/b/c y las tres variables que definen si una materia prima es estándar (1) o no (0).</li>
         <li><b>Pedidos de Venta</b> → carga masiva del Excel de pedidos y filtra por cliente, año-mes, material, acabado y calidad.</li>
         <li><b>Análisis Ventas</b> → gráficos de ventas/facturación y clasificación ABC de materiales y clientes.</li>
+        <li><b>Cálculos MMPP</b> (Output ABC / Estrategias) → estandarización de cada materia prima con los umbrales parametrizados y confirmación manual.</li>
       </ol>
       <div class="toolbar" style="margin-top:14px;margin-bottom:0">
         <button class="btn bp" onclick="nav('materiales',document.getElementById('nav-materiales'))">Ir al Maestro de Materiales →</button>
@@ -319,17 +331,9 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
     <h3>🧪 Estandarización MMPP</h3>
     <div class="sub">Una materia prima es <b>estándar (1)</b> cuando <b>supera las tres variables</b>; si falla alguna, es <b>no estándar (0)</b>.
       El valor por defecto de cada variable es el percentil indicado, calculado con los pedidos cargados, pero puede fijarse a mano.</div>
-    <div class="fl" style="margin-bottom:14px">
-      <div class="fg"><label>Agrupación de MMPP (provisional)</label>
-        <select id="pGrupo" onchange="setP('mmpp.grupo',this.value)">
-          <option value="redondo_esp">Familia (redondo) + espesor</option>
-          <option value="redondo">Familia (redondo)</option>
-          <option value="redondo_esp_cal">Familia (redondo) + espesor + calidad</option>
-        </select></div>
-      <div class="fg" style="flex:1;min-width:280px"><label>&nbsp;</label>
-        <div class="phelp" style="margin:0">Hasta que exista la pantalla de materias primas, la MMPP se identifica con esta agrupación.
-          Los materiales sin redondo (chapa, fleje, bobina) se agrupan por tipo y medida.</div></div>
-    </div>
+    <div class="info-bar" style="background:linear-gradient(90deg,#1b2838,#0077b6)">🔗 <strong>Cada materia prima se identifica con</strong>
+      <span class="chip" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)">AcabadoDefecto_Espesor_CalidadDefecto_RecubrimientoDefecto</span>
+      <span style="opacity:.8;font-size:11px">tomado del maestro de materiales · el detalle y las confirmaciones manuales están en <b>Cálculos MMPP</b></span></div>
     <div id="pMMPP"></div>
     <div id="pMMPPPrev" style="margin-top:18px"></div>
   </div>
@@ -343,7 +347,7 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
     <button class="btn bo" onclick="tplPedidos()">📥 Plantilla Excel</button>
     <button class="btn bo" onclick="exportPedidos()">📤 Exportar vista</button>
     <button class="btn bd bsm" onclick="clearPedidos()">🗑️ Vaciar pedidos</button>
-    <span style="font-size:11px;color:var(--tl);margin-left:auto">Acabado y calidad vacíos se completan con el <b>valor por defecto del material</b> <span class="dflt">(en cursiva)</span></span>
+    <span style="font-size:11px;color:var(--tl);margin-left:auto">Las columnas ⚙ se toman del <b>maestro de materiales</b> a partir del <b>Codigo Material</b></span>
   </div>
   <div class="kg">
     <div class="kc"><div class="kl">Líneas</div><div class="kv" id="kPedLin">0</div><div class="ks" id="kPedLinTot">de 0 cargadas</div></div>
@@ -460,6 +464,41 @@ tfoot td{background:#f8f9fa;font-weight:700;border-top:2px solid var(--primary);
       <th>Clase</th><th class="num">Kg</th><th class="num">€/kg</th><th class="num">Pedidos</th><th class="num">Clientes</th><th class="num">Meses con demanda</th><th>Estrategia sugerida</th>
     </tr></thead><tbody></tbody></table></div>
     <div class="note">La <b>estrategia sugerida</b> es una primera orientación a partir de clase ABC y regularidad de la demanda (meses con demanda sobre el periodo filtrado). La pantalla definitiva de cálculo MTS / ATO / MTO se construirá sobre estos mismos datos.</div>
+  </div>
+</div>
+
+<!-- ===================== CÁLCULOS MMPP ===================== -->
+<div class="pg" id="p-mmpp">
+  <div class="toolbar">
+    <button class="btn bp" onclick="recalcMMPP()">🔄 Recalcular ABC MMPP</button>
+    <button class="btn bs" onclick="guardarConf()">💾 Guardar confirmaciones</button>
+    <button class="btn bo" onclick="descartarConf()">↩️ Descartar cambios</button>
+    <button class="btn bo" onclick="exportMMPP()">📤 Exportar</button>
+    <button class="btn bo" onclick="nav('param',document.getElementById('nav-param'))">🎚️ Ver parámetros</button>
+    <span id="mmppFecha" style="font-size:11px;color:var(--tl);margin-left:auto"></span>
+  </div>
+  <div id="mmppAviso"></div>
+  <div class="cd">
+    <h3>📐 Umbrales aplicados <span style="font-size:11px;font-weight:400;color:var(--tl)">· percentiles de Parametrización ABC o el valor fijado a mano</span></h3>
+    <div class="sub">Materia prima identificada por <b>AcabadoDefecto_Espesor_CalidadDefecto_RecubrimientoDefecto</b> del maestro de materiales.
+      Es <b>estándar (1)</b> la que supera (≥) los tres umbrales.</div>
+    <div class="umb" id="mmppCab"></div>
+  </div>
+  <div class="kg" id="mmppKpis"></div>
+  <div class="fl">
+    <div class="fg"><label>Tipo de material</label><select id="fMMTipo" onchange="rMMPP()"></select></div>
+    <div class="fg"><label>Resultado</label><select id="fMMRes" onchange="rMMPP()">
+      <option value="">(todos)</option>
+      <option value="1">Solo estándar (1)</option>
+      <option value="0">Solo no estándar (0)</option>
+      <option value="man">Con confirmación manual</option>
+      <option value="dif">Manual distinto del calculado</option></select></div>
+    <div class="fg"><label>Buscar MMPP</label><input type="text" id="fMMQ" placeholder="ej. GALVANIZADO_2_S235JR" oninput="rMMPP()" style="min-width:240px"></div>
+    <div class="fg spacer"><label>&nbsp;</label><button class="btn bo" onclick="document.getElementById('fMMTipo').value='';document.getElementById('fMMRes').value='';document.getElementById('fMMQ').value='';rMMPP()">✖ Limpiar filtros</button></div>
+  </div>
+  <div class="cd" style="padding:14px">
+    <div class="tw"><table id="tMMPP"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+    <div class="pgn" id="pgMMPP"></div>
   </div>
 </div>
 
@@ -608,7 +647,7 @@ const SINMAQ='SIN MÁQUINA';
 
 /** Valores distintos ya presentes en el maestro para un campo (alimentan los desplegables) */
 function valoresDe(k){return uniqSort(ST.materiales.map(m=>up(m[k])));}
-const ST={materiales:[],familias:[],reglas:[],pedidos:[],maquinas:MAQ_BASE.slice(),param:null};
+const ST={materiales:[],familias:[],reglas:[],pedidos:[],maquinas:MAQ_BASE.slice(),param:null,mmppManual:{},mmppCalc:null};
 const LS_KEY='agsa_abc_estrategias_v1';
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
@@ -624,6 +663,7 @@ function load(){
     ST.materiales=o.materiales||[];ST.familias=o.familias||[];ST.reglas=o.reglas||[];
     ST.pedidos=o.pedidos||[];ST.maquinas=(o.maquinas&&o.maquinas.length)?o.maquinas:MAQ_BASE.slice();
     ST.param=o.param||null;PARAM();
+    ST.mmppManual=o.mmppManual||{};ST.mmppCalc=o.mmppCalc||null;
     migra();
   }catch(e){toast('No se pudieron leer los datos guardados: '+e.message,'err');}
 }
@@ -759,7 +799,7 @@ function invalidateMat(){_matIdx=null;invalidateRules();}
 function matOf(cod){return matIndex()[norm(cod)]||null;}
 
 /** Acabado / calidad efectivos de una línea de pedido (valor propio o por defecto del maestro) */
-const DEF_FIELD={acabado:'acabadoDef',calidad:'calidadDef'};
+const DEF_FIELD={acabado:'acabadoDef',calidad:'calidadDef',recub:'recubDef'};
 function efect(p,campo){
   const own=(p[campo]||'').trim();
   if(own)return {v:up(own),def:false};
@@ -769,7 +809,7 @@ function efect(p,campo){
 }
 
 /* ---------- Navegación ---------- */
-const TT={inicio:'Inicio',materiales:'Maestro de Materiales',familias:'Familias de Materiales',param:'Parametrización ABC',pedidos:'Pedidos de Venta',analisis:'Análisis de Ventas'};
+const TT={inicio:'Inicio',materiales:'Maestro de Materiales',familias:'Familias de Materiales',param:'Parametrización ABC',pedidos:'Pedidos de Venta',analisis:'Análisis de Ventas',mmpp:'Cálculos MMPP'};
 function nav(id,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   const p=document.getElementById('p-'+id);if(p)p.classList.add('on');
@@ -782,6 +822,7 @@ function nav(id,el){
   if(id==='param')rParam();
   if(id==='pedidos')rPed();
   if(id==='analisis')rAna();
+  if(id==='mmpp')rMMPP();
   window.scrollTo(0,0);
 }
 function oM(id){document.getElementById(id).classList.add('sh');}
@@ -823,34 +864,35 @@ function importBackup(input){
       ST.materiales=o.materiales||[];ST.familias=o.familias||[];ST.reglas=o.reglas||[];
       ST.pedidos=o.pedidos||[];ST.maquinas=(o.maquinas&&o.maquinas.length)?o.maquinas:MAQ_BASE.slice();
       ST.param=o.param||null;PARAM();
+      ST.mmppManual=o.mmppManual||{};ST.mmppCalc=o.mmppCalc||null;
       invalidateMat();save();refreshAll();toast('Backup restaurado','ok');
     }catch(err){toast('No se pudo leer el backup: '+err.message,'err');}
   };
   fr.readAsText(f);
 }
-function refreshAll(){rInicio();rMat();rFam();rParam();rPed();rAna();lsInfo();}
+function refreshAll(){rInicio();rMat();rFam();rParam();rPed();rAna();rMMPP();lsInfo();}
 
 /* ============================================================
    IMPORTACIÓN DE EXCEL (mapeo de columnas asistido)
    ============================================================ */
 const MAT_FIELDS=MAT_SPEC.map(f=>({k:f.k,l:f.l+(f.req?' *':''),al:f.al}));
-const PED_FIELDS=[
-  {k:'pedido',l:'Nº pedido *',al:['pedido','n pedido','num pedido','numero pedido','no pedido','doc ventas','documento ventas','pedido venta','pedido de venta','pedido cliente','orden venta','ov']},
-  {k:'pos',l:'Posición',al:['posicion','pos','linea','n linea','item','pos pedido']},
-  {k:'cliente',l:'Cliente *',al:['cliente','nombre cliente','cliente nombre','solicitante','deudor','razon social','customer']},
-  {k:'clienteCod',l:'Código cliente',al:['codigo cliente','cod cliente','cliente codigo','n cliente','id cliente']},
-  {k:'material',l:'Material (código) *',al:['material','codigo material','cod material','articulo','codigo articulo','referencia','ref','sku','producto']},
-  {k:'descripcion',l:'Descripción',al:['descripcion','descripcion material','texto breve','denominacion','texto','desc']},
-  {k:'cantidad',l:'Cantidad (kg)',al:['cantidad','cantidad kg','kg','kilos','peso','peso kg','cantidad pedida','cant','qty','unidades']},
-  {k:'um',l:'Unidad',al:['um','unidad','unidad medida','udm','uom']},
-  {k:'precio',l:'Precio (€/kg)',al:['precio','precio unitario','precio kg','precio venta','precio neto','pvp']},
-  {k:'importe',l:'Importe (€)',al:['importe','importe neto','importe total','importe venta','valor neto','facturacion','venta','total','neto']},
-  {k:'fCrea',l:'Fecha creación',al:['fecha creacion','f creacion','fecha de creacion','fecha pedido','fecha alta','creado el','fecha documento','fecha orden']},
-  {k:'fEnt',l:'Fecha entrega',al:['fecha entrega','f entrega','fecha de entrega','fecha entrega prevista','fecha servicio','fecha compromiso','entrega']},
-  {k:'acabado',l:'Acabado',al:['acabado','acabado por defecto','recubrimiento','revestimiento']},
-  {k:'calidad',l:'Calidad',al:['calidad','calidad por defecto','grado']},
-  {k:'estado',l:'Estado',al:['estado','situacion','status','estado pedido']}
+/* Estructura del Excel de pedidos de venta de AGSA.
+   n: numérico · f: fecha · el resto, texto. «Codigo Material» es el enlace con el maestro:
+   de él salen todas las características (tipo, medida, acabado, calidad, recubrimiento, redondo y máquina). */
+const PED_SPEC=[
+  {k:'pedido',l:'Pedido',req:true,al:['pedido','n pedido','num pedido','numero pedido','no pedido','doc ventas','documento ventas','pedido venta','pedido de venta','orden venta','ov']},
+  {k:'pos',l:'Posicion',al:['posicion','pos','linea','n linea','item','pos pedido']},
+  {k:'material',l:'Codigo Material',req:true,al:['codigo material','material','cod material','id material','articulo','codigo articulo','referencia','ref','sku','producto']},
+  {k:'clienteCod',l:'Id_Cliente',al:['id cliente','codigo cliente','cod cliente','cliente codigo','n cliente','deudor','id']},
+  {k:'cliente',l:'Nombre_Cliente',al:['nombre cliente','cliente','razon social','solicitante','customer','nombre del cliente']},
+  {k:'cantidad',l:'Cantidad',n:1,al:['cantidad','cantidad kg','kg','kilos','peso','peso kg','cantidad pedida','cant','qty']},
+  {k:'um',l:'Unidad de medida',al:['unidad de medida','unidad medida','um','unidad','udm','uom']},
+  {k:'importe',l:'Importe',n:1,al:['importe','importe neto','importe total','importe venta','valor neto','facturacion','venta','total','neto']},
+  {k:'fCrea',l:'Fecha Creacion',f:1,al:['fecha creacion','f creacion','fecha de creacion','fecha pedido','fecha alta','creado el','fecha documento']},
+  {k:'fEnt',l:'Fecha Entrega',f:1,al:['fecha entrega','f entrega','fecha de entrega','fecha entrega prevista','fecha servicio','entrega']},
+  {k:'estado',l:'Status Pedido',al:['status pedido','status','estado pedido','estado','situacion']}
 ];
+const PED_FIELDS=PED_SPEC.map(f=>({k:f.k,l:f.l+(f.req?' *':''),al:f.al}));
 
 let IMP={wb:null,target:'mat',rows:[],headers:[],map:{},fields:[]};
 
@@ -917,7 +959,7 @@ function renderImport(){
     ? '<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text)"><input type="checkbox" id="optActualiza" checked> Actualizar los materiales existentes que tengan el mismo <b>código</b> (si se desmarca, se omiten)</label>'
       +'<div style="margin-top:6px">Los materiales importados <b>se añaden</b> a los ya cargados. La <b>medida</b> (ancho × alto), la <b>familia (redondo)</b> y la <b>máquina</b> se calculan con las reglas de <b>Familias de Materiales</b>.</div>'
     : '<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text)"><input type="checkbox" id="optDup" checked> Omitir líneas duplicadas (mismo nº de pedido + posición + material)</label>'
-      +'<div style="margin-top:6px">Si falta el importe se calcula como cantidad × precio (y viceversa). Acabado y calidad vacíos se toman del maestro de materiales.</div>';
+      +'<div style="margin-top:6px">El <b>código de material</b> es el enlace con el maestro: de él se toman tipo, medida, espesor, acabado, calidad, recubrimiento, redondo y máquina. El precio (€/kg) se calcula como importe ÷ cantidad.</div>';
 }
 function setMap(i,v){
   if(v)Object.keys(IMP.map).forEach(k=>{if(IMP.map[k]===v&&+k!==i)delete IMP.map[k];});
@@ -949,14 +991,11 @@ function confirmImport(){
     const claves=new Set(ST.pedidos.map(p=>norm(p.pedido)+'|'+norm(p.pos)+'|'+norm(p.material)));
     let add=0,dup=0,sin=0;
     IMP.rows.forEach(r=>{
-      const p={pedido:txt(get(r,'pedido')),pos:txt(get(r,'pos')),cliente:txt(get(r,'cliente')),clienteCod:txt(get(r,'clienteCod')),
-        material:txt(get(r,'material')),descripcion:txt(get(r,'descripcion')),
-        cantidad:num(get(r,'cantidad')),um:up(get(r,'um'))||'KG',precio:num(get(r,'precio')),importe:num(get(r,'importe')),
-        fCrea:parseFecha(get(r,'fCrea')),fEnt:parseFecha(get(r,'fEnt')),
-        acabado:up(get(r,'acabado')),calidad:up(get(r,'calidad')),estado:txt(get(r,'estado'))};
+      const p={};
+      PED_SPEC.forEach(fd=>{const v=get(r,fd.k);p[fd.k]=fd.n?num(v):(fd.f?parseFecha(v):txt(v));});
+      p.um=up(p.um)||'KG';
       if(!p.pedido&&!p.material&&!p.cliente){sin++;return;}
-      if(p.importe==null&&p.cantidad!=null&&p.precio!=null)p.importe=p.cantidad*p.precio;
-      if(p.precio==null&&p.importe!=null&&p.cantidad)p.precio=p.importe/p.cantidad;
+      p.precio=(p.importe!=null&&p.cantidad)?p.importe/p.cantidad:null;
       const k=norm(p.pedido)+'|'+norm(p.pos)+'|'+norm(p.material);
       if(evitaDup&&claves.has(k)){dup++;return;}
       claves.add(k);p.id=uid();ST.pedidos.push(p);add++;
@@ -984,9 +1023,10 @@ function tplMateriales(){
 }
 function tplPedidos(){
   dlSheet([
-    ['Nº Pedido','Posición','Cliente','Código cliente','Material','Descripción','Cantidad','UM','Precio','Importe','Fecha creación','Fecha entrega','Acabado','Calidad','Estado'],
-    ['PV-100245',10,'METALURGIA DEL NORTE S.L.','C001','TUB-60040-20','Tubo 60x40x2,0',12500,'KG',0.92,11500,'15/01/2026','28/02/2026','NEGRO','S235JR','Abierto'],
-    ['PV-100245',20,'METALURGIA DEL NORTE S.L.','C001','CHA-1500-30','Chapa 1500x3000x3,0',8000,'KG',0.85,6800,'15/01/2026','10/03/2026','','','Abierto']
+    PED_SPEC.map(f=>f.l),
+    ['PV-100245',10,'TUB-60_40-2','C001','METALURGIA DEL NORTE S.L.',12500,'KG',11500,'15/01/2026','28/02/2026','Abierto'],
+    ['PV-100245',20,'TUB-50_50-1,5','C001','METALURGIA DEL NORTE S.L.',8000,'KG',7100,'15/01/2026','10/03/2026','Abierto'],
+    ['PV-100246',10,'TUB-60_40-2','C007','TALLERES ARANDA S.A.',4500,'KG',4210,'17/01/2026','05/03/2026','Servido']
   ],'Plantilla_Pedidos_Venta.xlsx','Pedidos');
   toast('Plantilla descargada','ok');
 }
@@ -1443,7 +1483,7 @@ function delMaquina(m){
 const PARAM_DEF={
   abcVol:{A:80,B:95,metrica:'imp'},
   abcPed:{c:3,b:12},
-  mmpp:{grupo:'redondo_esp',peso:{pct:70,valor:null},pos:{pct:70,valor:null},cli:{pct:70,valor:null}}
+  mmpp:{peso:{pct:70,valor:null},pos:{pct:70,valor:null},cli:{pct:70,valor:null}}
 };
 const MMPP_VARS=[
   {k:'peso',l:'Peso de los pedidos',u:'kg',d:0,h:'Kilos totales de los pedidos que tiran de esa materia prima'},
@@ -1477,25 +1517,28 @@ function percentil(arr,p){
   return lo===hi?a[lo]:a[lo]+(a[hi]-a[lo])*(pos-lo);
 }
 
-/** Clave provisional de materia prima a partir del material */
-function mmppKeyOf(m,modo){
-  const base=famOf(m)||(up(m.tipo)+' '+medOf(m));
-  if(modo==='redondo')return base;
-  const esp=num(m.espesor);
-  const k=base+' · e'+(esp==null?'—':numTxt(esp));
-  return modo==='redondo_esp_cal'?k+' · '+(up(m.calidadDef)||'—'):k;
+/** Clave de materia prima (tubos): AcabadoDefecto_Espesor_CalidadDefecto_RecubrimientoDefecto */
+function mmppKeyOf(m){
+  if(!m)return '';
+  const e=num(m.espesor);
+  return [up(m.acabadoDef)||'—',e==null?'—':numTxt(e),up(m.calidadDef)||'—',up(m.recubDef)||'—'].join('_');
 }
-/** Indicadores de cada MMPP a partir de los pedidos de venta */
-function mmppStats(){
-  const modo=PARAM().mmpp.grupo,g={};
+/** Indicadores de cada materia prima a partir de los pedidos de venta */
+function mmppStats(tipo){
+  const g={};
   ST.pedidos.forEach(p=>{
     const m=matOf(p.material);if(!m)return;
-    const k=mmppKeyOf(m,modo);
-    const x=g[k]=g[k]||{k:k,peso:0,imp:0,_pos:new Set(),_cli:new Set(),_mat:new Set()};
+    if(tipo&&up(m.tipo)!==tipo)return;
+    const k=mmppKeyOf(m);if(!k)return;
+    const x=g[k]=g[k]||{k:k,acabado:up(m.acabadoDef),espesor:num(m.espesor),calidad:up(m.calidadDef),recub:up(m.recubDef),
+      peso:0,imp:0,_pos:new Set(),_cli:new Set(),_mat:new Set(),_tipo:new Set()};
     x.peso+=p.cantidad||0;x.imp+=p.importe||0;
-    x._pos.add(norm(p.pedido)+'|'+norm(p.pos));x._cli.add(norm(p.cliente));x._mat.add(norm(p.material));
+    x._pos.add(norm(p.pedido)+'|'+norm(p.pos));
+    x._cli.add(norm(p.clienteCod||p.cliente));   // clientes diferentes por Id_Cliente
+    x._mat.add(norm(p.material));x._tipo.add(up(m.tipo));
   });
-  return Object.values(g).map(x=>({k:x.k,peso:x.peso,imp:x.imp,pos:x._pos.size,cli:x._cli.size,mat:x._mat.size}));
+  return Object.values(g).map(x=>({k:x.k,acabado:x.acabado,espesor:x.espesor,calidad:x.calidad,recub:x.recub,
+    peso:x.peso,imp:x.imp,pos:x._pos.size,cli:x._cli.size,mat:x._mat.size,tipos:[...x._tipo].filter(t=>t).join(', ')}));
 }
 /** Umbral aplicable de cada variable: el valor fijado a mano o, si no, el percentil calculado */
 function umbrales(stats){
@@ -1507,11 +1550,16 @@ function umbrales(stats){
   });
   return r;
 }
+/** Resultado del algoritmo: supera las tres variables */
 function esEstandar(x,u){return MMPP_VARS.every(v=>u[v.k].valor!=null&&x[v.k]>=u[v.k].valor);}
+/** Confirmación manual guardada para una materia prima (1, 0 o null) */
+function mmppManual(k){const v=ST.mmppManual?ST.mmppManual[k]:undefined;return (v===0||v===1)?v:null;}
+/** Valor final: manda la confirmación manual y, si no la hay, el algoritmo */
+function mmppFinal(x,u){const man=mmppManual(x.k);return man!=null?man:(esEstandar(x,u)?1:0);}
 /** 1 / 0 de cada material según la estandarización de su materia prima */
 function mapaMMPP(){
   const stats=mmppStats(),u=umbrales(stats),m={};
-  stats.forEach(x=>{m[x.k]=esEstandar(x,u)?1:0;});
+  stats.forEach(x=>{m[x.k]=mmppFinal(x,u);});
   return {mapa:m,umbrales:u,stats:stats};
 }
 
@@ -1526,13 +1574,13 @@ function abcProductos(){
   const met=P.abcVol.metrica==='kg'?'kg':'imp';
   const tot=arr.reduce((s,x)=>s+x[met],0);
   arr.sort((a,b)=>b[met]-a[met]);
-  const mm=mapaMMPP(),modo=P.mmpp.grupo;
+  const mm=mapaMMPP();
   let acc=0;
   arr.forEach(x=>{
     acc+=x[met];x.cum=tot?acc/tot*100:0;
     x.vol=claseVol(x.cum);x.frec=claseFrec(x.pos);
     const m=matOf(x.k);
-    x.mp=m?(mm.mapa[mmppKeyOf(m,modo)]||0):0;
+    x.mp=m?(mm.mapa[mmppKeyOf(m)]||0):0;
     x.codigo=x.vol+x.frec+x.mp;
   });
   return arr;
@@ -1540,7 +1588,6 @@ function abcProductos(){
 
 function rParam(){
   const P=PARAM();
-  document.getElementById('pGrupo').value=P.mmpp.grupo;
   // --- 1 · Volumen de ventas
   document.getElementById('pVol').innerHTML='<h4>1 · Volumen de ventas → A / B / C</h4>'+
     '<div class="phelp">Productos ordenados de mayor a menor % de ventas; se acumula el porcentaje y se corta en estos umbrales.</div>'+
@@ -1610,7 +1657,7 @@ function rParamMMPP(){
         '<td>'+(c.manual?'<button class="ia" title="Volver al valor calculado" onclick="setP(\'mmpp.'+v.k+'.valor\',\'\')">↺</button>':'')+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   // KPIs + vista previa
-  const est=stats.filter(x=>esEstandar(x,u)).length;
+  const est=stats.filter(x=>mmppFinal(x,u)).length;
   const prev=document.getElementById('pMMPPPrev');
   if(!stats.length){
     prev.innerHTML='<div class="note">Carga los pedidos de venta y el maestro de materiales para calcular los percentiles.</div>';
@@ -1625,13 +1672,14 @@ function rParamMMPP(){
     '<div class="kc w"><div class="kl">No estándar (0)</div><div class="kv">'+fmtN(stats.length-est)+'</div><div class="ks">no superan alguna variable</div></div>'+
     '</div>'+
     '<h3 style="font-size:13px;margin-bottom:8px">20 materias primas con más kilos</h3>'+
-    '<div class="tw"><table><thead><tr><th>Materia prima (provisional)</th><th class="num">Materiales</th>'+
+    '<div class="tw"><table><thead><tr><th>Materia prima</th><th class="num">Materiales</th>'+
     '<th class="num">Peso (kg)</th><th class="num">Pedidos-posición</th><th class="num">Clientes</th><th>Estándar</th></tr></thead><tbody>'+
     top.map(x=>'<tr><td><b>'+esc(x.k)+'</b></td><td class="num">'+fmtN(x.mat)+'</td>'+
       cel(x,MMPP_VARS[0])+cel(x,MMPP_VARS[1])+cel(x,MMPP_VARS[2])+
-      '<td>'+(esEstandar(x,u)?'<span class="b bl">1</span>':'<span class="b gr">0</span>')+'</td></tr>').join('')+
+      '<td>'+(mmppFinal(x,u)?'<span class="b bl">1</span>':'<span class="b gr">0</span>')+
+      (mmppManual(x.k)!=null?' <span class="b y" title="Confirmación manual en Cálculos MMPP">manual</span>':'')+'</td></tr>').join('')+
     '</tbody></table></div>'+
-    '<div class="note">En verde los valores que superan el umbral. Una materia prima es estándar solo si supera las tres variables.</div>';
+    '<div class="note">En verde los valores que superan el umbral. Una materia prima es estándar solo si supera las tres variables; las confirmaciones manuales de <b>Cálculos MMPP</b> mandan sobre el cálculo.</div>';
 }
 
 function setP(path,val){
@@ -1683,7 +1731,7 @@ function exportParam(){
     {'Bloque':'ABC Producto Terminado','Variable':'a (frecuencia)','Parámetro':'Pedidos-posición desde','Valor':P.abcPed.b+1},
     {'Bloque':'ABC Producto Terminado','Variable':'1 / 0','Parámetro':'Materia prima estándar','Valor':'Fijo (Estandarización MMPP)'}
   ].concat(MMPP_VARS.map(v=>({'Bloque':'Estandarización MMPP','Variable':v.l,'Parámetro':'Percentil '+P.mmpp[v.k].pct+' %','Valor':u[v.k].valor==null?'':Math.round(u[v.k].valor*100)/100,'Origen':u[v.k].manual?'Manual':'Calculado'})))
-   .concat([{'Bloque':'Estandarización MMPP','Variable':'Agrupación','Parámetro':'MMPP identificada por','Valor':P.mmpp.grupo}]),
+   .concat([{'Bloque':'Estandarización MMPP','Variable':'Identificación','Parámetro':'MMPP identificada por','Valor':'AcabadoDefecto_Espesor_CalidadDefecto_RecubrimientoDefecto'}]),
    'Parametrizacion_ABC_AGSA.xlsx','Parámetros');
 }
 
@@ -1691,32 +1739,38 @@ function exportParam(){
    PANTALLA · PEDIDOS DE VENTA
    ============================================================ */
 function famOfPed(p){const m=matOf(p.material);return m?famOf(m):'';}
+function espOfPed(p){const m=matOf(p.material);return m?num(m.espesor):null;}
+function mmppOfPed(p){const m=matOf(p.material);return m?mmppKeyOf(m):'';}
 function tipoOfPed(p){const m=matOf(p.material);return m?up(m.tipo):'';}
 function medOfPed(p){const m=matOf(p.material);return m?medOf(m):'';}
 function maqOfPed(p){const m=matOf(p.material);return m?maqOf(m):[];}
 function desOfPed(p){const m=matOf(p.material);return p.descripcion||(m?m.nombre:'');}
 
 const PED_COLS=[
-  {k:'pedido',l:'Pedido',g:p=>p.pedido},
-  {k:'pos',l:'Pos.',g:p=>p.pos},
-  {k:'cliente',l:'Cliente',g:p=>p.cliente},
-  {k:'material',l:'Material',g:p=>p.material},
-  {k:'descripcion',l:'Descripción',g:p=>desOfPed(p)},
-  {k:'tipo',l:'Tipo',g:p=>tipoOfPed(p),r:p=>tipoOfPed(p)?'<span class="b bl">'+esc(tipoOfPed(p))+'</span>':'—'},
-  {k:'familia',l:'Familia · redondo',g:p=>famOfPed(p),r:p=>famOfPed(p)?'<span class="b g">'+esc(famOfPed(p))+'</span>':'—'},
-  {k:'medida',l:'Medida',g:p=>medOfPed(p)},
+  {k:'pedido',l:'Pedido',stk:1,g:p=>p.pedido},
+  {k:'pos',l:'Posicion',g:p=>p.pos},
+  {k:'material',l:'Codigo Material',g:p=>p.material},
+  {k:'clienteCod',l:'Id_Cliente',g:p=>p.clienteCod},
+  {k:'cliente',l:'Nombre_Cliente',g:p=>p.cliente},
+  {k:'nombre',l:'Nombre Material ⚙',g:p=>desOfPed(p)},
+  {k:'tipo',l:'Tipo ⚙',g:p=>tipoOfPed(p),r:p=>tipoOfPed(p)?'<span class="b bl">'+esc(tipoOfPed(p))+'</span>':'—'},
+  {k:'familia',l:'Familia · redondo ⚙',g:p=>famOfPed(p),r:p=>famOfPed(p)?'<span class="b g">'+esc(famOfPed(p))+'</span>':'—'},
+  {k:'medida',l:'Medida ⚙',g:p=>medOfPed(p)},
+  {k:'espesor',l:'Espesor ⚙',n:1,d:2,g:p=>espOfPed(p)},
+  {k:'acabado',l:'Acabado por defecto ⚙',g:p=>efect(p,'acabado').v},
+  {k:'calidad',l:'Calidad por defecto ⚙',g:p=>efect(p,'calidad').v},
+  {k:'recub',l:'Recubrimiento por defecto ⚙',g:p=>efect(p,'recub').v},
+  {k:'mmpp',l:'MMPP ⚙',g:p=>mmppOfPed(p),r:p=>mmppOfPed(p)?'<span class="chip">'+esc(mmppOfPed(p))+'</span>':'—'},
   {k:'cantidad',l:'Cantidad',n:1,d:0,g:p=>p.cantidad},
-  {k:'um',l:'UM',g:p=>p.um},
-  {k:'precio',l:'Precio',n:1,d:3,g:p=>p.precio},
+  {k:'um',l:'Unidad de medida',g:p=>p.um},
   {k:'importe',l:'Importe',n:1,d:0,g:p=>p.importe},
-  {k:'fCrea',l:'F. Creación',g:p=>p.fCrea,r:p=>fmtFecha(p.fCrea)},
-  {k:'amCrea',l:'Año_Mes Creación',g:p=>ym(p.fCrea)},
-  {k:'fEnt',l:'F. Entrega',g:p=>p.fEnt,r:p=>fmtFecha(p.fEnt)},
-  {k:'amEnt',l:'Año_Mes Entrega',g:p=>ym(p.fEnt)},
-  {k:'acabado',l:'Acabado',g:p=>efect(p,'acabado').v,r:p=>{const e=efect(p,'acabado');return e.v?(e.def?'<span class="dflt" title="Por defecto del maestro de materiales">'+esc(e.v)+'</span>':esc(e.v)):'—';}},
-  {k:'calidad',l:'Calidad',g:p=>efect(p,'calidad').v,r:p=>{const e=efect(p,'calidad');return e.v?(e.def?'<span class="dflt" title="Por defecto del maestro de materiales">'+esc(e.v)+'</span>':esc(e.v)):'—';}},
-  {k:'maquina',l:'Máquina',g:p=>maqOfPed(p).join(', '),r:p=>chipsMaq(maqOfPed(p))},
-  {k:'estado',l:'Estado',g:p=>p.estado}
+  {k:'precio',l:'€/kg ⚙',n:1,d:3,g:p=>p.precio},
+  {k:'fCrea',l:'Fecha Creacion',g:p=>p.fCrea,r:p=>fmtFecha(p.fCrea)},
+  {k:'amCrea',l:'Año_Mes Creación ⚙',g:p=>ym(p.fCrea)},
+  {k:'fEnt',l:'Fecha Entrega',g:p=>p.fEnt,r:p=>fmtFecha(p.fEnt)},
+  {k:'amEnt',l:'Año_Mes Entrega ⚙',g:p=>ym(p.fEnt)},
+  {k:'maquina',l:'Máquina ⚙',g:p=>maqOfPed(p).join(', '),r:p=>chipsMaq(maqOfPed(p))},
+  {k:'estado',l:'Status Pedido',g:p=>p.estado}
 ];
 let pedSort={k:'fEnt',d:1},pedPage=1,pedColF={},_focusCol=null;const PED_PP=100;
 
@@ -1771,7 +1825,7 @@ function rPed(){
   document.getElementById('kPedPM').textContent='€/kg medio: '+(kg?fmtN(imp/kg,3):'—');
   // Cabecera + fila de filtros por columna
   document.querySelector('#tPed thead').innerHTML=
-    '<tr>'+PED_COLS.map(c=>'<th class="srt'+(c.n?' num':'')+'" onclick="sortPed(\''+c.k+'\')">'+c.l+
+    '<tr>'+PED_COLS.map(c=>'<th class="srt'+(c.n?' num':'')+(c.stk?' stk':'')+'" onclick="sortPed(\''+c.k+'\')">'+c.l+
       (pedSort.k===c.k?' <span class="ar">'+(pedSort.d>0?'▲':'▼')+'</span>':'')+'</th>').join('')+'<th style="width:40px"></th></tr>'+
     '<tr class="fr">'+PED_COLS.map(c=>'<th><input type="text" data-cf="'+c.k+'" value="'+esc(pedColF[c.k]||'')+'" placeholder="filtrar…" oninput="setColF(\''+c.k+'\',this.value)"></th>').join('')+
       '<th><button class="ia" title="Limpiar filtros de columna" onclick="pedColF={};rPed()">✖</button></th></tr>';
@@ -1784,12 +1838,15 @@ function rPed(){
   }else{
     tb.innerHTML=rows.map(p=>'<tr>'+PED_COLS.map(c=>{
       const v=c.r?c.r(p):(c.n?fmtN(c.g(p),c.d):esc(c.g(p)||'—'));
-      return '<td'+(c.n?' class="num"':'')+'>'+v+'</td>';
+      return '<td'+(c.n?' class="num"':'')+(c.stk?' class="stk"':'')+'>'+v+'</td>';
     }).join('')+'<td><button class="ia" title="Eliminar línea" onclick="delPedido(\''+p.id+'\')">🗑️</button></td></tr>').join('');
   }
+  const iCant=PED_COLS.findIndex(c=>c.k==='cantidad');
   document.querySelector('#tPed tfoot').innerHTML=list.length?
-    '<tr><td colspan="7">TOTAL vista ('+fmtN(list.length)+' líneas)</td><td class="num">'+fmtN(kg)+'</td><td></td><td class="num">'+(kg?fmtN(imp/kg,3):'—')+'</td>'+
-    '<td class="num">'+fmtN(imp)+'</td><td colspan="'+(PED_COLS.length-11+1)+'"></td></tr>':'';
+    '<tr><td colspan="'+iCant+'">TOTAL vista ('+fmtN(list.length)+' líneas)</td>'+
+    '<td class="num">'+fmtN(kg)+'</td><td></td><td class="num">'+fmtN(imp)+'</td>'+
+    '<td class="num">'+(kg?fmtN(imp/kg,3):'—')+'</td>'+
+    '<td colspan="'+(PED_COLS.length-iCant-4+1)+'"></td></tr>':'';
   document.getElementById('pgPed').innerHTML=pager(list.length,pedPage,PED_PP,'pedPage','rPed');
   if(_focusCol){
     const inp=document.querySelector('#tPed input[data-cf="'+_focusCol+'"]');
@@ -1813,11 +1870,17 @@ function clearPedidos(){
   ST.pedidos=[];save();refreshAll();toast('Pedidos vaciados','ok');
 }
 function exportPedidos(){
-  dlRows(pedFiltrados().map(p=>({'Pedido':p.pedido,'Posición':p.pos,'Cliente':p.cliente,'Material':p.material,
-    'Descripción':desOfPed(p),'Tipo':tipoOfPed(p),'Familia (redondo)':famOfPed(p),'Medida':medOfPed(p),'Cantidad':p.cantidad,'UM':p.um,
-    'Precio':p.precio,'Importe':p.importe,'Fecha creación':p.fCrea,'Año_Mes creación':ym(p.fCrea),
-    'Fecha entrega':p.fEnt,'Año_Mes entrega':ym(p.fEnt),'Acabado':efect(p,'acabado').v,'Calidad':efect(p,'calidad').v,
-    'Máquina':maqOfPed(p).join(', '),'Estado':p.estado})),'Pedidos_Venta_AGSA.xlsx','Pedidos');
+  dlRows(pedFiltrados().map(p=>{
+    const o={};
+    PED_SPEC.forEach(fd=>{o[fd.l]=p[fd.k];});
+    o['Nombre Material']=desOfPed(p);o['Tipo']=tipoOfPed(p);o['Familia (redondo)']=famOfPed(p);
+    o['Medida']=medOfPed(p);o['Espesor']=espOfPed(p);
+    o['Acabado por defecto']=efect(p,'acabado').v;o['Calidad por defecto']=efect(p,'calidad').v;
+    o['Recubrimiento por defecto']=efect(p,'recub').v;o['MMPP']=mmppOfPed(p);
+    o['€/kg']=p.precio;o['Año_Mes creacion']=ym(p.fCrea);o['Año_Mes entrega']=ym(p.fEnt);
+    o['Maquina']=maqOfPed(p).join(', ');
+    return o;
+  }),'Pedidos_Venta_AGSA.xlsx','Pedidos');
 }
 
 /* ============================================================
@@ -2040,6 +2103,166 @@ function clearAnaFilters(){
 }
 
 /* ============================================================
+   PANTALLA · CÁLCULOS MMPP  (Output ABC / Estrategias)
+   ============================================================ */
+let mmppPend={},mmppPage=1;const MM_PP=100;
+
+/** Firma de los datos y parámetros con los que se hizo el último cálculo */
+function mmppSig(){
+  const P=PARAM().mmpp;
+  const kg=Math.round(ST.pedidos.reduce((a,p)=>a+(p.cantidad||0),0));
+  return ST.pedidos.length+'|'+kg+'|'+ST.materiales.length+'|'+JSON.stringify(P);
+}
+/** Recalcula el ABC de materias primas con los pedidos y los parámetros actuales */
+function recalcMMPP(){
+  if(!ST.pedidos.length){toast('No hay pedidos de venta cargados','warn');return;}
+  if(!ST.materiales.length){toast('No hay materiales en el maestro: no se pueden leer las características','warn');return;}
+  const stats=mmppStats(),u=umbrales(stats);
+  ST.mmppCalc={
+    fecha:new Date().toISOString(),sig:mmppSig(),
+    umbrales:MMPP_VARS.reduce((o,v)=>{o[v.k]={pct:u[v.k].pct,calc:u[v.k].calc,valor:u[v.k].valor,manual:u[v.k].manual};return o;},{}),
+    filas:stats.map(x=>Object.assign({},x,{auto:esEstandar(x,u)?1:0}))
+  };
+  save();rMMPP();
+  const est=ST.mmppCalc.filas.filter(r=>r.auto).length;
+  toast('🔄 ABC MMPP recalculado: <b>'+fmtN(stats.length)+'</b> materias primas · <b>'+fmtN(est)+'</b> estándar por algoritmo','ok',5000);
+}
+/** Valor final de una fila: confirmación pendiente, manual guardada o algoritmo */
+function filaFinal(r){
+  if(mmppPend[r.k]!==undefined)return mmppPend[r.k]===''?r.auto:mmppPend[r.k];
+  const man=mmppManual(r.k);
+  return man!=null?man:r.auto;
+}
+function filaConf(r){
+  if(mmppPend[r.k]!==undefined)return mmppPend[r.k];
+  const man=mmppManual(r.k);
+  return man==null?'':man;
+}
+function setConf(k,v){
+  mmppPend[k]=(v===''?'':(+v));
+  const man=mmppManual(k);
+  if((mmppPend[k]===''&&man==null)||mmppPend[k]===man)delete mmppPend[k];
+  rMMPP();
+}
+function guardarConf(){
+  const n=Object.keys(mmppPend).length;
+  if(!n){toast('No hay cambios pendientes de guardar','warn');return;}
+  ST.mmppManual=ST.mmppManual||{};
+  Object.keys(mmppPend).forEach(k=>{
+    if(mmppPend[k]==='')delete ST.mmppManual[k];
+    else ST.mmppManual[k]=mmppPend[k];
+  });
+  mmppPend={};save();refreshAll();
+  toast('💾 <b>'+n+'</b> confirmación(es) guardada(s) en la columna manual','ok');
+}
+function descartarConf(){
+  const n=Object.keys(mmppPend).length;
+  if(!n){toast('No hay cambios pendientes','warn');return;}
+  mmppPend={};rMMPP();toast('Cambios descartados','ok');
+}
+
+function mmppFiltradas(){
+  const C=ST.mmppCalc;if(!C)return [];
+  const tipo=document.getElementById('fMMTipo').value,res=document.getElementById('fMMRes').value,
+        q=norm(document.getElementById('fMMQ').value);
+  return C.filas.filter(r=>{
+    if(tipo&&String(r.tipos||'').split(', ').indexOf(tipo)<0)return false;
+    const fin=filaFinal(r),man=mmppPend[r.k]!==undefined?(mmppPend[r.k]===''?null:mmppPend[r.k]):mmppManual(r.k);
+    if(res==='1'&&fin!==1)return false;
+    if(res==='0'&&fin!==0)return false;
+    if(res==='man'&&man==null)return false;
+    if(res==='dif'&&(man==null||man===r.auto))return false;
+    if(q){
+      const hay=norm([r.k,r.acabado,r.calidad,r.recub,r.tipos].join(' '));
+      if(q.split(' ').some(t=>hay.indexOf(t)<0))return false;
+    }
+    return true;
+  });
+}
+
+function rMMPP(){
+  const C=ST.mmppCalc;
+  fillSelect('fMMTipo',uniqSort(ST.materiales.map(m=>up(m.tipo))),'(todos los tipos)');
+  const aviso=document.getElementById('mmppAviso'),cab=document.getElementById('mmppCab'),
+        kpis=document.getElementById('mmppKpis');
+  if(!C){
+    aviso.innerHTML='';cab.innerHTML='<div class="empty" style="grid-column:1/-1">Todavía no se ha calculado el ABC de materias primas.</div>';
+    kpis.innerHTML='';
+    document.querySelector('#tMMPP thead').innerHTML='';
+    document.querySelector('#tMMPP tbody').innerHTML='<tr><td class="empty">Pulsa <b>🔄 Recalcular ABC MMPP</b> para calcularlo con los pedidos y los parámetros actuales.</td></tr>';
+    document.querySelector('#tMMPP tfoot').innerHTML='';
+    document.getElementById('pgMMPP').innerHTML='';
+    document.getElementById('mmppFecha').textContent='sin calcular';
+    return;
+  }
+  // ---- Cabecera: umbrales del cálculo
+  cab.innerHTML=MMPP_VARS.map(v=>{
+    const u=C.umbrales[v.k]||{};
+    return '<div class="u"><div class="ul">'+esc(v.l)+'</div>'+
+      '<div class="uv">≥ '+(u.valor==null?'—':fmtN(u.valor,v.d)+(v.u?' '+v.u:''))+'</div>'+
+      '<div class="us">Percentil '+fmtN(u.pct)+' % · '+(u.manual?'<b>valor manual</b>':'calculado: '+(u.calc==null?'—':fmtN(u.calc,v.d)))+'</div></div>';
+  }).join('');
+  // ---- Aviso de datos cambiados / cambios sin guardar
+  const stale=C.sig!==mmppSig(),pend=Object.keys(mmppPend).length;
+  aviso.innerHTML=(stale?'<div class="info-bar" style="background:var(--warning);color:#333">⚠️ <strong>Los pedidos o los parámetros han cambiado desde el último cálculo.</strong> Pulsa <b>Recalcular ABC MMPP</b> para actualizarlo.</div>':'')+
+    (pend?'<div class="info-bar" style="background:var(--danger)">💾 <strong>'+pend+' confirmación(es) sin guardar.</strong> Pulsa <b>Guardar confirmaciones</b> para conservarlas.</div>':'');
+  const d=new Date(C.fecha);
+  document.getElementById('mmppFecha').textContent='Último cálculo: '+fmtFecha(isoOf(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()))))+' '+p2(d.getHours())+':'+p2(d.getMinutes());
+  // ---- KPIs
+  const list=mmppFiltradas();
+  const est=C.filas.filter(r=>filaFinal(r)===1).length,man=C.filas.filter(r=>mmppManual(r.k)!=null||mmppPend[r.k]!==undefined).length;
+  const dif=C.filas.filter(r=>{const m=mmppPend[r.k]!==undefined?(mmppPend[r.k]===''?null:mmppPend[r.k]):mmppManual(r.k);return m!=null&&m!==r.auto;}).length;
+  kpis.innerHTML=
+    '<div class="kc"><div class="kl">Materias primas</div><div class="kv">'+fmtN(C.filas.length)+'</div><div class="ks">visibles: '+fmtN(list.length)+'</div></div>'+
+    '<div class="kc s"><div class="kl">Estándar (1)</div><div class="kv">'+fmtN(est)+'</div><div class="ks">'+(C.filas.length?fmtN(est*100/C.filas.length,1):'0')+' % del total</div></div>'+
+    '<div class="kc w"><div class="kl">No estándar (0)</div><div class="kv">'+fmtN(C.filas.length-est)+'</div><div class="ks">no superan alguna variable</div></div>'+
+    '<div class="kc b"><div class="kl">Confirmaciones manuales</div><div class="kv">'+fmtN(man)+'</div><div class="ks">'+fmtN(dif)+' distintas del cálculo</div></div>';
+  // ---- Tabla
+  document.querySelector('#tMMPP thead').innerHTML='<tr>'+
+    '<th class="stk">MMPP</th><th>Acabado por defecto</th><th class="num">Espesor</th><th>Calidad por defecto</th><th>Recubrimiento por defecto</th>'+
+    '<th>Tipo</th><th class="num">Materiales</th><th class="num">Peso (kg)</th><th class="num">Pedidos-posición</th><th class="num">Clientes</th>'+
+    '<th>Calculado</th><th>Confirmación</th><th>Resultado final</th></tr>';
+  const tot=Math.max(1,Math.ceil(list.length/MM_PP));mmppPage=Math.min(mmppPage,tot);
+  const rows=list.slice((mmppPage-1)*MM_PP,mmppPage*MM_PP);
+  const cel=(r,v)=>{const u=C.umbrales[v.k]||{},ok=u.valor!=null&&r[v.k]>=u.valor;
+    return '<td class="num"'+(ok?' style="color:var(--success);font-weight:700"':'')+' title="'+(ok?'supera':'no supera')+' el umbral">'+fmtN(r[v.k],v.d)+'</td>';};
+  document.querySelector('#tMMPP tbody').innerHTML=list.length?rows.map(r=>{
+    const conf=filaConf(r),fin=filaFinal(r),pendiente=mmppPend[r.k]!==undefined;
+    return '<tr'+(pendiente?' class="pend"':'')+'>'+
+      '<td class="stk"><b>'+esc(r.k)+'</b></td>'+
+      '<td>'+esc(r.acabado||'—')+'</td><td class="num">'+(r.espesor==null?'—':numTxt(r.espesor))+'</td>'+
+      '<td>'+esc(r.calidad||'—')+'</td><td>'+esc(r.recub||'—')+'</td>'+
+      '<td>'+(r.tipos?'<span class="b bl">'+esc(r.tipos)+'</span>':'—')+'</td>'+
+      '<td class="num">'+fmtN(r.mat)+'</td>'+
+      cel(r,MMPP_VARS[0])+cel(r,MMPP_VARS[1])+cel(r,MMPP_VARS[2])+
+      '<td>'+(r.auto?'<span class="b bl">1</span>':'<span class="b gr">0</span>')+'</td>'+
+      '<td><select class="confsel'+(conf!==''?' man':'')+'" onchange="setConf(\''+esc(r.k)+'\',this.value)">'+
+        '<option value=""'+(conf===''?' selected':'')+'>Automático</option>'+
+        '<option value="1"'+(conf===1?' selected':'')+'>Estándar (1)</option>'+
+        '<option value="0"'+(conf===0?' selected':'')+'>No estándar (0)</option></select>'+
+        (pendiente?' <span class="b r">sin guardar</span>':'')+'</td>'+
+      '<td>'+(fin?'<span class="b bl">1</span>':'<span class="b gr">0</span>')+
+        (conf!==''?' <span class="b y">manual</span>':'')+'</td></tr>';
+  }).join(''):'<tr><td colspan="13" class="empty">Ninguna materia prima coincide con los filtros.</td></tr>';
+  const kg=list.reduce((a,r)=>a+r.peso,0);
+  document.querySelector('#tMMPP tfoot').innerHTML=list.length?
+    '<tr><td colspan="7">TOTAL vista ('+fmtN(list.length)+' MMPP)</td><td class="num">'+fmtN(kg)+'</td><td colspan="5"></td></tr>':'';
+  document.getElementById('pgMMPP').innerHTML=pager(list.length,mmppPage,MM_PP,'mmppPage','rMMPP');
+}
+
+function exportMMPP(){
+  const C=ST.mmppCalc;
+  if(!C){toast('Calcula primero el ABC de materias primas','warn');return;}
+  dlRows(mmppFiltradas().map(r=>({
+    'MMPP':r.k,'Acabado por defecto':r.acabado,'Espesor':r.espesor,'Calidad por defecto':r.calidad,
+    'Recubrimiento por defecto':r.recub,'Tipo':r.tipos,'Materiales':r.mat,
+    'Peso (kg)':r.peso,'Pedidos-posicion':r.pos,'Clientes':r.cli,
+    'Umbral peso':C.umbrales.peso.valor,'Umbral pedidos-posicion':C.umbrales.pos.valor,'Umbral clientes':C.umbrales.cli.valor,
+    'Estandar calculado':r.auto,'Manual':mmppManual(r.k)==null?'':mmppManual(r.k),'Resultado final':filaFinal(r)
+  })),'ABC_MMPP_AGSA.xlsx','ABC MMPP');
+}
+
+/* ============================================================
    INICIO · DATOS DEMO · ARRANQUE
    ============================================================ */
 function rInicio(){
@@ -2130,17 +2353,18 @@ function loadDemo(){
         const fe=new Date(fc.getTime()+(10+Math.floor(R()*60))*86400000);
         const cant=Math.round((500+R()*22000)/50)*50;
         const precio=Math.round((.72+R()*.75+(m.tipo==='TUBO'?.08:0))*1000)/1000;
-        peds.push({id:uid(),pedido:'PV-'+nped,pos:String((l+1)*10),cliente:cli,clienteCod:'C'+p2(clientes.indexOf(cli)+1),
-          material:m.codigo,descripcion:m.nombre,cantidad:cant,um:'KG',precio:precio,importe:Math.round(cant*precio*100)/100,
+        const importe=Math.round(cant*precio*100)/100;
+        peds.push({id:uid(),pedido:'PV-'+nped,pos:String((l+1)*10),
+          material:m.codigo,clienteCod:'C'+p2(clientes.indexOf(cli)+1),cliente:cli,
+          cantidad:cant,um:'KG',importe:importe,precio:importe/cant,
           fCrea:isoOf(new Date(Date.UTC(fc.getFullYear(),fc.getMonth(),fc.getDate()))),
           fEnt:isoOf(new Date(Date.UTC(fe.getFullYear(),fe.getMonth(),fe.getDate()))),
-          acabado:R()<.35?pick(OPC.acabado):'',calidad:R()<.3?pick(OPC.calidad):'',
           estado:R()<.72?'Abierto':'Servido'});
       }
     }
   }
-  ST.materiales=mats;ST.pedidos=peds;
-  invalidateMat();save();refreshAll();
+  ST.materiales=mats;ST.pedidos=peds;ST.mmppManual={};ST.mmppCalc=null;
+  invalidateMat();save();recalcMMPP();refreshAll();
   toast('🎭 Datos demo: <b>'+mats.length+'</b> materiales, <b>'+ST.familias.length+'</b> redondos, <b>'+ST.reglas.length+'</b> medidas y <b>'+peds.length.toLocaleString('es-ES')+'</b> líneas de pedido','ok',6000);
 }
 

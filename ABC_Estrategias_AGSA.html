@@ -174,8 +174,9 @@ tbody tr.pend td.stk{background:#fff5d6;}
   <div class="st">Inputs Ventas</div>
   <div class="ni sub" id="nav-pedidos" onclick="nav('pedidos',this)">📋 Pedidos de Venta</div>
   <div class="ni sub" id="nav-analisis" onclick="nav('analisis',this)">📈 Análisis Ventas</div>
-  <div class="st">Output ABC / Estrategias</div>
-  <div class="ni sub" id="nav-mmpp" onclick="nav('mmpp',this)">🧪 Cálculos MMPP</div>
+  <div class="st">Output ABC / Estrategias Tubos</div>
+  <div class="ni sub" id="nav-mmpp" onclick="nav('mmpp',this)">🧪 Calculos MMPP Tubos</div>
+  <div class="ni sub" id="nav-tubos" onclick="nav('tubos',this)">🧮 Calculos Tubos</div>
   <div class="foot">Datos guardados en este navegador<br><span id="lsInfo">—</span></div>
 </div>
 
@@ -210,7 +211,8 @@ tbody tr.pend td.stk{background:#fff5d6;}
         <li><b>Parametrización ABC</b> → umbrales de las clases A/B/C y a/b/c y las tres variables que definen si una materia prima es estándar (1) o no (0).</li>
         <li><b>Pedidos de Venta</b> → carga masiva del Excel de pedidos y filtra por cliente, año-mes, material, acabado y calidad.</li>
         <li><b>Análisis Ventas</b> → gráficos de ventas/facturación y clasificación ABC de materiales y clientes.</li>
-        <li><b>Cálculos MMPP</b> (Output ABC / Estrategias) → estandarización de cada materia prima con los umbrales parametrizados y confirmación manual.</li>
+        <li><b>Calculos MMPP Tubos</b> (Output ABC / Estrategias Tubos) → estandarización de cada materia prima con los umbrales parametrizados y confirmación manual.</li>
+        <li><b>Calculos Tubos</b> → ABCabc10 por material (volumen + frecuencia + materia prima), estrategia propuesta y confirmación de ambos.</li>
       </ol>
       <div class="toolbar" style="margin-top:14px;margin-bottom:0">
         <button class="btn bp" onclick="nav('materiales',document.getElementById('nav-materiales'))">Ir al Maestro de Materiales →</button>
@@ -502,6 +504,51 @@ tbody tr.pend td.stk{background:#fff5d6;}
   </div>
 </div>
 
+<!-- ===================== CALCULOS TUBOS ===================== -->
+<div class="pg" id="p-tubos">
+  <div class="toolbar">
+    <button class="btn bp" onclick="recalcTubos()">🔄 Recalcular ABC y estrategias</button>
+    <button class="btn bs" onclick="guardarTubos()">💾 Guardar confirmaciones</button>
+    <button class="btn bo" onclick="descartarTubos()">↩️ Descartar cambios</button>
+    <button class="btn bo" onclick="exportTubos()">📤 Exportar</button>
+    <button class="btn bo" onclick="nav('mmpp',document.getElementById('nav-mmpp'))">🧪 Calculos MMPP Tubos</button>
+    <span id="tubFecha" style="font-size:11px;color:var(--tl);margin-left:auto"></span>
+  </div>
+  <div id="tubAviso"></div>
+  <div class="cd">
+    <h3>⚙️ Base del cálculo</h3>
+    <div class="sub">Define el universo y el periodo; se aplican al pulsar <b>Recalcular ABC y estrategias</b>.</div>
+    <div class="fl" style="box-shadow:none;padding:0;margin-bottom:14px;background:none">
+      <div class="fg"><label>Tipo de material</label><select id="tubTipo"></select></div>
+      <div class="fg"><label>Eje temporal</label><select id="tubEje">
+        <option value="fEnt">Fecha de entrega</option><option value="fCrea">Fecha de creación</option></select></div>
+      <div class="fg"><label>Desde (Año_Mes)</label><select id="tubDesde"></select></div>
+      <div class="fg"><label>Hasta (Año_Mes)</label><select id="tubHasta"></select></div>
+    </div>
+    <div class="umb" id="tubCab"></div>
+    <div class="note" id="tubRegla"></div>
+  </div>
+  <div class="kg" id="tubKpis"></div>
+  <div class="fl">
+    <div class="fg"><label>Clase (volumen)</label><select id="fTubVol" onchange="rTubos()">
+      <option value="">(todas)</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+    <div class="fg"><label>Estrategia propuesta</label><select id="fTubEstr" onchange="rTubos()">
+      <option value="">(todas)</option><option value="MTS">MTS</option><option value="ATO">ATO</option><option value="MTO">MTO</option></select></div>
+    <div class="fg"><label>Diferencias</label><select id="fTubDif" onchange="rTubos()">
+      <option value="">(todas las filas)</option>
+      <option value="abc">ABC distinto del maestro</option>
+      <option value="estr">Estrategia distinta del maestro</option>
+      <option value="any">Cualquier diferencia</option>
+      <option value="man">Con confirmación manual</option></select></div>
+    <div class="fg"><label>Buscar</label><input type="text" id="fTubQ" placeholder="material, medida, MMPP…" oninput="rTubos()" style="min-width:220px"></div>
+    <div class="fg spacer"><label>&nbsp;</label><button class="btn bo" onclick="['fTubVol','fTubEstr','fTubDif','fTubQ'].forEach(i=>document.getElementById(i).value='');rTubos()">✖ Limpiar filtros</button></div>
+  </div>
+  <div class="cd" style="padding:14px">
+    <div class="tw"><table id="tTub"><thead></thead><tbody></tbody><tfoot></tfoot></table></div>
+    <div class="pgn" id="pgTub"></div>
+  </div>
+</div>
+
 </div><!-- /ct -->
 </div><!-- /mn -->
 
@@ -601,7 +648,7 @@ const MAT_SPEC=[
   {k:'udsPaquete',l:'Unidades Paquete',t:'num',d:0,al:['unidades paquete','uds paquete','unidades por paquete','uds por paquete']},
   {k:'variante',l:'Variante',t:'sel',al:['variante','variantes']},
   {k:'clasificacion',l:'Clasificacion',t:'sel',al:['clasificacion']},
-  {k:'abc',l:'ABC',t:'sel',al:['abc','clase abc']},
+  {k:'abc',l:'ABC',t:'sel',raw:1,al:['abc','clase abc']},
   {k:'estrategia',l:'Estrategia',t:'sel',al:['estrategia','estrategia produccion','estrategia de produccion']}
 ];
 /* Catálogo de familias (redondos) de AGSA: [redondo, medida, medida, …] con la medida en formato ancho_alto */
@@ -646,8 +693,11 @@ const CAT_FAMILIAS=[
 const SINMAQ='SIN MÁQUINA';
 
 /** Valores distintos ya presentes en el maestro para un campo (alimentan los desplegables) */
-function valoresDe(k){return uniqSort(ST.materiales.map(m=>up(m[k])));}
-const ST={materiales:[],familias:[],reglas:[],pedidos:[],maquinas:MAQ_BASE.slice(),param:null,mmppManual:{},mmppCalc:null};
+function valoresDe(k){
+  const fd=(typeof MAT_SPEC!=='undefined')?MAT_SPEC.find(x=>x.k===k):null;
+  return uniqSort(ST.materiales.map(m=>fd&&fd.raw?String(m[k]==null?'':m[k]).trim():up(m[k])));
+}
+const ST={materiales:[],familias:[],reglas:[],pedidos:[],maquinas:MAQ_BASE.slice(),param:null,mmppManual:{},mmppCalc:null,tubosManual:{},tubosCalc:null};
 const LS_KEY='agsa_abc_estrategias_v1';
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
@@ -664,6 +714,7 @@ function load(){
     ST.pedidos=o.pedidos||[];ST.maquinas=(o.maquinas&&o.maquinas.length)?o.maquinas:MAQ_BASE.slice();
     ST.param=o.param||null;PARAM();
     ST.mmppManual=o.mmppManual||{};ST.mmppCalc=o.mmppCalc||null;
+    ST.tubosManual=o.tubosManual||{};ST.tubosCalc=o.tubosCalc||null;
     migra();
   }catch(e){toast('No se pudieron leer los datos guardados: '+e.message,'err');}
 }
@@ -809,7 +860,7 @@ function efect(p,campo){
 }
 
 /* ---------- Navegación ---------- */
-const TT={inicio:'Inicio',materiales:'Maestro de Materiales',familias:'Familias de Materiales',param:'Parametrización ABC',pedidos:'Pedidos de Venta',analisis:'Análisis de Ventas',mmpp:'Cálculos MMPP'};
+const TT={inicio:'Inicio',materiales:'Maestro de Materiales',familias:'Familias de Materiales',param:'Parametrización ABC',pedidos:'Pedidos de Venta',analisis:'Análisis de Ventas',mmpp:'Calculos MMPP Tubos',tubos:'Calculos Tubos'};
 function nav(id,el){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   const p=document.getElementById('p-'+id);if(p)p.classList.add('on');
@@ -823,6 +874,7 @@ function nav(id,el){
   if(id==='pedidos')rPed();
   if(id==='analisis')rAna();
   if(id==='mmpp')rMMPP();
+  if(id==='tubos')rTubos();
   window.scrollTo(0,0);
 }
 function oM(id){document.getElementById(id).classList.add('sh');}
@@ -865,12 +917,13 @@ function importBackup(input){
       ST.pedidos=o.pedidos||[];ST.maquinas=(o.maquinas&&o.maquinas.length)?o.maquinas:MAQ_BASE.slice();
       ST.param=o.param||null;PARAM();
       ST.mmppManual=o.mmppManual||{};ST.mmppCalc=o.mmppCalc||null;
+      ST.tubosManual=o.tubosManual||{};ST.tubosCalc=o.tubosCalc||null;
       invalidateMat();save();refreshAll();toast('Backup restaurado','ok');
     }catch(err){toast('No se pudo leer el backup: '+err.message,'err');}
   };
   fr.readAsText(f);
 }
-function refreshAll(){rInicio();rMat();rFam();rParam();rPed();rAna();rMMPP();lsInfo();}
+function refreshAll(){rInicio();rMat();rFam();rParam();rPed();rAna();rMMPP();rTubos();lsInfo();}
 
 /* ============================================================
    IMPORTACIÓN DE EXCEL (mapeo de columnas asistido)
@@ -978,7 +1031,7 @@ function confirmImport(){
       const cod=(get(r,'codigo')==null?'':String(get(r,'codigo')).trim());
       if(!cod){sin++;return;}
       const o={};
-      MAT_SPEC.forEach(fd=>{const v=get(r,fd.k);o[fd.k]=fd.t==='num'?num(v):(fd.t==='txt'?txt(v):up(v));});
+      MAT_SPEC.forEach(fd=>{const v=get(r,fd.k);o[fd.k]=fd.t==='num'?num(v):((fd.t==='txt'||fd.raw)?txt(v):up(v));});
       o.codigo=cod;
       const ex=ST.materiales.find(m=>norm(m.codigo)===norm(cod));
       if(ex){ if(!actualiza){omit++;return;} MAT_SPEC.forEach(fd=>{if(o[fd.k]!==''&&o[fd.k]!=null)ex[fd.k]=o[fd.k];}); act++; }
@@ -1139,7 +1192,7 @@ function editMaterial(id){
     const v=m?m[fd.k]:'';
     if(fd.t==='num')return campoFG(fd,'<input type="number" step="any" id="f_'+fd.k+'" value="'+(v==null?'':esc(v))+'" oninput="matPrev()">');
     if(fd.t==='txt')return campoFG(fd,'<input type="text" id="f_'+fd.k+'" value="'+esc(v||'')+'">');
-    const cur=up(v),vals=uniqSort(valoresDe(fd.k).concat(cur?[cur]:[]));
+    const cur=fd.raw?String(v==null?'':v).trim():up(v),vals=uniqSort(valoresDe(fd.k).concat(cur?[cur]:[]));
     return campoFG(fd,'<select id="f_'+fd.k+'" onchange="selNuevo(\''+fd.k+'\')">'+
       '<option value="">(vacío)</option>'+
       vals.map(x=>'<option value="'+esc(x)+'"'+(x===cur?' selected':'')+'>'+esc(x)+'</option>').join('')+
@@ -1155,7 +1208,9 @@ function selNuevo(k){
 }
 function valSel(k){
   const sel=document.getElementById('f_'+k);if(!sel)return '';
-  return sel.value==='__new__'?up(document.getElementById('n_'+k).value):up(sel.value);
+  const v=sel.value==='__new__'?document.getElementById('n_'+k).value:sel.value;
+  const fd=MAT_SPEC.find(x=>x.k===k);
+  return fd&&fd.raw?String(v).trim():up(v);            // el código ABC conserva mayúsculas y minúsculas
 }
 /** Vista previa de los tres campos calculados */
 function matPrev(){
@@ -2103,7 +2158,7 @@ function clearAnaFilters(){
 }
 
 /* ============================================================
-   PANTALLA · CÁLCULOS MMPP  (Output ABC / Estrategias)
+   PANTALLA · CALCULOS MMPP TUBOS  (Output ABC / Estrategias Tubos)
    ============================================================ */
 let mmppPend={},mmppPage=1;const MM_PP=100;
 
@@ -2263,6 +2318,248 @@ function exportMMPP(){
 }
 
 /* ============================================================
+   PANTALLA · CALCULOS TUBOS  (ABCabc10 y estrategia por material)
+   ============================================================ */
+let tubPend={},tubPage=1,tubInit=false;const TUB_PP=100;
+const ABC_CODES=[];['A','B','C'].forEach(v=>['a','b','c'].forEach(fq=>[1,0].forEach(mp=>ABC_CODES.push(v+fq+mp))));
+const ESTRATEGIAS=['MTS','ATO','MTO'];
+
+/** Estrategia propuesta a partir del código ABCabc10 */
+function estrategiaDe(vol,frec,mp){
+  if(!mp)return 'MTO';                                            // materia prima no estándar → contra pedido
+  if((vol==='A'||vol==='B')&&(frec==='a'||frec==='b'))return 'MTS'; // rota y la MMPP es estándar → contra stock
+  return 'ATO';                                                    // MMPP estándar pero poca rotación
+}
+function tubSig(){
+  return ST.pedidos.length+'|'+Math.round(ST.pedidos.reduce((a,p)=>a+(p.cantidad||0),0))+'|'+ST.materiales.length+
+    '|'+JSON.stringify(PARAM())+'|'+JSON.stringify(ST.mmppManual||{});
+}
+
+/** Recalcula el ABCabc10 y la estrategia de cada material */
+function recalcTubos(){
+  if(!ST.pedidos.length){toast('No hay pedidos de venta cargados','warn');return;}
+  const o={tipo:document.getElementById('tubTipo').value,eje:document.getElementById('tubEje').value,
+           desde:document.getElementById('tubDesde').value,hasta:document.getElementById('tubHasta').value};
+  const mm=mapaMMPP(),P=PARAM(),g={},meses=new Set();
+  ST.pedidos.forEach(p=>{
+    const m=matOf(p.material);if(!m)return;
+    if(o.tipo&&up(m.tipo)!==o.tipo)return;
+    const mes=ym(p[o.eje]);if(!mes)return;
+    if(o.desde&&mes<o.desde)return;
+    if(o.hasta&&mes>o.hasta)return;
+    meses.add(mes);
+    const x=g[p.material]=g[p.material]||{k:p.material,peso:0,imp:0,_cli:new Set(),_pos:new Set(),_mes:new Set()};
+    x.peso+=p.cantidad||0;x.imp+=p.importe||0;
+    x._cli.add(norm(p.clienteCod||p.cliente));            // clientes distintos por Id_Cliente
+    x._pos.add(norm(p.pedido)+'|'+norm(p.pos));           // pedido_posicion distintos
+    x._mes.add(mes);
+  });
+  const nMes=Math.max(1,meses.size);
+  const met=P.abcVol.metrica==='kg'?'peso':'imp';
+  const arr=Object.values(g).map(x=>{
+    const m=matOf(x.k)||{};
+    return {k:x.k,nombre:m.nombre||'',tipo:up(m.tipo),familia:famOf(m),medida:medOf(m),espesor:num(m.espesor),
+      acabado:up(m.acabadoDef),calidad:up(m.calidadDef),recub:up(m.recubDef),mmpp:mmppKeyOf(m),
+      peso:x.peso,imp:x.imp,cli:x._cli.size,pos:x._pos.size,meses:x._mes.size,
+      abcMaestro:String(m.abc==null?'':m.abc).trim(),estrMaestro:up(m.estrategia)};
+  });
+  const tot=arr.reduce((a,x)=>a+x[met],0);
+  arr.sort((a,b)=>b[met]-a[met]);
+  let acc=0;
+  arr.forEach(x=>{
+    acc+=x[met];
+    x.pct=tot?x[met]/tot*100:0;x.cum=tot?acc/tot*100:0;
+    x.vol=claseVol(x.cum);x.frec=claseFrec(x.pos);
+    x.mp=mm.mapa[x.mmpp]||0;
+    x.codigo=x.vol+x.frec+x.mp;
+    x.estr=estrategiaDe(x.vol,x.frec,x.mp);
+    x.tnMes=x.peso/nMes;x.tnSem=x.peso/nMes/4;
+  });
+  ST.tubosCalc={fecha:new Date().toISOString(),sig:tubSig(),tipo:o.tipo,eje:o.eje,desde:o.desde,hasta:o.hasta,
+    metrica:P.abcVol.metrica,meses:meses.size,periodo:[...meses].sort(),total:tot,filas:arr};
+  save();rTubos();
+  toast('🔄 Recalculado: <b>'+fmtN(arr.length)+'</b> materiales · '+fmtN(arr.filter(x=>x.estr==='MTS').length)+' MTS · '+
+    fmtN(arr.filter(x=>x.estr==='ATO').length)+' ATO · '+fmtN(arr.filter(x=>x.estr==='MTO').length)+' MTO','ok',5000);
+}
+
+/* ---- Confirmaciones manuales (ABC y estrategia comparten el guardado) ---- */
+function tubMan(k,campo){const o=ST.tubosManual?ST.tubosManual[k]:null;return (o&&o[campo])?o[campo]:'';}
+function tubConf(r,campo){
+  const p=tubPend[r.k];
+  if(p&&p[campo]!==undefined)return p[campo];
+  return tubMan(r.k,campo);
+}
+function tubFinal(r,campo){return tubConf(r,campo)||(campo==='abc'?r.codigo:r.estr);}
+function setTub(k,campo,v){
+  tubPend[k]=tubPend[k]||{};tubPend[k][campo]=v;
+  if((v||'')===tubMan(k,campo))delete tubPend[k][campo];
+  if(!Object.keys(tubPend[k]).length)delete tubPend[k];
+  rTubos();
+}
+function nPendTub(){return Object.keys(tubPend).length;}
+function guardarTubos(){
+  const n=nPendTub();
+  if(!n){toast('No hay cambios pendientes de guardar','warn');return;}
+  ST.tubosManual=ST.tubosManual||{};
+  Object.keys(tubPend).forEach(k=>{
+    const o=ST.tubosManual[k]=ST.tubosManual[k]||{};
+    Object.keys(tubPend[k]).forEach(c=>{if(tubPend[k][c])o[c]=tubPend[k][c];else delete o[c];});
+    if(!Object.keys(o).length)delete ST.tubosManual[k];
+  });
+  tubPend={};save();rTubos();
+  toast('💾 Confirmaciones guardadas en <b>'+n+'</b> material(es)','ok');
+}
+function descartarTubos(){
+  if(!nPendTub()){toast('No hay cambios pendientes','warn');return;}
+  tubPend={};rTubos();toast('Cambios descartados','ok');
+}
+
+function tubFiltradas(){
+  const C=ST.tubosCalc;if(!C)return [];
+  const vol=document.getElementById('fTubVol').value,estr=document.getElementById('fTubEstr').value,
+        dif=document.getElementById('fTubDif').value,q=norm(document.getElementById('fTubQ').value);
+  return C.filas.filter(r=>{
+    if(vol&&r.vol!==vol)return false;
+    if(estr&&r.estr!==estr)return false;
+    const dABC=tubFinal(r,'abc')!==r.abcMaestro,dES=tubFinal(r,'estr')!==r.estrMaestro,
+          man=!!(tubConf(r,'abc')||tubConf(r,'estr'));
+    if(dif==='abc'&&!dABC)return false;
+    if(dif==='estr'&&!dES)return false;
+    if(dif==='any'&&!dABC&&!dES)return false;
+    if(dif==='man'&&!man)return false;
+    if(q){
+      const hay=norm([r.k,r.nombre,r.tipo,r.familia,r.medida,r.mmpp,r.codigo,r.estr].join(' '));
+      if(q.split(' ').some(t=>hay.indexOf(t)<0))return false;
+    }
+    return true;
+  });
+}
+
+const TUB_COLS=[
+  {k:'k',l:'Id Material',stk:1,g:r=>r.k,r:r=>'<b>'+esc(r.k)+'</b>'},
+  {k:'nombre',l:'Nombre Material ⚙',g:r=>r.nombre},
+  {k:'tipo',l:'Tipo ⚙',g:r=>r.tipo,r:r=>r.tipo?'<span class="b bl">'+esc(r.tipo)+'</span>':'—'},
+  {k:'familia',l:'Familia · redondo ⚙',g:r=>r.familia,r:r=>r.familia?'<span class="b g">'+esc(r.familia)+'</span>':'—'},
+  {k:'medida',l:'Medida ⚙',g:r=>r.medida},
+  {k:'espesor',l:'Espesor ⚙',n:1,d:2,g:r=>r.espesor},
+  {k:'acabado',l:'Acabado por defecto ⚙',g:r=>r.acabado},
+  {k:'calidad',l:'Calidad por defecto ⚙',g:r=>r.calidad},
+  {k:'recub',l:'Recubrimiento por defecto ⚙',g:r=>r.recub},
+  {k:'mmpp',l:'MMPP ⚙',g:r=>r.mmpp,r:r=>r.mmpp?'<span class="chip">'+esc(r.mmpp)+'</span>':'—'},
+  {k:'peso',l:'Suma de Peso',n:1,d:0,g:r=>r.peso},
+  {k:'imp',l:'Importe',n:1,d:0,g:r=>r.imp},
+  {k:'pct',l:'%',n:1,d:2,g:r=>r.pct,r:r=>fmtN(r.pct,2)+' %'},
+  {k:'cum',l:'% Acum',n:1,d:2,g:r=>r.cum,r:r=>fmtN(r.cum,2)+' %'},
+  {k:'cli',l:'Recuento distinto de Id Cliente',n:1,d:0,g:r=>r.cli},
+  {k:'pos',l:'Recuento distinto de Pedido_Posicion',n:1,d:0,g:r=>r.pos},
+  {k:'vol',l:'ABC',g:r=>r.vol,r:r=>'<span class="b '+r.vol+'">'+r.vol+'</span>'},
+  {k:'frec',l:'abc',g:r=>r.frec,r:r=>'<span class="b '+up(r.frec)+'">'+r.frec+'</span>'},
+  {k:'mp',l:'MMPP Estándar',n:1,d:0,g:r=>r.mp,r:r=>r.mp?'<span class="b bl">1</span>':'<span class="b gr">0</span>'},
+  {k:'codigo',l:'Concat ABC Nuevo',g:r=>r.codigo,r:r=>'<b style="letter-spacing:1px">'+esc(r.codigo)+'</b>'},
+  {k:'abcMaestro',l:'ABC Maestro',g:r=>r.abcMaestro,r:r=>r.abcMaestro?esc(r.abcMaestro):'<span class="pfix">—</span>'},
+  {k:'cambioAbc',l:'Cambio ABC',n:1,d:0,g:r=>tubFinal(r,'abc')!==r.abcMaestro?1:0,
+   r:r=>tubFinal(r,'abc')!==r.abcMaestro?'<span class="b r" title="Propuesto '+esc(tubFinal(r,'abc'))+' · maestro '+esc(r.abcMaestro||'—')+'">1</span>':'<span class="b gr">0</span>'},
+  {k:'abcConf',l:'ABC Confirmado',g:r=>tubConf(r,'abc'),
+   r:r=>{const c=tubConf(r,'abc');
+     return '<select class="confsel'+(c?' man':'')+'" onchange="setTub(\''+esc(r.k)+'\',\'abc\',this.value)">'+
+       '<option value=""'+(c?'':' selected')+'>('+esc(r.codigo)+')</option>'+
+       ABC_CODES.map(x=>'<option value="'+x+'"'+(c===x?' selected':'')+'>'+x+'</option>').join('')+'</select>';}},
+  {k:'estr',l:'Estrategia',g:r=>r.estr,r:r=>'<span class="b '+ESTR_B[r.estr]+'">'+r.estr+'</span>'},
+  {k:'estrMaestro',l:'Estrategia antigua',g:r=>r.estrMaestro,r:r=>r.estrMaestro?'<span class="b gr">'+esc(r.estrMaestro)+'</span>':'<span class="pfix">—</span>'},
+  {k:'cambioEstr',l:'Cambio Estrategia',n:1,d:0,g:r=>tubFinal(r,'estr')!==r.estrMaestro?1:0,
+   r:r=>tubFinal(r,'estr')!==r.estrMaestro?'<span class="b r" title="Propuesta '+esc(tubFinal(r,'estr'))+' · maestro '+esc(r.estrMaestro||'—')+'">1</span>':'<span class="b gr">0</span>'},
+  {k:'estrConf',l:'Estrategia Confirmada',g:r=>tubConf(r,'estr'),
+   r:r=>{const c=tubConf(r,'estr');
+     return '<select class="confsel'+(c?' man':'')+'" onchange="setTub(\''+esc(r.k)+'\',\'estr\',this.value)">'+
+       '<option value=""'+(c?'':' selected')+'>('+esc(r.estr)+')</option>'+
+       ESTRATEGIAS.map(x=>'<option value="'+x+'"'+(c===x?' selected':'')+'>'+x+'</option>').join('')+'</select>';}},
+  {k:'tnMes',l:'Tn Mes',n:1,d:2,g:r=>r.tnMes},
+  {k:'tnSem',l:'Tn Semana',n:1,d:2,g:r=>r.tnSem}
+];
+
+function rTubos(){
+  const C=ST.tubosCalc,P=PARAM();
+  const meses=uniqSort(ST.pedidos.map(p=>ym(p[document.getElementById('tubEje').value||'fEnt'])));
+  if(!tubInit){tubInit=true;if(C&&C.eje)document.getElementById('tubEje').value=C.eje;}
+  const gv=i=>document.getElementById(i).value;
+  fillSelect('tubTipo',uniqSort(ST.materiales.map(m=>up(m.tipo))),'(todos los tipos)',gv('tubTipo')||(C?C.tipo:'TUBO'));
+  fillSelect('tubDesde',meses,'(desde el principio)',gv('tubDesde')||(C?C.desde:''));
+  fillSelect('tubHasta',meses,'(hasta el final)',gv('tubHasta')||(C?C.hasta:''));
+  document.getElementById('tubRegla').innerHTML='<b>Estrategia propuesta:</b> materia prima no estándar (0) → <span class="b y">MTO</span> · '+
+    'MMPP estándar (1) con volumen A o B y frecuencia a o b → <span class="b g">MTS</span> · resto de casos con MMPP estándar → <span class="b bl">ATO</span>.';
+  const cab=document.getElementById('tubCab'),kpis=document.getElementById('tubKpis'),aviso=document.getElementById('tubAviso');
+  if(!C){
+    aviso.innerHTML='';kpis.innerHTML='';
+    cab.innerHTML='<div class="empty" style="grid-column:1/-1">Todavía no se ha calculado el ABC de producto terminado.</div>';
+    document.querySelector('#tTub thead').innerHTML='';
+    document.querySelector('#tTub tbody').innerHTML='<tr><td class="empty">Pulsa <b>🔄 Recalcular ABC y estrategias</b> para calcularlo con los pedidos y los parámetros actuales.</td></tr>';
+    document.querySelector('#tTub tfoot').innerHTML='';document.getElementById('pgTub').innerHTML='';
+    document.getElementById('tubFecha').textContent='sin calcular';
+    return;
+  }
+  // ---- Cabecera
+  cab.innerHTML=
+    '<div class="u"><div class="ul">Universo</div><div class="uv">'+fmtN(C.filas.length)+'</div><div class="us">materiales de tipo '+esc(C.tipo||'(todos)')+' con ventas</div></div>'+
+    '<div class="u"><div class="ul">Periodo</div><div class="uv">'+fmtN(C.meses)+' meses</div><div class="us">'+(C.periodo.length?esc(C.periodo[0]+' → '+C.periodo[C.periodo.length-1]):'—')+' · por '+(C.eje==='fEnt'?'entrega':'creación')+'</div></div>'+
+    '<div class="u"><div class="ul">ABC por volumen</div><div class="uv">'+(C.metrica==='kg'?'Kg':'€')+'</div><div class="us">A ≤ '+fmtN(P.abcVol.A,1)+' % · B ≤ '+fmtN(P.abcVol.B,1)+' % acumulado</div></div>'+
+    '<div class="u"><div class="ul">abc por pedidos-posición</div><div class="uv">'+fmtN(P.abcPed.c)+' / '+fmtN(P.abcPed.b)+'</div><div class="us">c ≤ '+fmtN(P.abcPed.c)+' · b ≤ '+fmtN(P.abcPed.b)+' · a &gt; '+fmtN(P.abcPed.b)+'</div></div>'+
+    '<div class="u"><div class="ul">MMPP estándar (1)</div><div class="uv">'+fmtN(C.filas.filter(r=>r.mp===1).length)+'</div><div class="us">de '+fmtN(C.filas.length)+' materiales</div></div>';
+  // ---- Avisos
+  const stale=C.sig!==tubSig(),pend=nPendTub();
+  aviso.innerHTML=(stale?'<div class="info-bar" style="background:var(--warning);color:#333">⚠️ <strong>Los pedidos, los parámetros o las confirmaciones de MMPP han cambiado desde el último cálculo.</strong> Pulsa <b>Recalcular ABC y estrategias</b>.</div>':'')+
+    (pend?'<div class="info-bar" style="background:var(--danger)">💾 <strong>'+pend+' material(es) con confirmaciones sin guardar.</strong> El guardado es común para ABC y estrategia.</div>':'');
+  const d=new Date(C.fecha);
+  document.getElementById('tubFecha').textContent='Último cálculo: '+fmtFecha(isoOf(new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()))))+' '+p2(d.getHours())+':'+p2(d.getMinutes());
+  // ---- KPIs
+  const list=tubFiltradas();
+  const dAbc=C.filas.filter(r=>tubFinal(r,'abc')!==r.abcMaestro).length;
+  const dEs=C.filas.filter(r=>tubFinal(r,'estr')!==r.estrMaestro).length;
+  const man=C.filas.filter(r=>tubConf(r,'abc')||tubConf(r,'estr')).length;
+  const kg=C.filas.reduce((a,r)=>a+r.peso,0);
+  kpis.innerHTML=
+    '<div class="kc"><div class="kl">Materiales</div><div class="kv">'+fmtN(C.filas.length)+'</div><div class="ks">visibles: '+fmtN(list.length)+'</div></div>'+
+    '<div class="kc s"><div class="kl">Peso del periodo</div><div class="kv">'+fmtK(kg)+'</div><div class="ks">kg · '+fmtK(kg/Math.max(1,C.meses))+' kg/mes</div></div>'+
+    '<div class="kc w"><div class="kl">Cambios de ABC</div><div class="kv">'+fmtN(dAbc)+'</div><div class="ks">no coinciden con el maestro</div></div>'+
+    '<div class="kc d"><div class="kl">Cambios de estrategia</div><div class="kv">'+fmtN(dEs)+'</div><div class="ks">respecto a la del maestro</div></div>'+
+    '<div class="kc b"><div class="kl">Confirmaciones manuales</div><div class="kv">'+fmtN(man)+'</div><div class="ks">'+fmtN(pend)+' sin guardar</div></div>';
+  // ---- Tabla
+  document.querySelector('#tTub thead').innerHTML='<tr>'+TUB_COLS.map(c=>
+    '<th'+(c.n?' class="num'+(c.stk?' stk':'')+'"':(c.stk?' class="stk"':''))+'>'+esc(c.l)+'</th>').join('')+'</tr>';
+  const tot=Math.max(1,Math.ceil(list.length/TUB_PP));tubPage=Math.min(tubPage,tot);
+  const rows=list.slice((tubPage-1)*TUB_PP,tubPage*TUB_PP);
+  document.querySelector('#tTub tbody').innerHTML=list.length?rows.map(r=>{
+    const p=!!tubPend[r.k];
+    return '<tr'+(p?' class="pend"':'')+'>'+TUB_COLS.map(c=>{
+      const v=c.r?c.r(r):(c.n?fmtN(c.g(r),c.d):esc(c.g(r)||'—'));
+      return '<td'+(c.n?' class="num'+(c.stk?' stk':'')+'"':(c.stk?' class="stk"':''))+'>'+v+'</td>';
+    }).join('')+'</tr>';
+  }).join(''):'<tr><td colspan="'+TUB_COLS.length+'" class="empty">Ningún material coincide con los filtros.</td></tr>';
+  const iPeso=TUB_COLS.findIndex(c=>c.k==='peso');
+  const kgv=list.reduce((a,r)=>a+r.peso,0),impv=list.reduce((a,r)=>a+r.imp,0);
+  document.querySelector('#tTub tfoot').innerHTML=list.length?
+    '<tr><td colspan="'+iPeso+'">TOTAL vista ('+fmtN(list.length)+' materiales)</td>'+
+    '<td class="num">'+fmtN(kgv)+'</td><td class="num">'+fmtN(impv)+'</td>'+
+    '<td colspan="'+(TUB_COLS.length-iPeso-2)+'"></td></tr>':'';
+  document.getElementById('pgTub').innerHTML=pager(list.length,tubPage,TUB_PP,'tubPage','rTubos');
+}
+
+function exportTubos(){
+  const C=ST.tubosCalc;
+  if(!C){toast('Calcula primero el ABC de producto terminado','warn');return;}
+  dlRows(tubFiltradas().map(r=>({
+    'Id Material':r.k,'Nombre Material':r.nombre,'Tipo':r.tipo,'Familia (redondo)':r.familia,'Medida':r.medida,
+    'Espesor':r.espesor,'Acabado por defecto':r.acabado,'Calidad por defecto':r.calidad,'Recubrimiento por defecto':r.recub,
+    'MMPP':r.mmpp,'Suma de Peso':r.peso,'Importe':r.imp,'%':Math.round(r.pct*100)/100,'% Acum':Math.round(r.cum*100)/100,
+    'Recuento distinto de Id Cliente':r.cli,'Recuento distinto de Pedido_Posicion':r.pos,
+    'ABC':r.vol,'abc':r.frec,'MMPP Estandar':r.mp,'Concat ABC Nuevo':r.codigo,'ABC Maestro':r.abcMaestro,
+    'Cambio ABC':tubFinal(r,'abc')!==r.abcMaestro?1:0,'ABC Confirmado':tubConf(r,'abc'),'ABC Final':tubFinal(r,'abc'),
+    'Estrategia':r.estr,'Estrategia antigua':r.estrMaestro,'Cambio Estrategia':tubFinal(r,'estr')!==r.estrMaestro?1:0,
+    'Estrategia Confirmada':tubConf(r,'estr'),'Estrategia Final':tubFinal(r,'estr'),
+    'Tn Mes':Math.round(r.tnMes*100)/100,'Tn Semana':Math.round(r.tnSem*100)/100
+  })),'ABC_Estrategias_Tubos_AGSA.xlsx','Calculos Tubos');
+}
+
+/* ============================================================
    INICIO · DATOS DEMO · ARRANQUE
    ============================================================ */
 function rInicio(){
@@ -2298,7 +2595,7 @@ function loadDemo(){
     recub:['NINGUNO','Z275','PINTURA','IMPRIMACION'],
     galv:['Z140','Z200','Z275','NO APLICA'],
     variante:['ESTANDAR','ESPECIAL'],clasif:['ESTRUCTURAL','DECORATIVO','INDUSTRIAL'],
-    abc:['A','B','C'],estr:['MTS','ATO','MTO']
+    abc:['Aa1','Aa0','Ab1','Ba1','Bb1','Bb0','Bc1','Ca1','Cb0','Cc1','Cc0'],estr:['MTS','ATO','MTO']
   };
   const catMed=[];CAT_FAMILIAS.forEach(row=>row.slice(1).forEach(m=>catMed.push(m)));
   const tubos=[],usadas={};
@@ -2363,8 +2660,8 @@ function loadDemo(){
       }
     }
   }
-  ST.materiales=mats;ST.pedidos=peds;ST.mmppManual={};ST.mmppCalc=null;
-  invalidateMat();save();recalcMMPP();refreshAll();
+  ST.materiales=mats;ST.pedidos=peds;ST.mmppManual={};ST.mmppCalc=null;ST.tubosManual={};ST.tubosCalc=null;
+  invalidateMat();save();recalcMMPP();refreshAll();recalcTubos();
   toast('🎭 Datos demo: <b>'+mats.length+'</b> materiales, <b>'+ST.familias.length+'</b> redondos, <b>'+ST.reglas.length+'</b> medidas y <b>'+peds.length.toLocaleString('es-ES')+'</b> líneas de pedido','ok',6000);
 }
 

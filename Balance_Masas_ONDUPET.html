@@ -145,12 +145,6 @@ td.hl{background:#fffbe6;}
 <div class="hd">
   <h2 id="pt">Resumen</h2>
   <div class="cfg">
-    <label>Sobrante teórico
-      <select id="cfgModo" onchange="setCfg()">
-        <option value="plan">Planificado − Fabricado</option>
-        <option value="asignado">Asignado − Fabricado</option>
-      </select>
-    </label>
     <label>Tolerancia ± <input type="number" id="cfgTol" min="0" step="0.5" onchange="setCfg()"> %</label>
   </div>
 </div>
@@ -162,8 +156,8 @@ td.hl{background:#fffbe6;}
   <div class="cd" id="avisosCd"><h3>⚠️ Avisos de validación</h3><ul class="av" id="avisos"></ul></div>
   <div class="cd">
     <h3>⚖️ Balance por orden de fabricación</h3>
-    <div class="sub">Consumo neto = asignado (teórico + exceso) − devolución (compensación de sobrante + reparto por % de consumo). Desviación = consumo neto − consumo teórico de lo fabricado.</div>
-    <div class="tb"><span class="sp"></span><button class="btn bg bsm" onclick="exportarCSV('ordenes')">⬇ CSV órdenes</button><button class="btn bg bsm" onclick="exportarCSV('lotes')">⬇ CSV lote ↔ pedido</button></div>
+    <div class="sub">Consumo final = reparto (hasta teórico + exceso) + consumo extra − devolución sobrante − devolución ponderada. Desviación = consumo final − teórico notificado (cantidad notificada × LdM).</div>
+    <div class="tb"><span class="sp"></span><button class="btn bg bsm" onclick="exportarCSV('ordenes')">⬇ CSV órdenes</button><button class="btn bg bsm" onclick="exportarCSV('lotes')">⬇ CSV pedido × lote</button></div>
     <div class="tw"><table class="cp" id="tOrd"></table></div>
   </div>
   <div class="cd">
@@ -201,13 +195,13 @@ td.hl{background:#fffbe6;}
 <!-- TRAZABILIDAD -->
 <div class="pg" id="p-traz">
   <div class="cd">
-    <h3>📦 Lotes consumidos por pedido</h3>
-    <div class="sub">Consumo neto (tras devoluciones) de cada lote imputado a cada pedido / OF.</div>
-    <div class="tw"><table id="tTrazPed"></table></div>
+    <h3>📦 Detalle por pedido y lote</h3>
+    <div class="sub">Una fila por pedido y lote, con los mismos campos que el cálculo en Excel. El teórico notificado de cada pedido se reparte entre sus lotes en el orden en que los consumió; el último lote se queda con la diferencia. Cantidades en kg.</div>
+    <div class="tw"><table class="cp" id="tTrazPed"></table></div>
   </div>
   <div class="cd">
     <h3>🧻 Destino de cada lote</h3>
-    <div class="tw"><table id="tTrazLote"></table></div>
+    <div class="tw"><table class="cp" id="tTrazLote"></table></div>
   </div>
 </div>
 
@@ -237,31 +231,42 @@ td.hl{background:#fffbe6;}
     <h3>📘 Cómo se calcula el balance</h3>
     <ol class="steps">
       <li><b>Secuencia y cadenas.</b> Las órdenes se ordenan por máquina y secuencia. Una <b>cadena</b> agrupa las órdenes consecutivas que llevan la misma bobina en su lista de materiales; la <b>última orden</b> de la cadena es aquella cuya siguiente orden lleva otra bobina (o no tiene siguiente).</li>
-      <li><b>Consumo teórico.</b> Por orden: <span class="f">Teórico planificado = cant. planificada × g/ud ÷ 1000</span> y <span class="f">Teórico fabricado = cant. fabricada × g/ud ÷ 1000</span> (kg).</li>
+      <li><b>Consumo teórico.</b> Por orden: <span class="f">Teórico planificado = cant. planificada × g/ud ÷ 1000</span> y <span class="f">Teórico notificado = cant. notificada × g/ud ÷ 1000</span> (kg).</li>
       <li><b>Reparto de consumos.</b> Los consumos se procesan por fecha. Cada bobina se consume entera en la orden activa en máquina y sus kg se reparten, en orden de secuencia, entre esa orden y las siguientes de la cadena, rellenando el <i>teórico planificado pendiente</i> de cada una. Si al llegar al final de la cadena aún quedan kg, todo el <b>exceso</b> se imputa a la última orden. Cada lote queda así asociado a la OF y a su pedido.</li>
-      <li><b>Sobrante teórico por orden.</b> Es lo que cada orden debería devolver según el teórico:
+      <li><b>Notificado por lote.</b> El teórico notificado de cada pedido se reparte entre los lotes que consumió, en el orden en que los consumió: cada lote hasta lo que se le repartió y el último lote se queda con la diferencia (en más o en menos).</li>
+      <li><b>Sobrante teórico</b> (por pedido y lote): <span class="f">reparto de consumo − teórico notificado</span>. Positivo: se le repartió más de lo que justifica lo notificado. Negativo: notificó más de lo que se le repartió.</li>
+      <li><b>Devoluciones.</b> Cada devolución de un lote se reparte solo entre los pedidos que consumieron ese lote:
         <ul>
-          <li><span class="f">Planificado − Fabricado</span> (por defecto): <span class="f">teórico planificado − teórico fabricado</span>. Si se fabrica menos de lo planificado se espera más devolución; si se fabrica más, el sobrante es negativo y la orden no recibe compensación.</li>
-          <li><span class="f">Asignado − Fabricado</span> (alternativa): <span class="f">consumo asignado − teórico fabricado</span>. Incluye además el exceso imputado a la última orden de la cadena.</li>
+          <li><b>Consumo extra:</b> un sobrante negativo nunca se convierte en devolución negativa. Se suma al consumo del pedido como <b>consumo extra</b>, y esos kg se añaden a lo que hay que devolver: <span class="f">a devolver = devolución + consumo extra</span>.</li>
+          <li><b>Devolución sobrante:</b> primero se compensan los sobrantes positivos, en proporción a su sobrante y sin superar lo que consumió cada pedido de ese lote.</li>
+          <li><b>Devolución ponderada:</b> el resto se reparte según el % del <b>reparto de consumo</b> del lote. Si un pedido se queda sin consumo de ese lote, su parte pasa a los demás.</li>
+          <li>Si lo que hay que devolver supera el consumo del lote, el exceso se marca como <b>no imputable</b>.</li>
         </ul>
       </li>
-      <li><b>Devoluciones.</b> Tras repartir el consumo, cada devolución de un lote (parte de la bobina que se vuelve a dar de alta) se reparte solo entre las órdenes que consumieron ese lote:
-        <ul>
-          <li><b>Fase A — compensación del sobrante:</b> primero se compensa el sobrante teórico positivo pendiente de cada orden, en proporción a su sobrante y sin superar lo que consumió de ese lote.</li>
-          <li><b>Fase B — reparto por % de consumo:</b> el resto se reparte según el % que cada orden consumió del lote. Si una orden se queda sin consumo neto de ese lote, su parte pasa al resto de órdenes.</li>
-          <li>Si la devolución supera el consumo neto del lote, el exceso se marca como <b>no imputable</b>.</li>
-        </ul>
-      </li>
-      <li><b>Resultado.</b> <span class="f">Consumo neto = asignado − devuelto</span>; <span class="f">Desviación = consumo neto − teórico fabricado</span>. El cuadre comprueba que <span class="f">kg de bobinas consumidas = Σ asignado</span> y <span class="f">kg devueltos = Σ devolución imputada + no imputable</span>.</li>
+      <li><b>Resultado.</b> <span class="f">Consumo final = reparto + consumo extra − devolución sobrante − devolución ponderada</span>; <span class="f">Desviación = consumo final − teórico notificado</span>. El cuadre comprueba que <span class="f">bobinas consumidas = Σ reparto</span> y que <span class="f">devolución + consumo extra = Σ devolución sobrante + Σ devolución ponderada + no imputable</span>.</li>
     </ol>
+  </div>
+  <div class="cd">
+    <h3>🧮 Ejemplo (máquina T3 de la demo)</h3>
+    <div class="sub">Lote 1: 1.000 kg. Lote 2: 5.500 kg consumidos y 1.000 kg devueltos. El pedido 2 notifica más de lo planificado en el lote 2, así que tiene sobrante negativo y recibe 1.000 kg de consumo extra. Eso sube lo que hay que devolver a 1.000 + 1.000 = 2.000 kg: 1.500 compensan el sobrante del pedido 2 y los 500 restantes se reparten por el reparto de consumo (2.000 / 5.500 y 3.500 / 5.500).</div>
+    <div class="tw"><table class="cp">
+      <thead><tr><th>Pedido</th><th>Lote</th><th class="n">Teórico planif.</th><th class="n">Teórico notif.</th><th class="n">Reparto</th><th class="n">Sobrante</th><th class="n">Consumo extra</th><th class="n">Dev. sobrante</th><th class="n">Dev. ponderada</th><th class="n">Consumo final</th></tr></thead>
+      <tbody>
+        <tr><td>PED-0001</td><td>LOTE-1</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">1.000</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n"><b>1.000</b></td></tr>
+        <tr><td>PED-0001</td><td>LOTE-2</td><td class="n">2.000</td><td class="n">3.000</td><td class="n">2.000</td><td class="n">−1.000</td><td class="n"><b>1.000</b></td><td class="n">0</td><td class="n">181,8</td><td class="n"><b>2.818,2</b></td></tr>
+        <tr><td>PED-0002</td><td>LOTE-2</td><td class="n">2.000</td><td class="n">2.000</td><td class="n">3.500</td><td class="n">+1.500</td><td class="n">0</td><td class="n"><b>1.500</b></td><td class="n">318,2</td><td class="n"><b>1.681,8</b></td></tr>
+        <tr class="tot"><td colspan="2">Lote 2</td><td class="n">4.000</td><td class="n">5.000</td><td class="n">5.500</td><td class="n">+500</td><td class="n">1.000</td><td class="n">1.500</td><td class="n">500</td><td class="n">4.500</td></tr>
+      </tbody>
+    </table></div>
   </div>
   <div class="cd">
     <h3>📝 Supuestos y casos límite</h3>
     <ul class="av">
+      <li class="info">La compensación se hace al procesar la devolución de un lote. Un lote sin devolución no genera consumo extra ni devolución sobrante: se queda con el reparto inicial.</li>
       <li class="info">El reparto empieza en la orden donde se declara el consumo: nunca imputa a órdenes anteriores de la cadena. Si a una orden no le llega consumo suficiente para su teórico planificado, aparece un aviso (posible consumo sin declarar).</li>
       <li class="info">El material del lote debe coincidir con la bobina de la LdM de la OF donde se consume; si no, el consumo se ignora y se avisa.</li>
-      <li class="info">Si un lote se consume más de una vez (por ejemplo, tras devolverlo y volver a cargarlo), los consumos se acumulan. Todas las devoluciones se procesan después de todos los consumos.</li>
-      <li class="info">Con varias devoluciones del mismo lote, cada una parte del sobrante pendiente y del consumo neto que dejó la anterior.</li>
+      <li class="info">Si un lote se consume más de una vez, los consumos se acumulan. Todas las devoluciones se procesan después de todos los consumos.</li>
+      <li class="info">Con varias devoluciones del mismo lote, el consumo extra se aplica en la primera y cada una parte del sobrante pendiente y del consumo que dejó la anterior.</li>
     </ul>
   </div>
 </div>
@@ -316,12 +321,11 @@ function ordenarEventos(lista){
   });
 }
 
-function calcularBalance(datos,cfg){
-  cfg=cfg||{};
-  var modo=cfg.modo==='asignado'?'asignado':'plan';
+function calcularBalance(datos){
   var avisos=[];
   function aviso(nivel,msg){avisos.push({nivel:nivel,msg:msg});}
   function txt(v){return String(v==null?'':v).trim();}
+  function suma(l,f){return l.reduce(function(s,x){return s+f(x);},0);}
 
   /* 1. Órdenes, secuencia por máquina y cadenas de bobina */
   var ords=[],porOf={};
@@ -331,9 +335,9 @@ function calcularBalance(datos,cfg){
     if(porOf[of]){aviso('error','OF '+of+' duplicada: se ignora la fila '+(i+1)+'.');return;}
     var o={of:of,pedido:txt(r.pedido),articulo:txt(r.articulo),maquina:txt(r.maquina)||'—',seq:num(r.seq),
       bobina:txt(r.bobina),gUd:num(r.gUd),cantPlan:num(r.cantPlan),cantFab:num(r.cantFab),idx:i,
-      consTeo:0,consExc:0,devComp:0,devPct:0,lotes:{}};
+      consTeo:0,consExc:0,consExtra:0,devComp:0,devPct:0,filas:[]};
     o.tPlan=o.cantPlan*o.gUd/1000;
-    o.tReal=o.cantFab*o.gUd/1000;
+    o.tReal=o.cantFab*o.gUd/1000; // teórico de lo notificado
     o.pend=o.tPlan;
     if(!o.bobina)aviso('warn','OF '+of+' sin bobina en la lista de materiales.');
     ords.push(o);porOf[of]=o;
@@ -354,9 +358,14 @@ function calcularBalance(datos,cfg){
 
   /* 2. Reparto de consumos: rellena el teórico planificado pendiente; el exceso, a la última orden de la cadena */
   var lotes={},listaLotes=[],trazaCons=[],totCons=0;
-  function imputar(L,o,kg){
+  // Una fila por pedido/OF y lote, en el orden en que el lote se imputa a la OF
+  function imputar(L,o,kg,tipo){
     var p=L.porOf[o.of];
-    if(!p){p=L.porOf[o.of]={o:o,bruto:0,neto:0,devComp:0,devPct:0};L.ofs.push(o.of);o.lotes[L.lote]=p;}
+    if(!p){
+      p=L.porOf[o.of]={L:L,o:o,teo:0,exc:0,bruto:0,notif:0,sob:0,sobPend:0,extraPend:0,extra:0,devComp:0,devPct:0,neto:0};
+      L.filas.push(p);o.filas.push(p);
+    }
+    if(tipo==='exceso')p.exc+=kg;else p.teo+=kg;
     p.bruto+=kg;p.neto+=kg;
   }
   ordenarEventos(datos.consumos||[]).forEach(function(x){
@@ -369,7 +378,7 @@ function calcularBalance(datos,cfg){
     if(mat!==o.bobina){aviso('error','Lote '+lote+' ('+mat+') consumido en '+of+', cuya LdM lleva '+o.bobina+'. Se ignora.');return;}
     if(!(kg>0)){aviso('error','Consumo del lote '+lote+' con peso no válido. Se ignora.');return;}
     var L=lotes[lote];
-    if(!L){L=lotes[lote]={lote:lote,bobina:mat,consumido:0,devuelto:0,noImputado:0,porOf:{},ofs:[]};listaLotes.push(L);}
+    if(!L){L=lotes[lote]={lote:lote,bobina:mat,consumido:0,devuelto:0,extra:0,noImputado:0,porOf:{},filas:[]};listaLotes.push(L);}
     else if(L.bobina!==mat){aviso('error','Lote '+lote+' registrado con dos materiales distintos ('+L.bobina+' / '+mat+'). Se ignora el consumo de la fila '+n+'.');return;}
     else aviso('info','Lote '+lote+' consumido más de una vez: se acumulan sus consumos.');
     L.consumido+=kg;totCons+=kg;
@@ -378,13 +387,13 @@ function calcularBalance(datos,cfg){
       var oj=cad.ordenes[j],t=Math.min(oj.pend,rest);
       if(t>EPS){
         pasos.push({o:oj,pendAntes:oj.pend,kg:t,tipo:'teorico',pendDesp:oj.pend-t});
-        oj.pend-=t;oj.consTeo+=t;rest-=t;imputar(L,oj,t);
+        oj.pend-=t;oj.consTeo+=t;rest-=t;imputar(L,oj,t,'teorico');
       }
     }
     if(rest>EPS){
       var u=cad.ultima;
       pasos.push({o:u,pendAntes:u.pend,kg:rest,tipo:'exceso',pendDesp:u.pend});
-      u.consExc+=rest;imputar(L,u,rest);
+      u.consExc+=rest;imputar(L,u,rest,'exceso');
     }
     trazaCons.push({n:n,fecha:txt(c.fecha),lote:lote,bobina:mat,kg:kg,o:o,cadena:cad,pasos:pasos});
   });
@@ -394,68 +403,87 @@ function calcularBalance(datos,cfg){
       aviso('warn','OF '+o.of+': el consumo repartido ('+f1(o.consBruto)+' kg) no cubre su teórico planificado ('+f1(o.tPlan)+' kg). Faltan '+f1(o.pend)+' kg: ¿consumo de bobina sin declarar?');
   });
 
-  /* 3. Sobrante teórico por orden */
+  /* 3. Teórico notificado por lote y sobrante teórico = reparto − teórico notificado */
   ords.forEach(function(o){
-    o.sobrante=modo==='asignado'?o.consBruto-o.tReal:o.tPlan-o.tReal;
-    o.sobPend=Math.max(0,o.sobrante);
+    var rest=o.tReal;
+    o.filas.forEach(function(p,i){
+      p.notif=i===o.filas.length-1?rest:Math.min(rest,p.bruto); // el último lote se queda con la diferencia
+      rest-=p.notif;
+      p.sob=p.bruto-p.notif;
+      p.sobPend=Math.max(0,p.sob);
+      p.extraPend=Math.max(0,-p.sob);
+    });
+    o.sobrante=o.consBruto-o.tReal;
   });
 
-  /* 4. Devoluciones: A) compensar sobrante teórico, B) resto por % de consumo del lote */
-  var trazaDev=[],totDev=0,totNoImp=0;
+  /* 4. Devoluciones por lote: consumo extra (sobrante negativo), devolución sobrante y devolución ponderada */
+  var trazaDev=[],totDev=0,totExtra=0,totNoImp=0;
   ordenarEventos(datos.devoluciones||[]).forEach(function(x){
     var d=x.e,n=x.i+1,lote=txt(d.lote),kg=num(d.kg);
     if(!lote||!(kg>0)){aviso('error','Devolución (fila '+n+'): lote o peso no válido. Se ignora.');return;}
     var L=lotes[lote];
     if(!L){aviso('error','Devolución del lote '+lote+': el lote no tiene consumos registrados. Se ignora.');return;}
     totDev+=kg;L.devuelto+=kg;
-    var part=L.ofs.map(function(of){return L.porOf[of];});
-    var antes=part.map(function(p){return {neto:p.neto,sob:p.o.sobPend};});
-    var brutoTot=part.reduce(function(s,p){return s+p.bruto;},0);
+    var filas=L.filas,netoAntes=filas.map(function(p){return p.neto;}),brutoTot=suma(filas,function(p){return p.bruto;});
 
-    var itA=part.map(function(p){return {id:p.o.of,peso:p.o.sobPend,tope:Math.min(p.o.sobPend,p.neto)};});
-    var kA=Math.min(kg,itA.reduce(function(s,it){return s+it.tope;},0));
+    // Sobrante negativo: nunca devolución negativa, se suma como consumo extra del pedido.
+    // Esos kg salen del mismo lote, así que se añaden a lo que hay que devolver.
+    var extra=filas.map(function(p){var e=p.extraPend;p.extraPend=0;p.extra+=e;p.neto+=e;p.o.consExtra+=e;return e;});
+    var kE=suma(extra,function(e){return e;});
+    L.extra+=kE;totExtra+=kE;
+    var aDev=kg+kE;
+
+    // Devolución sobrante: compensa los sobrantes positivos
+    var itA=filas.map(function(p){return {id:p.o.of,peso:p.sobPend,tope:Math.min(p.sobPend,p.neto)};});
+    var kA=Math.min(aDev,suma(itA,function(it){return it.tope;}));
     var rA=prorratear(kA,itA);
-    part.forEach(function(p){var a=rA.asig[p.o.of];p.o.sobPend-=a;p.neto-=a;p.devComp+=a;p.o.devComp+=a;});
+    filas.forEach(function(p){var a=rA.asig[p.o.of];p.sobPend-=a;p.neto-=a;p.devComp+=a;p.o.devComp+=a;});
 
-    var kB=kg-kA;
-    var rB=prorratear(kB,part.map(function(p){return {id:p.o.of,peso:p.bruto,tope:p.neto};}));
-    part.forEach(function(p){var b=rB.asig[p.o.of];p.neto-=b;p.devPct+=b;p.o.devPct+=b;});
+    // Devolución ponderada: el resto, por % del reparto de consumo del lote
+    var kB=aDev-kA;
+    var rB=prorratear(kB,filas.map(function(p){return {id:p.o.of,peso:p.bruto,tope:p.neto};}));
+    filas.forEach(function(p){var b=rB.asig[p.o.of];p.neto-=b;p.devPct+=b;p.o.devPct+=b;});
     if(rB.sinAsignar>EPS){
       L.noImputado+=rB.sinAsignar;totNoImp+=rB.sinAsignar;
-      aviso('error','Devolución del lote '+lote+': '+f1(rB.sinAsignar)+' kg superan el consumo neto pendiente del lote y no se pueden imputar.');
+      aviso('error','Devolución del lote '+lote+': '+f1(rB.sinAsignar)+' kg superan el consumo pendiente del lote y no se pueden imputar.');
     }
-    trazaDev.push({n:n,fecha:txt(d.fecha),lote:lote,bobina:L.bobina,kg:kg,kA:kA,kB:kB,noImp:rB.sinAsignar,
-      filas:part.map(function(p,i){return {o:p.o,bruto:p.bruto,pct:brutoTot>0?p.bruto/brutoTot*100:0,
-        sobrante:p.o.sobrante,sobAntes:antes[i].sob,compA:rA.asig[p.o.of],compB:rB.asig[p.o.of],
-        netoAntes:antes[i].neto,netoDesp:p.neto};})});
+    trazaDev.push({n:n,fecha:txt(d.fecha),lote:lote,bobina:L.bobina,kg:kg,kE:kE,aDev:aDev,kA:kA,kB:kB,noImp:rB.sinAsignar,
+      filas:filas.map(function(p,i){return {o:p.o,bruto:p.bruto,pct:brutoTot>0?p.bruto/brutoTot*100:0,notif:p.notif,sob:p.sob,
+        extra:extra[i],compA:rA.asig[p.o.of],compB:rB.asig[p.o.of],netoAntes:netoAntes[i],netoDesp:p.neto};})});
   });
 
   /* 5. Resultados */
-  var tot={consumido:totCons,devuelto:totDev,noImputado:totNoImp,tPlan:0,tReal:0,consBruto:0,devOrd:0,consNeto:0};
+  var tot={consumido:totCons,devuelto:totDev,extra:totExtra,noImputado:totNoImp,tPlan:0,tReal:0,consBruto:0,devOrd:0,consNeto:0};
   ords.forEach(function(o){
     o.devTotal=o.devComp+o.devPct;
-    o.consNeto=o.consBruto-o.devTotal;
+    o.consNeto=o.consBruto+o.consExtra-o.devTotal;
     o.desv=o.consNeto-o.tReal;
     o.desvPct=o.tReal>EPS?o.desv/o.tReal*100:null;
     o.gUdReal=o.cantFab>0?o.consNeto*1000/o.cantFab:null;
+    o.filas.forEach(function(p){p.desv=p.neto-p.notif;p.desvPct=p.notif>EPS?p.desv/p.notif*100:null;});
     tot.tPlan+=o.tPlan;tot.tReal+=o.tReal;tot.consBruto+=o.consBruto;tot.devOrd+=o.devTotal;tot.consNeto+=o.consNeto;
   });
   tot.desv=tot.consNeto-tot.tReal;
   tot.desvPct=tot.tReal>EPS?tot.desv/tot.tReal*100:null;
   tot.cuadreCons=Math.abs(tot.consumido-tot.consBruto)<0.01;
-  tot.cuadreDev=Math.abs(tot.devuelto-tot.devOrd-tot.noImputado)<0.01;
+  tot.cuadreDev=Math.abs(tot.devuelto+tot.extra-tot.devOrd-tot.noImputado)<0.01;
+  listaLotes.forEach(function(L){
+    L.notif=suma(L.filas,function(p){return p.notif;});
+    L.neto=suma(L.filas,function(p){return p.neto;});
+    L.desvPct=L.notif>EPS?(L.neto-L.notif)/L.notif*100:null;
+  });
   cadenas.forEach(function(c){
-    var s={tPlan:0,tReal:0,consBruto:0,consExc:0,devTotal:0,consNeto:0},ls={};
+    var s={tPlan:0,tReal:0,consBruto:0,consExc:0,consExtra:0,devTotal:0,consNeto:0},ls={};
     c.ordenes.forEach(function(o){
-      ['tPlan','tReal','consBruto','consExc','devTotal','consNeto'].forEach(function(k){s[k]+=o[k];});
-      Object.keys(o.lotes).forEach(function(l){ls[l]=1;});
+      Object.keys(s).forEach(function(k){s[k]+=o[k];});
+      o.filas.forEach(function(p){ls[p.L.lote]=1;});
     });
     s.lotes=Object.keys(ls);
     s.desv=s.consNeto-s.tReal;
     s.desvPct=s.tReal>EPS?s.desv/s.tReal*100:null;
     c.tot=s;
   });
-  return {modo:modo,ordenes:ords,cadenas:cadenas,lotes:listaLotes,trazaCons:trazaCons,trazaDev:trazaDev,avisos:avisos,tot:tot};
+  return {ordenes:ords,cadenas:cadenas,lotes:listaLotes,trazaCons:trazaCons,trazaDev:trazaDev,avisos:avisos,tot:tot};
 }
 /* ===================== FIN MOTOR DE CÁLCULO ===================== */
 
@@ -472,9 +500,12 @@ function datosDemo(){
       {maquina:'T1',seq:4,of:'OF-26104',pedido:'PED-5510',articulo:'Tapa Ø115',bobina:'LAM-PET-300x560',gUd:14,cantPlan:12000,cantFab:12000},
       {maquina:'T1',seq:5,of:'OF-26105',pedido:'PED-5512',articulo:'Tapa Ø95',bobina:'LAM-PET-300x560',gUd:14,cantPlan:16000,cantFab:15000},
       {maquina:'T2',seq:1,of:'OF-26201',pedido:'PED-5520',articulo:'Envase 1000 cc',bobina:'LAM-PET-500x800',gUd:25,cantPlan:30000,cantFab:30000},
-      {maquina:'T2',seq:2,of:'OF-26202',pedido:'PED-5521',articulo:'Envase 750 cc',bobina:'LAM-PET-500x800',gUd:25,cantPlan:8000,cantFab:7000},
+      {maquina:'T2',seq:2,of:'OF-26202',pedido:'PED-5521',articulo:'Envase 750 cc',bobina:'LAM-PET-500x800',gUd:25,cantPlan:8000,cantFab:9000},
       {maquina:'T2',seq:3,of:'OF-26203',pedido:'PED-5524',articulo:'Envase 500 cc',bobina:'LAM-PET-500x800',gUd:20,cantPlan:5000,cantFab:5000},
-      {maquina:'T2',seq:4,of:'OF-26204',pedido:'PED-5530',articulo:'Bandeja 187x137',bobina:'LAM-PET-450x700',gUd:18,cantPlan:10000,cantFab:9800}
+      {maquina:'T2',seq:4,of:'OF-26204',pedido:'PED-5530',articulo:'Bandeja 187x137',bobina:'LAM-PET-450x700',gUd:18,cantPlan:10000,cantFab:9800},
+      // T3 reproduce el ejemplo de Excel: pedido 1 notifica 4.000 kg teóricos sobre 3.000 planificados
+      {maquina:'T3',seq:1,of:'OF-26301',pedido:'PED-0001',articulo:'Ejemplo Excel · pedido 1',bobina:'LAM-PET-600x900',gUd:20,cantPlan:150000,cantFab:200000},
+      {maquina:'T3',seq:2,of:'OF-26302',pedido:'PED-0002',articulo:'Ejemplo Excel · pedido 2',bobina:'LAM-PET-600x900',gUd:20,cantPlan:100000,cantFab:100000}
     ],
     consumos:[
       {fecha:'2026-09-28T06:05',lote:'L-240911',bobina:'LAM-PET-450x700',kg:600,of:'OF-26101'},
@@ -483,14 +514,17 @@ function datosDemo(){
       {fecha:'2026-09-28T06:00',lote:'L-240915',bobina:'LAM-PET-500x800',kg:420,of:'OF-26201'},
       {fecha:'2026-09-28T11:30',lote:'L-240916',bobina:'LAM-PET-500x800',kg:410,of:'OF-26201'},
       {fecha:'2026-09-29T07:15',lote:'L-240917',bobina:'LAM-PET-500x800',kg:400,of:'OF-26202'},
-      {fecha:'2026-09-30T06:00',lote:'L-240913',bobina:'LAM-PET-450x700',kg:150,of:'OF-26204'}
+      {fecha:'2026-09-30T06:00',lote:'L-240913',bobina:'LAM-PET-450x700',kg:150,of:'OF-26204'},
+      {fecha:'2026-10-01T06:00',lote:'LOTE-1',bobina:'LAM-PET-600x900',kg:1000,of:'OF-26301'},
+      {fecha:'2026-10-01T09:00',lote:'LOTE-2',bobina:'LAM-PET-600x900',kg:5500,of:'OF-26301'}
     ],
     devoluciones:[
       {fecha:'2026-09-28T22:00',lote:'L-240912',kg:130},
       {fecha:'2026-09-29T21:30',lote:'L-240930',kg:90},
-      {fecha:'2026-09-29T22:15',lote:'L-240917',kg:150}
+      {fecha:'2026-09-29T22:15',lote:'L-240917',kg:150},
+      {fecha:'2026-10-01T22:00',lote:'LOTE-2',kg:1000}
     ],
-    cfg:{modo:'plan',tol:3}
+    cfg:{tol:3}
   };
 }
 
@@ -499,12 +533,12 @@ function datosDemo(){
    INTERFAZ
    ===================================================================== */
 var ST=null,RES=null,TAB='ordenes';
-var LS_KEY='ondupet_balance_masas_v1';
+var LS_KEY='ondupet_balance_masas_v2';
 var COLS={
   ordenes:[
     {k:'maquina',l:'Máquina'},{k:'seq',l:'Secuencia',t:'n'},{k:'of',l:'OF'},{k:'pedido',l:'Pedido'},
     {k:'articulo',l:'Artículo',w:170},{k:'bobina',l:'Bobina (LdM)',w:150},{k:'gUd',l:'Consumo LdM (g/ud)',t:'n'},
-    {k:'cantPlan',l:'Cant. planificada (ud)',t:'n'},{k:'cantFab',l:'Cant. fabricada (ud)',t:'n'}],
+    {k:'cantPlan',l:'Cant. planificada (ud)',t:'n'},{k:'cantFab',l:'Cant. notificada (ud)',t:'n'}],
   consumos:[
     {k:'fecha',l:'Fecha/hora',t:'dt'},{k:'lote',l:'Lote'},{k:'bobina',l:'Material bobina',w:150},
     {k:'kg',l:'Peso bobina (kg)',t:'n'},{k:'of',l:'OF activa en máquina'}],
@@ -513,7 +547,7 @@ var COLS={
 };
 var TABS={ordenes:'🏭 Órdenes (secuencia de máquina)',consumos:'🧻 Consumos de bobina',devoluciones:'↩️ Devoluciones'};
 var HINTS={
-  ordenes:'Una fila por OF. La secuencia ordena las órdenes de cada máquina; el consumo LdM es el teórico de bobina por unidad.',
+  ordenes:'Una fila por OF. La secuencia ordena las órdenes de cada máquina; el consumo LdM es el teórico de bobina por unidad; la cantidad notificada es la declarada como fabricada.',
   consumos:'Cada bobina consumida desde máquina (se consume entera) en la OF que está activa.',
   devoluciones:'Kg de bobina que se vuelven a dar de alta tras el consumo.'
 };
@@ -540,7 +574,7 @@ function cargarLS(){
   }catch(e){}
   return null;
 }
-function normalizar(o){o.cfg=Object.assign({modo:'plan',tol:3},o.cfg||{});return o;}
+function normalizar(o){o.cfg=Object.assign({tol:3},o.cfg||{});return o;}
 
 function nav(id,el){
   document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
@@ -553,7 +587,6 @@ function nav(id,el){
 }
 
 function setCfg(){
-  ST.cfg.modo=document.getElementById('cfgModo').value;
   var t=parseFloat(document.getElementById('cfgTol').value);
   ST.cfg.tol=isFinite(t)&&t>=0?t:3;
   guardar();recalc();
@@ -561,7 +594,7 @@ function setCfg(){
 
 function recalc(){
   colBob={};
-  RES=calcularBalance(ST,ST.cfg);
+  RES=calcularBalance(ST);
   renderResumen();renderReparto();renderDevol();renderTraz();renderTabs();
 }
 
@@ -570,10 +603,10 @@ function renderResumen(){
   var T=RES.tot,nErr=RES.avisos.filter(function(a){return a.nivel==='error';}).length,nWarn=RES.avisos.filter(function(a){return a.nivel==='warn';}).length;
   document.getElementById('kpis').innerHTML=
     '<div class="kc"><div class="kl">Bobinas consumidas</div><div class="kv">'+f1(T.consumido)+' <small>kg</small></div><div class="ks">'+RES.lotes.length+' lotes · '+RES.ordenes.length+' órdenes</div></div>'+
-    '<div class="kc p"><div class="kl">Devoluciones</div><div class="kv">'+f1(T.devuelto)+' <small>kg</small></div><div class="ks">'+RES.trazaDev.length+' devoluciones'+(T.noImputado>EPS?' · <b style="color:var(--danger)">'+f1(T.noImputado)+' kg no imputables</b>':'')+'</div></div>'+
-    '<div class="kc s"><div class="kl">Consumo neto</div><div class="kv">'+f1(T.consNeto)+' <small>kg</small></div><div class="ks">Asignado − devuelto</div></div>'+
-    '<div class="kc"><div class="kl">Teórico fabricado</div><div class="kv">'+f1(T.tReal)+' <small>kg</small></div><div class="ks">Planificado: '+f1(T.tPlan)+' kg</div></div>'+
-    '<div class="kc '+(clsDesv(T.desvPct)==='ok'?'s':clsDesv(T.desvPct)==='wa'?'w':'d')+'"><div class="kl">Desviación (merma)</div><div class="kv">'+fs(T.desv)+' <small>kg</small></div><div class="ks">'+fp(T.desvPct)+' sobre el teórico fabricado</div></div>'+
+    '<div class="kc p"><div class="kl">Devoluciones</div><div class="kv">'+f1(T.devuelto)+' <small>kg</small></div><div class="ks">'+RES.trazaDev.length+' devoluciones · consumo extra '+f1(T.extra)+' kg'+(T.noImputado>EPS?' · <b style="color:var(--danger)">'+f1(T.noImputado)+' kg no imputables</b>':'')+'</div></div>'+
+    '<div class="kc s"><div class="kl">Consumo final</div><div class="kv">'+f1(T.consNeto)+' <small>kg</small></div><div class="ks">Reparto + extra − devoluciones</div></div>'+
+    '<div class="kc"><div class="kl">Teórico notificado</div><div class="kv">'+f1(T.tReal)+' <small>kg</small></div><div class="ks">Planificado: '+f1(T.tPlan)+' kg</div></div>'+
+    '<div class="kc '+(clsDesv(T.desvPct)==='ok'?'s':clsDesv(T.desvPct)==='wa'?'w':'d')+'"><div class="kl">Desviación (merma)</div><div class="kv">'+fs(T.desv)+' <small>kg</small></div><div class="ks">'+fp(T.desvPct)+' sobre el teórico notificado</div></div>'+
     '<div class="kc '+(nErr?'d':nWarn?'w':'s')+'"><div class="kl">Avisos</div><div class="kv">'+(nErr+nWarn)+'</div><div class="ks">'+nErr+' errores · '+nWarn+' advertencias</div></div>';
 
   var avs=RES.avisos.filter(function(a){return a.nivel!=='info';}).concat(RES.avisos.filter(function(a){return a.nivel==='info';}));
@@ -582,46 +615,46 @@ function renderResumen(){
   var cnt=document.getElementById('avCnt');
   cnt.style.display=(nErr+nWarn)?'':'none';cnt.textContent=nErr+nWarn;cnt.className='cnt'+(nErr?'':' w');
 
-  var h='<thead><tr><th class="grp" colspan="5">Orden</th><th class="grp" colspan="5">Planificación</th><th class="grp" colspan="2">Reparto de consumo</th><th class="grp" colspan="3">Devolución</th><th class="grp" colspan="4">Resultado</th></tr>'+
+  var h='<thead><tr><th class="grp" colspan="5">Orden</th><th class="grp" colspan="5">Planificación y notificación</th><th class="grp" colspan="2">Reparto de consumo</th><th class="grp" colspan="4">Compensación en devolución</th><th class="grp" colspan="4">Resultado</th></tr>'+
     '<tr><th>Máq.</th><th>Sec.</th><th>OF</th><th>Pedido</th><th>Artículo</th>'+
-    '<th class="n">g/ud LdM</th><th class="n">Planif. (ud)</th><th class="n">Fabric. (ud)</th><th class="n">Teórico planif. (kg)</th><th class="n">Teórico fabric. (kg)</th>'+
+    '<th class="n">g/ud LdM</th><th class="n">Planif. (ud)</th><th class="n">Notif. (ud)</th><th class="n">Teórico planif. (kg)</th><th class="n">Teórico notif. (kg)</th>'+
     '<th class="n">Hasta teórico (kg)</th><th class="n">Exceso (kg)</th>'+
-    '<th class="n">Sobrante teórico (kg)</th><th class="n">Compensación (kg)</th><th class="n">Por % consumo (kg)</th>'+
-    '<th class="n">Consumo neto (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desv. %</th><th class="n">g/ud real</th></tr></thead><tbody>';
-  if(!RES.ordenes.length)h+='<tr><td colspan="19"><div class="empty">No hay órdenes. Carga la demo o introduce datos en la pestaña de Datos.</div></td></tr>';
+    '<th class="n">Sobrante teórico (kg)</th><th class="n">Consumo extra (kg)</th><th class="n">Dev. sobrante (kg)</th><th class="n">Dev. ponderada (kg)</th>'+
+    '<th class="n">Consumo final (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desv. %</th><th class="n">g/ud real</th></tr></thead><tbody>';
+  if(!RES.ordenes.length)h+='<tr><td colspan="20"><div class="empty">No hay órdenes. Carga la demo o introduce datos en la pestaña de Datos.</div></td></tr>';
   var cadAct=null;
   RES.ordenes.forEach(function(o){
     if(o.cadena!==cadAct){
       cadAct=o.cadena;
-      h+='<tr class="cad"><td colspan="19">'+esc(cadAct.maquina)+' · Cadena '+cadAct.id+' · '+chipBob(cadAct.bobina)+' '+cadAct.ordenes.length+(cadAct.ordenes.length===1?' orden':' órdenes')+' · lotes: '+(cadAct.tot.lotes.map(esc).join(', ')||'—')+'</td></tr>';
+      h+='<tr class="cad"><td colspan="20">'+esc(cadAct.maquina)+' · Cadena '+cadAct.id+' · '+chipBob(cadAct.bobina)+' '+cadAct.ordenes.length+(cadAct.ordenes.length===1?' orden':' órdenes')+' · lotes: '+(cadAct.tot.lotes.map(esc).join(', ')||'—')+'</td></tr>';
     }
     var ult=o===o.cadena.ultima;
     h+='<tr><td>'+esc(o.maquina)+'</td><td class="n">'+esc(o.seq)+'</td><td><b>'+esc(o.of)+'</b>'+(ult?' <span class="b ex" title="Última orden de la cadena: recibe el exceso">última</span>':'')+'</td><td>'+esc(o.pedido)+'</td><td>'+esc(o.articulo)+'</td>'+
       '<td class="n">'+f1(o.gUd)+'</td><td class="n">'+f0(o.cantPlan)+'</td><td class="n">'+f0(o.cantFab)+'</td><td class="n">'+f1(o.tPlan)+'</td><td class="n">'+f1(o.tReal)+'</td>'+
       '<td class="n'+(o.pend>0.05?' hl" title="Faltan '+f1(o.pend)+' kg para cubrir el teórico planificado':'')+'">'+f1(o.consTeo)+'</td><td class="n">'+(o.consExc>EPS?'<b>'+f1(o.consExc)+'</b>':f1(0))+'</td>'+
-      '<td class="n">'+fs(o.sobrante)+'</td><td class="n">'+f1(o.devComp)+'</td><td class="n">'+f1(o.devPct)+'</td>'+
+      '<td class="n">'+fs(o.sobrante)+'</td><td class="n">'+(o.consExtra>EPS?'<b>'+f1(o.consExtra)+'</b>':f1(0))+'</td><td class="n">'+f1(o.devComp)+'</td><td class="n">'+f1(o.devPct)+'</td>'+
       '<td class="n"><b>'+f1(o.consNeto)+'</b></td><td class="n">'+fs(o.desv)+'</td><td class="n">'+badgeDesv(o.desvPct)+'</td><td class="n">'+f1(o.gUdReal)+'</td></tr>';
   });
   if(RES.ordenes.length){
     var s={consTeo:0,consExc:0,sob:0,devComp:0,devPct:0};
     RES.ordenes.forEach(function(o){s.consTeo+=o.consTeo;s.consExc+=o.consExc;s.sob+=o.sobrante;s.devComp+=o.devComp;s.devPct+=o.devPct;});
-    h+='<tr class="tot"><td colspan="8">Total</td><td class="n">'+f1(T.tPlan)+'</td><td class="n">'+f1(T.tReal)+'</td><td class="n">'+f1(s.consTeo)+'</td><td class="n">'+f1(s.consExc)+'</td><td class="n">'+fs(s.sob)+'</td><td class="n">'+f1(s.devComp)+'</td><td class="n">'+f1(s.devPct)+'</td><td class="n">'+f1(T.consNeto)+'</td><td class="n">'+fs(T.desv)+'</td><td class="n">'+badgeDesv(T.desvPct)+'</td><td></td></tr>';
+    h+='<tr class="tot"><td colspan="8">Total</td><td class="n">'+f1(T.tPlan)+'</td><td class="n">'+f1(T.tReal)+'</td><td class="n">'+f1(s.consTeo)+'</td><td class="n">'+f1(s.consExc)+'</td><td class="n">'+fs(s.sob)+'</td><td class="n">'+f1(T.extra)+'</td><td class="n">'+f1(s.devComp)+'</td><td class="n">'+f1(s.devPct)+'</td><td class="n">'+f1(T.consNeto)+'</td><td class="n">'+fs(T.desv)+'</td><td class="n">'+badgeDesv(T.desvPct)+'</td><td></td></tr>';
   }
   document.getElementById('tOrd').innerHTML=h+'</tbody>';
 
-  var c='<thead><tr><th>Máq.</th><th>Cadena</th><th>Bobina</th><th>Órdenes</th><th>Lotes</th><th class="n">Consumido (kg)</th><th class="n">del que exceso (kg)</th><th class="n">Devuelto (kg)</th><th class="n">Neto (kg)</th><th class="n">Teórico fabric. (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desv. %</th></tr></thead><tbody>';
+  var c='<thead><tr><th>Máq.</th><th>Cadena</th><th>Bobina</th><th>Órdenes</th><th>Lotes</th><th class="n">Reparto (kg)</th><th class="n">del que exceso (kg)</th><th class="n">Consumo extra (kg)</th><th class="n">Devuelto (kg)</th><th class="n">Consumo final (kg)</th><th class="n">Teórico notif. (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desv. %</th></tr></thead><tbody>';
   RES.cadenas.forEach(function(k){
     var t=k.tot;
     c+='<tr><td>'+esc(k.maquina)+'</td><td class="n">'+k.id+'</td><td>'+chipBob(k.bobina)+'</td><td>'+k.ordenes.map(function(o){return esc(o.of);}).join(' → ')+'</td><td>'+(t.lotes.map(esc).join(', ')||'—')+'</td>'+
-      '<td class="n">'+f1(t.consBruto)+'</td><td class="n">'+f1(t.consExc)+'</td><td class="n">'+f1(t.devTotal)+'</td><td class="n"><b>'+f1(t.consNeto)+'</b></td><td class="n">'+f1(t.tReal)+'</td><td class="n">'+fs(t.desv)+'</td><td class="n">'+badgeDesv(t.desvPct)+'</td></tr>';
+      '<td class="n">'+f1(t.consBruto)+'</td><td class="n">'+f1(t.consExc)+'</td><td class="n">'+f1(t.consExtra)+'</td><td class="n">'+f1(t.devTotal)+'</td><td class="n"><b>'+f1(t.consNeto)+'</b></td><td class="n">'+f1(t.tReal)+'</td><td class="n">'+fs(t.desv)+'</td><td class="n">'+badgeDesv(t.desvPct)+'</td></tr>';
   });
   document.getElementById('tCad').innerHTML=c+'</tbody>';
 
   function ok(b){return b?'<span class="b ok">✓ cuadra</span>':'<span class="b ko">✗ no cuadra</span>';}
   document.getElementById('cuadre').innerHTML=
-    '<div><b>Consumo</b> '+ok(T.cuadreCons)+'<br>Bobinas consumidas: <b>'+f1(T.consumido)+' kg</b><br>Σ asignado a órdenes: <b>'+f1(T.consBruto)+' kg</b></div>'+
-    '<div><b>Devoluciones</b> '+ok(T.cuadreDev)+'<br>Kg devueltos: <b>'+f1(T.devuelto)+' kg</b><br>Σ imputado a órdenes: <b>'+f1(T.devOrd)+' kg</b>'+(T.noImputado>EPS?' + no imputable: <b style="color:var(--danger)">'+f1(T.noImputado)+' kg</b>':'')+'</div>'+
-    '<div><b>Balance</b><br>Consumido − devuelto: <b>'+f1(T.consumido-T.devuelto+T.noImputado)+' kg</b><br>= Teórico fabricado <b>'+f1(T.tReal)+' kg</b> '+fs(T.desv)+' kg de desviación</div>';
+    '<div><b>Consumo</b> '+ok(T.cuadreCons)+'<br>Bobinas consumidas: <b>'+f1(T.consumido)+' kg</b><br>Σ reparto a órdenes: <b>'+f1(T.consBruto)+' kg</b></div>'+
+    '<div><b>Devoluciones</b> '+ok(T.cuadreDev)+'<br>Devuelto + consumo extra: <b>'+f1(T.devuelto)+' + '+f1(T.extra)+' kg</b><br>Σ dev. sobrante + ponderada: <b>'+f1(T.devOrd)+' kg</b>'+(T.noImputado>EPS?' + no imputable: <b style="color:var(--danger)">'+f1(T.noImputado)+' kg</b>':'')+'</div>'+
+    '<div><b>Balance</b><br>Consumido − devuelto: <b>'+f1(T.consumido-T.devuelto+T.noImputado)+' kg</b> = consumo final<br>Frente a teórico notificado <b>'+f1(T.tReal)+' kg</b>: '+fs(T.desv)+' kg</div>';
 }
 
 /* ---------- Reparto ---------- */
@@ -663,15 +696,15 @@ function renderReparto(){
 
 /* ---------- Devoluciones ---------- */
 function renderDevol(){
-  document.getElementById('devSub').innerHTML='Primero se compensa el <b>sobrante teórico</b> de cada orden que consumió el lote (modo actual: <span class="f">'+(RES.modo==='asignado'?'asignado − teórico fabricado':'teórico planificado − teórico fabricado')+'</span>), en proporción al sobrante y sin superar lo consumido de ese lote. El resto se reparte por el % de consumo del lote. Cantidades en kg.';
+  document.getElementById('devSub').innerHTML='Por lote: el <b>sobrante teórico</b> de cada pedido es <span class="f">reparto − teórico notificado</span>. Un sobrante negativo nunca da devolución negativa: se suma como <b>consumo extra</b> y esos kg se añaden a lo que hay que devolver. Con ese total, primero la <b>devolución sobrante</b> compensa los sobrantes positivos y después la <b>devolución ponderada</b> reparte el resto por el % del reparto de consumo del lote. Cantidades en kg.';
   var e='';
   RES.trazaDev.forEach(function(t){
     e+='<div class="ev"><div class="eh"><span>↩️ Lote <b>'+esc(t.lote)+'</b></span><span>'+chipBob(t.bobina)+'</span><span>Devuelto <b>'+f1(t.kg)+' kg</b></span><span style="color:var(--tl)">'+fFecha(t.fecha)+'</span></div>'+
-      '<div class="fase">Fase A — compensación de sobrante: <b>'+f1(t.kA)+' kg</b> · Fase B — reparto por % de consumo: <b>'+f1(t.kB-t.noImp)+' kg</b>'+(t.noImp>EPS?' · <b style="color:var(--danger)">No imputable: '+f1(t.noImp)+' kg</b>':'')+'</div>'+
-      '<div class="eb tw"><table class="cp"><thead><tr><th>OF</th><th>Pedido</th><th class="n">Consumo lote</th><th class="n">% consumo</th><th class="n" title="Sobrante teórico de la OF">Sobrante teórico</th><th class="n" title="Sobrante positivo aún sin compensar antes de esta devolución">Sobrante pend.</th><th class="n">Fase A</th><th class="n">Fase B</th><th class="n">Devuelto</th><th class="n">Neto lote</th></tr></thead><tbody>'+
+      '<div class="fase">Consumo extra: <b>'+f1(t.kE)+' kg</b> · A devolver a pedidos: '+f1(t.kg)+' + '+f1(t.kE)+' = <b>'+f1(t.aDev)+' kg</b> → devolución sobrante <b>'+f1(t.kA)+' kg</b> + devolución ponderada <b>'+f1(t.kB-t.noImp)+' kg</b>'+(t.noImp>EPS?' · <b style="color:var(--danger)">No imputable: '+f1(t.noImp)+' kg</b>':'')+'</div>'+
+      '<div class="eb tw"><table class="cp"><thead><tr><th>OF</th><th>Pedido</th><th class="n">Reparto lote</th><th class="n">% reparto</th><th class="n">Teórico notif.</th><th class="n">Sobrante teórico</th><th class="n">Consumo extra</th><th class="n">Dev. sobrante</th><th class="n">Dev. ponderada</th><th class="n">Consumo del lote</th></tr></thead><tbody>'+
       t.filas.map(function(f){
-        return '<tr><td><b>'+esc(f.o.of)+'</b></td><td>'+esc(f.o.pedido)+'</td><td class="n">'+f1(f.bruto)+'</td><td class="n">'+f1(f.pct)+' %</td><td class="n">'+fs(f.sobrante)+'</td><td class="n">'+f1(f.sobAntes)+'</td>'+
-          '<td class="n">'+f1(f.compA)+'</td><td class="n">'+f1(f.compB)+'</td><td class="n"><b>'+f1(f.compA+f.compB)+'</b></td><td class="n">'+f1(f.netoAntes)+' → <b>'+f1(f.netoDesp)+'</b></td></tr>';
+        return '<tr><td><b>'+esc(f.o.of)+'</b></td><td>'+esc(f.o.pedido)+'</td><td class="n">'+f1(f.bruto)+'</td><td class="n">'+f1(f.pct)+' %</td><td class="n">'+f1(f.notif)+'</td><td class="n">'+fs(f.sob)+'</td>'+
+          '<td class="n">'+(f.extra>EPS?'<b>'+f1(f.extra)+'</b>':f1(0))+'</td><td class="n">'+f1(f.compA)+'</td><td class="n">'+f1(f.compB)+'</td><td class="n">'+f1(f.netoAntes)+' → <b>'+f1(f.netoDesp)+'</b></td></tr>';
       }).join('')+'</tbody></table></div></div>';
   });
   document.getElementById('eventosDev').innerHTML=e||'<div class="empty">No hay devoluciones registradas.</div>';
@@ -679,21 +712,25 @@ function renderDevol(){
 
 /* ---------- Trazabilidad ---------- */
 function renderTraz(){
-  var h='<thead><tr><th>Pedido</th><th>OF</th><th>Máq.</th><th>Bobina</th><th>Lotes (consumo neto)</th><th class="n">Total neto (kg)</th></tr></thead><tbody>';
-  RES.ordenes.slice().sort(function(a,b){return a.pedido<b.pedido?-1:a.pedido>b.pedido?1:0;}).forEach(function(o){
-    var ls=Object.keys(o.lotes);
-    h+='<tr><td><b>'+esc(o.pedido||'—')+'</b></td><td>'+esc(o.of)+'</td><td>'+esc(o.maquina)+'</td><td>'+chipBob(o.bobina)+'</td><td style="white-space:normal">'+
-      (ls.length?ls.map(function(l){var p=o.lotes[l];return chip(colorBobina(o.bobina),esc(l)+': '+f1(p.neto)+' kg'+(p.bruto-p.neto>EPS?' <span style="color:var(--tl);font-weight:400">(de '+f1(p.bruto)+')</span>':''));}).join(''):'<span style="color:var(--tl)">Sin lotes</span>')+
-      '</td><td class="n"><b>'+f1(o.consNeto)+'</b></td></tr>';
+  var h='<thead><tr><th>Pedido</th><th>OF</th><th>Lote</th><th class="n">Teórico planif.</th><th class="n">Teórico notif.</th><th class="n">Reparto consumo</th><th class="n">Sobrante teórico</th><th class="n">Consumo extra</th><th class="n">Dev. sobrante</th><th class="n">Dev. ponderada</th><th class="n">Consumo final</th><th class="n">Desv. %</th></tr></thead><tbody>';
+  var s={teo:0,notif:0,bruto:0,sob:0,extra:0,devComp:0,devPct:0,neto:0},n=0;
+  RES.ordenes.forEach(function(o){
+    o.filas.forEach(function(p){
+      n++;Object.keys(s).forEach(function(k){s[k]+=p[k];});
+      h+='<tr><td><b>'+esc(o.pedido||'—')+'</b></td><td>'+esc(o.of)+'</td><td>'+chip(colorBobina(o.bobina),esc(p.L.lote))+'</td><td class="n">'+f1(p.teo)+'</td><td class="n">'+f1(p.notif)+'</td><td class="n">'+f1(p.bruto)+'</td><td class="n">'+fs(p.sob)+'</td>'+
+        '<td class="n">'+(p.extra>EPS?'<b>'+f1(p.extra)+'</b>':f1(0))+'</td><td class="n">'+f1(p.devComp)+'</td><td class="n">'+f1(p.devPct)+'</td><td class="n"><b>'+f1(p.neto)+'</b></td><td class="n">'+badgeDesv(p.desvPct)+'</td></tr>';
+    });
   });
+  if(n)h+='<tr class="tot"><td colspan="3">Total</td><td class="n">'+f1(s.teo)+'</td><td class="n">'+f1(s.notif)+'</td><td class="n">'+f1(s.bruto)+'</td><td class="n">'+fs(s.sob)+'</td><td class="n">'+f1(s.extra)+'</td><td class="n">'+f1(s.devComp)+'</td><td class="n">'+f1(s.devPct)+'</td><td class="n">'+f1(s.neto)+'</td><td></td></tr>';
+  else h+='<tr><td colspan="12"><div class="empty">No hay lotes imputados a pedidos.</div></td></tr>';
   document.getElementById('tTrazPed').innerHTML=h+'</tbody>';
 
-  var l='<thead><tr><th>Lote</th><th>Bobina</th><th class="n">Consumido (kg)</th><th class="n">Devuelto (kg)</th><th class="n">Neto (kg)</th><th>Destino (OF / pedido: neto kg)</th></tr></thead><tbody>';
+  var l='<thead><tr><th>Lote</th><th>Bobina</th><th class="n">Consumido (kg)</th><th class="n">Consumo extra (kg)</th><th class="n">Devuelto (kg)</th><th class="n">Consumo final (kg)</th><th class="n">Teórico notif. (kg)</th><th class="n">Desv. %</th><th>Destino (OF / pedido: consumo final kg)</th></tr></thead><tbody>';
   RES.lotes.forEach(function(L){
-    l+='<tr><td><b>'+esc(L.lote)+'</b></td><td>'+chipBob(L.bobina)+'</td><td class="n">'+f1(L.consumido)+'</td><td class="n">'+f1(L.devuelto)+(L.noImputado>EPS?' <span class="b ko">'+f1(L.noImputado)+' no imp.</span>':'')+'</td><td class="n"><b>'+f1(L.consumido-L.devuelto+L.noImputado)+'</b></td><td style="white-space:normal">'+
-      L.ofs.map(function(of){var p=L.porOf[of];return chip(colorBobina(L.bobina),esc(of)+' / '+esc(p.o.pedido)+': '+f1(p.neto)+' kg');}).join('')+'</td></tr>';
+    l+='<tr><td><b>'+esc(L.lote)+'</b></td><td>'+chipBob(L.bobina)+'</td><td class="n">'+f1(L.consumido)+'</td><td class="n">'+f1(L.extra)+'</td><td class="n">'+f1(L.devuelto)+(L.noImputado>EPS?' <span class="b ko">'+f1(L.noImputado)+' no imp.</span>':'')+'</td><td class="n"><b>'+f1(L.neto)+'</b></td><td class="n">'+f1(L.notif)+'</td><td class="n">'+badgeDesv(L.desvPct)+'</td><td style="white-space:normal">'+
+      L.filas.map(function(p){return chip(colorBobina(L.bobina),esc(p.o.of)+' / '+esc(p.o.pedido)+': '+f1(p.neto)+' kg');}).join('')+'</td></tr>';
   });
-  if(!RES.lotes.length)l+='<tr><td colspan="6"><div class="empty">No hay lotes consumidos.</div></td></tr>';
+  if(!RES.lotes.length)l+='<tr><td colspan="9"><div class="empty">No hay lotes consumidos.</div></td></tr>';
   document.getElementById('tTrazLote').innerHTML=l+'</tbody>';
 }
 
@@ -801,20 +838,20 @@ function csvTxt(s){s=String(s==null?'':s);return /[;"\n]/.test(s)?'"'+s.replace(
 function exportarCSV(tipo){
   var filas;
   if(tipo==='ordenes'){
-    filas=[['Maquina','Secuencia','Cadena','Bobina','OF','Pedido','Articulo','g/ud LdM','Cant planificada','Cant fabricada','Teorico planificado kg','Teorico fabricado kg','Asignado hasta teorico kg','Exceso kg','Sobrante teorico kg','Devolucion compensacion kg','Devolucion % consumo kg','Consumo neto kg','Desviacion kg','Desviacion %','g/ud real']];
+    filas=[['Maquina','Secuencia','Cadena','Bobina','OF','Pedido','Articulo','g/ud LdM','Cant planificada','Cant notificada','Teorico planificado kg','Teorico notificado kg','Reparto hasta teorico kg','Exceso kg','Sobrante teorico kg','Consumo extra kg','Devolucion sobrante kg','Devolucion ponderada kg','Consumo final kg','Desviacion kg','Desviacion %','g/ud real']];
     RES.ordenes.forEach(function(o){
-      filas.push([csvTxt(o.maquina),o.seq,o.cadena.id,csvTxt(o.bobina),csvTxt(o.of),csvTxt(o.pedido),csvTxt(o.articulo),csvNum(o.gUd),csvNum(o.cantPlan),csvNum(o.cantFab),csvNum(o.tPlan),csvNum(o.tReal),csvNum(o.consTeo),csvNum(o.consExc),csvNum(o.sobrante),csvNum(o.devComp),csvNum(o.devPct),csvNum(o.consNeto),csvNum(o.desv),csvNum(o.desvPct),csvNum(o.gUdReal)]);
+      filas.push([csvTxt(o.maquina),o.seq,o.cadena.id,csvTxt(o.bobina),csvTxt(o.of),csvTxt(o.pedido),csvTxt(o.articulo),csvNum(o.gUd),csvNum(o.cantPlan),csvNum(o.cantFab),csvNum(o.tPlan),csvNum(o.tReal),csvNum(o.consTeo),csvNum(o.consExc),csvNum(o.sobrante),csvNum(o.consExtra),csvNum(o.devComp),csvNum(o.devPct),csvNum(o.consNeto),csvNum(o.desv),csvNum(o.desvPct),csvNum(o.gUdReal)]);
     });
   }else{
-    filas=[['Lote','Bobina','OF','Pedido','Consumo asignado kg','Devolucion compensacion kg','Devolucion % consumo kg','Consumo neto kg']];
-    RES.lotes.forEach(function(L){L.ofs.forEach(function(of){var p=L.porOf[of];
-      filas.push([csvTxt(L.lote),csvTxt(L.bobina),csvTxt(of),csvTxt(p.o.pedido),csvNum(p.bruto),csvNum(p.devComp),csvNum(p.devPct),csvNum(p.neto)]);});});
+    filas=[['Pedido','OF','Lote','Bobina','Teorico planificado kg','Teorico notificado kg','Reparto consumo kg','Sobrante teorico kg','Consumo extra kg','Devolucion sobrante kg','Devolucion ponderada kg','Consumo final kg']];
+    RES.ordenes.forEach(function(o){o.filas.forEach(function(p){
+      filas.push([csvTxt(o.pedido),csvTxt(o.of),csvTxt(p.L.lote),csvTxt(p.L.bobina),csvNum(p.teo),csvNum(p.notif),csvNum(p.bruto),csvNum(p.sob),csvNum(p.extra),csvNum(p.devComp),csvNum(p.devPct),csvNum(p.neto)]);});});
   }
   descargar('balance_masas_'+tipo+'.csv','﻿'+filas.map(function(f){return f.join(';');}).join('\r\n'),'text/csv;charset=utf-8');
 }
 
 /* ---------- Arranque ---------- */
-function aplicarCfgUI(){document.getElementById('cfgModo').value=ST.cfg.modo;document.getElementById('cfgTol').value=ST.cfg.tol;}
+function aplicarCfgUI(){document.getElementById('cfgTol').value=ST.cfg.tol;}
 function cargarDemo(){ST=normalizar(datosDemo());aplicarCfgUI();guardar();recalc();renderDatos();}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')cerrarPegar();});
 ST=normalizar(cargarLS()||datosDemo());

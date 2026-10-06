@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo de Planificación · CL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#00263A; --navy2:#0B3A52; --blue:#98C9EB; --teal:#244C5A; --mid:#3E6E80;
+  --grey:#5B6B78; --muted:#8A99A6; --border:#D7DFE5; --card:#F5F7F8; --tint:#EAF3FA; --bg:#F7F9FA;
+  --warm:#E4A47C; --warn:#B4532A; --ok:#2E7D5B; --white:#FFFFFF;
+  --font:'Montserrat','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);font-size:13px;color:var(--navy);background:var(--bg);display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+/* barra lateral */
+aside{background:var(--navy);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{padding:22px 20px 14px}
+.brand img{width:150px;display:block}
+.brand .app{margin-top:14px;font-weight:700;font-size:14px;line-height:1.3}
+.brand .sub{color:var(--blue);font-size:11px;margin-top:2px}
+nav{padding:6px 10px;flex:1}
+nav button{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:none;border:0;color:#DCE7EF;padding:9px 12px;border-radius:8px;cursor:pointer;font-weight:500}
+nav button:hover{background:var(--navy2);color:#fff}
+nav button.on{background:var(--blue);color:var(--navy);font-weight:700}
+nav .badge{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:10px;background:rgba(255,255,255,.12);color:#fff}
+nav button.on .badge{background:var(--navy);color:var(--blue)}
+nav .badge.warn{background:var(--warm);color:var(--navy)}
+nav .sep{height:1px;margin:8px 12px}
+.side-foot{padding:14px 18px 18px;border-top:1px solid rgba(255,255,255,.1)}
+.side-foot label{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);font-weight:700}
+.side-foot input{width:100%;margin:6px 0 10px;padding:7px 9px;border-radius:7px;border:1px solid rgba(255,255,255,.25);background:var(--navy2);color:#fff}
+.side-foot .status{font-size:11px;color:#B9CCDA;margin-top:8px;min-height:15px}
+.side-foot .status.bad{color:var(--warm)}
+/* principal */
+main{min-width:0;padding:26px 32px 60px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.head h1{margin:0;font-size:22px}
+.head p{margin:4px 0 0;color:var(--grey);max-width:820px;line-height:1.5}
+.btn{border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--navy2)}
+.btn.light{background:var(--blue);border-color:var(--blue);color:var(--navy)}
+.btn.ghost{background:#fff;color:var(--navy);border-color:var(--border)}
+.btn.ghost:hover{border-color:var(--navy)}
+.btn.danger{background:#fff;color:var(--warn);border-color:#E9C3B0}
+.btn.small{padding:5px 10px;font-size:12px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.cards{display:grid;gap:16px}
+.label{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:700}
+.muted{color:var(--muted)}
+.hint{color:var(--grey);font-size:12px;line-height:1.5}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--border);background:#fff;border-radius:20px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:12px}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip .n{font-weight:500;opacity:.75;margin-left:4px}
+/* tablas editables */
+.tablewrap{overflow:auto;border:1px solid var(--border);border-radius:12px;background:#fff;margin-bottom:12px}
+table.grid{border-collapse:collapse;width:100%}
+table.grid th{position:sticky;top:0;background:var(--card);text-align:left;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);padding:10px 8px;border-bottom:1px solid var(--border);z-index:1}
+table.grid td{border-bottom:1px solid #EDF1F4;padding:4px 4px;vertical-align:top}
+table.grid tr:last-child td{border-bottom:0}
+table.grid input,table.grid select,table.grid textarea{width:100%;border:1px solid transparent;background:transparent;border-radius:6px;padding:6px 7px;line-height:1.4}
+table.grid textarea{resize:none;overflow:hidden;min-height:32px}
+table.grid input:hover,table.grid select:hover,table.grid textarea:hover{border-color:var(--border)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-offset:0;border-color:var(--blue)!important;background:#fff!important}
+td.act,th.act{width:34px;text-align:center}
+.icon{border:0;background:none;cursor:pointer;color:var(--muted);font-size:18px;line-height:1;padding:4px 6px;border-radius:6px}
+.icon:hover{color:var(--warn);background:#FBEDE6}
+/* inicio */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.tile{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.tile .big{font-size:28px;font-weight:700;margin:6px 0 2px}
+.tile .bar{height:6px;background:#EDF1F4;border-radius:4px;margin-top:10px;overflow:hidden}
+.tile .bar i{display:block;height:100%;background:var(--navy);border-radius:4px}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:14px 0 4px}
+.step{display:flex;gap:10px}
+.step .num{flex:0 0 28px;height:28px;border-radius:50%;background:var(--navy);color:var(--blue);display:grid;place-items:center;font-weight:700}
+.step b{display:block;margin-bottom:2px}
+table.cover{border-collapse:separate;border-spacing:4px;width:100%}
+table.cover th{font-size:10.5px;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;font-weight:700;text-align:center;padding:4px}
+table.cover th.l{text-align:left}
+table.cover td.cell{cursor:pointer;padding:6px;border-radius:8px;background:var(--card);min-width:70px}
+table.cover td.cell:hover{outline:2px solid var(--blue)}
+.stack{display:flex;height:10px;border-radius:5px;overflow:hidden;background:#fff;border:1px solid var(--border)}
+.stack i{display:block;height:100%}
+.cell .frac{font-size:11px;color:var(--grey);margin-top:4px;text-align:center}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--grey)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid rgba(0,0,0,.08)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+ul.gaps{margin:8px 0 0;padding-left:18px;line-height:1.7}
+/* notas por proceso */
+.procwrap{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:start}
+.proclist{background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;position:sticky;top:12px}
+.proclist button{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:none;padding:9px 10px;border-radius:8px;cursor:pointer;text-align:left;font-weight:600;gap:8px}
+.proclist button:hover{background:var(--card)}
+.proclist button.on{background:var(--tint);color:var(--navy)}
+.proclist .cnt{font-size:11px;color:var(--grey);font-weight:500;white-space:nowrap}
+.proclist input{width:100%;margin:2px 0 6px;padding:6px 8px;border:1px solid var(--border);border-radius:6px}
+.actcard{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.acthead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.aid{background:var(--navy);color:var(--blue);font-weight:700;border-radius:6px;padding:3px 8px;font-size:11.5px}
+.acthead h3{margin:0;font-size:15px;flex:1;min-width:200px}
+.pill{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:12px;border:1px solid var(--border);white-space:nowrap}
+.desc{color:var(--grey);margin:6px 0 12px;line-height:1.5}
+.notegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 14px}
+.notegrid .full{grid-column:1/-1}
+.notegrid .half{grid-column:span 2}
+.fld label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin-bottom:4px}
+.fld input,.fld select,.fld textarea{width:100%;border:1px solid var(--border);border-radius:7px;padding:7px 9px;background:#fff;line-height:1.45}
+.fld textarea{resize:vertical;min-height:58px}
+.racisum{margin-top:12px;font-size:12px;color:var(--grey);display:flex;gap:16px;flex-wrap:wrap}
+.racisum b{color:var(--navy)}
+.catedit{display:grid;grid-template-columns:2fr 3fr 1fr 1fr auto;gap:8px;margin:8px 0 12px;padding:10px;background:var(--tint);border-radius:8px}
+.catedit input{border:1px solid var(--border);border-radius:6px;padding:6px 8px;width:100%}
+/* RACI */
+.racitools{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.raciwrap{overflow:auto;max-height:calc(100vh - 210px);border:1px solid var(--border);border-radius:12px;background:#fff}
+table.raci{border-collapse:separate;border-spacing:0;font-size:12px}
+table.raci th,table.raci td{border-bottom:1px solid #EDF1F4;border-right:1px solid #F1F4F6}
+table.raci thead th{position:sticky;background:var(--card);z-index:2;padding:6px 4px;font-size:10.5px;text-align:center;color:var(--navy)}
+table.raci thead tr.g th{top:0;height:30px;text-transform:uppercase;letter-spacing:.08em;color:var(--teal)}
+table.raci thead tr.r th{top:30px;height:58px;min-width:76px;max-width:90px;line-height:1.25;font-weight:700}
+table.raci thead tr.r th .nm{display:block;font-weight:500;color:var(--grey);font-size:10px;margin-top:3px}
+table.raci thead tr.r th .nm.none{color:var(--warm)}
+table.raci th.first,table.raci td.first{position:sticky;left:0;background:#fff;z-index:1;text-align:left;min-width:300px;max-width:300px;padding:6px 10px}
+table.raci thead th.first{z-index:3;background:var(--card)}
+table.raci tr.grp td{background:var(--navy);color:#fff;font-weight:700;padding:7px 10px;position:sticky;left:0}
+table.raci td.c{padding:3px;text-align:center}
+table.raci td.c select{width:52px;border:1px solid transparent;border-radius:6px;padding:5px 2px;text-align:center;font-weight:700;cursor:pointer;appearance:none;-webkit-appearance:none;background:transparent}
+table.raci td.c select:hover{border-color:var(--border)}
+.v-A,.v-AR{background:var(--navy)!important;color:#fff}
+.v-R{background:var(--blue)!important;color:var(--navy)}
+.v-C{background:var(--tint)!important;color:var(--teal)}
+.v-I{background:#fff;color:var(--muted)}
+td.chk{min-width:110px;padding:6px 8px;font-size:11.5px;white-space:nowrap}
+td.chk.ok{color:var(--ok)}
+td.chk.bad{color:var(--warn);font-weight:600}
+/* exportar */
+.expgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.expgrid .card h3{margin:6px 0 8px;font-size:15px}
+.expgrid .card p{margin:0 0 12px;color:var(--grey);line-height:1.5}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:11px 16px;border-radius:10px;font-weight:600;box-shadow:0 8px 24px rgba(0,38,58,.25);opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;z-index:50}
+.toast.on{opacity:1;transform:none}
+@media (max-width:1100px){.tiles,.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.expgrid{grid-template-columns:1fr}.notegrid{grid-template-columns:1fr 1fr}.notegrid .half{grid-column:1/-1}}
+@media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}nav{display:flex;flex-wrap:wrap;gap:4px}nav button{width:auto}.procwrap{grid-template-columns:1fr}.proclist{position:static}main{padding:18px 16px 40px}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand">
+    <img src="data:image/png;base64,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" alt="CL Grupo Industrial">
+    <div class="app">Modelo de planificación corporativo</div>
+    <div class="sub">Packaging · notas de trabajo</div>
+  </div>
+  <nav id="nav"></nav>
+  <div class="side-foot">
+    <label for="autor">Tu nombre</label>
+    <input id="autor" placeholder="Quién rellena estas notas">
+    <button class="btn light" style="width:100%" data-go="exportar">Exportar para Claude</button>
+    <div class="status" id="status"></div>
+  </div>
+</aside>
+<main id="main"></main>
+<div class="toast" id="toast"></div>
+<datalist id="dl-titulares"></datalist>
+
+<script id="datos-base" type="application/json">{"meta": {"version": 1, "modelo": "Modelo de planificación corporativo · CL Grupo Industrial", "autor": "", "actualizado": ""}, "empresas": [{"id": "CORP", "nombre": "Corporativo · Planificación", "tipo": "Corporativo", "erp": "SAP", "herramienta": "SAP · GIO · SIGPA", "director": "", "responsable": "", "personasHoy": "", "particularidades": "Define el modelo y gobierna la planificación de todas las plantas.", "notas": ""}, {"id": "OPET", "nombre": "Ondupet", "tipo": "PET · extrusión y termoformado", "erp": "SAP", "herramienta": "GIO (escritorio; migración a web propuesta para 2027)", "director": "", "responsable": "", "personasHoy": "", "particularidades": "Ciclos por molde (termoformado) y por calidad (extrusión); MRP en SAP integrado con GIO.", "notas": ""}, {"id": "OPACK_ALM", "nombre": "Ondupack Almendralejo", "tipo": "Cartón ondulado · onduladora y converting", "erp": "SAP", "herramienta": "Aplicación de escritorio (migración a web propuesta para 2027)", "director": "", "responsable": "", "personasHoy": "", "particularidades": "Combiplan para combinar pedidos; consume papel intercompany.", "notas": ""}, {"id": "OPACK_NAV", "nombre": "Ondupack Navalmoral", "tipo": "Cartón ondulado · onduladora y converting", "erp": "SAP", "herramienta": "Aplicación de escritorio (migración a web propuesta para 2027)", "director": "", "responsable": "", "personasHoy": "", "particularidades": "Consume papel intercompany.", "notas": ""}, {"id": "MGT", "nombre": "MGT", "tipo": "Papelera", "erp": "SAP", "herramienta": "SIGPA (web)", "director": "", "responsable": "", "personasHoy": "", "particularidades": "Algoritmo de combinación en SIGPA en pruebas; suministra papel a Ondupack.", "notas": ""}, {"id": "PDA", "nombre": "PDA", "tipo": "Papelera", "erp": "SAP", "herramienta": "SIGPA (web)", "director": "", "responsable": "", "personasHoy": "", "particularidades": "Suministra papel a Ondupack.", "notas": ""}, {"id": "PAPRESA", "nombre": "Papresa", "tipo": "Papelera · nueva incorporación", "erp": "ERP propio · SAP previsto 01/01/2027", "herramienta": "Por confirmar", "director": "", "responsable": "", "personasHoy": "", "particularidades": "Trazabilidad compra-venta en un HTML conectado a los distintos ERP hasta su paso a SAP.", "notas": ""}], "roles": [{"id": "DIR", "corto": "Dir. Planificación", "nombre": "Director/a de Planificación", "ambito": "Corporativo", "mision": "Dueño del modelo de planificación del grupo: define cómo se planifica, quién lo hace y con qué objetivos.", "responsabilidades": "Aprobar procesos, políticas y roles · Fijar objetivos y KPIs por planta · Presidir el S&OP del grupo · Asignar personas y suplencias · Priorizar mejoras y desarrollos.", "decide": "Políticas, estructura de roles, asignación de personas, objetivos y prioridades de desarrollo.", "kpis": "OTIF del grupo · Madurez de procesos · % integración intercompany."}, {"id": "PO", "corto": "Resp. procesos", "nombre": "Responsable de procesos (Functional Lead)", "ambito": "Corporativo", "mision": "Diseña, documenta y mantiene los procedimientos estándar y vela por que cada planta los cumpla.", "responsabilidades": "Manual de planificación · Auditorías de madurez · Formación y certificación de planificadores · Interlocución con las plantas.", "decide": "Cómo se ejecuta cada actividad; aprueba las excepciones locales al estándar.", "kpis": "Madurez de procesos · Adherencia al plan."}, {"id": "MD", "corto": "Dato maestro", "nombre": "Responsable de dato maestro", "ambito": "Corporativo", "mision": "Garantiza que el dato de planificación es único, completo y fiable en todas las plantas.", "responsabilidades": "Altas y cambios de datos de planificación · Velocidades, tiempos de cambio y estrategias · Auditoría de calidad del dato · Mapeo de materiales intercompany.", "decide": "Aprobación de cualquier cambio en el dato maestro de planificación.", "kpis": "Calidad del dato maestro."}, {"id": "SOP", "corto": "S&OP / Intercompany", "nombre": "Coordinador/a de S&OP e intercompany", "ambito": "Corporativo", "mision": "Integra demanda y suministro del grupo y coordina los flujos de papel hacia las cartoneras.", "responsabilidades": "Preparar y conducir el S&OP mensual · Balanceo de carga entre plantas · Mínimos y máximos intercompany · Seguimiento del % de integración.", "decide": "Reparto de capacidad entre plantas dentro de las políticas; escalados intercompany.", "kpis": "Precisión de la previsión · % integración intercompany · OTIF del grupo."}, {"id": "SIS", "corto": "Sistemas", "nombre": "Sistemas de planificación (Technical Lead y desarrollo)", "ambito": "Corporativo", "mision": "Construye y mantiene las herramientas de planificación comunes a todas las plantas (SAP, GIO, SIGPA).", "responsabilidades": "Desarrollos y mejoras · Despliegues controlados · Soporte de segundo nivel · Documentación técnica.", "decide": "Arquitectura técnica y pasos a producción.", "kpis": "Plazo de entrega de mejoras · Incidencias resueltas en plazo."}, {"id": "RPP", "corto": "Resp. planif. planta", "nombre": "Responsable de planificación de planta", "ambito": "Planta", "mision": "Responde del plan de la planta y de que se ejecute según el estándar corporativo.", "responsabilidades": "Aprobar el plan semanal · Resolver conflictos de prioridad · Representar a la planta en el S&OP · Coordinar al equipo de planificación de la planta.", "decide": "Plan semanal y prioridades dentro de las políticas; escala lo que las supera.", "kpis": "OTIF · Adherencia y estabilidad del plan."}, {"id": "PDC", "corto": "Demanda y cartera", "nombre": "Planificador/a de demanda y cartera", "ambito": "Planta", "mision": "Convierte previsión y pedidos en necesidades de fabricación y compromete fechas fiables.", "responsabilidades": "Previsión y demanda perdida · Cartera diaria y cierre de pedidos · Propuesta de fabricación · Fechas al cliente y reservas de stock.", "decide": "Fecha comprometida dentro del plan y propuesta de fabricación.", "kpis": "Precisión de la previsión · Salud de la cartera · OTIF."}, {"id": "PPR", "corto": "Programación", "nombre": "Programador/a de producción", "ambito": "Planta", "mision": "Secuencia la producción para cumplir el plan con el menor coste de cambios.", "responsabilidades": "Plan semanal y secuencia (ciclos, combinación) · Lanzamiento de órdenes · Replanificación ante incidencias · Carga de capacidad.", "decide": "Secuencia y lanzamiento dentro del horizonte congelado.", "kpis": "Adherencia al plan · Horas de cambio · Saturación por línea."}, {"id": "PMT", "corto": "Materiales", "nombre": "Planificador/a de materiales", "ambito": "Planta", "mision": "Asegura que semielaborado, papel y materias primas llegan a tiempo y en la cantidad necesaria.", "responsabilidades": "MRP · Necesidades de semielaborado y materias primas · Flujo intercompany y recepciones · Balance de masas.", "decide": "Propuestas de aprovisionamiento dentro de las políticas.", "kpis": "Cobertura de stock · Roturas · % integración intercompany."}, {"id": "DPL", "corto": "Dir. planta", "nombre": "Dirección de planta", "ambito": "Otras áreas", "mision": "Dirige la operación de la planta y apoya la ejecución del plan.", "responsabilidades": "Recursos de producción · Conflictos operativos · OEE.", "decide": "Recursos operativos de la planta.", "kpis": "OEE · Coste de producción."}, {"id": "COM", "corto": "Comercial", "nombre": "Comercial / Atención al cliente", "ambito": "Otras áreas", "mision": "Aporta la visión de mercado y es la voz del cliente.", "responsabilidades": "Información de demanda · Comunicación de fechas y retrasos al cliente.", "decide": "Prioridad comercial dentro de las reglas acordadas.", "kpis": "Servicio al cliente."}, {"id": "PRO", "corto": "Producción", "nombre": "Producción (jefes de turno)", "ambito": "Otras áreas", "mision": "Ejecuta el plan en máquina e informa de lo real.", "responsabilidades": "Cumplir la secuencia · Registrar producción, paradas y consumos · Avisar de incidencias.", "decide": "Ajustes operativos dentro del turno.", "kpis": "OEE · Adherencia al plan."}, {"id": "LOG", "corto": "Logística", "nombre": "Logística / Expediciones", "ambito": "Otras áreas", "mision": "Expide los pedidos y gestiona los almacenes.", "responsabilidades": "Cargas vinculadas a pedido · Saturación de almacén.", "decide": "Organización de cargas.", "kpis": "Expediciones en fecha."}, {"id": "CMP", "corto": "Compras", "nombre": "Compras", "ambito": "Otras áreas", "mision": "Gestiona proveedores externos y el aprovisionamiento intercompany.", "responsabilidades": "Pedidos de compra · Seguimiento de proveedores.", "decide": "Proveedor y condiciones.", "kpis": "Plazo y fiabilidad de suministro."}, {"id": "MNT", "corto": "Mantenimiento", "nombre": "Mantenimiento", "ambito": "Otras áreas", "mision": "Planifica las paradas y garantiza la disponibilidad de las máquinas.", "responsabilidades": "Calendario de paradas · Avisos de averías.", "decide": "Ventanas de mantenimiento.", "kpis": "Disponibilidad."}], "procesos": [{"id": "G", "nombre": "Gobierno y S&OP", "actividades": [{"id": "G.1", "nombre": "Modelo de procesos y manual de planificación", "descripcion": "Definir, documentar y mantener cómo se ejecuta cada actividad en todas las plantas.", "frecuencia": "Continua", "herramienta": ""}, {"id": "G.2", "nombre": "Políticas de planificación", "descripcion": "MTS/MTO, stock de seguridad, horizonte congelado, prioridades, lotes, mínimos y máximos.", "frecuencia": "Trimestral", "herramienta": ""}, {"id": "G.3", "nombre": "S&OP mensual del grupo", "descripcion": "Revisión de demanda, de suministro y reunión ejecutiva para decidir capacidad y prioridades.", "frecuencia": "Mensual", "herramienta": ""}, {"id": "G.4", "nombre": "Objetivos y revisión de KPIs", "descripcion": "Fijar objetivos por planta y revisar el cuadro de mando común.", "frecuencia": "Mensual", "herramienta": ""}, {"id": "G.5", "nombre": "Roles, personas, suplencias y formación", "descripcion": "Asignar cada rol con nombre y apellidos, con titular y suplente, y su plan de formación.", "frecuencia": "Trimestral", "herramienta": ""}, {"id": "G.6", "nombre": "Gestión de cambios y prioridad de desarrollos", "descripcion": "Canal único de peticiones, priorización y paso a producción de mejoras.", "frecuencia": "Semanal", "herramienta": ""}]}, {"id": "P1", "nombre": "Dato maestro", "actividades": [{"id": "1.1", "nombre": "Datos de planificación del material", "descripcion": "Altas y mantenimiento de los datos que usa la planificación (unidades, rutas, máquinas por defecto).", "frecuencia": "Diaria", "herramienta": ""}, {"id": "1.2", "nombre": "Segmentación ABC/XYZ y estrategia MTS/MTO", "descripcion": "Clasificar materiales y asignar su estrategia de planificación con criterio común.", "frecuencia": "Trimestral", "herramienta": ""}, {"id": "1.3", "nombre": "Velocidades, tiempos de cambio y rutas", "descripcion": "Mantener los estándares de máquina a partir de los datos reales registrados.", "frecuencia": "Mensual", "herramienta": ""}, {"id": "1.4", "nombre": "Calendario de turnos, días y paradas", "descripcion": "Turnos activos, días festivos y paradas de mantenimiento por máquina.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "1.5", "nombre": "Auditoría de calidad del dato", "descripcion": "Detectar duplicados, datos incompletos e incoherencias y corregirlos.", "frecuencia": "Mensual", "herramienta": ""}]}, {"id": "P2", "nombre": "Demanda", "actividades": [{"id": "2.1", "nombre": "Previsión de demanda", "descripcion": "Generar y ajustar la previsión por material o familia.", "frecuencia": "Mensual", "herramienta": ""}, {"id": "2.2", "nombre": "Consenso de la previsión con Comercial", "descripcion": "Revisar la previsión con Comercial y cerrar el plan de demanda.", "frecuencia": "Mensual", "herramienta": ""}, {"id": "2.3", "nombre": "Demanda perdida (agotados)", "descripcion": "Registrar los pedidos que no entran por falta de stock, precio u otros motivos.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "2.4", "nombre": "Precisión y sesgo de la previsión", "descripcion": "Medir el error de la previsión y corregir sus causas.", "frecuencia": "Mensual", "herramienta": ""}]}, {"id": "P3", "nombre": "Cartera", "actividades": [{"id": "3.1", "nombre": "Revisión diaria de la cartera", "descripcion": "Pendiente, stock disponible y cargas de cada pedido.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "3.2", "nombre": "Cargas vinculadas a pedidos", "descripcion": "Asociar cada carga o expedición a su pedido.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "3.3", "nombre": "Cierre (saldado) de pedidos", "descripcion": "Cerrar los pedidos completados o anulados.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "3.4", "nombre": "Prioridad de pedidos en conflicto", "descripcion": "Decidir qué se sirve primero cuando no llega para todo; los conflictos entre plantas van a S&OP.", "frecuencia": "Semanal", "herramienta": ""}]}, {"id": "P4", "nombre": "Necesidades", "actividades": [{"id": "4.1", "nombre": "Ejecución y revisión del MRP", "descripcion": "Lanzar el MRP y revisar sus propuestas y excepciones.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "4.2", "nombre": "Propuesta de fabricación de producto terminado", "descripcion": "Qué fabricar según previsión, cartera, stock y órdenes ya lanzadas (MTS y MTO).", "frecuencia": "Diaria", "herramienta": ""}, {"id": "4.3", "nombre": "Necesidades de semielaborado", "descripcion": "Bobina, lámina o cartón necesarios para el producto terminado planificado.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "4.4", "nombre": "Necesidades de materias primas y auxiliares", "descripcion": "Cálculo de necesidades y traslado a Compras.", "frecuencia": "Semanal", "herramienta": ""}]}, {"id": "P5", "nombre": "Capacidad", "actividades": [{"id": "5.1", "nombre": "Carga de capacidad y saturación por línea", "descripcion": "% de ocupación de cada máquina según lo lanzado y la previsión.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "5.2", "nombre": "Balanceo entre líneas y plantas", "descripcion": "Mover carga entre máquinas o plantas con antelación.", "frecuencia": "Mensual", "herramienta": ""}, {"id": "5.3", "nombre": "Saturación de almacenes", "descripcion": "Proyección de ocupación de almacén de semielaborado y producto terminado.", "frecuencia": "Semanal", "herramienta": ""}]}, {"id": "P6", "nombre": "Programación", "actividades": [{"id": "6.1", "nombre": "Plan de producción semanal", "descripcion": "Plan congelado de la semana, aprobado por la planta.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "6.2", "nombre": "Secuenciación, ciclos y combinación", "descripcion": "Orden de fabricación que minimiza cambios (moldes, calidades, combinaciones).", "frecuencia": "Diaria", "herramienta": ""}, {"id": "6.3", "nombre": "Lanzamiento de órdenes a máquina", "descripcion": "Liberar las órdenes a producción.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "6.4", "nombre": "Replanificación ante incidencias", "descripcion": "Averías, faltas de material o urgencias.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "6.5", "nombre": "Cronograma de cambios", "descripcion": "Proyección de cambios de molde, formato o calidad por máquina.", "frecuencia": "Semanal", "herramienta": ""}]}, {"id": "P7", "nombre": "Entrega", "actividades": [{"id": "7.1", "nombre": "Compromiso de fecha al cliente", "descripcion": "Consulta de plazos sobre la capacidad real (CTP).", "frecuencia": "Diaria", "herramienta": ""}, {"id": "7.2", "nombre": "Reserva de stock a pedidos", "descripcion": "Asignar el stock disponible a cada pedido por fechas.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "7.3", "nombre": "Retrasos y aviso al cliente", "descripcion": "Detectar retrasos y avisar al cliente antes de que ocurran.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "7.4", "nombre": "Coordinación con expediciones", "descripcion": "Que lo planificado salga en la fecha comprometida.", "frecuencia": "Diaria", "herramienta": ""}]}, {"id": "P8", "nombre": "Control", "actividades": [{"id": "8.1", "nombre": "Plan frente a real (adherencia)", "descripcion": "Seguimiento de lo producido frente a lo planificado.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "8.2", "nombre": "OEE y rendimiento por máquina", "descripcion": "Disponibilidad, rendimiento y calidad.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "8.3", "nombre": "Balance de masas", "descripcion": "Consumos reales frente a teóricos para detectar descuadres de stock.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "8.4", "nombre": "Causa raíz de desviaciones", "descripcion": "Analizar por qué no se cumplió el plan y corregir el origen.", "frecuencia": "Semanal", "herramienta": ""}]}, {"id": "IC", "nombre": "Intercompany", "actividades": [{"id": "I.1", "nombre": "Mapeo de materiales y mínimos/máximos", "descripcion": "Tabla de correspondencia cartonera ↔ papelera y puntos de pedido.", "frecuencia": "Mensual", "herramienta": ""}, {"id": "I.2", "nombre": "Necesidad y pedidos de compra/venta", "descripcion": "Trigger de necesidad y pedidos de compra y venta mapeados.", "frecuencia": "Diaria", "herramienta": ""}, {"id": "I.3", "nombre": "Planificación en papelera contra pedidos de stock", "descripcion": "La papelera planifica contra stock y reserva el material para las cartoneras.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "I.4", "nombre": "Recepciones y % de integración", "descripcion": "Seguimiento de lo recibido de MGT, PDA y Papresa.", "frecuencia": "Semanal", "herramienta": ""}, {"id": "I.5", "nombre": "Control y cierre de pedidos intercompany", "descripcion": "Apertura y cierre controlado de pedidos entre plantas.", "frecuencia": "Semanal", "herramienta": ""}]}], "raci": {"G.1": {"DIR": "A", "PO": "R", "SIS": "C", "RPP": "C", "DPL": "I"}, "G.2": {"DIR": "A", "PO": "R", "SOP": "C", "RPP": "C", "COM": "C", "DPL": "C", "PDC": "I", "PPR": "I", "PMT": "I"}, "G.3": {"DIR": "A", "SOP": "R", "RPP": "C", "COM": "C", "DPL": "C", "CMP": "C", "PO": "I"}, "G.4": {"DIR": "A", "PO": "R", "RPP": "C", "DPL": "C", "PDC": "I", "PPR": "I", "PMT": "I"}, "G.5": {"DIR": "A", "PO": "R", "RPP": "C", "DPL": "C", "PDC": "I", "PPR": "I", "PMT": "I"}, "G.6": {"DIR": "A", "PO": "R", "SIS": "R", "RPP": "C", "DPL": "I"}, "1.1": {"MD": "A/R", "PMT": "C", "PPR": "C", "RPP": "I", "SIS": "I"}, "1.2": {"PO": "A", "MD": "R", "SOP": "C", "RPP": "C", "COM": "C", "PDC": "I", "PMT": "I"}, "1.3": {"MD": "A/R", "PPR": "R", "PRO": "C", "RPP": "I"}, "1.4": {"RPP": "A", "PPR": "R", "PRO": "C", "MNT": "C", "MD": "I", "PDC": "I"}, "1.5": {"PO": "A", "MD": "R", "RPP": "C", "DIR": "I"}, "2.1": {"RPP": "A", "PDC": "R", "COM": "C", "SOP": "C", "PMT": "I", "PPR": "I"}, "2.2": {"SOP": "A", "PDC": "R", "COM": "C", "RPP": "C", "DIR": "I"}, "2.3": {"RPP": "A", "PDC": "R", "COM": "C", "SOP": "I"}, "2.4": {"SOP": "A", "PDC": "R", "RPP": "C", "COM": "C", "DIR": "I"}, "3.1": {"RPP": "A", "PDC": "R", "COM": "C", "PPR": "I"}, "3.2": {"RPP": "A", "LOG": "R", "PDC": "C", "COM": "I"}, "3.3": {"RPP": "A", "PDC": "R", "COM": "C", "LOG": "I"}, "3.4": {"RPP": "A", "PDC": "R", "COM": "C", "PPR": "C", "SOP": "C", "DPL": "I"}, "4.1": {"RPP": "A", "PMT": "R", "MD": "C", "PPR": "I", "CMP": "I"}, "4.2": {"RPP": "A", "PDC": "R", "PMT": "C", "PPR": "C", "COM": "I"}, "4.3": {"RPP": "A", "PMT": "R", "PPR": "C", "PRO": "I"}, "4.4": {"RPP": "A", "PMT": "R", "CMP": "C", "SOP": "I"}, "5.1": {"RPP": "A", "PPR": "R", "PRO": "C", "SOP": "I", "DPL": "I"}, "5.2": {"SOP": "A", "RPP": "R", "PPR": "C", "DPL": "C", "DIR": "I", "COM": "I"}, "5.3": {"RPP": "A", "PPR": "R", "LOG": "C", "PRO": "I"}, "6.1": {"RPP": "A", "PPR": "R", "PRO": "C", "PDC": "C", "PMT": "C", "DPL": "I", "COM": "I"}, "6.2": {"RPP": "A", "PPR": "R", "PRO": "C", "PDC": "I"}, "6.3": {"RPP": "A", "PPR": "R", "PDC": "C", "PRO": "I"}, "6.4": {"RPP": "A", "PPR": "R", "PRO": "C", "MNT": "C", "PDC": "C", "COM": "I"}, "6.5": {"RPP": "A", "PPR": "R", "PRO": "C", "MNT": "C"}, "7.1": {"RPP": "A", "PDC": "R", "PPR": "C", "COM": "I"}, "7.2": {"RPP": "A", "PDC": "R", "LOG": "C", "COM": "I"}, "7.3": {"RPP": "A", "PDC": "R", "COM": "R", "PPR": "C", "DPL": "I"}, "7.4": {"RPP": "A", "PDC": "R", "LOG": "R", "COM": "I"}, "8.1": {"RPP": "A", "PPR": "R", "PRO": "C", "PO": "I", "DPL": "I"}, "8.2": {"DPL": "A", "PRO": "R", "PPR": "C", "RPP": "I", "PO": "I"}, "8.3": {"RPP": "A", "PMT": "R", "PRO": "C", "MD": "C", "PO": "I"}, "8.4": {"RPP": "A", "PPR": "R", "PRO": "C", "PDC": "C", "PMT": "C", "PO": "I"}, "I.1": {"SOP": "A", "MD": "R", "PMT": "R", "RPP": "C", "CMP": "I"}, "I.2": {"SOP": "A", "PMT": "R", "CMP": "C", "COM": "C", "RPP": "I"}, "I.3": {"RPP": "A", "PPR": "R", "SOP": "C", "PMT": "I"}, "I.4": {"SOP": "A", "PMT": "R", "CMP": "C", "LOG": "C", "DIR": "I"}, "I.5": {"SOP": "A", "PMT": "R", "CMP": "C", "COM": "C", "RPP": "I"}}, "personas": [{"id": "p1", "empresa": "CORP", "rol": "DIR", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p2", "empresa": "CORP", "rol": "PO", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p3", "empresa": "CORP", "rol": "MD", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p4", "empresa": "CORP", "rol": "SOP", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p5", "empresa": "CORP", "rol": "SIS", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p6", "empresa": "OPET", "rol": "RPP", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p7", "empresa": "OPET", "rol": "PDC", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p8", "empresa": "OPET", "rol": "PPR", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p9", "empresa": "OPET", "rol": "PMT", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p10", "empresa": "OPACK_ALM", "rol": "RPP", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p11", "empresa": "OPACK_ALM", "rol": "PDC", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p12", "empresa": "OPACK_ALM", "rol": "PPR", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p13", "empresa": "OPACK_ALM", "rol": "PMT", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p14", "empresa": "OPACK_NAV", "rol": "RPP", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p15", "empresa": "OPACK_NAV", "rol": "PDC", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p16", "empresa": "OPACK_NAV", "rol": "PPR", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p17", "empresa": "OPACK_NAV", "rol": "PMT", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p18", "empresa": "MGT", "rol": "RPP", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p19", "empresa": "MGT", "rol": "PDC", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p20", "empresa": "MGT", "rol": "PPR", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p21", "empresa": "MGT", "rol": "PMT", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p22", "empresa": "PDA", "rol": "RPP", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p23", "empresa": "PDA", "rol": "PDC", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p24", "empresa": "PDA", "rol": "PPR", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p25", "empresa": "PDA", "rol": "PMT", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p26", "empresa": "PAPRESA", "rol": "RPP", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p27", "empresa": "PAPRESA", "rol": "PDC", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p28", "empresa": "PAPRESA", "rol": "PPR", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}, {"id": "p29", "empresa": "PAPRESA", "rol": "PMT", "titular": "", "suplente": "", "puesto": "", "dedicacion": "", "email": "", "notas": ""}], "notas": {}, "politicas": [{"id": "pol1", "nombre": "Segmentación ABC/XYZ", "estandar": "Volumen (ABC) y variabilidad (XYZ) con el mismo criterio en todas las plantas; recálculo trimestral.", "parametros": "Umbrales de cada planta", "responsable": "MD", "estado": "Propuesta", "notas": ""}, {"id": "pol2", "nombre": "Estrategia MTS/MTO", "estandar": "Regla común por segmento para decidir qué se fabrica contra stock y qué contra pedido; las excepciones las aprueba corporativo.", "parametros": "Excepciones por planta", "responsable": "PO", "estado": "Propuesta", "notas": ""}, {"id": "pol3", "nombre": "Stock de seguridad y cobertura", "estandar": "Cobertura objetivo en días por segmento, revisada en el S&OP.", "parametros": "Días de cobertura por segmento", "responsable": "SOP", "estado": "Propuesta", "notas": ""}, {"id": "pol4", "nombre": "Horizonte congelado", "estandar": "Ventana en la que el plan no se cambia sin aprobación del responsable de planta.", "parametros": "Días por tipo de planta", "responsable": "DIR", "estado": "Propuesta", "notas": ""}, {"id": "pol5", "nombre": "Prioridad de pedidos", "estandar": "Orden común: fecha comprometida, cliente estratégico, antigüedad. Los conflictos entre plantas se deciden en el S&OP.", "parametros": "", "responsable": "DIR", "estado": "Propuesta", "notas": ""}, {"id": "pol6", "nombre": "Mínimos y máximos intercompany", "estandar": "Los propone la cartonera, los valida S&OP y se revisan cada mes.", "parametros": "Por referencia", "responsable": "SOP", "estado": "Propuesta", "notas": ""}, {"id": "pol7", "nombre": "Lote mínimo de fabricación", "estandar": "Lote mínimo por familia según el coste del cambio.", "parametros": "Por familia y máquina", "responsable": "PO", "estado": "Propuesta", "notas": ""}, {"id": "pol8", "nombre": "Nivel de servicio objetivo", "estandar": "OTIF objetivo por segmento de cliente o material.", "parametros": "Objetivo por planta", "responsable": "DIR", "estado": "Propuesta", "notas": ""}, {"id": "pol9", "nombre": "Reglas de secuenciación", "estandar": "Ciclos por molde o calidad y combinación de pedidos según el estándar de cada tipo de planta.", "parametros": "Familias y ciclos de cada planta", "responsable": "PO", "estado": "Propuesta", "notas": ""}, {"id": "pol10", "nombre": "Cambios en el dato maestro", "estandar": "Todo cambio se solicita al responsable de dato maestro, que lo aprueba y deja trazado.", "parametros": "", "responsable": "MD", "estado": "Propuesta", "notas": ""}], "kpis": [{"id": "kpi1", "nombre": "OTIF", "definicion": "Pedidos entregados en la fecha y cantidad comprometidas.", "formula": "Pedidos en fecha y completos / pedidos entregados", "frecuencia": "Mensual", "responsable": "RPP", "objetivo": "", "notas": ""}, {"id": "kpi2", "nombre": "Adherencia al plan", "definicion": "Lo producido según el plan semanal.", "formula": "Órdenes fabricadas en su semana y cantidad / órdenes planificadas", "frecuencia": "Semanal", "responsable": "PPR", "objetivo": "", "notas": ""}, {"id": "kpi3", "nombre": "Estabilidad del plan", "definicion": "Cambios dentro del horizonte congelado.", "formula": "Órdenes modificadas en horizonte congelado / órdenes del plan", "frecuencia": "Semanal", "responsable": "RPP", "objetivo": "", "notas": ""}, {"id": "kpi4", "nombre": "Precisión de la previsión", "definicion": "Error y sesgo de la previsión.", "formula": "1 − MAPE; sesgo = Σ(previsión − real) / Σ real", "frecuencia": "Mensual", "responsable": "SOP", "objetivo": "", "notas": ""}, {"id": "kpi5", "nombre": "Cobertura de stock", "definicion": "Días de consumo que cubre el stock.", "formula": "Stock / consumo medio diario", "frecuencia": "Semanal", "responsable": "PMT", "objetivo": "", "notas": ""}, {"id": "kpi6", "nombre": "Horas de cambio", "definicion": "Tiempo de máquina dedicado a cambios.", "formula": "Σ horas de cambio por línea", "frecuencia": "Semanal", "responsable": "PPR", "objetivo": "", "notas": ""}, {"id": "kpi7", "nombre": "OEE", "definicion": "Eficiencia global de los equipos.", "formula": "Disponibilidad × rendimiento × calidad", "frecuencia": "Semanal", "responsable": "PRO", "objetivo": "", "notas": ""}, {"id": "kpi8", "nombre": "Saturación por línea", "definicion": "Ocupación prevista de cada máquina.", "formula": "Horas cargadas / horas disponibles", "frecuencia": "Semanal", "responsable": "PPR", "objetivo": "", "notas": ""}, {"id": "kpi9", "nombre": "% integración intercompany", "definicion": "Recepciones de SQ y DU servidas por MGT, PDA o Papresa.", "formula": "Recepciones intercompany / recepciones totales", "frecuencia": "Mensual", "responsable": "SOP", "objetivo": "", "notas": ""}, {"id": "kpi10", "nombre": "Salud de la cartera", "definicion": "Pedidos vencidos o sin cerrar.", "formula": "Pedidos vencidos o abiertos indebidamente / cartera", "frecuencia": "Semanal", "responsable": "PDC", "objetivo": "", "notas": ""}, {"id": "kpi11", "nombre": "Calidad del dato maestro", "definicion": "Materiales con datos completos y sin duplicados.", "formula": "Materiales correctos / materiales activos", "frecuencia": "Mensual", "responsable": "MD", "objetivo": "", "notas": ""}, {"id": "kpi12", "nombre": "Madurez del proceso", "definicion": "Procesos alineados con el estándar corporativo.", "formula": "Actividades alineadas / actividades aplicables", "frecuencia": "Trimestral", "responsable": "PO", "objetivo": "", "notas": ""}], "cadencia": [{"id": "cad1", "nombre": "S&OP ejecutivo del grupo", "frecuencia": "Mensual (1.ª semana)", "duracion": "90 min", "participantes": "Dir. Planificación, S&OP, responsables de planta, Comercial, Dirección General", "entradas": "Plan de demanda consensuado, plan de suministro, KPIs", "salidas": "Decisiones de capacidad, prioridades y riesgos", "notas": ""}, {"id": "cad2", "nombre": "Revisión de demanda", "frecuencia": "Mensual", "duracion": "60 min", "participantes": "S&OP, planificadores de demanda, Comercial", "entradas": "Previsión, demanda perdida, precisión", "salidas": "Plan de demanda consensuado", "notas": ""}, {"id": "cad3", "nombre": "Revisión de suministro", "frecuencia": "Mensual", "duracion": "60 min", "participantes": "S&OP, responsables de planta, programación, materiales", "entradas": "Carga de capacidad, coberturas, intercompany", "salidas": "Plan de suministro y escalados", "notas": ""}, {"id": "cad4", "nombre": "Comité semanal de plan (por planta)", "frecuencia": "Semanal", "duracion": "45 min", "participantes": "Responsable de planta, demanda y cartera, programación, materiales, Producción", "entradas": "Cartera, carga, incidencias de la semana", "salidas": "Plan semanal congelado", "notas": ""}, {"id": "cad5", "nombre": "Daily de planificación (por planta)", "frecuencia": "Diaria", "duracion": "15 min", "participantes": "Demanda y cartera, programación, Producción", "entradas": "Control de producción, roturas, urgencias", "salidas": "Ajustes del día", "notas": ""}, {"id": "cad6", "nombre": "Revisión intercompany", "frecuencia": "Semanal", "duracion": "30 min", "participantes": "S&OP, materiales de las cartoneras, responsables de las papeleras", "entradas": "Mínimos/máximos, pedidos abiertos, recepciones", "salidas": "Acciones de suministro", "notas": ""}, {"id": "cad7", "nombre": "Comité de planificación corporativo", "frecuencia": "Mensual", "duracion": "60 min", "participantes": "Dir. Planificación, procesos, dato maestro, S&OP, sistemas", "entradas": "Avance del despliegue, cambios, peticiones de desarrollo", "salidas": "Decisiones sobre el modelo y prioridades", "notas": ""}, {"id": "cad8", "nombre": "Auditoría de madurez", "frecuencia": "Trimestral", "duracion": "2 h por planta", "participantes": "Responsable de procesos, responsable de planta", "entradas": "Notas de proceso y matriz de madurez", "salidas": "Plan de acción de la planta", "notas": ""}], "decisiones": [{"id": "dec1", "nombre": "Línea de dependencia de los planificadores de planta", "opciones": "A) Jerárquica de corporativo con puesto en planta · B) Funcional de corporativo y jerárquica de planta", "recomendacion": "A: es la coherente con el mandato de centralizar.", "responsable": "Dirección General y RR. HH.", "fecha": "", "estado": "Abierta", "resolucion": ""}, {"id": "dec2", "nombre": "Horizonte congelado estándar", "opciones": "Uno por tipo de planta (PET, cartón, papel) o uno común", "recomendacion": "Uno por tipo de planta, igual para todas las plantas del mismo tipo.", "responsable": "Dir. Planificación", "fecha": "", "estado": "Abierta", "resolucion": ""}, {"id": "dec3", "nombre": "Qué puede decidir la planta sin escalar", "opciones": "Umbrales de cambio de plan, prioridad y fechas", "recomendacion": "Fijar umbrales claros y un plazo máximo de respuesta de corporativo.", "responsable": "Dir. Planificación", "fecha": "", "estado": "Abierta", "resolucion": ""}, {"id": "dec4", "nombre": "Herramienta única de planificación", "opciones": "SIGPA (web) en todas las plantas o convivencia con GIO", "recomendacion": "Alinear con los proyectos 2027 de migración a web.", "responsable": "Dir. Planificación y Sistemas", "fecha": "", "estado": "Abierta", "resolucion": ""}, {"id": "dec5", "nombre": "Planta piloto y fecha de arranque", "opciones": "Ondupet, Ondupack o papeleras", "recomendacion": "Ondupet, por ser la planta con mayor madurez.", "responsable": "Dir. Planificación", "fecha": "", "estado": "Abierta", "resolucion": ""}, {"id": "dec6", "nombre": "Papresa hasta su paso a SAP", "opciones": "Aplicar ya roles y cadencia o esperar a enero de 2027", "recomendacion": "Aplicar ya roles y cadencia; las herramientas, tras el paso a SAP.", "responsable": "Dir. Planificación", "fecha": "", "estado": "Abierta", "resolucion": ""}], "plan": [{"id": "fase1", "nombre": "0 · Diagnóstico", "actividades": "Quién planifica hoy en cada planta, qué hace y cuánto tiempo dedica; rellenar esta herramienta.", "entregables": "Notas por proceso y empresa; directorio de personas.", "plazo": "Mes 1–2", "responsable": "PO", "estado": "Pendiente", "notas": ""}, {"id": "fase2", "nombre": "1 · Diseño del modelo", "actividades": "RACI, fichas de rol, políticas, cadencia y KPIs; validación con la dirección y las plantas.", "entregables": "Manual de planificación v1 y RACI con nombres.", "plazo": "Mes 2–3", "responsable": "DIR", "estado": "Pendiente", "notas": ""}, {"id": "fase3", "nombre": "2 · Piloto", "actividades": "Asignación nominal, formación, primer ciclo semanal y primer S&OP en la planta piloto.", "entregables": "Piloto en marcha y KPIs de partida.", "plazo": "Mes 3–5", "responsable": "PO", "estado": "Pendiente", "notas": ""}, {"id": "fase4", "nombre": "3 · Despliegue", "actividades": "Resto de plantas: Ondupack (Almendralejo y Navalmoral), MGT y PDA; Papresa tras su paso a SAP.", "entregables": "Modelo implantado en todas las plantas.", "plazo": "Mes 5–9", "responsable": "DIR", "estado": "Pendiente", "notas": ""}, {"id": "fase5", "nombre": "4 · Consolidación", "actividades": "S&OP del grupo, auditorías trimestrales y planificación en red papel → cartón.", "entregables": "Ciclo de mejora continua.", "plazo": "Continuo", "responsable": "DIR", "estado": "Pendiente", "notas": ""}]}</script>
+<script>
+'use strict';
+const KEY = 'cl-modelo-planificacion-v1';
+const BASE = JSON.parse(document.getElementById('datos-base').textContent);
+const clone = o => JSON.parse(JSON.stringify(o));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+let storageOK = true;
+function load() {
+  try { const t = localStorage.getItem(KEY); return t ? JSON.parse(t) : null; }
+  catch (e) { storageOK = false; return null; }
+}
+let S = load() || clone(BASE);
+for (const k of Object.keys(BASE)) if (S[k] === undefined) S[k] = clone(BASE[k]);
+let dirty = false;
+
+function save() {
+  S.meta.actualizado = new Date().toISOString();
+  try { localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; dirty = false; }
+  catch (e) { storageOK = false; }
+  setStatus();
+  refreshNav();
+}
+let tSave;
+function saveSoon() { dirty = true; clearTimeout(tSave); tSave = setTimeout(save, 350); }
+function setStatus() {
+  const el = document.getElementById('status');
+  if (!storageOK) { el.className = 'status bad'; el.textContent = 'Este navegador no guarda automáticamente: exporta el JSON antes de cerrar.'; return; }
+  el.className = 'status';
+  const d = S.meta.actualizado ? new Date(S.meta.actualizado) : null;
+  el.textContent = d ? 'Guardado en este navegador · ' + d.toLocaleString('es-ES', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin cambios todavía';
+}
+window.addEventListener('beforeunload', e => { if (dirty || !storageOK) { save(); if (!storageOK) { e.preventDefault(); e.returnValue = ''; } } });
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2200); }
+
+/* ---------------------------------------------------------------- utilidades de dominio */
+const ESTADOS = [
+  ['', 'Sin revisar', '#FFFFFF'],
+  ['alineado', 'Alineado con el estándar', '#00263A'],
+  ['propio', 'Estándar propio', '#3E6E80'],
+  ['informal', 'Informal', '#98C9EB'],
+  ['nohace', 'No se hace', '#E4A47C'],
+  ['na', 'No aplica', '#D7DFE5'],
+];
+const ESTADO = Object.fromEntries(ESTADOS.map(e => [e[0], e]));
+const PRIORIDADES = ['', 'Alta', 'Media', 'Baja'];
+const RACI_VALS = ['', 'R', 'A', 'A/R', 'C', 'I'];
+const AMBITOS = ['Corporativo', 'Planta', 'Otras áreas'];
+const roleById = id => S.roles.find(r => r.id === id);
+const empById = id => S.empresas.find(e => e.id === id);
+const roleName = id => (roleById(id) || {}).nombre || id || '—';
+const empName = id => (empById(id) || {}).nombre || id || '—';
+const allActs = () => S.procesos.flatMap(p => p.actividades.map(a => ({...a, proc: p})));
+const note = (emp, act) => ((S.notas[emp] || {})[act]) || {};
+function setNote(emp, act, k, v) {
+  S.notas[emp] = S.notas[emp] || {};
+  S.notas[emp][act] = S.notas[emp][act] || {};
+  S.notas[emp][act][k] = v;
+}
+function raciCheck(actId) {
+  const row = S.raci[actId] || {};
+  const vals = S.roles.map(r => row[r.id]).filter(Boolean);
+  const a = vals.filter(v => v === 'A' || v === 'A/R').length;
+  const r = vals.filter(v => v === 'R' || v === 'A/R').length;
+  if (a === 0) return 'Falta un A';
+  if (a > 1) return 'Más de un A';
+  if (r === 0) return 'Falta un R';
+  return '';
+}
+function titulares(emp, rol) {
+  return S.personas.filter(p => p.empresa === emp && p.rol === rol && p.titular.trim()).map(p => p.titular.trim());
+}
+function stats() {
+  const acts = allActs(), emps = S.empresas;
+  let rev = 0;
+  for (const e of emps) for (const a of acts) if (note(e.id, a.id).estado) rev++;
+  const asign = S.personas.filter(p => p.titular.trim()).length;
+  const raciBad = acts.filter(a => raciCheck(a.id)).length;
+  const decAb = S.decisiones.filter(d => d.estado !== 'Decidida').length;
+  return {rev, revTot: acts.length * emps.length, asign, asignTot: S.personas.length, raciBad, nActs: acts.length, decAb};
+}
+
+/* ---------------------------------------------------------------- navegación */
+const SECTIONS = [
+  ['inicio', 'Resumen'], ['empresas', 'Empresas y plantas'], ['personas', 'Personas y roles asignados'],
+  ['roles', 'Fichas de rol'], ['procesos', 'Notas por proceso'], ['raci', 'Matriz RACI'],
+  ['politicas', 'Políticas'], ['kpis', 'KPIs'], ['cadencia', 'Reuniones'], ['decisiones', 'Decisiones'],
+  ['plan', 'Plan de despliegue'], ['exportar', 'Exportar / importar'],
+];
+const ui = {sec: 'inicio', emp: 'OPET', proc: null, editCat: false, filtroEmp: '', raciEmp: ''};
+try { Object.assign(ui, JSON.parse(sessionStorage.getItem(KEY + '-ui') || '{}')); } catch (e) {}
+function saveUI() { try { sessionStorage.setItem(KEY + '-ui', JSON.stringify(ui)); } catch (e) {} }
+
+function refreshNav() {
+  const st = stats();
+  const badge = {
+    procesos: `${st.rev}/${st.revTot}`,
+    personas: `${st.asign}/${st.asignTot}`,
+    raci: st.raciBad ? `${st.raciBad} avisos` : 'OK',
+    decisiones: st.decAb ? `${st.decAb} abiertas` : '',
+  };
+  const warn = {raci: st.raciBad > 0};
+  document.getElementById('nav').innerHTML = SECTIONS.map(([id, label], i) =>
+    (i === 1 || i === 6 || i === 11 ? '<div class="sep"></div>' : '') +
+    `<button data-go="${id}" class="${ui.sec === id ? 'on' : ''}">${esc(label)}${badge[id] ? `<span class="badge${warn[id] ? ' warn' : ''}">${esc(badge[id])}</span>` : ''}</button>`
+  ).join('');
+}
+function go(sec) { ui.sec = sec; saveUI(); render(); window.scrollTo(0, 0); }
+
+/* ---------------------------------------------------------------- tablas editables genéricas */
+function field(list, i, c, v) {
+  const a = `data-list="${list}" data-i="${i}" data-k="${c.k}" aria-label="${esc(c.label)}"`;
+  if (c.type === 'select') {
+    const opts = c.options();
+    return `<select ${a}>${opts.map(([val, lab]) => `<option value="${esc(val)}"${val === (v ?? '') ? ' selected' : ''}>${esc(lab)}</option>`).join('')}</select>`;
+  }
+  if (c.type === 'area') return `<textarea ${a} rows="1" placeholder="${esc(c.ph || '')}">${esc(v)}</textarea>`;
+  return `<input ${a} value="${esc(v)}" placeholder="${esc(c.ph || '')}"${c.list ? ` list="${c.list}"` : ''}>`;
+}
+function grid(list, cols, opts = {}) {
+  const rows = S[list];
+  const idx = rows.map((r, i) => i).filter(i => !opts.filter || opts.filter(rows[i]));
+  let h = `<div class="tablewrap"><table class="grid"><thead><tr>${cols.map(c => `<th style="min-width:${c.w || 140}px">${esc(c.label)}</th>`).join('')}<th class="act"></th></tr></thead><tbody>`;
+  for (const i of idx) {
+    h += `<tr>${cols.map(c => `<td>${field(list, i, c, rows[i][c.k])}</td>`).join('')}<td class="act"><button class="icon" data-del="${list}" data-i="${i}" title="Eliminar fila" aria-label="Eliminar fila">×</button></td></tr>`;
+  }
+  if (!idx.length) h += `<tr><td colspan="${cols.length + 1}" class="hint" style="padding:16px">${esc(opts.empty || 'Sin filas.')}</td></tr>`;
+  h += `</tbody></table></div><button class="btn ghost small" data-add="${list}">+ ${esc(opts.addLabel || 'Añadir fila')}</button>`;
+  return h;
+}
+const NEW = {
+  empresas: () => ({id: uid('E'), nombre: '', tipo: '', erp: '', herramienta: '', director: '', responsable: '', personasHoy: '', particularidades: '', notas: ''}),
+  personas: () => ({id: uid('p'), empresa: ui.filtroEmp || (S.empresas[0] || {}).id || '', rol: '', titular: '', suplente: '', puesto: '', dedicacion: '', email: '', notas: ''}),
+  roles: () => ({id: uid('R'), corto: '', nombre: '', ambito: 'Planta', mision: '', responsabilidades: '', decide: '', kpis: ''}),
+  politicas: () => ({id: uid('pol'), nombre: '', estandar: '', parametros: '', responsable: '', estado: 'Propuesta', notas: ''}),
+  kpis: () => ({id: uid('kpi'), nombre: '', definicion: '', formula: '', frecuencia: '', responsable: '', objetivo: '', notas: ''}),
+  cadencia: () => ({id: uid('cad'), nombre: '', frecuencia: '', duracion: '', participantes: '', entradas: '', salidas: '', notas: ''}),
+  decisiones: () => ({id: uid('dec'), nombre: '', opciones: '', recomendacion: '', responsable: '', fecha: '', estado: 'Abierta', resolucion: ''}),
+  plan: () => ({id: uid('fase'), nombre: '', actividades: '', entregables: '', plazo: '', responsable: '', estado: 'Pendiente', notas: ''}),
+};
+const optRoles = (blank = true) => () => (blank ? [['', '—']] : []).concat(S.roles.map(r => [r.id, r.nombre || r.id]));
+const optEmps = () => S.empresas.map(e => [e.id, e.nombre || e.id]);
+const optList = arr => () => arr.map(v => [v, v]);
+
+/* ---------------------------------------------------------------- vistas */
+const VIEWS = {};
+
+VIEWS.inicio = () => {
+  const st = stats();
+  const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+  const tile = (lab, big, sub, p) => `<div class="tile"><div class="label">${lab}</div><div class="big">${big}</div><div class="hint">${sub}</div>${p !== undefined ? `<div class="bar"><i style="width:${p}%"></i></div>` : ''}</div>`;
+  let cover = `<table class="cover"><thead><tr><th class="l">Empresa</th>${S.procesos.map(p => `<th>${esc(p.nombre)}</th>`).join('')}</tr></thead><tbody>`;
+  for (const e of S.empresas) {
+    cover += `<tr><th class="l">${esc(e.nombre)}</th>`;
+    for (const p of S.procesos) {
+      const counts = {}; let revd = 0;
+      for (const a of p.actividades) { const s = note(e.id, a.id).estado || ''; counts[s] = (counts[s] || 0) + 1; if (s) revd++; }
+      const n = p.actividades.length || 1;
+      const bars = ESTADOS.filter(x => x[0] && counts[x[0]]).map(x => `<i style="width:${100 * counts[x[0]] / n}%;background:${x[2]}" title="${esc(x[1])}: ${counts[x[0]]}"></i>`).join('');
+      cover += `<td class="cell" data-cover="${e.id}|${p.id}" title="${esc(e.nombre)} · ${esc(p.nombre)}"><div class="stack">${bars}</div><div class="frac">${revd}/${p.actividades.length}</div></td>`;
+    }
+    cover += '</tr>';
+  }
+  cover += '</tbody></table>';
+  const sinTit = S.personas.filter(p => !p.titular.trim()).map(p => `${esc(empName(p.empresa))} · ${esc(roleName(p.rol))}`);
+  const sinSup = S.personas.filter(p => p.titular.trim() && !p.suplente.trim()).map(p => `${esc(empName(p.empresa))} · ${esc(roleName(p.rol))} (${esc(p.titular)})`);
+  const raciBad = allActs().filter(a => raciCheck(a.id)).map(a => `${esc(a.id)} ${esc(a.nombre)}: ${esc(raciCheck(a.id))}`);
+  const list = (arr, empty) => arr.length ? `<ul class="gaps">${arr.slice(0, 12).map(x => `<li>${x}</li>`).join('')}${arr.length > 12 ? `<li class="muted">… y ${arr.length - 12} más</li>` : ''}</ul>` : `<p class="hint">${empty}</p>`;
+  return `
+  <div class="head"><div><h1>Resumen</h1><p>Herramienta para diseñar el modelo de planificación corporativo: <b>corporativo define</b> procesos, roles, personas, políticas y KPIs, y <b>cada planta ejecuta</b>. Todo lo que escribáis se guarda solo en este navegador.</p></div></div>
+  <div class="card" style="margin-bottom:16px"><div class="label">Cómo usarla</div>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div><b>Notas por proceso</b><span class="hint">Por cada empresa y actividad: cómo se hace hoy, quién lo hace y qué falla.</span></div></div>
+      <div class="step"><div class="num">2</div><div><b>Personas y roles</b><span class="hint">Titular y suplente, con nombre y apellidos, para cada rol de cada planta.</span></div></div>
+      <div class="step"><div class="num">3</div><div><b>RACI y políticas</b><span class="hint">Ajustad la propuesta: quién es responsable (R), quién decide (A), a quién se consulta (C) y a quién se informa (I).</span></div></div>
+      <div class="step"><div class="num">4</div><div><b>Exportar para Claude</b><span class="hint">Descargad el JSON y pasádmelo: con él genero el modelo final.</span></div></div>
+    </div>
+  </div>
+  <div class="tiles">
+    ${tile('Actividades revisadas', `${st.rev}<span class="muted" style="font-size:15px"> / ${st.revTot}</span>`, `${S.empresas.length} empresas × ${st.nActs} actividades`, pct(st.rev, st.revTot))}
+    ${tile('Roles con titular', `${st.asign}<span class="muted" style="font-size:15px"> / ${st.asignTot}</span>`, 'Asignaciones con nombre y apellidos', pct(st.asign, st.asignTot))}
+    ${tile('RACI', st.raciBad ? `${st.raciBad} avisos` : 'Correcta', `${st.nActs} actividades: una A y al menos una R cada una`)}
+    ${tile('Decisiones abiertas', st.decAb, 'Pendientes de cerrar con dirección')}
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="row" style="justify-content:space-between;margin-bottom:8px"><div class="label">Situación por empresa y proceso</div>
+      <div class="legend">${ESTADOS.filter(e => e[0]).map(e => `<span><i class="sw" style="background:${e[2]}"></i>${esc(e[1])}</span>`).join('')}</div></div>
+    <div style="overflow:auto">${cover}</div>
+    <p class="hint" style="margin:8px 0 0">Pulsa una celda para ir a sus notas.</p>
+  </div>
+  <div class="two">
+    <div class="card"><div class="label">Roles sin titular</div>${list(sinTit, 'Todos los roles tienen titular.')}</div>
+    <div class="card"><div class="label">Roles sin suplente</div>${list(sinSup, 'No hay titulares sin suplente.')}${raciBad.length ? `<div class="label" style="margin-top:14px">Avisos de la RACI</div>${list(raciBad, '')}` : ''}</div>
+  </div>`;
+};
+
+VIEWS.empresas = () => `
+  <div class="head"><div><h1>Empresas y plantas</h1><p>Perímetro del modelo. Completad quién dirige cada planta, quién planifica hoy y sus particularidades.</p></div></div>
+  ${grid('empresas', [
+    {k: 'nombre', label: 'Empresa / planta', type: 'area', w: 170}, {k: 'tipo', label: 'Tipo', type: 'area', w: 170}, {k: 'erp', label: 'ERP', w: 120},
+    {k: 'herramienta', label: 'Herramienta de planificación', type: 'area', w: 200}, {k: 'director', label: 'Director/a de planta', w: 150},
+    {k: 'responsable', label: 'Responsable de planificación hoy', w: 170}, {k: 'personasHoy', label: 'Nº personas planificando', w: 110},
+    {k: 'particularidades', label: 'Particularidades', type: 'area', w: 240}, {k: 'notas', label: 'Notas', type: 'area', w: 200},
+  ], {addLabel: 'Añadir empresa o planta'})}`;
+
+VIEWS.personas = () => {
+  const counts = {};
+  for (const p of S.personas) counts[p.empresa] = (counts[p.empresa] || 0) + 1;
+  const titulares = [...new Set(S.personas.map(p => p.titular.trim()).filter(Boolean))];
+  document.getElementById('dl-titulares').innerHTML = titulares.map(t => `<option value="${esc(t)}">`).join('');
+  return `
+  <div class="head"><div><h1>Personas y roles asignados</h1><p>Cada fila es un rol en una empresa, con su titular y su suplente con nombre y apellidos. Si una persona cubre varios roles, añadid una fila por rol.</p></div></div>
+  <div class="row" style="margin-bottom:12px"><div class="chips">
+    <button class="chip ${ui.filtroEmp === '' ? 'on' : ''}" data-filtro="">Todas<span class="n">${S.personas.length}</span></button>
+    ${S.empresas.map(e => `<button class="chip ${ui.filtroEmp === e.id ? 'on' : ''}" data-filtro="${e.id}">${esc(e.nombre)}<span class="n">${counts[e.id] || 0}</span></button>`).join('')}
+  </div></div>
+  ${grid('personas', [
+    {k: 'empresa', label: 'Empresa', type: 'select', options: optEmps, w: 190}, {k: 'rol', label: 'Rol', type: 'select', options: optRoles(), w: 300},
+    {k: 'titular', label: 'Titular (nombre y apellidos)', w: 190, ph: 'Nombre Apellido Apellido', list: 'dl-titulares'},
+    {k: 'suplente', label: 'Suplente', w: 170, list: 'dl-titulares'}, {k: 'puesto', label: 'Puesto actual', w: 150},
+    {k: 'dedicacion', label: '% dedicación', w: 90, ph: 'p. ej. 50 %'}, {k: 'email', label: 'Email', w: 170},
+    {k: 'notas', label: 'Notas', type: 'area', w: 200},
+  ], {addLabel: 'Añadir asignación', filter: ui.filtroEmp ? r => r.empresa === ui.filtroEmp : null, empty: 'No hay asignaciones para esta empresa.'})}`;
+};
+
+VIEWS.roles = () => `
+  <div class="head"><div><h1>Fichas de rol</h1><p>Qué hace cada rol, qué puede decidir y con qué KPIs se mide. Un rol nuevo aparece también como columna en la RACI.</p></div></div>
+  ${grid('roles', [
+    {k: 'nombre', label: 'Rol', type: 'area', w: 200}, {k: 'corto', label: 'Nombre corto (RACI)', type: 'area', w: 130},
+    {k: 'ambito', label: 'Ámbito', type: 'select', options: optList(AMBITOS), w: 120},
+    {k: 'mision', label: 'Misión', type: 'area', w: 240}, {k: 'responsabilidades', label: 'Responsabilidades', type: 'area', w: 280},
+    {k: 'decide', label: 'Qué decide', type: 'area', w: 220}, {k: 'kpis', label: 'KPIs', type: 'area', w: 170},
+  ], {addLabel: 'Añadir rol'})}`;
+
+VIEWS.procesos = () => {
+  if (!S.procesos.find(p => p.id === ui.proc)) ui.proc = (S.procesos[0] || {}).id;
+  if (!empById(ui.emp)) ui.emp = (S.empresas[0] || {}).id;
+  const emp = ui.emp, P = S.procesos.find(p => p.id === ui.proc);
+  const acts = allActs();
+  const revEmp = acts.filter(a => note(emp, a.id).estado).length;
+  const names = [...new Set(S.personas.filter(p => p.empresa === emp).flatMap(p => [p.titular, p.suplente]).map(s => (s || '').trim()).filter(Boolean))];
+  document.getElementById('dl-titulares').innerHTML = names.map(t => `<option value="${esc(t)}">`).join('');
+  let list = '';
+  S.procesos.forEach((p, pi) => {
+    const rv = p.actividades.filter(a => note(emp, a.id).estado).length;
+    list += ui.editCat
+      ? `<input data-cat-proc="${pi}" value="${esc(p.nombre)}" aria-label="Nombre del proceso">`
+      : `<button data-proc="${p.id}" class="${p.id === ui.proc ? 'on' : ''}"><span>${esc(p.nombre)}</span><span class="cnt">${rv}/${p.actividades.length}</span></button>`;
+  });
+  if (ui.editCat) list += `<button data-addproc="1" class="muted">+ Añadir proceso</button><p class="hint" style="padding:0 8px">Sal de «Editar catálogo» para navegar por los procesos.</p>`;
+  let cards = '';
+  if (P) {
+    const pi = S.procesos.indexOf(P);
+    P.actividades.forEach((a, ai) => {
+      const n = note(emp, a.id), e = ESTADO[n.estado || ''] || ESTADO[''];
+      const dark = ['alineado', 'propio'].includes(n.estado);
+      const raci = S.raci[a.id] || {};
+      const by = L => S.roles.filter(r => raci[r.id] === L || (L === 'A' && raci[r.id] === 'A/R') || (L === 'R' && raci[r.id] === 'A/R')).map(r => esc(r.corto || r.nombre)).join(', ') || '—';
+      const nf = (k, label, cls, type, extra = '') => `<div class="fld ${cls || ''}"><label>${label}</label>${type === 'area'
+        ? `<textarea data-note="${a.id}" data-nk="${k}" rows="2" ${extra}>${esc(n[k])}</textarea>`
+        : type === 'estado'
+          ? `<select data-note="${a.id}" data-nk="${k}">${ESTADOS.map(x => `<option value="${x[0]}"${x[0] === (n[k] || '') ? ' selected' : ''}>${esc(x[1])}</option>`).join('')}</select>`
+          : type === 'prio'
+            ? `<select data-note="${a.id}" data-nk="${k}">${PRIORIDADES.map(x => `<option value="${x}"${x === (n[k] || '') ? ' selected' : ''}>${x || '—'}</option>`).join('')}</select>`
+            : `<input data-note="${a.id}" data-nk="${k}" value="${esc(n[k])}" ${extra}>`}</div>`;
+      cards += `<div class="actcard">
+        <div class="acthead"><span class="aid">${esc(a.id)}</span><h3>${esc(a.nombre)}</h3>
+          <span class="pill" style="background:${e[2]};color:${dark ? '#fff' : 'var(--navy)'}" data-pill="${a.id}">${esc(e[1])}</span></div>
+        ${ui.editCat ? `<div class="catedit">
+            <input data-cat="${pi}|${ai}" data-ck="nombre" value="${esc(a.nombre)}" aria-label="Nombre de la actividad">
+            <input data-cat="${pi}|${ai}" data-ck="descripcion" value="${esc(a.descripcion)}" aria-label="Descripción">
+            <input data-cat="${pi}|${ai}" data-ck="frecuencia" value="${esc(a.frecuencia)}" aria-label="Frecuencia estándar" placeholder="Frecuencia">
+            <input data-cat="${pi}|${ai}" data-ck="herramienta" value="${esc(a.herramienta)}" aria-label="Herramienta estándar" placeholder="Herramienta">
+            <button class="icon" data-delact="${pi}|${ai}" title="Eliminar actividad" aria-label="Eliminar actividad">×</button></div>`
+          : `<p class="desc">${esc(a.descripcion)}${a.frecuencia ? ` <span class="muted">· Frecuencia estándar: ${esc(a.frecuencia)}</span>` : ''}${a.herramienta ? ` <span class="muted">· ${esc(a.herramienta)}</span>` : ''}</p>`}
+        <div class="notegrid">
+          ${nf('estado', 'Situación', '', 'estado')}
+          ${nf('quien', 'Quién lo hace hoy', '', '', 'list="dl-titulares" placeholder="Nombre y apellidos"')}
+          ${nf('herramienta', 'Herramienta / transacción', '', '', 'placeholder="p. ej. GIO 102404"')}
+          ${nf('frecuencia', 'Frecuencia real', '', '', 'placeholder="Diaria, semanal…"')}
+          ${nf('situacion', 'Cómo se hace hoy', 'half', 'area')}
+          ${nf('problemas', 'Problemas detectados', 'half', 'area')}
+          ${nf('propuesta', 'Cómo debería hacerse (propuesta)', 'half', 'area')}
+          <div class="half" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px">
+            ${nf('prioridad', 'Prioridad', '', 'prio')}
+            ${nf('horas', 'Horas / semana dedicadas', '', '', 'placeholder="p. ej. 4"')}
+            ${nf('notas', 'Otras notas', 'full', 'area')}
+          </div>
+        </div>
+        <div class="racisum"><span><b>A</b> ${by('A')}</span><span><b>R</b> ${by('R')}</span><span><b>C</b> ${by('C')}</span><span><b>I</b> ${by('I')}</span></div>
+      </div>`;
+    });
+    if (ui.editCat) cards += `<button class="btn ghost small" data-addact="${pi}">+ Añadir actividad a ${esc(P.nombre)}</button>`;
+  }
+  return `
+  <div class="head"><div><h1>Notas por proceso</h1><p>Elegid la empresa y recorred sus actividades. En «Situación»: <b>alineado</b> = ya sigue el estándar corporativo · <b>estándar propio</b> = la planta tiene su forma de hacerlo · <b>informal</b> = depende de quién lo haga · <b>no se hace</b> · <b>no aplica</b>.</p></div>
+    <div class="row"><span class="hint">${revEmp} de ${acts.length} actividades revisadas</span><button class="btn ${ui.editCat ? 'light' : 'ghost'} small" data-editcat="1">${ui.editCat ? 'Terminar de editar' : 'Editar catálogo'}</button></div></div>
+  <div class="chips" style="margin-bottom:14px">${S.empresas.map(e => `<button class="chip ${e.id === emp ? 'on' : ''}" data-emp="${e.id}">${esc(e.nombre)}</button>`).join('')}</div>
+  <div class="procwrap"><div class="proclist">${list}</div><div>${cards || '<p class="hint">No hay procesos.</p>'}</div></div>`;
+};
+
+VIEWS.raci = () => {
+  const groups = AMBITOS.map(g => [g, S.roles.filter(r => (r.ambito || 'Otras áreas') === g)]).filter(g => g[1].length);
+  const emp = ui.raciEmp;
+  const namesFor = r => {
+    if (!emp) return '';
+    const e = r.ambito === 'Corporativo' ? 'CORP' : emp;
+    const t = titulares(e, r.id);
+    return `<span class="nm${t.length ? '' : ' none'}">${t.length ? esc(t.join(', ')) : 'Por asignar'}</span>`;
+  };
+  let h = `<table class="raci"><thead><tr class="g"><th class="first" rowspan="1"></th>${groups.map(([g, rs]) => `<th colspan="${rs.length}">${esc(g)}</th>`).join('')}<th rowspan="1"></th></tr>
+    <tr class="r"><th class="first" style="top:30px">Actividad</th>${groups.flatMap(g => g[1]).map(r => `<th title="${esc(r.nombre)}">${esc(r.corto || r.nombre)}${namesFor(r)}</th>`).join('')}<th>Revisión</th></tr></thead><tbody>`;
+  const roles = groups.flatMap(g => g[1]);
+  for (const p of S.procesos) {
+    h += `<tr class="grp"><td class="first" style="background:var(--navy);color:#fff">${esc(p.nombre)}</td><td colspan="${roles.length + 1}" style="background:var(--navy)"></td></tr>`;
+    for (const a of p.actividades) {
+      const row = S.raci[a.id] || {};
+      const chk = raciCheck(a.id);
+      h += `<tr><td class="first"><b>${esc(a.id)}</b> ${esc(a.nombre)}</td>${roles.map(r => {
+        const v = row[r.id] || '';
+        return `<td class="c"><select data-raci="${a.id}" data-role="${r.id}" class="v-${v.replace('/', '')}" aria-label="${esc(a.id)} · ${esc(r.nombre)}">${RACI_VALS.map(x => `<option value="${x}"${x === v ? ' selected' : ''}>${x || '·'}</option>`).join('')}</select></td>`;
+      }).join('')}<td class="chk ${chk ? 'bad' : 'ok'}" data-chk="${a.id}">${chk ? '⚠ ' + esc(chk) : '✓'}</td></tr>`;
+    }
+  }
+  h += '</tbody></table>';
+  return `
+  <div class="head"><div><h1>Matriz RACI</h1><p>Propuesta inicial por rol. Cada actividad debe tener <b>una sola A</b> y al menos una R. Elegid una empresa para ver los nombres asignados a cada rol.</p></div>
+    <div class="row"><button class="btn ghost small" data-csv="raci">Exportar CSV</button></div></div>
+  <div class="racitools">
+    <label class="hint" for="raciemp">Ver nombres de</label>
+    <select id="raciemp" data-raciemp="1" style="padding:6px 8px;border:1px solid var(--border);border-radius:7px"><option value="">— Solo roles —</option>${S.empresas.filter(e => e.id !== 'CORP').map(e => `<option value="${e.id}"${e.id === emp ? ' selected' : ''}>${esc(e.nombre)}</option>`).join('')}</select>
+    <div class="legend"><span><i class="sw v-A"></i><b>A</b> Decide y responde del resultado</span><span><i class="sw v-R"></i><b>R</b> Lo ejecuta</span><span><i class="sw v-C"></i><b>C</b> Se le consulta</span><span><i class="sw v-I"></i><b>I</b> Se le informa</span></div>
+  </div>
+  <div class="raciwrap">${h}</div>`;
+};
+
+const respCol = {k: 'responsable', label: 'Responsable', type: 'select', options: optRoles(), w: 240};
+VIEWS.politicas = () => `
+  <div class="head"><div><h1>Políticas de planificación</h1><p>Corporativo fija el estándar; cada planta solo ajusta los parámetros dentro de él.</p></div></div>
+  ${grid('politicas', [
+    {k: 'nombre', label: 'Política', type: 'area', w: 190}, {k: 'estandar', label: 'Estándar corporativo', type: 'area', w: 300},
+    {k: 'parametros', label: 'Parámetros por planta', type: 'area', w: 220}, respCol,
+    {k: 'estado', label: 'Estado', type: 'select', options: optList(['Propuesta', 'En revisión', 'Validada']), w: 120},
+    {k: 'notas', label: 'Notas', type: 'area', w: 220},
+  ], {addLabel: 'Añadir política'})}`;
+
+VIEWS.kpis = () => `
+  <div class="head"><div><h1>KPIs comunes</h1><p>Misma definición y fórmula en todas las plantas; el objetivo puede variar por planta.</p></div></div>
+  ${grid('kpis', [
+    {k: 'nombre', label: 'KPI', type: 'area', w: 170}, {k: 'definicion', label: 'Definición', type: 'area', w: 230},
+    {k: 'formula', label: 'Fórmula', type: 'area', w: 250}, {k: 'frecuencia', label: 'Frecuencia', w: 110}, respCol,
+    {k: 'objetivo', label: 'Objetivo (por planta)', type: 'area', w: 200}, {k: 'notas', label: 'Notas', type: 'area', w: 180},
+  ], {addLabel: 'Añadir KPI'})}`;
+
+VIEWS.cadencia = () => `
+  <div class="head"><div><h1>Reuniones y cadencia</h1><p>El calendario de planificación del grupo: quién se reúne, cada cuánto y para decidir qué.</p></div></div>
+  ${grid('cadencia', [
+    {k: 'nombre', label: 'Reunión', type: 'area', w: 190}, {k: 'frecuencia', label: 'Frecuencia', type: 'area', w: 130}, {k: 'duracion', label: 'Duración', w: 90},
+    {k: 'participantes', label: 'Participantes', type: 'area', w: 250}, {k: 'entradas', label: 'Entradas', type: 'area', w: 220},
+    {k: 'salidas', label: 'Salidas / decisiones', type: 'area', w: 220}, {k: 'notas', label: 'Notas', type: 'area', w: 180},
+  ], {addLabel: 'Añadir reunión'})}`;
+
+VIEWS.decisiones = () => `
+  <div class="head"><div><h1>Decisiones</h1><p>Lo que hay que cerrar con dirección para poder desplegar el modelo.</p></div></div>
+  ${grid('decisiones', [
+    {k: 'nombre', label: 'Decisión', type: 'area', w: 210}, {k: 'opciones', label: 'Opciones', type: 'area', w: 250},
+    {k: 'recomendacion', label: 'Recomendación', type: 'area', w: 230}, {k: 'responsable', label: 'Quién decide', type: 'area', w: 170},
+    {k: 'fecha', label: 'Fecha límite', w: 110}, {k: 'estado', label: 'Estado', type: 'select', options: optList(['Abierta', 'Decidida']), w: 110},
+    {k: 'resolucion', label: 'Resolución', type: 'area', w: 220},
+  ], {addLabel: 'Añadir decisión'})}`;
+
+VIEWS.plan = () => `
+  <div class="head"><div><h1>Plan de despliegue</h1><p>Fases propuestas para pasar de la situación actual al modelo centralizado.</p></div></div>
+  ${grid('plan', [
+    {k: 'nombre', label: 'Fase', type: 'area', w: 160}, {k: 'actividades', label: 'Actividades', type: 'area', w: 300},
+    {k: 'entregables', label: 'Entregables', type: 'area', w: 220}, {k: 'plazo', label: 'Plazo', w: 100}, respCol,
+    {k: 'estado', label: 'Estado', type: 'select', options: optList(['Pendiente', 'En curso', 'Hecho']), w: 110},
+    {k: 'notas', label: 'Notas', type: 'area', w: 200},
+  ], {addLabel: 'Añadir fase'})}`;
+
+VIEWS.exportar = () => {
+  const st = stats();
+  return `
+  <div class="head"><div><h1>Exportar e importar</h1><p>Todo se guarda en este navegador. Para pasármelo, o para compartirlo con el equipo, descargad el archivo JSON.</p></div></div>
+  <div class="expgrid">
+    <div class="card"><div class="label">Para Claude</div><h3>Descargar JSON</h3>
+      <p>Contiene todo: empresas, personas, roles, notas, RACI, políticas, KPIs, reuniones, decisiones y plan. Con él genero el modelo final: el manual de planificación por proceso, la RACI con nombres por empresa, las fichas de rol y las diapositivas.</p>
+      <p class="hint">Ahora mismo: ${st.rev} de ${st.revTot} actividades revisadas · ${st.asign} de ${st.asignTot} roles con titular.</p>
+      <button class="btn" data-export="json">Descargar JSON</button></div>
+    <div class="card"><div class="label">Importar</div><h3>Cargar un JSON</h3>
+      <p><b>Combinar</b> añade las notas y nombres del archivo donde aquí estén vacíos; sirve para juntar el trabajo de varias personas. <b>Reemplazar</b> sustituye todo por el contenido del archivo.</p>
+      <input type="file" id="fileimp" accept=".json,application/json" style="margin-bottom:10px">
+      <div class="row"><button class="btn ghost" data-import="merge">Combinar</button><button class="btn ghost" data-import="replace">Reemplazar todo</button></div></div>
+    <div class="card"><div class="label">Para Excel</div><h3>Exportar CSV</h3>
+      <p>Tablas sueltas para revisar en Excel (separador punto y coma).</p>
+      <div class="row"><button class="btn ghost small" data-csv="raci">RACI</button><button class="btn ghost small" data-csv="notas">Notas por proceso</button><button class="btn ghost small" data-csv="personas">Personas y roles</button></div></div>
+    <div class="card"><div class="label">Volver a empezar</div><h3>Restablecer la propuesta inicial</h3>
+      <p>Borra todo lo escrito en este navegador y vuelve a la propuesta de partida. Descargad antes el JSON si queréis conservarlo.</p>
+      <button class="btn danger" data-reset="1">Restablecer</button></div>
+  </div>`;
+};
+
+/* ---------------------------------------------------------------- render y eventos */
+function autosize(t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; }
+function render() {
+  refreshNav();
+  document.getElementById('main').innerHTML = VIEWS[ui.sec]();
+  document.querySelectorAll('table.grid textarea').forEach(autosize);
+}
+const main = document.getElementById('main');
+
+function onEdit(e) {
+  const el = e.target, d = el.dataset;
+  if (d.list !== undefined) {
+    S[d.list][+d.i][d.k] = el.value;
+    if (el.tagName === 'TEXTAREA' && el.closest('table.grid')) autosize(el);
+    saveSoon();
+  } else if (d.note) {
+    setNote(ui.emp, d.note, d.nk, el.value);
+    if (d.nk === 'estado') {
+      const pill = main.querySelector(`[data-pill="${CSS.escape(d.note)}"]`), x = ESTADO[el.value] || ESTADO[''];
+      if (pill) { pill.textContent = x[1]; pill.style.background = x[2]; pill.style.color = ['alineado', 'propio'].includes(el.value) ? '#fff' : 'var(--navy)'; }
+      if (e.type === 'change') { save(); updateProcCounts(); }
+    }
+    saveSoon();
+  } else if (d.raci) {
+    S.raci[d.raci] = S.raci[d.raci] || {};
+    if (el.value) S.raci[d.raci][d.role] = el.value; else delete S.raci[d.raci][d.role];
+    el.className = 'v-' + el.value.replace('/', '');
+    const c = main.querySelector(`[data-chk="${CSS.escape(d.raci)}"]`), chk = raciCheck(d.raci);
+    if (c) { c.className = 'chk ' + (chk ? 'bad' : 'ok'); c.textContent = chk ? '⚠ ' + chk : '✓'; }
+    saveSoon();
+  } else if (d.cat) {
+    const [pi, ai] = d.cat.split('|').map(Number);
+    S.procesos[pi].actividades[ai][d.ck] = el.value; saveSoon();
+  } else if (d.catProc !== undefined) {
+    S.procesos[+d.catProc].nombre = el.value; saveSoon();
+  } else if (d.raciemp) {
+    ui.raciEmp = el.value; saveUI(); render();
+  } else if (el.id === 'autor') {
+    S.meta.autor = el.value; saveSoon();
+  }
+}
+function updateProcCounts() {
+  if (ui.sec !== 'procesos' || ui.editCat) return;
+  main.querySelectorAll('[data-proc]').forEach(b => {
+    const p = S.procesos.find(x => x.id === b.dataset.proc);
+    b.querySelector('.cnt').textContent = `${p.actividades.filter(a => note(ui.emp, a.id).estado).length}/${p.actividades.length}`;
+  });
+  const acts = allActs(), h = main.querySelector('.head .hint');
+  if (h) h.textContent = `${acts.filter(a => note(ui.emp, a.id).estado).length} de ${acts.length} actividades revisadas`;
+}
+document.addEventListener('input', onEdit);
+document.addEventListener('change', e => { if (e.target.tagName === 'SELECT' || e.target.dataset.raciemp) onEdit(e); });
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button, td.cell'); if (!b) return;
+  const d = b.dataset;
+  if (d.go) return go(d.go);
+  if (d.add) { S[d.add].push(NEW[d.add]()); save(); render(); return; }
+  if (d.del) {
+    const row = S[d.del][+d.i];
+    const label = row.nombre || row.titular || (row.rol ? roleName(row.rol) : '') || 'esta fila';
+    if (!confirm(`¿Eliminar «${label}»?`)) return;
+    S[d.del].splice(+d.i, 1);
+    if (d.del === 'roles') for (const k in S.raci) delete S.raci[k][row.id];
+    save(); render(); return;
+  }
+  if (d.filtro !== undefined) { ui.filtroEmp = d.filtro; saveUI(); render(); return; }
+  if (d.emp) { ui.emp = d.emp; saveUI(); render(); return; }
+  if (d.proc) { ui.proc = d.proc; saveUI(); render(); window.scrollTo(0, 0); return; }
+  if (d.cover) { const [e1, p1] = d.cover.split('|'); ui.emp = e1; ui.proc = p1; ui.editCat = false; go('procesos'); return; }
+  if (d.editcat) { ui.editCat = !ui.editCat; saveUI(); render(); return; }
+  if (d.addact) {
+    const P = S.procesos[+d.addact], n = P.actividades.length + 1;
+    let id = `${P.id}.${n}`; while (allActs().some(a => a.id === id)) id += 'b';
+    P.actividades.push({id, nombre: 'Nueva actividad', descripcion: '', frecuencia: '', herramienta: ''});
+    S.raci[id] = {}; save(); render(); return;
+  }
+  if (d.delact) {
+    const [pi, ai] = d.delact.split('|').map(Number), a = S.procesos[pi].actividades[ai];
+    if (!confirm(`¿Eliminar la actividad «${a.id} ${a.nombre}»? Se borran también sus notas y su fila de la RACI.`)) return;
+    S.procesos[pi].actividades.splice(ai, 1); delete S.raci[a.id];
+    for (const em in S.notas) delete S.notas[em][a.id];
+    save(); render(); return;
+  }
+  if (d.addproc) {
+    const id = uid('P');
+    S.procesos.push({id, nombre: 'Nuevo proceso', actividades: []}); ui.proc = id; save(); render(); return;
+  }
+  if (d.export === 'json') return exportJSON();
+  if (d.csv) return exportCSV(d.csv);
+  if (d.import) return importJSON(d.import);
+  if (d.reset) {
+    if (!confirm('¿Borrar todo lo escrito y volver a la propuesta inicial?')) return;
+    S = clone(BASE); save(); render(); toast('Propuesta inicial restablecida'); return;
+  }
+});
+
+/* ---------------------------------------------------------------- exportación e importación */
+function download(name, text, type) {
+  const blob = new Blob([text], {type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+const stamp = () => new Date().toISOString().slice(0, 10);
+const slug = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_|_$/g, '');
+function exportJSON() {
+  save();
+  const out = clone(S);
+  out.meta.exportado = new Date().toISOString();
+  download(`modelo_planificacion_${slug(S.meta.autor) || 'equipo'}_${stamp()}.json`, JSON.stringify(out, null, 1), 'application/json');
+  toast('JSON descargado');
+}
+function csv(rows) {
+  const q = v => { const s = String(v ?? ''); return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  return '﻿' + rows.map(r => r.map(q).join(';')).join('\r\n');
+}
+function exportCSV(kind) {
+  let rows;
+  if (kind === 'raci') {
+    rows = [['Proceso', 'Actividad', 'Nombre'].concat(S.roles.map(r => r.nombre)).concat(['Revisión'])];
+    for (const p of S.procesos) for (const a of p.actividades) rows.push([p.nombre, a.id, a.nombre].concat(S.roles.map(r => (S.raci[a.id] || {})[r.id] || '')).concat([raciCheck(a.id) || 'OK']));
+  } else if (kind === 'notas') {
+    rows = [['Empresa', 'Proceso', 'Actividad', 'Nombre', 'Situación', 'Quién lo hace hoy', 'Herramienta', 'Frecuencia real', 'Horas/semana', 'Cómo se hace hoy', 'Problemas', 'Propuesta', 'Prioridad', 'Notas']];
+    for (const e of S.empresas) for (const p of S.procesos) for (const a of p.actividades) {
+      const n = note(e.id, a.id);
+      rows.push([e.nombre, p.nombre, a.id, a.nombre, (ESTADO[n.estado || ''] || ESTADO[''])[1], n.quien, n.herramienta, n.frecuencia, n.horas, n.situacion, n.problemas, n.propuesta, n.prioridad, n.notas]);
+    }
+  } else {
+    rows = [['Empresa', 'Rol', 'Titular', 'Suplente', 'Puesto actual', '% dedicación', 'Email', 'Notas']];
+    for (const p of S.personas) rows.push([empName(p.empresa), roleName(p.rol), p.titular, p.suplente, p.puesto, p.dedicacion, p.email, p.notas]);
+  }
+  download(`${kind}_${stamp()}.csv`, csv(rows), 'text/csv;charset=utf-8');
+  toast('CSV descargado');
+}
+function importJSON(mode) {
+  const f = document.getElementById('fileimp').files[0];
+  if (!f) { toast('Elige primero un archivo JSON'); return; }
+  const r = new FileReader();
+  r.onload = () => {
+    let data;
+    try { data = JSON.parse(r.result); } catch (e) { alert('El archivo no es un JSON válido.'); return; }
+    if (!data || !Array.isArray(data.procesos) || !data.raci) { alert('El archivo no parece exportado desde esta herramienta.'); return; }
+    if (mode === 'replace') {
+      if (!confirm('Se sustituirá todo lo que hay en este navegador por el contenido del archivo. ¿Continuar?')) return;
+      S = data;
+      for (const k of Object.keys(BASE)) if (S[k] === undefined) S[k] = clone(BASE[k]);
+      save(); render(); toast('Datos importados'); return;
+    }
+    let n = 0;
+    for (const em in (data.notas || {})) for (const act in data.notas[em]) for (const [k, v] of Object.entries(data.notas[em][act] || {})) {
+      if (v && !(note(em, act)[k])) { setNote(em, act, k, v); n++; }
+    }
+    for (const p of (data.personas || [])) {
+      const cur = S.personas.find(x => x.id === p.id) || S.personas.find(x => x.empresa === p.empresa && x.rol === p.rol && !x.titular.trim() && p.titular);
+      if (cur) { for (const k of ['titular', 'suplente', 'puesto', 'dedicacion', 'email', 'notas']) if (p[k] && !cur[k]) { cur[k] = p[k]; n++; } }
+      else if (p.titular) { S.personas.push(p); n++; }
+    }
+    save(); render(); toast(`Combinado: ${n} campos añadidos`);
+  };
+  r.readAsText(f);
+}
+
+document.getElementById('autor').value = S.meta.autor || '';
+setStatus();
+render();
+</script>
+</body>
+</html>

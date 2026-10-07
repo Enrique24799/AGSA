@@ -6,6 +6,10 @@ Ejecutar este script regenera datos_base.json.
 """
 import json
 import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import datos_equipo as equipo  # noqa: E402
 
 VERSION = 1
 
@@ -408,12 +412,21 @@ def build():
             assert any(l in ('R', 'A/R') for l in letters), aid
             assert all(r in {x['id'] for x in ROLES} for r in raci[aid]), aid
         procesos.append(dict(id=pid, nombre=pname, actividades=items))
+    ids_rol = {x['id'] for x in ROLES}
+    assert all(r in ids_rol for f in equipo.PERSONAS.values() for r, _, _ in f)
+    assert all(n[5] in ids_rol | {''} for f in equipo.ORG_ASIS.values() for n in f)
     personas, n = [], 0
     for e in EMPRESAS:
-        for rol in (CORP_ROLES if e['id'] == 'CORP' else PLANT_ROLES):
+        filas = equipo.PERSONAS.get(e['id']) or [
+            (rol, '', '') for rol in (CORP_ROLES if e['id'] == 'CORP' else PLANT_ROLES)]
+        for rol, titular, dedicacion in filas:
             n += 1
-            personas.append(dict(id=f'p{n}', empresa=e['id'], rol=rol, titular='', suplente='', puesto='',
-                                 dedicacion='', email='', notas=''))
+            personas.append(dict(id=f'p{n}', empresa=e['id'], rol=rol, titular=titular, suplente='', puesto='',
+                                 dedicacion=dedicacion, email='', notas=''))
+    organigramas = build_org()
+    for emp, nodos in equipo.ORG_ASIS.items():
+        organigramas[emp]['asis'] = [dict(id=i, parent=p, puesto=pu, persona=pe, area=ar, rol=ro, empresa='',
+                                          funcional='', dedicacion='', notas='') for i, p, pu, pe, ar, ro in nodos]
     return dict(
         meta=dict(version=VERSION, modelo='Modelo de planificación corporativo · CL Grupo Industrial',
                   autor='', actualizado=''),
@@ -422,7 +435,7 @@ def build():
         procesos=procesos,
         raci=raci,
         personas=personas,
-        organigramas=build_org(),
+        organigramas=organigramas,
         notas={},
         politicas=[dict(id=f'pol{i}', nombre=a, estandar=b, parametros=c, responsable=d, estado='Propuesta',
                         notas='') for i, (a, b, c, d) in enumerate(POLITICAS, 1)],

@@ -61,7 +61,20 @@ main{min-width:0;padding:26px 32px 60px}
 /* tablas editables */
 .tablewrap{overflow:auto;border:1px solid var(--border);border-radius:12px;background:#fff;margin-bottom:12px}
 table.grid{border-collapse:collapse;width:100%}
-table.grid th{position:sticky;top:0;background:var(--card);text-align:left;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);padding:10px 8px;border-bottom:1px solid var(--border);z-index:1}
+table.grid th{background:var(--card);text-align:left;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);padding:10px 8px;border-bottom:1px solid var(--border)}
+table.grid tr.filters th{padding:4px;background:#fff}
+table.grid tr.filters input,table.grid tr.filters select{width:100%;border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:11.5px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--navy);background:#fff}
+td.mv,th.mv{width:58px;padding:4px 2px!important;text-align:center;white-space:nowrap;vertical-align:middle!important}
+.grip{cursor:grab;color:var(--muted);font-size:13px;letter-spacing:-3px;padding:2px 5px 2px 2px;user-select:none}
+.grip:active{cursor:grabbing}
+td.mv .mvb{font-size:11px;padding:3px 4px;color:var(--grey)}
+td.mv .mvb:hover{color:var(--navy);background:var(--tint)}
+tr.drop-before td{box-shadow:inset 0 3px 0 var(--navy)}
+tr.drop-after td{box-shadow:inset 0 -3px 0 var(--navy)}
+tr.dragging{opacity:.4}
+.gridbar{display:flex;gap:10px;align-items:center;margin-bottom:8px;min-height:28px}
+.obox.dragging{opacity:.45}
+.obox.droptarget{outline:3px dashed var(--teal);outline-offset:3px;background:#fff}
 table.grid td{border-bottom:1px solid #EDF1F4;padding:4px 4px;vertical-align:top}
 table.grid tr:last-child td{border-bottom:0}
 table.grid input,table.grid select,table.grid textarea{width:100%;border:1px solid transparent;background:transparent;border-radius:6px;padding:6px 7px;line-height:1.4}
@@ -327,16 +340,68 @@ function field(list, i, c, v) {
   if (c.type === 'area') return `<textarea ${a} rows="1" placeholder="${esc(c.ph || '')}">${esc(v)}</textarea>`;
   return `<input ${a} value="${esc(v)}" placeholder="${esc(c.ph || '')}"${c.list ? ` list="${c.list}"` : ''}>`;
 }
-function grid(list, cols, opts = {}) {
-  const rows = S[list];
-  const idx = rows.map((r, i) => i).filter(i => !opts.filter || opts.filter(rows[i]));
-  let h = `<div class="tablewrap"><table class="grid"><thead><tr>${cols.map(c => `<th style="min-width:${c.w || 140}px">${esc(c.label)}</th>`).join('')}<th class="act"></th></tr></thead><tbody>`;
-  for (const i of idx) {
-    h += `<tr>${cols.map(c => `<td>${field(list, i, c, rows[i][c.k])}</td>`).join('')}<td class="act"><button class="icon" data-del="${list}" data-i="${i}" title="Eliminar fila" aria-label="Eliminar fila">×</button></td></tr>`;
+const GRIDS = {};
+const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+function filterField(list, c, v) {
+  const a = `data-flt="${list}" data-fk="${c.k}" aria-label="Filtrar por ${esc(c.label)}"`;
+  if (c.type === 'select') {
+    return `<select ${a}><option value="">Todos</option><option value="__vacio__"${v === '__vacio__' ? ' selected' : ''}>(vacío)</option>${c.options().filter(o => o[0]).map(([val, lab]) => `<option value="${esc(val)}"${val === v ? ' selected' : ''}>${esc(lab)}</option>`).join('')}</select>`;
   }
-  if (!idx.length) h += `<tr><td colspan="${cols.length + 1}" class="hint" style="padding:16px">${esc(opts.empty || 'Sin filas.')}</td></tr>`;
+  return `<input ${a} value="${esc(v || '')}" placeholder="Filtrar…">`;
+}
+function grid(list, cols, opts = {}) {
+  GRIDS[list] = {cols};
+  const rows = S[list], f = (ui.filters || {})[list] || {};
+  const idx = rows.map((r, i) => i).filter(i => !opts.filter || opts.filter(rows[i]));
+  let h = `<div class="gridbar"><span class="hint" data-cnt="${list}"></span><button class="btn ghost small" data-clearf="${list}" hidden>Quitar filtros</button><span class="hint" style="margin-left:auto">Arrastra ⋮⋮ o usa ▲ ▼ para ordenar las filas</span></div>
+  <div class="tablewrap"><table class="grid" data-grid="${list}"><thead><tr><th class="mv"></th>${cols.map(c => `<th style="min-width:${c.w || 140}px">${esc(c.label)}</th>`).join('')}<th class="act"></th></tr>
+  <tr class="filters"><th class="mv"></th>${cols.map(c => `<th>${filterField(list, c, f[c.k])}</th>`).join('')}<th class="act"></th></tr></thead><tbody>`;
+  for (const i of idx) {
+    h += `<tr data-row="${i}"><td class="mv"><span class="grip" draggable="true" data-grip="${list}" data-i="${i}" title="Arrastra para mover la fila">⋮⋮</span><button class="icon mvb" data-mv="${list}" data-i="${i}" data-dir="-1" title="Subir" aria-label="Subir fila">▲</button><button class="icon mvb" data-mv="${list}" data-i="${i}" data-dir="1" title="Bajar" aria-label="Bajar fila">▼</button></td>${cols.map(c => `<td>${field(list, i, c, rows[i][c.k])}</td>`).join('')}<td class="act"><button class="icon" data-del="${list}" data-i="${i}" title="Eliminar fila" aria-label="Eliminar fila">×</button></td></tr>`;
+  }
+  if (!idx.length) h += `<tr><td colspan="${cols.length + 2}" class="hint" style="padding:16px">${esc(opts.empty || 'Sin filas.')}</td></tr>`;
   h += `</tbody></table></div><button class="btn ghost small" data-add="${list}">+ ${esc(opts.addLabel || 'Añadir fila')}</button>`;
   return h;
+}
+function rowMatches(list, i) {
+  const g = GRIDS[list], f = (ui.filters || {})[list] || {}, r = S[list][i];
+  if (!g || !r) return true;
+  for (const c of g.cols) {
+    const v = f[c.k];
+    if (!v) continue;
+    if (c.type === 'select') { if (v === '__vacio__' ? (r[c.k] || '') !== '' : (r[c.k] || '') !== v) return false; }
+    else if (!norm(r[c.k]).includes(norm(v))) return false;
+  }
+  return true;
+}
+function applyFilters(list) {
+  const t = main.querySelector(`table.grid[data-grid="${list}"]`);
+  if (!t) return;
+  let shown = 0, total = 0;
+  t.querySelectorAll('tbody tr[data-row]').forEach(tr => { total++; const ok = rowMatches(list, +tr.dataset.row); tr.hidden = !ok; if (ok) shown++; });
+  const c = main.querySelector(`[data-cnt="${list}"]`);
+  if (c) c.textContent = shown === total ? `${total} filas` : `Mostrando ${shown} de ${total} filas`;
+  const clr = main.querySelector(`[data-clearf="${list}"]`);
+  if (clr) clr.hidden = !Object.values((ui.filters || {})[list] || {}).some(Boolean);
+}
+function visibleRows(list) {
+  return [...main.querySelectorAll(`table.grid[data-grid="${list}"] tbody tr[data-row]`)].filter(tr => !tr.hidden).map(tr => +tr.dataset.row);
+}
+function moveItem(list, from, to, after) {
+  const arr = S[list], item = arr[from], target = arr[to];
+  if (!item || !target || item === target) return;
+  arr.splice(from, 1);
+  const k = arr.indexOf(target);
+  arr.splice(after ? k + 1 : k, 0, item);
+}
+function moveRow(list, i, dir) {
+  const vis = visibleRows(list), p = vis.indexOf(i), q = p + dir;
+  if (p < 0 || q < 0 || q >= vis.length) return;
+  const item = S[list][i];
+  moveItem(list, i, vis[q], dir > 0);
+  save(); render();
+  const btn = main.querySelector(`[data-mv="${list}"][data-i="${S[list].indexOf(item)}"][data-dir="${dir}"]`);
+  if (btn) btn.focus();
 }
 const NEW = {
   empresas: () => ({id: uid('E'), nombre: '', tipo: '', erp: '', herramienta: '', director: '', responsable: '', personasHoy: '', particularidades: '', notas: ''}),
@@ -605,7 +670,7 @@ VIEWS.exportar = () => {
       <p>Tablas sueltas para revisar en Excel (separador punto y coma).</p>
       <div class="row"><button class="btn ghost small" data-csv="raci">RACI</button><button class="btn ghost small" data-csv="notas">Notas por proceso</button><button class="btn ghost small" data-csv="personas">Personas y roles</button></div></div>
     <div class="card"><div class="label">Volver a empezar</div><h3>Restablecer la propuesta inicial</h3>
-      <p>Borra todo lo escrito en este navegador y vuelve a la propuesta de partida. Descargad antes el JSON si queréis conservarlo.</p>
+      <p>Borra lo guardado en este navegador y vuelve a los datos con los que se entregó esta versión. Descargad antes el JSON si queréis conservarlo.</p>
       <button class="btn danger" data-reset="1">Restablecer</button></div>
   </div>`;
 };
@@ -691,7 +756,7 @@ function orgChartHTML() {
   for (const n of nodes) {
     const {x, y} = P(n.id), r = roleById(n.rol), ext = n.empresa && n.empresa !== ui.orgEmp, vac = !(n.persona || '').trim();
     const cls = ['obox', n.id === ui.orgSel ? 'sel' : '', ext ? 'ext' : '', n.area === 'Planificación' ? 'plan' : ''].filter(Boolean).join(' ');
-    boxes += `<div class="${cls}" data-node="${n.id}" tabindex="0" role="button" aria-label="${esc(orgLabel(n))}" style="left:${x + OPAD}px;top:${y + OPAD}px">
+    boxes += `<div class="${cls}" data-node="${n.id}" draggable="true" tabindex="0" role="button" aria-label="${esc(orgLabel(n))}" style="left:${x + OPAD}px;top:${y + OPAD}px">
       <div class="ob-top"><span><i class="dot" style="background:${AREA_COLOR[n.area] || '#D7DFE5'}"></i>${esc(n.area || 'Sin área')}</span>${ext ? `<span class="ob-ext">${esc(empName(n.empresa))}</span>` : ''}</div>
       <div class="ob-puesto">${esc(n.puesto || 'Puesto sin nombre')}</div>
       <div class="ob-persona${vac ? ' vac' : ''}">${vac ? 'Vacante / por cubrir' : esc(n.persona)}</div>
@@ -728,17 +793,18 @@ function orgPanelHTML() {
       ${f('dedicacion', '% a planificación', inp('dedicacion', 'p. ej. 50'))}
     </div>
     ${f('rol', 'Rol del modelo', sel('rol', [['', '—']].concat(S.roles.map(r => [r.id, r.nombre || r.id]))))}
-    ${f('parent', 'Depende jerárquicamente de', sel('parent', parents))}
+    ${f('parent', 'Jefe directo (dependencia jerárquica)', sel('parent', parents))}
     ${f('funcional', 'Dependencia funcional de', sel('funcional', funcs))}
     ${f('empresa', 'Pertenece a', sel('empresa', [['', 'Esta empresa']].concat(S.empresas.filter(e => e.id !== ui.orgEmp).map(e => [e.id, e.nombre]))))}
     ${f('notas', 'Notas', `<textarea id="org-notas" data-org="notas" rows="3">${esc(n.notas)}</textarea>`)}
     <div class="btns">
+      <button class="btn small" data-orgact="addboss" title="Crea un puesto por encima de este y lo convierte en su jefe">+ Jefe</button>
       <button class="btn small" data-orgact="addchild">+ Subordinado</button>
       <button class="btn ghost small" data-orgact="addsib">+ Mismo nivel</button>
+      <button class="btn ghost small" data-orgact="deselect">Cerrar</button>
       <button class="btn ghost small" data-orgact="left" aria-label="Mover a la izquierda">◀ Mover</button>
       <button class="btn ghost small" data-orgact="right" aria-label="Mover a la derecha">Mover ▶</button>
-      <button class="btn ghost small" data-orgact="deselect">Cerrar</button>
-      <button class="btn danger small" data-orgact="del">Eliminar</button>
+      <button class="btn danger small" data-orgact="del" style="grid-column:1/-1">Eliminar</button>
     </div>${stats}</div>`;
 }
 VIEWS.organigrama = () => {
@@ -748,7 +814,7 @@ VIEWS.organigrama = () => {
   for (const v of ['asis', 'tobe']) for (const n of orgList(ui.orgEmp, v)) names.add(n.persona);
   document.getElementById('dl-titulares').innerHTML = [...names].map(s => (s || '').trim()).filter(Boolean).map(t => `<option value="${esc(t)}">`).join('');
   return `
-  <div class="head"><div><h1>Organigramas</h1><p>Uno por empresa, con dos pestañas: la situación actual (<b>as-is</b>) y la objetivo (<b>to-be</b>). Pulsa una cajita para editarla. La línea continua es la dependencia jerárquica y la discontinua, la funcional.</p></div></div>
+  <div class="head"><div><h1>Organigramas</h1><p>Uno por empresa, con dos pestañas: la situación actual (<b>as-is</b>) y la objetivo (<b>to-be</b>). Pulsa una cajita para editarla. Para asignar un jefe, arrastra la cajita sobre la de su jefe o usa «+ Jefe» para crear uno por encima. La línea continua es la dependencia jerárquica y la discontinua, la funcional.</p></div></div>
   <div class="chips" style="margin-bottom:12px">${S.empresas.map(e => `<button class="chip ${e.id === ui.orgEmp ? 'on' : ''}" data-orgemp="${e.id}">${esc(e.nombre)}</button>`).join('')}</div>
   <div class="orgbar">
     <div class="tabs" role="tablist">${ORG_TABS.map(([v, l]) => `<button role="tab" aria-selected="${v === ui.orgView}" class="${v === ui.orgView ? 'on' : ''}" data-orgview="${v}">${esc(l)}<span class="n">${orgList(ui.orgEmp, v).length}</span></button>`).join('')}</div>
@@ -813,6 +879,7 @@ function orgAction(a) {
     toast(c === 1 ? '1 asignación añadida a Personas y roles' : c ? `${c} asignaciones añadidas a Personas y roles` : 'No había asignaciones nuevas que volcar');
     return;
   } else if (!n) { toast('Selecciona primero un puesto'); return; }
+  else if (a === 'addboss') { const x = orgNew(orgParent(nodes, n)); x.puesto = 'Nuevo jefe'; nodes.splice(nodes.indexOf(n), 0, x); n.parent = x.id; ui.orgSel = x.id; }
   else if (a === 'addchild') { const x = orgNew(n.id); nodes.push(x); ui.orgSel = x.id; }
   else if (a === 'addsib') { const x = orgNew(orgParent(nodes, n)); nodes.splice(nodes.indexOf(n) + 1, 0, x); ui.orgSel = x.id; }
   else if (a === 'left' || a === 'right') {
@@ -850,6 +917,7 @@ function render() {
   const oc = document.getElementById('orgchart'), sc = oc ? [oc.scrollLeft, oc.scrollTop] : null;
   document.getElementById('main').innerHTML = VIEWS[ui.sec]();
   document.querySelectorAll('table.grid textarea').forEach(autosize);
+  main.querySelectorAll('table.grid[data-grid]').forEach(t => applyFilters(t.dataset.grid));
   const oc2 = document.getElementById('orgchart');
   if (oc2 && sc) { oc2.scrollLeft = sc[0]; oc2.scrollTop = sc[1]; }
 }
@@ -857,6 +925,12 @@ const main = document.getElementById('main');
 
 function onEdit(e) {
   const el = e.target, d = el.dataset;
+  if (d.flt) {
+    ui.filters = ui.filters || {};
+    (ui.filters[d.flt] = ui.filters[d.flt] || {})[d.fk] = el.value;
+    saveUI(); applyFilters(d.flt);
+    return;
+  }
   if (d.list !== undefined) {
     S[d.list][+d.i][d.k] = el.value;
     if (el.tagName === 'TEXTAREA' && el.closest('table.grid')) autosize(el);
@@ -915,6 +989,8 @@ document.addEventListener('click', e => {
   if (d.orgemp) { ui.orgEmp = d.orgemp; ui.orgSel = ''; saveUI(); render(); return; }
   if (d.orgview) { ui.orgView = d.orgview; ui.orgSel = ''; saveUI(); render(); return; }
   if (d.orgact) return orgAction(d.orgact);
+  if (d.clearf) { ui.filters = ui.filters || {}; ui.filters[d.clearf] = {}; saveUI(); render(); return; }
+  if (d.mv) return moveRow(d.mv, +d.i, +d.dir);
   if (d.add) { S[d.add].push(NEW[d.add]()); save(); render(); return; }
   if (d.del) {
     const row = S[d.del][+d.i];
@@ -954,6 +1030,68 @@ document.addEventListener('click', e => {
     S = clone(BASE); save(); render(); toast('Propuesta inicial restablecida'); return;
   }
 });
+
+/* ---------------------------------------------------------------- arrastrar y soltar (filas y organigrama) */
+let drag = null;
+function clearDrop() {
+  document.querySelectorAll('.drop-before,.drop-after,.droptarget,.dragging').forEach(x => x.classList.remove('drop-before', 'drop-after', 'droptarget', 'dragging'));
+}
+document.addEventListener('dragstart', e => {
+  const g = e.target.closest && e.target.closest('[data-grip]');
+  if (g) {
+    drag = {kind: 'row', list: g.dataset.grip, i: +g.dataset.i};
+    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', '');
+    const tr = g.closest('tr'); tr.classList.add('dragging');
+    try { e.dataTransfer.setDragImage(tr, 24, 20); } catch (err) {}
+    return;
+  }
+  const b = e.target.closest && e.target.closest('.obox');
+  if (b) { drag = {kind: 'org', id: b.dataset.node}; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', ''); b.classList.add('dragging'); }
+});
+document.addEventListener('dragover', e => {
+  if (!drag) return;
+  if (drag.kind === 'row') {
+    const tr = e.target.closest('tr[data-row]');
+    if (!tr || tr.closest('table').dataset.grid !== drag.list) return;
+    e.preventDefault();
+    const r = tr.getBoundingClientRect(), after = e.clientY > r.top + r.height / 2;
+    document.querySelectorAll('.drop-before,.drop-after').forEach(x => x.classList.remove('drop-before', 'drop-after'));
+    tr.classList.add(after ? 'drop-after' : 'drop-before');
+  } else {
+    const b = e.target.closest('.obox');
+    document.querySelectorAll('.droptarget').forEach(x => x.classList.remove('droptarget'));
+    if (b) {
+      if (b.dataset.node === drag.id || orgDesc(orgList(), drag.id).has(b.dataset.node)) return;
+      e.preventDefault(); b.classList.add('droptarget');
+    } else if (e.target.closest('#orgchart')) e.preventDefault();
+  }
+});
+document.addEventListener('drop', e => {
+  if (!drag) return;
+  e.preventDefault();
+  const d0 = drag;
+  drag = null;
+  if (d0.kind === 'row') {
+    const tr = e.target.closest('tr[data-row]');
+    if (tr && tr.closest('table').dataset.grid === d0.list && +tr.dataset.row !== d0.i) {
+      const r = tr.getBoundingClientRect();
+      moveItem(d0.list, d0.i, +tr.dataset.row, e.clientY > r.top + r.height / 2);
+      save(); render();
+    }
+  } else {
+    const nodes = orgList(), n = nodes.find(x => x.id === d0.id), b = e.target.closest('.obox');
+    if (n && b && b.dataset.node !== n.id && !orgDesc(nodes, n.id).has(b.dataset.node)) {
+      n.parent = b.dataset.node;
+      toast(`Nuevo jefe de «${n.puesto || 'puesto'}»: ${orgLabel(nodes.find(x => x.id === b.dataset.node))}`);
+    } else if (n && !b && e.target.closest('#orgchart') && orgParent(nodes, n)) {
+      n.parent = '';
+      toast(`«${n.puesto || 'Puesto'}» pasa a ser un puesto raíz`);
+    } else { clearDrop(); return; }
+    ui.orgSel = n.id; save(); saveUI(); render();
+  }
+  clearDrop();
+});
+document.addEventListener('dragend', () => { drag = null; clearDrop(); });
 
 /* ---------------------------------------------------------------- exportación e importación */
 function download(name, text, type) {

@@ -1248,6 +1248,571 @@
    "notas": ""
   }
  ],
+ "organigramas": {
+  "CORP": {
+   "asis": [],
+   "tobe": [
+    {
+     "id": "c1",
+     "parent": "",
+     "puesto": "Dirección General",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "c2",
+     "parent": "c1",
+     "puesto": "Director/a de Planificación",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "DIR",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "c3",
+     "parent": "c2",
+     "puesto": "Responsable de procesos (Functional Lead)",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PO",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "c4",
+     "parent": "c2",
+     "puesto": "Responsable de dato maestro",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "MD",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "c5",
+     "parent": "c2",
+     "puesto": "Coordinador/a de S&OP e intercompany",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "SOP",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "c6",
+     "parent": "c2",
+     "puesto": "Technical Lead",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "SIS",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "c7",
+     "parent": "c6",
+     "puesto": "Solution Developer",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "SIS",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "c8",
+     "parent": "c2",
+     "puesto": "Responsables de planificación de planta",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "RPP",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": "Uno por planta; ver el organigrama de cada empresa."
+    }
+   ]
+  },
+  "OPET": {
+   "asis": [],
+   "tobe": [
+    {
+     "id": "t1",
+     "parent": "",
+     "puesto": "Director/a de Planificación",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DIR",
+     "empresa": "CORP",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": "Corporativo."
+    },
+    {
+     "id": "t2",
+     "parent": "t1",
+     "puesto": "Responsable de planificación de planta",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "RPP",
+     "empresa": "",
+     "funcional": "t6",
+     "dedicacion": "",
+     "notas": "Dependencia jerárquica de corporativo y funcional de la dirección de planta (opción A, pendiente de decisión)."
+    },
+    {
+     "id": "t3",
+     "parent": "t2",
+     "puesto": "Planificador/a de demanda y cartera",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PDC",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t4",
+     "parent": "t2",
+     "puesto": "Programador/a de producción",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PPR",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t5",
+     "parent": "t2",
+     "puesto": "Planificador/a de materiales",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PMT",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t6",
+     "parent": "",
+     "puesto": "Dirección de planta",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DPL",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    }
+   ]
+  },
+  "OPACK_ALM": {
+   "asis": [],
+   "tobe": [
+    {
+     "id": "t1",
+     "parent": "",
+     "puesto": "Director/a de Planificación",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DIR",
+     "empresa": "CORP",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": "Corporativo."
+    },
+    {
+     "id": "t2",
+     "parent": "t1",
+     "puesto": "Responsable de planificación de planta",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "RPP",
+     "empresa": "",
+     "funcional": "t6",
+     "dedicacion": "",
+     "notas": "Dependencia jerárquica de corporativo y funcional de la dirección de planta (opción A, pendiente de decisión)."
+    },
+    {
+     "id": "t3",
+     "parent": "t2",
+     "puesto": "Planificador/a de demanda y cartera",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PDC",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t4",
+     "parent": "t2",
+     "puesto": "Programador/a de producción",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PPR",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t5",
+     "parent": "t2",
+     "puesto": "Planificador/a de materiales",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PMT",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t6",
+     "parent": "",
+     "puesto": "Dirección de planta",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DPL",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    }
+   ]
+  },
+  "OPACK_NAV": {
+   "asis": [],
+   "tobe": [
+    {
+     "id": "t1",
+     "parent": "",
+     "puesto": "Director/a de Planificación",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DIR",
+     "empresa": "CORP",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": "Corporativo."
+    },
+    {
+     "id": "t2",
+     "parent": "t1",
+     "puesto": "Responsable de planificación de planta",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "RPP",
+     "empresa": "",
+     "funcional": "t6",
+     "dedicacion": "",
+     "notas": "Dependencia jerárquica de corporativo y funcional de la dirección de planta (opción A, pendiente de decisión)."
+    },
+    {
+     "id": "t3",
+     "parent": "t2",
+     "puesto": "Planificador/a de demanda y cartera",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PDC",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t4",
+     "parent": "t2",
+     "puesto": "Programador/a de producción",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PPR",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t5",
+     "parent": "t2",
+     "puesto": "Planificador/a de materiales",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PMT",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t6",
+     "parent": "",
+     "puesto": "Dirección de planta",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DPL",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    }
+   ]
+  },
+  "MGT": {
+   "asis": [],
+   "tobe": [
+    {
+     "id": "t1",
+     "parent": "",
+     "puesto": "Director/a de Planificación",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DIR",
+     "empresa": "CORP",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": "Corporativo."
+    },
+    {
+     "id": "t2",
+     "parent": "t1",
+     "puesto": "Responsable de planificación de planta",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "RPP",
+     "empresa": "",
+     "funcional": "t6",
+     "dedicacion": "",
+     "notas": "Dependencia jerárquica de corporativo y funcional de la dirección de planta (opción A, pendiente de decisión)."
+    },
+    {
+     "id": "t3",
+     "parent": "t2",
+     "puesto": "Planificador/a de demanda y cartera",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PDC",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t4",
+     "parent": "t2",
+     "puesto": "Programador/a de producción",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PPR",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t5",
+     "parent": "t2",
+     "puesto": "Planificador/a de materiales",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PMT",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t6",
+     "parent": "",
+     "puesto": "Dirección de planta",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DPL",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    }
+   ]
+  },
+  "PDA": {
+   "asis": [],
+   "tobe": [
+    {
+     "id": "t1",
+     "parent": "",
+     "puesto": "Director/a de Planificación",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DIR",
+     "empresa": "CORP",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": "Corporativo."
+    },
+    {
+     "id": "t2",
+     "parent": "t1",
+     "puesto": "Responsable de planificación de planta",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "RPP",
+     "empresa": "",
+     "funcional": "t6",
+     "dedicacion": "",
+     "notas": "Dependencia jerárquica de corporativo y funcional de la dirección de planta (opción A, pendiente de decisión)."
+    },
+    {
+     "id": "t3",
+     "parent": "t2",
+     "puesto": "Planificador/a de demanda y cartera",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PDC",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t4",
+     "parent": "t2",
+     "puesto": "Programador/a de producción",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PPR",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t5",
+     "parent": "t2",
+     "puesto": "Planificador/a de materiales",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PMT",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t6",
+     "parent": "",
+     "puesto": "Dirección de planta",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DPL",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    }
+   ]
+  },
+  "PAPRESA": {
+   "asis": [],
+   "tobe": [
+    {
+     "id": "t1",
+     "parent": "",
+     "puesto": "Director/a de Planificación",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DIR",
+     "empresa": "CORP",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": "Corporativo."
+    },
+    {
+     "id": "t2",
+     "parent": "t1",
+     "puesto": "Responsable de planificación de planta",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "RPP",
+     "empresa": "",
+     "funcional": "t6",
+     "dedicacion": "",
+     "notas": "Dependencia jerárquica de corporativo y funcional de la dirección de planta (opción A, pendiente de decisión)."
+    },
+    {
+     "id": "t3",
+     "parent": "t2",
+     "puesto": "Planificador/a de demanda y cartera",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PDC",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t4",
+     "parent": "t2",
+     "puesto": "Programador/a de producción",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PPR",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t5",
+     "parent": "t2",
+     "puesto": "Planificador/a de materiales",
+     "persona": "",
+     "area": "Planificación",
+     "rol": "PMT",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    },
+    {
+     "id": "t6",
+     "parent": "",
+     "puesto": "Dirección de planta",
+     "persona": "",
+     "area": "Dirección",
+     "rol": "DPL",
+     "empresa": "",
+     "funcional": "",
+     "dedicacion": "",
+     "notas": ""
+    }
+   ]
+  }
+ },
  "notas": {},
  "politicas": [
   {

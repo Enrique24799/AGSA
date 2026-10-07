@@ -349,6 +349,41 @@ PLAN = [
      'Ciclo de mejora continua.', 'Continuo', 'DIR'),
 ]
 
+# Organigrama to-be propuesto (el as-is lo rellena cada planta). Sigue la opción A de la decisión abierta:
+# el equipo de planificación depende jerárquicamente de corporativo y funcionalmente de la dirección de planta.
+# (id, depende de, puesto, área, rol, empresa externa, dependencia funcional, notas)
+ORG_TOBE_PLANTA = [
+    ('t1', '', 'Director/a de Planificación', 'Dirección', 'DIR', 'CORP', '', 'Corporativo.'),
+    ('t2', 't1', 'Responsable de planificación de planta', 'Planificación', 'RPP', '', 't6',
+     'Dependencia jerárquica de corporativo y funcional de la dirección de planta (opción A, pendiente de decisión).'),
+    ('t3', 't2', 'Planificador/a de demanda y cartera', 'Planificación', 'PDC', '', '', ''),
+    ('t4', 't2', 'Programador/a de producción', 'Planificación', 'PPR', '', '', ''),
+    ('t5', 't2', 'Planificador/a de materiales', 'Planificación', 'PMT', '', '', ''),
+    ('t6', '', 'Dirección de planta', 'Dirección', 'DPL', '', '', ''),
+]
+ORG_TOBE_CORP = [
+    ('c1', '', 'Dirección General', 'Dirección', '', '', '', ''),
+    ('c2', 'c1', 'Director/a de Planificación', 'Planificación', 'DIR', '', '', ''),
+    ('c3', 'c2', 'Responsable de procesos (Functional Lead)', 'Planificación', 'PO', '', '', ''),
+    ('c4', 'c2', 'Responsable de dato maestro', 'Planificación', 'MD', '', '', ''),
+    ('c5', 'c2', 'Coordinador/a de S&OP e intercompany', 'Planificación', 'SOP', '', '', ''),
+    ('c6', 'c2', 'Technical Lead', 'Planificación', 'SIS', '', '', ''),
+    ('c7', 'c6', 'Solution Developer', 'Planificación', 'SIS', '', '', ''),
+    ('c8', 'c2', 'Responsables de planificación de planta', 'Planificación', 'RPP', '', '',
+     'Uno por planta; ver el organigrama de cada empresa.'),
+]
+
+
+def build_org():
+    out = {}
+    for e in EMPRESAS:
+        tpl = ORG_TOBE_CORP if e['id'] == 'CORP' else ORG_TOBE_PLANTA
+        out[e['id']] = dict(asis=[], tobe=[dict(id=i, parent=p, puesto=pu, persona='', area=ar, rol=ro, empresa=ex,
+                                                funcional=fu, dedicacion='', notas=no)
+                                           for i, p, pu, ar, ro, ex, fu, no in tpl])
+    return out
+
+
 PLANT_ROLES = ['RPP', 'PDC', 'PPR', 'PMT']
 CORP_ROLES = ['DIR', 'PO', 'MD', 'SOP', 'SIS']
 
@@ -387,6 +422,7 @@ def build():
         procesos=procesos,
         raci=raci,
         personas=personas,
+        organigramas=build_org(),
         notas={},
         politicas=[dict(id=f'pol{i}', nombre=a, estandar=b, parametros=c, responsable=d, estado='Propuesta',
                         notas='') for i, (a, b, c, d) in enumerate(POLITICAS, 1)],

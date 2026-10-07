@@ -100,6 +100,12 @@ def build(data, out, origen):
         hojas.insert(1, ('Notas', 'Notas por empresa y actividad: situación actual, quién, problemas y propuesta',
                          '=COUNTA(Notas!E:E)-1-COUNTIF(Notas!E:E,"Sin revisar")', 'actividades revisadas'))
         hojas.insert(2, ('Madurez', 'Situación por empresa y proceso', None, ''))
+    org = data.get('organigramas', {})
+    has_org = any(v for e in org.values() for v in e.values())
+    if has_org:
+        pos = [h[0] for h in hojas].index('Asignación') + 1
+        hojas.insert(pos, ('Organigramas', 'Organigramas as-is y to-be de cada empresa: puesto, persona y dependencias',
+                           '=COUNTA(Organigramas!D:D)-1', 'puestos'))
     raci_col = get_column_letter(3 + len(roles) + 1)
     for i, (h, d, f, u) in enumerate(hojas, 10):
         ws[f'B{i}'] = h
@@ -216,7 +222,48 @@ def build(data, out, origen):
     ws.cell(row=end + 2, column=1, value='En amarillo, los huecos por asignar (titular o suplente).'
             ).font = Font(name=F, size=9, italic=True, color=GREY)
 
-    # ---------------------------------------------------------------- notas y madurez (solo si hay notas)
+    # ---------------------------------------------------------------- organigramas (árbol con sangría)
+    if has_org:
+        ws = wb.create_sheet('Organigramas')
+        rows = []
+        lab = lambda x: (x.get('puesto') or 'Puesto') + (' · ' + x['persona'] if x.get('persona') else '')
+        for e in data['empresas']:
+            for vista, vname in (('asis', 'As-is'), ('tobe', 'To-be')):
+                nodes = (org.get(e['id']) or {}).get(vista) or []
+                byid = {n['id']: n for n in nodes}
+                kids = {}
+                for n in nodes:
+                    par = n.get('parent') if n.get('parent') in byid and n.get('parent') != n['id'] else ''
+                    kids.setdefault(par, []).append(n)
+                seen = set()
+
+                def walk(n, d):
+                    if n['id'] in seen:
+                        return
+                    seen.add(n['id'])
+                    rows.append([e['nombre'], vname, d + 1, '      ' * d + (n.get('puesto') or ''),
+                                 n.get('persona') or 'Vacante', n.get('area', ''),
+                                 rid.get(n.get('rol'), {}).get('nombre', ''),
+                                 emp.get(n.get('empresa'), {}).get('nombre', '') if n.get('empresa') else '',
+                                 lab(byid[n['parent']]) if n.get('parent') in byid else '',
+                                 lab(byid[n['funcional']]) if n.get('funcional') in byid else '',
+                                 n.get('dedicacion', ''), n.get('notas', '')])
+                    for c in kids.get(n['id'], []):
+                        walk(c, d + 1)
+
+                for r in kids.get('', []) + nodes:
+                    walk(r, 0)
+        end = table(ws, 1, ['Empresa', 'Vista', 'Nivel', 'Puesto', 'Persona', 'Área', 'Rol del modelo', 'De otra empresa',
+                            'Depende de', 'Dependencia funcional de', '% planificación', 'Notas'],
+                    rows, [24, 8, 7, 44, 24, 14, 34, 22, 38, 38, 13, 44])
+        ws.auto_filter.ref = f'A1:L{end}'
+        for i in range(2, end + 1):
+            if ws[f'E{i}'].value == 'Vacante':
+                ws[f'E{i}'].font = Font(name=F, size=10, italic=True, color='B4532A')
+            if ws[f'F{i}'].value == 'Planificación':
+                for col in 'ABCDEFGHIJKL':
+                    ws[f'{col}{i}'].fill = fill(TINT)
+
     if has_notes:
         ws = wb.create_sheet('Notas', 1)
         rows = []

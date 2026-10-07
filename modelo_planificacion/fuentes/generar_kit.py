@@ -106,6 +106,9 @@ def build(data, out, origen):
         pos = [h[0] for h in hojas].index('Asignación') + 1
         hojas.insert(pos, ('Organigramas', 'Organigramas as-is y to-be de cada empresa: puesto, persona y dependencias',
                            '=COUNTA(Organigramas!D:D)-1', 'puestos'))
+    if any(any(any(x.values()) for x in v.values()) for v in (data.get('raciAsis') or {}).values()):
+        hojas.insert([h[0] for h in hojas].index('RACI') + 1,
+                     ('RACI as-is', 'Cómo se hace hoy en cada empresa y diferencias con el estándar', "=COUNTA('RACI as-is'!C:C)-1", 'filas'))
     raci_col = get_column_letter(3 + len(roles) + 1)
     for i, (h, d, f, u) in enumerate(hojas, 10):
         ws[f'B{i}'] = h
@@ -202,6 +205,52 @@ def build(data, out, origen):
     ws.cell(row=leg, column=1, value='A = decide y responde (una por fila) · R = ejecuta · A/R = decide y ejecuta · '
                                      'C = se le consulta · I = se le informa. La columna «Revisión» se recalcula sola.'
             ).font = Font(name=F, size=9, italic=True, color=GREY)
+
+    # ---------------------------------------------------------------- RACI as-is por empresa (si hay datos)
+    asis = {e: v for e, v in (data.get('raciAsis') or {}).items() if any(any(x.values()) for x in v.values())}
+    if asis:
+        ws = wb.create_sheet('RACI as-is')
+        ws.cell(row=1, column=1, value='RACI as-is · cómo se hace hoy en cada empresa').font = Font(name=F, size=14, bold=True, color=NAVY)
+        hdr = ['Empresa', 'Proceso', 'ID', 'Actividad'] + [x.get('corto') or x['nombre'] for x in ordered] + ['Revisión', 'Dif. con to-be']
+        for j, h in enumerate(hdr, 1):
+            c = ws.cell(row=3, column=j, value=h)
+            c.font, c.fill, c.alignment, c.border = Font(name=F, size=9, bold=True, color='FFFFFF'), fill(NAVY), CENTER, BOX
+        ws.row_dimensions[3].height = 42
+        r = 4
+        f0, f1 = get_column_letter(5), get_column_letter(4 + len(ordered))
+        t0, t1 = get_column_letter(4), get_column_letter(3 + len(ordered))
+        for e in data['empresas']:
+            src = asis.get(e['id'])
+            if not src:
+                continue
+            for k, (p, a) in enumerate(acts):
+                row = src.get(a['id'], {})
+                if not any(row.values()):
+                    continue
+                vals = [e['nombre'], p['nombre'], a['id'], a['nombre']] + [row.get(x['id'], '') for x in ordered]
+                for j, v in enumerate(vals, 1):
+                    c = ws.cell(row=r, column=j, value=v or None)
+                    c.border = BOX
+                    if j <= 4:
+                        c.font, c.alignment = Font(name=F, size=10, color=NAVY), WRAP
+                    else:
+                        bg, fg = styles.get(v, ('FFFFFF', NAVY))
+                        c.font, c.fill, c.alignment = Font(name=F, size=10, bold=True, color=fg), fill(bg), CENTER
+                rng = f'{f0}{r}:{f1}{r}'
+                c = ws.cell(row=r, column=len(ordered) + 5,
+                            value=f'=IF(COUNTIF({rng},"A")+COUNTIF({rng},"A/R")<>1,"Revisar A",'
+                                  f'IF(COUNTIF({rng},"R")+COUNTIF({rng},"A/R")=0,"Falta R","OK"))')
+                c.font, c.alignment, c.border = Font(name=F, size=9, bold=True, color=TEAL), CENTER, BOX
+                tr = 4 + k  # fila de la misma actividad en la hoja RACI (to-be)
+                c = ws.cell(row=r, column=len(ordered) + 6, value=f"=SUMPRODUCT(--({rng}<>RACI!{t0}{tr}:{t1}{tr}))")
+                c.font, c.alignment, c.border = Font(name=F, size=9, bold=True, color=NAVY), CENTER, BOX
+                r += 1
+        for j, w in enumerate([22, 16, 6, 40] + [11] * len(ordered) + [11, 12], 1):
+            ws.column_dimensions[get_column_letter(j)].width = w
+        ws.freeze_panes = 'E4'
+        ws.auto_filter.ref = f'A3:{get_column_letter(len(ordered) + 6)}{r - 1}'
+        ws.cell(row=r + 1, column=1, value='«Dif. con to-be» cuenta las celdas de la fila que no coinciden con la hoja RACI (estándar corporativo).'
+                ).font = Font(name=F, size=9, italic=True, color=GREY)
 
     # ---------------------------------------------------------------- roles y asignación
     ws = wb.create_sheet('Roles')
@@ -338,11 +387,12 @@ def build(data, out, origen):
 
 
 if __name__ == '__main__':
-    src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'datos_base.json')
+    actuales = os.path.join(HERE, 'datos_actuales.json')
+    src = sys.argv[1] if len(sys.argv) > 1 else (actuales if os.path.exists(actuales) else os.path.join(HERE, 'datos_base.json'))
     out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, '..', 'Kit_Modelo_Planificacion_CL.xlsx')
     with open(src, encoding='utf-8') as f:
         data = json.load(f)
     meta = data.get('meta', {})
     origen = ('Propuesta inicial' if os.path.basename(src) == 'datos_base.json'
-              else f"Export de la herramienta · {meta.get('autor') or 'sin autor'} · {meta.get('exportado', '')[:10]}")
+              else f"Datos del equipo · {meta.get('autor') or 'export de la herramienta'} · {meta.get('exportado', '')[:10]}")
     print('OK', os.path.normpath(build(data, out, origen)))

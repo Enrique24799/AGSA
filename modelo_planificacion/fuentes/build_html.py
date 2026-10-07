@@ -9,8 +9,12 @@ OUT = os.path.join(HERE, '..', 'Modelo_Planificacion_CL.html')
 
 
 def main():
-    with open(os.path.join(HERE, 'datos_base.json'), encoding='utf-8') as f:
+    # los datos del equipo (último export) tienen prioridad sobre la propuesta inicial
+    fuente = 'datos_actuales.json' if os.path.exists(os.path.join(HERE, 'datos_actuales.json')) else 'datos_base.json'
+    with open(os.path.join(HERE, fuente), encoding='utf-8') as f:
         datos = json.load(f)
+    datos.setdefault('raciAsis', {})
+    datos.setdefault('organigramas', {})
     with open(os.path.join(HERE, 'plantilla.html'), encoding='utf-8') as f:
         html = f.read()
     with open(os.path.join(HERE, 'logo_blanco.png'), 'rb') as f:
@@ -21,7 +25,7 @@ def main():
     html = html.replace('__DATOS__', payload).replace('__LOGO__', logo)
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write(html)
-    print('OK', os.path.normpath(OUT), f'{len(html) / 1024:.0f} KB')
+    print('OK', os.path.normpath(OUT), f'{len(html) / 1024:.0f} KB', 'desde', fuente)
 
 
 if __name__ == '__main__':

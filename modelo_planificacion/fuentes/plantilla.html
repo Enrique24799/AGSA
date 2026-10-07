@@ -153,6 +153,8 @@ table.raci td.c select:hover{border-color:var(--border)}
 .v-I{background:#fff;color:var(--muted)}
 td.chk{min-width:110px;padding:6px 8px;font-size:11.5px;white-space:nowrap}
 td.chk.ok{color:var(--ok)}
+td.chk.muted{color:var(--muted)}
+table.raci td.c.dif{box-shadow:inset 0 0 0 2px var(--warm)}
 td.chk.bad{color:var(--warn);font-weight:600}
 /* exportar */
 .expgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -280,8 +282,8 @@ function setNote(emp, act, k, v) {
   S.notas[emp][act] = S.notas[emp][act] || {};
   S.notas[emp][act][k] = v;
 }
-function raciCheck(actId) {
-  const row = S.raci[actId] || {};
+function raciCheck(actId, src = S.raci) {
+  const row = src[actId] || {};
   const vals = S.roles.map(r => row[r.id]).filter(Boolean);
   const a = vals.filter(v => v === 'A' || v === 'A/R').length;
   const r = vals.filter(v => v === 'R' || v === 'A/R').length;
@@ -289,6 +291,22 @@ function raciCheck(actId) {
   if (a > 1) return 'Más de un A';
   if (r === 0) return 'Falta un R';
   return '';
+}
+function raciAsis(emp) {
+  S.raciAsis = S.raciAsis || {};
+  return S.raciAsis[emp] = S.raciAsis[emp] || {};
+}
+const raciRowEmpty = (src, actId) => !Object.values(src[actId] || {}).some(Boolean);
+function raciSrc() { return ui.raciView === 'asis' ? raciAsis(ui.raciAsisEmp) : S.raci; }
+function raciStatus(actId, src, asis) {
+  if (asis && raciRowEmpty(src, actId)) return ['muted', 'Sin completar'];
+  const c = raciCheck(actId, src);
+  return c ? ['bad', '⚠ ' + c] : ['ok', '✓'];
+}
+function raciDiff(actId, src) {
+  if (raciRowEmpty(src, actId)) return null;
+  const a = src[actId] || {}, t = S.raci[actId] || {};
+  return S.roles.filter(r => (a[r.id] || '') !== (t[r.id] || '')).length;
 }
 function titulares(emp, rol) {
   return S.personas.filter(p => p.empresa === emp && p.rol === rol && p.titular.trim()).map(p => p.titular.trim());
@@ -310,7 +328,7 @@ const SECTIONS = [
   ['politicas', 'Políticas'], ['kpis', 'KPIs'], ['cadencia', 'Reuniones'], ['decisiones', 'Decisiones'],
   ['plan', 'Plan de despliegue'], ['exportar', 'Exportar / importar'],
 ];
-const ui = {sec: 'inicio', emp: 'OPET', proc: null, editCat: false, filtroEmp: '', raciEmp: '', orgEmp: 'OPET', orgView: 'asis', orgSel: '', orgZoom: 1};
+const ui = {sec: 'inicio', emp: 'OPET', proc: null, editCat: false, filtroEmp: '', raciEmp: '', raciView: 'tobe', raciAsisEmp: 'OPET', raciDiff: true, orgEmp: 'OPET', orgView: 'asis', orgSel: '', orgZoom: 1};
 try { Object.assign(ui, JSON.parse(sessionStorage.getItem(KEY + '-ui') || '{}')); } catch (e) {}
 function saveUI() { try { sessionStorage.setItem(KEY + '-ui', JSON.stringify(ui)); } catch (e) {} }
 
@@ -575,39 +593,56 @@ VIEWS.procesos = () => {
 };
 
 VIEWS.raci = () => {
+  if (!['asis', 'tobe'].includes(ui.raciView)) ui.raciView = 'tobe';
+  if (!empById(ui.raciAsisEmp)) ui.raciAsisEmp = (S.empresas.find(e => e.id === 'OPET') || S.empresas[0] || {}).id;
+  const asis = ui.raciView === 'asis', src = raciSrc(), diffOn = asis && ui.raciDiff !== false;
   const groups = AMBITOS.map(g => [g, S.roles.filter(r => (r.ambito || 'Otras áreas') === g)]).filter(g => g[1].length);
-  const emp = ui.raciEmp;
+  const emp = asis ? ui.raciAsisEmp : ui.raciEmp;
   const namesFor = r => {
     if (!emp) return '';
-    const e = r.ambito === 'Corporativo' ? 'CORP' : emp;
-    const t = titulares(e, r.id);
+    const e = r.ambito === 'Corporativo' && !asis ? 'CORP' : emp;
+    let t = titulares(e, r.id);
+    if (!t.length && r.ambito === 'Corporativo' && asis && emp !== 'CORP') t = titulares('CORP', r.id);
     return `<span class="nm${t.length ? '' : ' none'}">${t.length ? esc(t.join(', ')) : 'Por asignar'}</span>`;
   };
-  let h = `<table class="raci"><thead><tr class="g"><th class="first" rowspan="1"></th>${groups.map(([g, rs]) => `<th colspan="${rs.length}">${esc(g)}</th>`).join('')}<th rowspan="1"></th></tr>
-    <tr class="r"><th class="first" style="top:30px">Actividad</th>${groups.flatMap(g => g[1]).map(r => `<th title="${esc(r.nombre)}">${esc(r.corto || r.nombre)}${namesFor(r)}</th>`).join('')}<th>Revisión</th></tr></thead><tbody>`;
   const roles = groups.flatMap(g => g[1]);
+  let h = `<table class="raci"><thead><tr class="g"><th class="first"></th>${groups.map(([g, rs]) => `<th colspan="${rs.length}">${esc(g)}</th>`).join('')}<th></th>${asis ? '<th></th>' : ''}</tr>
+    <tr class="r"><th class="first" style="top:30px">Actividad</th>${roles.map(r => `<th title="${esc(r.nombre)}">${esc(r.corto || r.nombre)}${namesFor(r)}</th>`).join('')}<th>Revisión</th>${asis ? '<th>Dif. con to-be</th>' : ''}</tr></thead><tbody>`;
+  let done = 0, total = 0;
   for (const p of S.procesos) {
-    h += `<tr class="grp"><td class="first" style="background:var(--navy);color:#fff">${esc(p.nombre)}</td><td colspan="${roles.length + 1}" style="background:var(--navy)"></td></tr>`;
+    h += `<tr class="grp"><td class="first" style="background:var(--navy);color:#fff">${esc(p.nombre)}</td><td colspan="${roles.length + (asis ? 2 : 1)}" style="background:var(--navy)"></td></tr>`;
     for (const a of p.actividades) {
-      const row = S.raci[a.id] || {};
-      const chk = raciCheck(a.id);
+      total++;
+      if (!raciRowEmpty(src, a.id)) done++;
+      const row = src[a.id] || {}, tobe = S.raci[a.id] || {}, [cls, txt] = raciStatus(a.id, src, asis), empty = raciRowEmpty(src, a.id);
       h += `<tr><td class="first"><b>${esc(a.id)}</b> ${esc(a.nombre)}</td>${roles.map(r => {
-        const v = row[r.id] || '';
-        return `<td class="c"><select data-raci="${a.id}" data-role="${r.id}" class="v-${v.replace('/', '')}" aria-label="${esc(a.id)} · ${esc(r.nombre)}">${RACI_VALS.map(x => `<option value="${x}"${x === v ? ' selected' : ''}>${x || '·'}</option>`).join('')}</select></td>`;
-      }).join('')}<td class="chk ${chk ? 'bad' : 'ok'}" data-chk="${a.id}">${chk ? '⚠ ' + esc(chk) : '✓'}</td></tr>`;
+        const v = row[r.id] || '', t = tobe[r.id] || '';
+        const dif = diffOn && !empty && v !== t;
+        return `<td class="c${dif ? ' dif' : ''}"${dif ? ` title="To-be: ${t || 'vacío'}"` : ''}><select data-raci="${a.id}" data-role="${r.id}" class="v-${v.replace('/', '')}" aria-label="${esc(a.id)} · ${esc(r.nombre)}">${RACI_VALS.map(x => `<option value="${x}"${x === v ? ' selected' : ''}>${x || '·'}</option>`).join('')}</select></td>`;
+      }).join('')}<td class="chk ${cls}" data-chk="${a.id}">${esc(txt)}</td>${asis ? `<td class="chk muted" data-dif="${a.id}">${difText(raciDiff(a.id, src))}</td>` : ''}</tr>`;
     }
   }
   h += '</tbody></table>';
+  const tabs = `<div class="tabs" role="tablist">${[['asis', 'As-is · cómo se hace hoy'], ['tobe', 'To-be · estándar corporativo']].map(([v, l]) => `<button role="tab" aria-selected="${v === ui.raciView}" class="${v === ui.raciView ? 'on' : ''}" data-raciview="${v}">${esc(l)}</button>`).join('')}</div>`;
+  const tools = asis ? `
+    <div class="chips" style="margin:0 0 12px">${S.empresas.map(e => `<button class="chip ${e.id === emp ? 'on' : ''}" data-raciasisemp="${e.id}">${esc(e.nombre)}<span class="n">${Object.keys(raciAsis(e.id)).filter(k => !raciRowEmpty(raciAsis(e.id), k)).length}/${total}</span></button>`).join('')}</div>
+    <div class="racitools"><span class="hint">${done} de ${total} actividades completadas en ${esc(empName(emp))}</span>
+      <button class="btn ghost small" data-raciact="copy">Partir del to-be</button>
+      <button class="btn ghost small" data-raciact="clear">Vaciar</button>
+      <label class="hint" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" data-racidiff="1"${diffOn ? ' checked' : ''}> Marcar diferencias con el to-be</label></div>`
+    : `<div class="racitools"><label class="hint" for="raciemp">Ver nombres de</label>
+    <select id="raciemp" data-raciemp="1" style="padding:6px 8px;border:1px solid var(--border);border-radius:7px"><option value="">— Solo roles —</option>${S.empresas.filter(e => e.id !== 'CORP').map(e => `<option value="${e.id}"${e.id === emp ? ' selected' : ''}>${esc(e.nombre)}</option>`).join('')}</select></div>`;
   return `
-  <div class="head"><div><h1>Matriz RACI</h1><p>Propuesta inicial por rol. Cada actividad debe tener <b>una sola A</b> y al menos una R. Elegid una empresa para ver los nombres asignados a cada rol.</p></div>
+  <div class="head"><div><h1>Matriz RACI</h1><p>${asis
+    ? 'Quién hace <b>hoy</b> cada actividad en cada empresa, aunque no siga el estándar. Las celdas con borde naranja no coinciden con el to-be: son las brechas que hay que cerrar.'
+    : 'El <b>estándar corporativo</b>, igual para todas las empresas. Cada actividad debe tener <b>una sola A</b> y al menos una R. Elegid una empresa para ver los nombres asignados a cada rol.'}</p></div>
     <div class="row"><button class="btn ghost small" data-csv="raci">Exportar CSV</button></div></div>
-  <div class="racitools">
-    <label class="hint" for="raciemp">Ver nombres de</label>
-    <select id="raciemp" data-raciemp="1" style="padding:6px 8px;border:1px solid var(--border);border-radius:7px"><option value="">— Solo roles —</option>${S.empresas.filter(e => e.id !== 'CORP').map(e => `<option value="${e.id}"${e.id === emp ? ' selected' : ''}>${esc(e.nombre)}</option>`).join('')}</select>
-    <div class="legend"><span><i class="sw v-A"></i><b>A</b> Decide y responde del resultado</span><span><i class="sw v-R"></i><b>R</b> Lo ejecuta</span><span><i class="sw v-C"></i><b>C</b> Se le consulta</span><span><i class="sw v-I"></i><b>I</b> Se le informa</span></div>
-  </div>
+  <div class="orgbar">${tabs}</div>
+  ${tools}
+  <div class="legend" style="margin-bottom:10px"><span><i class="sw v-A"></i><b>A</b> Decide y responde del resultado</span><span><i class="sw v-R"></i><b>R</b> Lo ejecuta</span><span><i class="sw v-C"></i><b>C</b> Se le consulta</span><span><i class="sw v-I"></i><b>I</b> Se le informa</span>${asis ? '<span><i class="sw" style="box-shadow:inset 0 0 0 2px #E4A47C;background:#fff"></i>Distinto del to-be</span>' : ''}</div>
   <div class="raciwrap">${h}</div>`;
 };
+const difText = n => n === null ? '—' : n === 0 ? 'Igual' : `${n} ${n === 1 ? 'celda' : 'celdas'}`;
 
 const respCol = {k: 'responsable', label: 'Responsable', type: 'select', options: optRoles(), w: 240};
 VIEWS.politicas = () => `
@@ -659,7 +694,7 @@ VIEWS.exportar = () => {
   <div class="head"><div><h1>Exportar e importar</h1><p>Todo se guarda en este navegador. Para pasármelo, o para compartirlo con el equipo, descargad el archivo JSON.</p></div></div>
   <div class="expgrid">
     <div class="card"><div class="label">Para Claude</div><h3>Descargar JSON</h3>
-      <p>Contiene todo: empresas, personas, roles, organigramas as-is y to-be, notas, RACI, políticas, KPIs, reuniones, decisiones y plan. Con él genero el modelo final: el manual de planificación por proceso, la RACI con nombres por empresa, las fichas de rol y las diapositivas.</p>
+      <p>Contiene todo: empresas, personas, roles, organigramas y RACI (as-is y to-be), notas, políticas, KPIs, reuniones, decisiones y plan. Con él genero el modelo final: el manual de planificación por proceso, la RACI con nombres por empresa, las fichas de rol y las diapositivas.</p>
       <p class="hint">Ahora mismo: ${st.rev} de ${st.revTot} actividades revisadas · ${st.asign} de ${st.asignTot} roles con titular.</p>
       <button class="btn" data-export="json">Descargar JSON</button></div>
     <div class="card"><div class="label">Importar</div><h3>Cargar un JSON</h3>
@@ -944,17 +979,32 @@ function onEdit(e) {
     }
     saveSoon();
   } else if (d.raci) {
-    S.raci[d.raci] = S.raci[d.raci] || {};
-    if (el.value) S.raci[d.raci][d.role] = el.value; else delete S.raci[d.raci][d.role];
+    const src = raciSrc(), asis = ui.raciView === 'asis';
+    src[d.raci] = src[d.raci] || {};
+    if (el.value) src[d.raci][d.role] = el.value; else delete src[d.raci][d.role];
     el.className = 'v-' + el.value.replace('/', '');
-    const c = main.querySelector(`[data-chk="${CSS.escape(d.raci)}"]`), chk = raciCheck(d.raci);
-    if (c) { c.className = 'chk ' + (chk ? 'bad' : 'ok'); c.textContent = chk ? '⚠ ' + chk : '✓'; }
+    const c = main.querySelector(`[data-chk="${CSS.escape(d.raci)}"]`), [cls, txt] = raciStatus(d.raci, src, asis);
+    if (c) { c.className = 'chk ' + cls; c.textContent = txt; }
+    if (asis) {
+      const dc = main.querySelector(`[data-dif="${CSS.escape(d.raci)}"]`);
+      if (dc) dc.textContent = difText(raciDiff(d.raci, src));
+      if (ui.raciDiff !== false) {
+        const empty = raciRowEmpty(src, d.raci), tobe = S.raci[d.raci] || {};
+        el.closest('tr').querySelectorAll('select[data-raci]').forEach(sel => {
+          const t = tobe[sel.dataset.role] || '', td = sel.closest('td'), dif = !empty && (sel.value || '') !== t;
+          td.classList.toggle('dif', dif);
+          if (dif) td.title = 'To-be: ' + (t || 'vacío'); else td.removeAttribute('title');
+        });
+      }
+    }
     saveSoon();
   } else if (d.cat) {
     const [pi, ai] = d.cat.split('|').map(Number);
     S.procesos[pi].actividades[ai][d.ck] = el.value; saveSoon();
   } else if (d.catProc !== undefined) {
     S.procesos[+d.catProc].nombre = el.value; saveSoon();
+  } else if (d.racidiff) {
+    ui.raciDiff = el.checked; saveUI(); render();
   } else if (d.raciemp) {
     ui.raciEmp = el.value; saveUI(); render();
   } else if (d.org) {
@@ -989,6 +1039,19 @@ document.addEventListener('click', e => {
   if (d.orgemp) { ui.orgEmp = d.orgemp; ui.orgSel = ''; saveUI(); render(); return; }
   if (d.orgview) { ui.orgView = d.orgview; ui.orgSel = ''; saveUI(); render(); return; }
   if (d.orgact) return orgAction(d.orgact);
+  if (d.raciview) { ui.raciView = d.raciview; saveUI(); render(); return; }
+  if (d.raciasisemp) { ui.raciAsisEmp = d.raciasisemp; saveUI(); render(); return; }
+  if (d.raciact) {
+    const e = ui.raciAsisEmp, cur = raciAsis(e), filled = Object.keys(cur).some(k => !raciRowEmpty(cur, k));
+    if (d.raciact === 'copy') {
+      if (filled && !confirm(`Se sustituirá la RACI as-is de ${empName(e)} por una copia del to-be. ¿Continuar?`)) return;
+      S.raciAsis[e] = clone(S.raci);
+    } else {
+      if (!filled || !confirm(`¿Vaciar la RACI as-is de ${empName(e)}?`)) return;
+      S.raciAsis[e] = {};
+    }
+    save(); render(); return;
+  }
   if (d.clearf) { ui.filters = ui.filters || {}; ui.filters[d.clearf] = {}; saveUI(); render(); return; }
   if (d.mv) return moveRow(d.mv, +d.i, +d.dir);
   if (d.add) { S[d.add].push(NEW[d.add]()); save(); render(); return; }
@@ -1117,8 +1180,16 @@ function csv(rows) {
 function exportCSV(kind) {
   let rows;
   if (kind === 'raci') {
-    rows = [['Proceso', 'Actividad', 'Nombre'].concat(S.roles.map(r => r.nombre)).concat(['Revisión'])];
-    for (const p of S.procesos) for (const a of p.actividades) rows.push([p.nombre, a.id, a.nombre].concat(S.roles.map(r => (S.raci[a.id] || {})[r.id] || '')).concat([raciCheck(a.id) || 'OK']));
+    rows = [['Vista', 'Empresa', 'Proceso', 'Actividad', 'Nombre'].concat(S.roles.map(r => r.nombre)).concat(['Revisión', 'Dif. con to-be'])];
+    const block = (vista, empresa, src, asis) => {
+      for (const p of S.procesos) for (const a of p.actividades) {
+        if (asis && raciRowEmpty(src, a.id)) continue;
+        rows.push([vista, empresa, p.nombre, a.id, a.nombre].concat(S.roles.map(r => (src[a.id] || {})[r.id] || ''))
+          .concat([raciCheck(a.id, src) || 'OK', asis ? raciDiff(a.id, src) : '']));
+      }
+    };
+    block('To-be', 'Estándar corporativo', S.raci, false);
+    for (const e of S.empresas) block('As-is', e.nombre, raciAsis(e.id), true);
   } else if (kind === 'notas') {
     rows = [['Empresa', 'Proceso', 'Actividad', 'Nombre', 'Situación', 'Quién lo hace hoy', 'Herramienta', 'Frecuencia real', 'Horas/semana', 'Cómo se hace hoy', 'Problemas', 'Propuesta', 'Prioridad', 'Notas']];
     for (const e of S.empresas) for (const p of S.procesos) for (const a of p.actividades) {
@@ -1154,6 +1225,10 @@ function importJSON(mode) {
       const cur = S.personas.find(x => x.id === p.id) || S.personas.find(x => x.empresa === p.empresa && x.rol === p.rol && !x.titular.trim() && p.titular);
       if (cur) { for (const k of ['titular', 'suplente', 'puesto', 'dedicacion', 'email', 'notas']) if (p[k] && !cur[k]) { cur[k] = p[k]; n++; } }
       else if (p.titular) { S.personas.push(p); n++; }
+    }
+    for (const em in (data.raciAsis || {})) {
+      const src = data.raciAsis[em] || {}, cur = raciAsis(em);
+      if (Object.keys(src).length && !Object.keys(cur).some(k => !raciRowEmpty(cur, k))) { S.raciAsis[em] = src; n += Object.keys(src).length; }
     }
     for (const em in (data.organigramas || {})) for (const v of ['asis', 'tobe']) {
       const src = (data.organigramas[em] || {})[v] || [];

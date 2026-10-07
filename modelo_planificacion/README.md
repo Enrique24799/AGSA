@@ -10,8 +10,8 @@ Kit para centralizar la planificación de packaging en corporativo: **corporativ
 
 ## Flujo de trabajo
 
-1. Cada persona abre la herramienta, pone su nombre y rellena las notas de su empresa y proceso, y el organigrama de su empresa (pestañas **as-is** y **to-be**: cajitas por puesto con persona, área, rol, dependencia jerárquica y funcional y % de dedicación a planificación).
-2. En **Matriz RACI**, la pestaña **as-is** recoge por empresa quién hace hoy cada actividad y marca en naranja lo que no coincide con el **to-be** (estándar corporativo, único para todas).
+1. Cada persona abre la herramienta, pone su nombre y rellena las notas de su empresa y proceso (si su planta tiene un paso que no está en el catálogo, lo añade con **+ Añadir apartado en …**: misma ficha, solo visible en esa planta), y el organigrama de su empresa (pestañas **as-is** y **to-be**: cajitas por puesto con persona, área, rol, dependencia jerárquica y funcional y % de dedicación a planificación).
+2. En **Matriz RACI**, la pestaña **as-is** recoge por empresa quién hace hoy cada actividad y marca en naranja lo que no coincide con el **to-be** (estándar corporativo, único para todas). Cada proceso se despliega o contrae pulsando su cabecera.
 3. **Exportar para Claude** descarga un JSON. Si varias personas trabajan por separado, se pueden juntar con **Importar → Combinar** o pasar todos los JSON.
 4. Con el JSON se genera el modelo final: Excel con notas y madurez por empresa y proceso, RACI con nombres, fichas de rol, manual de planificación y diapositivas.
 

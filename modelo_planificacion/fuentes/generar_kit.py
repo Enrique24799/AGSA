@@ -95,7 +95,8 @@ def build(data, out, origen):
         ('Decisiones', 'Decisiones que hay que cerrar con dirección', '=COUNTIF(Decisiones!F:F,"Abierta")', 'abiertas'),
         ('Plan', 'Plan de despliegue por fases', '=COUNTA(Plan!A:A)-1', 'fases'),
     ]
-    has_notes = any(v for e in data.get('notas', {}).values() for v in e.values())
+    has_notes = (any(v for e in data.get('notas', {}).values() for v in e.values())
+                 or any(v for e in (data.get('apartados') or {}).values() for v in e.values()))
     if has_notes:
         hojas.insert(1, ('Notas', 'Notas por empresa y actividad: situación actual, quién, problemas y propuesta',
                          '=COUNTA(Notas!E:E)-1-COUNTIF(Notas!E:E,"Sin revisar")', 'actividades revisadas'))
@@ -316,17 +317,23 @@ def build(data, out, origen):
     if has_notes:
         ws = wb.create_sheet('Notas', 1)
         rows = []
+        apartados = data.get('apartados') or {}
         for e in data['empresas']:
-            for p, a in acts:
-                n = data['notas'].get(e['id'], {}).get(a['id'], {})
-                rows.append([e['nombre'], p['nombre'], a['id'], a['nombre'], ESTADOS.get(n.get('estado', ''), 'Sin revisar'),
-                             n.get('quien', ''), n.get('herramienta', ''), n.get('frecuencia', ''), n.get('horas', ''),
-                             n.get('situacion', ''), n.get('problemas', ''), n.get('propuesta', ''),
-                             n.get('prioridad', ''), n.get('notas', '')])
+            for p in data['procesos']:
+                # actividades del catálogo + apartados propios de la planta en ese proceso
+                propios = (apartados.get(e['id']) or {}).get(p['id']) or []
+                for a in p['actividades'] + propios:
+                    n = data['notas'].get(e['id'], {}).get(a['id'], {})
+                    rows.append([e['nombre'], p['nombre'], a.get('codigo') or a['id'], a.get('nombre', ''),
+                                 ESTADOS.get(n.get('estado', ''), 'Sin revisar'),
+                                 n.get('quien', ''), n.get('herramienta', ''), n.get('frecuencia', ''), n.get('horas', ''),
+                                 n.get('situacion', ''), n.get('problemas', ''), n.get('propuesta', ''),
+                                 n.get('prioridad', ''), n.get('notas', ''),
+                                 'Propio de la planta' if a.get('codigo') else 'Catálogo'])
         table(ws, 1, ['Empresa', 'Proceso', 'ID', 'Actividad', 'Situación', 'Quién lo hace hoy', 'Herramienta',
                       'Frecuencia real', 'Horas/semana', 'Cómo se hace hoy', 'Problemas', 'Propuesta', 'Prioridad',
-                      'Notas'], rows, [22, 16, 6, 34, 20, 22, 18, 14, 10, 45, 45, 45, 10, 30])
-        ws.auto_filter.ref = f'A1:N{len(rows) + 1}'
+                      'Notas', 'Origen'], rows, [22, 16, 6, 34, 20, 22, 18, 14, 10, 45, 45, 45, 10, 30, 18])
+        ws.auto_filter.ref = f'A1:O{len(rows) + 1}'
         ws = wb.create_sheet('Madurez', 2)
         title(ws, 'Actividades alineadas con el estándar / actividades aplicables',
               'Se calcula desde la hoja Notas.')

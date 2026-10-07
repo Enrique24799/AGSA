@@ -15,6 +15,7 @@ def main():
         datos = json.load(f)
     datos.setdefault('raciAsis', {})
     datos.setdefault('organigramas', {})
+    datos.setdefault('apartados', {})
     with open(os.path.join(HERE, 'plantilla.html'), encoding='utf-8') as f:
         html = f.read()
     with open(os.path.join(HERE, 'logo_blanco.png'), 'rb') as f:

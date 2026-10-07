@@ -3,8 +3,8 @@
   "version": 1,
   "modelo": "Modelo de planificación corporativo · CL Grupo Industrial",
   "autor": "",
-  "actualizado": "2026-10-07T09:13:43.718Z",
-  "exportado": "2026-10-07T09:13:43.720Z"
+  "actualizado": "2026-10-07T15:59:18.724Z",
+  "exportado": "2026-10-07T15:59:18.733Z"
  },
  "empresas": [
   {
@@ -114,16 +114,6 @@
    "kpis": "Madurez de procesos · Adherencia al plan."
   },
   {
-   "id": "MD",
-   "corto": "Dato maestro",
-   "nombre": "Responsable de dato maestro",
-   "ambito": "Corporativo",
-   "mision": "Garantiza que el dato de planificación es único, completo y fiable en todas las plantas.",
-   "responsabilidades": "Altas y cambios de datos de planificación · Velocidades, tiempos de cambio y estrategias · Auditoría de calidad del dato · Mapeo de materiales intercompany.",
-   "decide": "Aprobación de cualquier cambio en el dato maestro de planificación.",
-   "kpis": "Calidad del dato maestro."
-  },
-  {
    "id": "SOP",
    "corto": "S&OP / Intercompany",
    "nombre": "Coordinador/a de S&OP e intercompany",
@@ -142,6 +132,26 @@
    "responsabilidades": "Desarrollos y mejoras · Despliegues controlados · Soporte de segundo nivel · Documentación técnica.",
    "decide": "Arquitectura técnica y pasos a producción.",
    "kpis": "Plazo de entrega de mejoras · Incidencias resueltas en plazo."
+  },
+  {
+   "id": "DPL",
+   "corto": "Dir. planta",
+   "nombre": "Dirección de planta",
+   "ambito": "Planta",
+   "mision": "Dirige la operación de la planta y apoya la ejecución del plan.",
+   "responsabilidades": "Recursos de producción · Conflictos operativos · OEE.",
+   "decide": "Recursos operativos de la planta.",
+   "kpis": "OEE · Coste de producción."
+  },
+  {
+   "id": "MD",
+   "corto": "Dato maestro",
+   "nombre": "Responsable de dato maestro",
+   "ambito": "Planta",
+   "mision": "Garantiza que el dato de planificación es único, completo y fiable en todas las plantas.",
+   "responsabilidades": "Altas y cambios de datos de planificación · Velocidades, tiempos de cambio y estrategias · Auditoría de calidad del dato · Mapeo de materiales intercompany.",
+   "decide": "Aprobación de cualquier cambio en el dato maestro de planificación.",
+   "kpis": "Calidad del dato maestro."
   },
   {
    "id": "RPP",
@@ -174,36 +184,6 @@
    "kpis": "Adherencia al plan · Horas de cambio · Saturación por línea."
   },
   {
-   "id": "PMT",
-   "corto": "Materiales",
-   "nombre": "Planificador/a de materiales",
-   "ambito": "Planta",
-   "mision": "Asegura que semielaborado, papel y materias primas llegan a tiempo y en la cantidad necesaria.",
-   "responsabilidades": "MRP · Necesidades de semielaborado y materias primas · Flujo intercompany y recepciones · Balance de masas.",
-   "decide": "Propuestas de aprovisionamiento dentro de las políticas.",
-   "kpis": "Cobertura de stock · Roturas · % integración intercompany."
-  },
-  {
-   "id": "DPL",
-   "corto": "Dir. planta",
-   "nombre": "Dirección de planta",
-   "ambito": "Otras áreas",
-   "mision": "Dirige la operación de la planta y apoya la ejecución del plan.",
-   "responsabilidades": "Recursos de producción · Conflictos operativos · OEE.",
-   "decide": "Recursos operativos de la planta.",
-   "kpis": "OEE · Coste de producción."
-  },
-  {
-   "id": "COM",
-   "corto": "Comercial",
-   "nombre": "Comercial / Atención al cliente",
-   "ambito": "Otras áreas",
-   "mision": "Aporta la visión de mercado y es la voz del cliente.",
-   "responsabilidades": "Información de demanda · Comunicación de fechas y retrasos al cliente.",
-   "decide": "Prioridad comercial dentro de las reglas acordadas.",
-   "kpis": "Servicio al cliente."
-  },
-  {
    "id": "Rmuxvyzy166c8",
    "corto": "Producción",
    "nombre": "Responsable Producción",
@@ -211,47 +191,57 @@
    "mision": "Ejecuta el plan en máquina e informa de lo real.",
    "responsabilidades": "Cumplir la secuencia · Registrar producción, paradas y consumos · Avisar de incidencias.",
    "decide": "Ajustes operativos dentro del turno",
-   "kpis": ""
+   "kpis": "OEE · Adherencia al plan."
   },
   {
    "id": "PRO",
    "corto": "Producción",
    "nombre": "Producción (jefes de turno)",
-   "ambito": "Otras áreas",
+   "ambito": "Planta",
    "mision": "Ejecuta el plan en máquina e informa de lo real.",
    "responsabilidades": "Cumplir la secuencia · Registrar producción, paradas y consumos · Avisar de incidencias.",
    "decide": "Ajustes operativos dentro del turno.",
-   "kpis": "OEE · Adherencia al plan."
-  },
-  {
-   "id": "LOG",
-   "corto": "Logística",
-   "nombre": "Logística / Expediciones",
-   "ambito": "Otras áreas",
-   "mision": "Expide los pedidos y gestiona los almacenes.",
-   "responsabilidades": "Cargas vinculadas a pedido · Saturación de almacén.",
-   "decide": "Organización de cargas.",
-   "kpis": "Expediciones en fecha."
+   "kpis": ""
   },
   {
    "id": "CMP",
    "corto": "Compras",
    "nombre": "Compras",
-   "ambito": "Otras áreas",
+   "ambito": "Planta",
    "mision": "Gestiona proveedores externos y el aprovisionamiento intercompany.",
    "responsabilidades": "Pedidos de compra · Seguimiento de proveedores.",
    "decide": "Proveedor y condiciones.",
    "kpis": "Plazo y fiabilidad de suministro."
   },
   {
-   "id": "MNT",
-   "corto": "Mantenimiento",
-   "nombre": "Mantenimiento",
-   "ambito": "Otras áreas",
-   "mision": "Planifica las paradas y garantiza la disponibilidad de las máquinas.",
-   "responsabilidades": "Calendario de paradas · Avisos de averías.",
-   "decide": "Ventanas de mantenimiento.",
-   "kpis": "Disponibilidad."
+   "id": "PMT",
+   "corto": "Materiales",
+   "nombre": "Planificador/a de materiales",
+   "ambito": "Planta",
+   "mision": "Asegura que papel y materias primas llegan a tiempo y en la cantidad necesaria.",
+   "responsabilidades": "MRP · Necesidades de semielaborado y materias primas · Flujo intercompany y recepciones · Balance de masas.",
+   "decide": "Propuestas de aprovisionamiento dentro de las políticas.",
+   "kpis": "Cobertura de stock · Roturas · % integración intercompany."
+  },
+  {
+   "id": "COM",
+   "corto": "Comercial",
+   "nombre": "Comercial / Atención al cliente",
+   "ambito": "Planta",
+   "mision": "Aporta la visión de mercado y es la voz del cliente.",
+   "responsabilidades": "Información de demanda · Comunicación de fechas y retrasos al cliente.",
+   "decide": "Prioridad comercial dentro de las reglas acordadas.",
+   "kpis": "Servicio al cliente."
+  },
+  {
+   "id": "LOG",
+   "corto": "Logística",
+   "nombre": "Logística / Expediciones",
+   "ambito": "Planta",
+   "mision": "Expide los pedidos y gestiona los almacenes.",
+   "responsabilidades": "Cargas vinculadas a pedido · Saturación de almacén.",
+   "decide": "Organización de cargas.",
+   "kpis": "Expediciones en fecha."
   }
  ],
  "procesos": [
@@ -703,7 +693,6 @@
    "RPP": "A",
    "PPR": "R",
    "PRO": "C",
-   "MNT": "C",
    "MD": "I",
    "PDC": "I"
   },
@@ -839,15 +828,13 @@
    "RPP": "A",
    "PPR": "R",
    "PRO": "C",
-   "MNT": "C",
    "PDC": "C",
    "COM": "I"
   },
   "6.5": {
    "RPP": "A",
    "PPR": "R",
-   "PRO": "C",
-   "MNT": "C"
+   "PRO": "C"
   },
   "7.1": {
    "RPP": "A",
@@ -1391,7 +1378,51 @@
    "notas": ""
   }
  ],
- "notas": {},
+ "notas": {
+  "OPET": {
+   "1.1": {
+    "estado": "",
+    "quien": "Monica Gordillo",
+    "prioridad": "Media",
+    "frecuencia": ""
+   },
+   "1.2": {
+    "estado": "nohace",
+    "prioridad": "Alta",
+    "horas": "0",
+    "notas": "Tienen transacción preparada para calculo automático de ABC y estrategias",
+    "situacion": "NO SE HACE",
+    "propuesta": "Cada tres meses debe haber revisión por parte de comercial y planificación para revisar estrategias de productos ya creados y de nueva creación",
+    "frecuencia": "Nunca",
+    "problemas": "Falta de coordinación y seguimiento entre planificación y comercial"
+   },
+   "I.1": {
+    "estado": "na"
+   },
+   "I.2": {
+    "estado": "na"
+   },
+   "I.3": {
+    "estado": "na"
+   },
+   "I.4": {
+    "estado": "na"
+   },
+   "I.5": {
+    "estado": "na"
+   },
+   "1.3": {
+    "estado": ""
+   },
+   "1.4": {
+    "estado": "",
+    "frecuencia": ""
+   },
+   "5.1": {
+    "estado": ""
+   }
+  }
+ },
  "politicas": [
   {
    "id": "pol1",
@@ -1606,150 +1637,8 @@
    "notas": ""
   }
  ],
- "cadencia": [
-  {
-   "id": "cad1",
-   "nombre": "S&OP ejecutivo del grupo",
-   "frecuencia": "Mensual (1.ª semana)",
-   "duracion": "90 min",
-   "participantes": "Dir. Planificación, S&OP, responsables de planta, Comercial, Dirección General",
-   "entradas": "Plan de demanda consensuado, plan de suministro, KPIs",
-   "salidas": "Decisiones de capacidad, prioridades y riesgos",
-   "notas": ""
-  },
-  {
-   "id": "cad2",
-   "nombre": "Revisión de demanda",
-   "frecuencia": "Mensual",
-   "duracion": "60 min",
-   "participantes": "S&OP, planificadores de demanda, Comercial",
-   "entradas": "Previsión, demanda perdida, precisión",
-   "salidas": "Plan de demanda consensuado",
-   "notas": ""
-  },
-  {
-   "id": "cad3",
-   "nombre": "Revisión de suministro",
-   "frecuencia": "Mensual",
-   "duracion": "60 min",
-   "participantes": "S&OP, responsables de planta, programación, materiales",
-   "entradas": "Carga de capacidad, coberturas, intercompany",
-   "salidas": "Plan de suministro y escalados",
-   "notas": ""
-  },
-  {
-   "id": "cad4",
-   "nombre": "Comité semanal de plan (por planta)",
-   "frecuencia": "Semanal",
-   "duracion": "45 min",
-   "participantes": "Responsable de planta, demanda y cartera, programación, materiales, Producción",
-   "entradas": "Cartera, carga, incidencias de la semana",
-   "salidas": "Plan semanal congelado",
-   "notas": ""
-  },
-  {
-   "id": "cad5",
-   "nombre": "Daily de planificación (por planta)",
-   "frecuencia": "Diaria",
-   "duracion": "15 min",
-   "participantes": "Demanda y cartera, programación, Producción",
-   "entradas": "Control de producción, roturas, urgencias",
-   "salidas": "Ajustes del día",
-   "notas": ""
-  },
-  {
-   "id": "cad6",
-   "nombre": "Revisión intercompany",
-   "frecuencia": "Semanal",
-   "duracion": "30 min",
-   "participantes": "S&OP, materiales de las cartoneras, responsables de las papeleras",
-   "entradas": "Mínimos/máximos, pedidos abiertos, recepciones",
-   "salidas": "Acciones de suministro",
-   "notas": ""
-  },
-  {
-   "id": "cad7",
-   "nombre": "Comité de planificación corporativo",
-   "frecuencia": "Mensual",
-   "duracion": "60 min",
-   "participantes": "Dir. Planificación, procesos, dato maestro, S&OP, sistemas",
-   "entradas": "Avance del despliegue, cambios, peticiones de desarrollo",
-   "salidas": "Decisiones sobre el modelo y prioridades",
-   "notas": ""
-  },
-  {
-   "id": "cad8",
-   "nombre": "Auditoría de madurez",
-   "frecuencia": "Trimestral",
-   "duracion": "2 h por planta",
-   "participantes": "Responsable de procesos, responsable de planta",
-   "entradas": "Notas de proceso y matriz de madurez",
-   "salidas": "Plan de acción de la planta",
-   "notas": ""
-  }
- ],
- "decisiones": [
-  {
-   "id": "dec1",
-   "nombre": "Línea de dependencia de los planificadores de planta",
-   "opciones": "A) Jerárquica de corporativo con puesto en planta · B) Funcional de corporativo y jerárquica de planta",
-   "recomendacion": "A: es la coherente con el mandato de centralizar.",
-   "responsable": "Dirección General y RR. HH.",
-   "fecha": "",
-   "estado": "Abierta",
-   "resolucion": ""
-  },
-  {
-   "id": "dec2",
-   "nombre": "Horizonte congelado estándar",
-   "opciones": "Uno por tipo de planta (PET, cartón, papel) o uno común",
-   "recomendacion": "Uno por tipo de planta, igual para todas las plantas del mismo tipo.",
-   "responsable": "Dir. Planificación",
-   "fecha": "",
-   "estado": "Abierta",
-   "resolucion": ""
-  },
-  {
-   "id": "dec3",
-   "nombre": "Qué puede decidir la planta sin escalar",
-   "opciones": "Umbrales de cambio de plan, prioridad y fechas",
-   "recomendacion": "Fijar umbrales claros y un plazo máximo de respuesta de corporativo.",
-   "responsable": "Dir. Planificación",
-   "fecha": "",
-   "estado": "Abierta",
-   "resolucion": ""
-  },
-  {
-   "id": "dec4",
-   "nombre": "Herramienta única de planificación",
-   "opciones": "SIGPA (web) en todas las plantas o convivencia con GIO",
-   "recomendacion": "Alinear con los proyectos 2027 de migración a web.",
-   "responsable": "Dir. Planificación y Sistemas",
-   "fecha": "",
-   "estado": "Abierta",
-   "resolucion": ""
-  },
-  {
-   "id": "dec5",
-   "nombre": "Planta piloto y fecha de arranque",
-   "opciones": "Ondupet, Ondupack o papeleras",
-   "recomendacion": "Ondupet, por ser la planta con mayor madurez.",
-   "responsable": "Dir. Planificación",
-   "fecha": "",
-   "estado": "Abierta",
-   "resolucion": ""
-  },
-  {
-   "id": "dec6",
-   "nombre": "Papresa hasta su paso a SAP",
-   "opciones": "Aplicar ya roles y cadencia o esperar a enero de 2027",
-   "recomendacion": "Aplicar ya roles y cadencia; las herramientas, tras el paso a SAP.",
-   "responsable": "Dir. Planificación",
-   "fecha": "",
-   "estado": "Abierta",
-   "resolucion": ""
-  }
- ],
+ "cadencia": [],
+ "decisiones": [],
  "plan": [
   {
    "id": "fase1",
@@ -2561,5 +2450,19 @@
    ]
   }
  },
- "raciAsis": {}
+ "raciAsis": {
+  "OPET": {
+   "1.1": {
+    "MD": "A/R",
+    "RPP": "C",
+    "COM": "C"
+   }
+  },
+  "CORP": {},
+  "OPACK_ALM": {},
+  "OPACK_NAV": {},
+  "MGT": {},
+  "PDA": {},
+  "PAPRESA": {}
+ }
 }

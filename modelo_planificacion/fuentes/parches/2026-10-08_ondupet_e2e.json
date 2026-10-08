@@ -1,0 +1,1692 @@
+{
+ "id": "2026-10-08-ondupet-e2e",
+ "titulo": "Análisis E2E de Ondupet",
+ "datos": {
+  "notas": {
+   "OPET": {
+    "1.1": {
+     "estado": "propio",
+     "herramienta": "SAP",
+     "frecuencia": "Bajo demanda (alta de material nuevo)",
+     "situacion": "Monica Gordillo crea los materiales: como es de Comercial, es quien antes se entera de que hace falta uno. Consulta con Calidad las características técnicas, pero no pregunta a Planificación qué estrategia debe llevar.",
+     "problemas": "Planificación no participa en el alta: el material llega sin estrategia (MTS/MTO, ABC) ni ruta revisada. Duda abierta: ¿se consulta a Producción y Mantenimiento la ruta por defecto?",
+     "propuesta": "Alta con plantilla única: Comercial lo solicita, Calidad fija las características y Dato maestro asigna estrategia y ruta consultando a Planificación y Producción. Antes de crear, se comprueba que no haya duplicados."
+    },
+    "1.2": {
+     "quien": "Nadie",
+     "herramienta": "Transacción de cálculo automático de ABC y estrategias (sin uso)"
+    },
+    "1.3": {
+     "estado": "propio",
+     "herramienta": "SAP (dato del molde)",
+     "frecuencia": "Solo al dar de alta; las rutas no se revisan",
+     "situacion": "Las velocidades y los tiempos de cambio dependen del molde, que es un dato fijo del dato maestro. Por eso necesitan mucho menos mantenimiento que en otras plantas.",
+     "problemas": "Las rutas no se actualizan con la carga de capacidad del mes, así que la carga entre máquinas no se equilibra.",
+     "propuesta": "Cada mes, Programación revisa las rutas por defecto con la carga del mes, consultando a Producción. Velocidades y tiempos de cambio se revisan solo si cambia el molde o hay desviaciones frente a lo real.",
+     "prioridad": "Media"
+    },
+    "1.5": {
+     "estado": "nohace",
+     "quien": "Nadie (correcciones puntuales de Monica Gordillo y su equipo)",
+     "herramienta": "SAP · campo «material reemplazante»",
+     "frecuencia": "Nunca; solo correcciones puntuales",
+     "situacion": "No hay auditoría ni estándar para detectar duplicados, porque no está claro qué características definen un material. Cuando Monica o alguien de su equipo encuentra uno, lo corrige con el campo «material reemplazante», que une el duplicado con el material definitivo sin perder el histórico de ventas ni de producción.",
+     "problemas": "Los duplicados se encuentran por casualidad: no hay análisis del dato maestro ni un criterio de qué define un material.",
+     "propuesta": "Definir qué características identifican un material y hacer una auditoría mensual (duplicados, datos incompletos e incoherencias) con su KPI. Se sigue usando «material reemplazante» para unir materiales sin perder histórico.",
+     "prioridad": "Media"
+    },
+    "2.1": {
+     "estado": "propio",
+     "quien": "Manuel Jesus Trinidad",
+     "frecuencia": "Mensual, sin día de cierre",
+     "situacion": "Cada mes, Manuel Jesus Trinidad carga la previsión de cada material: como mínimo, el mes en curso y los tres siguientes.",
+     "problemas": "No hay día límite para cerrar la previsión. La del mes en curso se cambia sin consultar a Planificación, incluso cuando el material ya está fabricado (no debería estar permitido).",
+     "propuesta": "Calendario mensual con día límite de cierre: Planificación propone la previsión estadística y Comercial la ajusta. Después del cierre, el mes en curso queda congelado y cualquier cambio necesita la aprobación de Planificación.",
+     "prioridad": "Alta"
+    },
+    "2.2": {
+     "estado": "nohace",
+     "quien": "Nadie",
+     "frecuencia": "Nunca",
+     "situacion": "No hay un estándar para que Planificación y Comercial se pongan de acuerdo en qué se va a fabricar. Planificación fabrica lo que diga la previsión (descontando stock, órdenes lanzadas…) y con ella genera los temporales.",
+     "problemas": "No hay plan de demanda acordado: si la previsión es mala, lo son también lo fabricado y los plazos que se dan.",
+     "propuesta": "Reunión mensual de consenso (Comercial, Planificación y S&OP) tras cerrar la previsión, que incluya la revisión de temporales (2.5). Si no hay acuerdo, decide S&OP.",
+     "prioridad": "Alta"
+    },
+    "2.3": {
+     "estado": "informal",
+     "quien": "Monica Gordillo y su equipo",
+     "frecuencia": "Irregular",
+     "situacion": "Se va de un extremo a otro: épocas con muchos agotados registrados y 2-3 meses sin registrar ninguno, aunque haya roturas.",
+     "problemas": "No está claro qué es un agotado, así que el dato no sirve para corregir la previsión.",
+     "propuesta": "Definir qué es un agotado (pedido no servido o rechazado por falta de stock o de plazo), registrarlo a diario con un motivo codificado y revisarlo en el ciclo mensual de previsión.",
+     "prioridad": "Media"
+    },
+    "2.4": {
+     "estado": "informal",
+     "quien": "Manuel Jesus Trinidad y Victoriano Perez",
+     "frecuencia": "Reunión mensual",
+     "situacion": "Hay una reunión mensual de accuracy entre Manuel Jesus Trinidad y Victoriano Perez, pero Comercial no se implica y Planificación no la impulsa.",
+     "problemas": "Se ven desviaciones enormes en algunos materiales y no se hace nada.",
+     "propuesta": "KPI mensual de precisión y sesgo por familia y material. Los diez peores se ven en la reunión de consenso y cada desviación tiene responsable y acción, que se revisa al mes siguiente.",
+     "prioridad": "Media"
+    },
+    "ap_opet_temporales": {
+     "estado": "informal",
+     "quien": "Victoriano Perez",
+     "frecuencia": "Mensual, sin revisión conjunta",
+     "situacion": "Planificación genera los temporales (previsiones de fabricación) a partir de la previsión de Comercial. Sirven para reservar tiempo de cada familia en el ciclo y poder dar plazos en la consulta de plazos.",
+     "problemas": "No se revisan con Comercial ni con un criterio común: si la previsión no es buena, los plazos que se dan tampoco.",
+     "propuesta": "Revisión mensual de los temporales con la previsión ya consensuada, dentro de la reunión de consenso (2.2).",
+     "prioridad": "Alta",
+     "notas": "Del análisis E2E: falta decidir si es un apartado propio o forma parte de 2.2 (consenso de la previsión)."
+    },
+    "3.1": {
+     "estado": "propio",
+     "quien": "Monica Gordillo (Comercial) y Victoriano Perez (Planificación), por separado",
+     "frecuencia": "Diaria",
+     "situacion": "Cada día, Comercial y Planificación revisan por separado la cartera de pedidos, el stock disponible y las cargas, y lo ponen en común en la reunión de producción.",
+     "problemas": "No hay acuerdo sobre las fechas de entrega de cargas y pedidos: aunque Planificación avise de que no llega a la fecha del cliente, no se cambia. Y eso que el pedido tiene dos fechas: la que pidió el cliente y otra para medir retrasos.",
+     "propuesta": "Una sola revisión con una sola fuente de datos. Planificación confirma una fecha viable y Comercial la negocia con el cliente. Se usan las dos fechas del pedido: la solicitada para medir el servicio y la confirmada para planificar.",
+     "prioridad": "Alta"
+    },
+    "3.2": {
+     "estado": "propio",
+     "quien": "Monica Gordillo y su equipo (Victoriano Perez envía el reporte de atrasos)",
+     "frecuencia": "Diaria",
+     "situacion": "Cada día, Monica y su equipo vinculan todas las cargas a sus pedidos. Planificación envía un reporte diario de cargas atrasadas.",
+     "problemas": "A veces se crean cargas por mucha más cantidad que la del pedido y con fechas de entrega imposibles de cumplir.",
+     "propuesta": "Al crear la carga, validar que la cantidad no supere lo pendiente del pedido y que la fecha sea la confirmada. El reporte de atrasos pasa a ser un KPI diario con su causa.",
+     "prioridad": "Media"
+    },
+    "3.3": {
+     "estado": "informal",
+     "quien": "Monica Gordillo y su equipo",
+     "frecuencia": "Sin pauta",
+     "situacion": "Comercial salda los pedidos. Da la sensación de que algunos, ya planificados, se saldan sin avisar a Planificación.",
+     "problemas": "Planificación puede seguir fabricando o reservando capacidad para pedidos que ya están cerrados.",
+     "propuesta": "Saldado semanal con una regla común: Planificación propone qué pedidos saldar (completos o con un resto mínimo) y Comercial lo valida. Si se salda un pedido planificado, Planificación se entera en el momento.",
+     "prioridad": "Media"
+    },
+    "3.4": {
+     "estado": "informal",
+     "quien": "Comercial (Monica Gordillo, Manuel Jesus Trinidad) y Victoriano Perez; decide Manuel Castro si no hay acuerdo",
+     "frecuencia": "Bajo demanda (por teléfono)",
+     "situacion": "Cuando hay varios pedidos comprometidos, Comercial (Monica y su equipo, o incluso Manuel Jesus) llama a Planificación para buscar soluciones. Si no se ponen de acuerdo, llaman a Manuel Castro (director de planta) para que decida.",
+     "problemas": "No hay reglas de prioridad: se resuelve caso a caso por teléfono y acaba en el director de planta.",
+     "propuesta": "Reglas de prioridad acordadas (tipo de cliente, fecha comprometida, margen y stock de seguridad) que aplica Planificación consultando a Comercial y Programación. Si afecta a otras plantas, decide S&OP. Al director de planta solo se le informa.",
+     "prioridad": "Media"
+    }
+   }
+  },
+  "apartados": {
+   "OPET": {
+    "P2": [
+     {
+      "id": "ap_opet_temporales",
+      "codigo": "2.5",
+      "nombre": "Revisión de temporales",
+      "descripcion": "Los temporales son previsiones de fabricación que reservan tiempo de cada familia en el ciclo para poder dar plazos en la consulta de plazos. Deben ir alineados con la demanda que propone Comercial."
+     }
+    ]
+   }
+  },
+  "raciAsis": {
+   "OPET": {
+    "1.3": {
+     "MD": "A/R"
+    },
+    "1.5": {
+     "MD": "R"
+    },
+    "2.1": {
+     "COM": "A/R",
+     "PDC": "I"
+    },
+    "2.3": {
+     "COM": "R"
+    },
+    "2.4": {
+     "COM": "R",
+     "PDC": "R"
+    },
+    "3.1": {
+     "COM": "A/R",
+     "PDC": "R",
+     "Rmuxvyzy166c8": "I"
+    },
+    "3.2": {
+     "LOG": "A/R",
+     "PDC": "C"
+    },
+    "3.3": {
+     "COM": "A/R"
+    },
+    "3.4": {
+     "DPL": "A",
+     "PDC": "R",
+     "COM": "C"
+    }
+   }
+  },
+  "flujos": {
+   "OPET": {
+    "asis": {
+     "P1": {
+      "nodos": [
+       {
+        "id": "f-OPET-asis-P1-e0",
+        "tipo": "evento",
+        "texto": "Material nuevo",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 67
+       },
+       {
+        "id": "f-OPET-asis-P1-t1",
+        "tipo": "tarea",
+        "texto": "Comercial detecta que hace falta un material nuevo",
+        "resp": "Monica Gordillo",
+        "sistema": "",
+        "act": "1.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 41
+       },
+       {
+        "id": "f-OPET-asis-P1-t2",
+        "tipo": "tarea",
+        "texto": "Consulta a Calidad las características técnicas",
+        "resp": "Monica Gordillo · Calidad",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 56
+       },
+       {
+        "id": "f-OPET-asis-P1-t3",
+        "tipo": "tarea",
+        "texto": "Alta del material: molde, velocidad, tiempos de cambio y ruta por defecto",
+        "resp": "Monica Gordillo",
+        "sistema": "SAP",
+        "act": "1.1",
+        "dolor": true,
+        "notas": "No se consulta a Planificación la estrategia (MTS/MTO, ABC) ni la ruta.",
+        "x": 757,
+        "y": 34
+       },
+       {
+        "id": "f-OPET-asis-P1-n1",
+        "tipo": "nota",
+        "texto": "¿Se consulta a Producción y Mantenimiento la ruta por defecto? Duda abierta.",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 987,
+        "y": 43
+       },
+       {
+        "id": "f-OPET-asis-P1-t4",
+        "tipo": "tarea",
+        "texto": "Planificación planifica con el dato tal cual llega",
+        "resp": "Victoriano Perez",
+        "sistema": "GIO",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 206
+       },
+       {
+        "id": "f-OPET-asis-P1-n2",
+        "tipo": "nota",
+        "texto": "Nadie revisa ABC ni estrategias (1.2) ni reequilibra las rutas con la carga del mes (1.3).",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 987,
+        "y": 200
+       },
+       {
+        "id": "f-OPET-asis-P1-d1",
+        "tipo": "decision",
+        "texto": "¿Aparece un duplicado?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 537,
+        "y": 190
+       },
+       {
+        "id": "f-OPET-asis-P1-e9",
+        "tipo": "evento",
+        "texto": "Material en uso",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 320,
+        "y": 217
+       },
+       {
+        "id": "f-OPET-asis-P1-t5",
+        "tipo": "tarea",
+        "texto": "Corrección puntual con el campo «material reemplazante»",
+        "resp": "Monica Gordillo y equipo",
+        "sistema": "SAP",
+        "act": "1.5",
+        "dolor": true,
+        "notas": "No hay auditoría ni criterio de qué define un material: los duplicados aparecen por casualidad.",
+        "x": 527,
+        "y": 335
+       }
+      ],
+      "enlaces": [
+       {
+        "id": "l-OPET-asis-P1-1",
+        "de": "f-OPET-asis-P1-e0",
+        "a": "f-OPET-asis-P1-t1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-2",
+        "de": "f-OPET-asis-P1-t1",
+        "a": "f-OPET-asis-P1-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-3",
+        "de": "f-OPET-asis-P1-t2",
+        "a": "f-OPET-asis-P1-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-4",
+        "de": "f-OPET-asis-P1-n1",
+        "a": "f-OPET-asis-P1-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-5",
+        "de": "f-OPET-asis-P1-t3",
+        "a": "f-OPET-asis-P1-t4",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-6",
+        "de": "f-OPET-asis-P1-n2",
+        "a": "f-OPET-asis-P1-t4",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-7",
+        "de": "f-OPET-asis-P1-t4",
+        "a": "f-OPET-asis-P1-d1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-8",
+        "de": "f-OPET-asis-P1-d1",
+        "a": "f-OPET-asis-P1-t5",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-9",
+        "de": "f-OPET-asis-P1-d1",
+        "a": "f-OPET-asis-P1-e9",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P1-10",
+        "de": "f-OPET-asis-P1-t5",
+        "a": "f-OPET-asis-P1-e9",
+        "texto": "",
+        "estilo": ""
+       }
+      ]
+     },
+     "P2": {
+      "nodos": [
+       {
+        "id": "f-OPET-asis-P2-n0",
+        "tipo": "nota",
+        "texto": "No hay consenso con Comercial (2.2): Planificación fabrica lo que diga la previsión.",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 50
+       },
+       {
+        "id": "f-OPET-asis-P2-e1",
+        "tipo": "evento",
+        "texto": "Inicio de mes",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 217
+       },
+       {
+        "id": "f-OPET-asis-P2-t1",
+        "tipo": "tarea",
+        "texto": "Comercial carga la previsión de cada material: mes en curso + 3",
+        "resp": "Manuel Jesus Trinidad",
+        "sistema": "",
+        "act": "2.1",
+        "dolor": true,
+        "notas": "No hay día límite para cerrar la previsión.",
+        "x": 297,
+        "y": 184
+       },
+       {
+        "id": "f-OPET-asis-P2-t2",
+        "tipo": "tarea",
+        "texto": "Planificación calcula qué fabricar con la previsión, el stock y las órdenes lanzadas",
+        "resp": "Victoriano Perez",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 191
+       },
+       {
+        "id": "f-OPET-asis-P2-t3",
+        "tipo": "tarea",
+        "texto": "Genera los temporales para reservar tiempo de cada familia en el ciclo",
+        "resp": "Victoriano Perez",
+        "sistema": "",
+        "act": "ap_opet_temporales",
+        "dolor": true,
+        "notas": "No se revisan con Comercial.",
+        "x": 757,
+        "y": 191
+       },
+       {
+        "id": "f-OPET-asis-P2-t4",
+        "tipo": "tarea",
+        "texto": "Comercial cambia la previsión del mes en curso sin consultar a Planificación",
+        "resp": "Manuel Jesus Trinidad",
+        "sistema": "",
+        "act": "2.1",
+        "dolor": true,
+        "notas": "A veces con el material ya fabricado.",
+        "x": 757,
+        "y": 334
+       },
+       {
+        "id": "f-OPET-asis-P2-t5",
+        "tipo": "tarea",
+        "texto": "Registro de agotados irregular: épocas con muchos y meses sin ninguno",
+        "resp": "Monica Gordillo y equipo",
+        "sistema": "",
+        "act": "2.3",
+        "dolor": true,
+        "notas": "",
+        "x": 527,
+        "y": 334
+       },
+       {
+        "id": "f-OPET-asis-P2-t6",
+        "tipo": "tarea",
+        "texto": "Reunión mensual de accuracy",
+        "resp": "Manuel Jesus Trinidad · Victoriano Perez",
+        "sistema": "",
+        "act": "2.4",
+        "dolor": true,
+        "notas": "Comercial no se implica y Planificación no la impulsa.",
+        "x": 297,
+        "y": 342
+       },
+       {
+        "id": "f-OPET-asis-P2-e7",
+        "tipo": "evento",
+        "texto": "Fin de mes sin acciones",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": true,
+        "notas": "",
+        "x": 90,
+        "y": 366
+       }
+      ],
+      "enlaces": [
+       {
+        "id": "l-OPET-asis-P2-1",
+        "de": "f-OPET-asis-P2-n0",
+        "a": "f-OPET-asis-P2-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P2-2",
+        "de": "f-OPET-asis-P2-e1",
+        "a": "f-OPET-asis-P2-t1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P2-3",
+        "de": "f-OPET-asis-P2-t1",
+        "a": "f-OPET-asis-P2-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P2-4",
+        "de": "f-OPET-asis-P2-t2",
+        "a": "f-OPET-asis-P2-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P2-5",
+        "de": "f-OPET-asis-P2-t3",
+        "a": "f-OPET-asis-P2-t4",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P2-6",
+        "de": "f-OPET-asis-P2-t4",
+        "a": "f-OPET-asis-P2-t5",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P2-7",
+        "de": "f-OPET-asis-P2-t5",
+        "a": "f-OPET-asis-P2-t6",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P2-8",
+        "de": "f-OPET-asis-P2-t6",
+        "a": "f-OPET-asis-P2-e7",
+        "texto": "",
+        "estilo": ""
+       }
+      ]
+     },
+     "P3": {
+      "nodos": [
+       {
+        "id": "f-OPET-asis-P3-t1",
+        "tipo": "tarea",
+        "texto": "Comercial revisa cartera, stock y cargas",
+        "resp": "Monica Gordillo",
+        "sistema": "SAP",
+        "act": "3.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 49
+       },
+       {
+        "id": "f-OPET-asis-P3-t13",
+        "tipo": "tarea",
+        "texto": "Comercial salda pedidos, algunos ya planificados, sin avisar a Planificación",
+        "resp": "Monica Gordillo y equipo",
+        "sistema": "SAP",
+        "act": "3.3",
+        "dolor": true,
+        "notas": "",
+        "x": 757,
+        "y": 35
+       },
+       {
+        "id": "f-OPET-asis-P3-e0",
+        "tipo": "evento",
+        "texto": "Inicio del día",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 217
+       },
+       {
+        "id": "f-OPET-asis-P3-t2",
+        "tipo": "tarea",
+        "texto": "Planificación revisa por su cuenta cartera, stock y cargas",
+        "resp": "Victoriano Perez",
+        "sistema": "GIO",
+        "act": "3.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 191
+       },
+       {
+        "id": "f-OPET-asis-P3-t3",
+        "tipo": "tarea",
+        "texto": "Puesta en común en la reunión de producción",
+        "resp": "Comercial · Planificación · Producción",
+        "sistema": "",
+        "act": "3.1",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 192
+       },
+       {
+        "id": "f-OPET-asis-P3-t4",
+        "tipo": "tarea",
+        "texto": "Fechas sin consenso: se mantiene la del cliente aunque no se llegue",
+        "resp": "Comercial",
+        "sistema": "",
+        "act": "3.1",
+        "dolor": true,
+        "notas": "El pedido tiene dos fechas (la del cliente y otra para medir retrasos), pero no se usan.",
+        "x": 757,
+        "y": 191
+       },
+       {
+        "id": "f-OPET-asis-P3-t5",
+        "tipo": "tarea",
+        "texto": "Comercial vincula a diario las cargas a los pedidos",
+        "resp": "Monica Gordillo y equipo",
+        "sistema": "SAP",
+        "act": "3.2",
+        "dolor": true,
+        "notas": "A veces se crean cargas por mucha más cantidad que el pedido y con fechas imposibles.",
+        "x": 757,
+        "y": 335
+       },
+       {
+        "id": "f-OPET-asis-P3-t6",
+        "tipo": "tarea",
+        "texto": "Planificación envía el reporte diario de cargas atrasadas",
+        "resp": "Victoriano Perez",
+        "sistema": "",
+        "act": "3.2",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 341
+       },
+       {
+        "id": "f-OPET-asis-P3-d7",
+        "tipo": "decision",
+        "texto": "¿Pedidos en conflicto?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 307,
+        "y": 340
+       },
+       {
+        "id": "f-OPET-asis-P3-e8",
+        "tipo": "evento",
+        "texto": "Fin del día",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 367
+       },
+       {
+        "id": "f-OPET-asis-P3-t9",
+        "tipo": "tarea",
+        "texto": "Comercial llama a Planificación para buscar una solución",
+        "resp": "Monica Gordillo · Manuel Jesus Trinidad",
+        "sistema": "",
+        "act": "3.4",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 485
+       },
+       {
+        "id": "f-OPET-asis-P3-d10",
+        "tipo": "decision",
+        "texto": "¿Hay acuerdo?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 537,
+        "y": 490
+       },
+       {
+        "id": "f-OPET-asis-P3-e11",
+        "tipo": "evento",
+        "texto": "Prioridad resuelta",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 780,
+        "y": 516
+       },
+       {
+        "id": "f-OPET-asis-P3-t12",
+        "tipo": "tarea",
+        "texto": "Decide el director de planta",
+        "resp": "Manuel Castro",
+        "sistema": "",
+        "act": "3.4",
+        "dolor": true,
+        "notas": "No hay reglas de prioridad.",
+        "x": 527,
+        "y": 649
+       }
+      ],
+      "enlaces": [
+       {
+        "id": "l-OPET-asis-P3-1",
+        "de": "f-OPET-asis-P3-e0",
+        "a": "f-OPET-asis-P3-t1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-2",
+        "de": "f-OPET-asis-P3-e0",
+        "a": "f-OPET-asis-P3-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-3",
+        "de": "f-OPET-asis-P3-t1",
+        "a": "f-OPET-asis-P3-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-4",
+        "de": "f-OPET-asis-P3-t2",
+        "a": "f-OPET-asis-P3-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-5",
+        "de": "f-OPET-asis-P3-t3",
+        "a": "f-OPET-asis-P3-t4",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-6",
+        "de": "f-OPET-asis-P3-t4",
+        "a": "f-OPET-asis-P3-t5",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-7",
+        "de": "f-OPET-asis-P3-t5",
+        "a": "f-OPET-asis-P3-t6",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-8",
+        "de": "f-OPET-asis-P3-t6",
+        "a": "f-OPET-asis-P3-d7",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-9",
+        "de": "f-OPET-asis-P3-d7",
+        "a": "f-OPET-asis-P3-e8",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-10",
+        "de": "f-OPET-asis-P3-d7",
+        "a": "f-OPET-asis-P3-t9",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-11",
+        "de": "f-OPET-asis-P3-t9",
+        "a": "f-OPET-asis-P3-d10",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-12",
+        "de": "f-OPET-asis-P3-d10",
+        "a": "f-OPET-asis-P3-e11",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-13",
+        "de": "f-OPET-asis-P3-d10",
+        "a": "f-OPET-asis-P3-t12",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P3-14",
+        "de": "f-OPET-asis-P3-t12",
+        "a": "f-OPET-asis-P3-e11",
+        "texto": "",
+        "estilo": ""
+       }
+      ]
+     }
+    },
+    "tobe": {
+     "P1": {
+      "nodos": [
+       {
+        "id": "f-OPET-tobe-P1-e0",
+        "tipo": "evento",
+        "texto": "Solicitud de material",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 66
+       },
+       {
+        "id": "f-OPET-tobe-P1-t1",
+        "tipo": "tarea",
+        "texto": "Comercial solicita el alta con los datos del cliente",
+        "resp": "Comercial",
+        "sistema": "",
+        "act": "1.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 49
+       },
+       {
+        "id": "f-OPET-tobe-P1-t2",
+        "tipo": "tarea",
+        "texto": "Calidad fija las características técnicas",
+        "resp": "Calidad",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 56
+       },
+       {
+        "id": "f-OPET-tobe-P1-t3",
+        "tipo": "tarea",
+        "texto": "Dato maestro asigna estrategia MTS/MTO y ABC/XYZ con el criterio común",
+        "resp": "Dato maestro · consulta a Resp. planif. planta",
+        "sistema": "",
+        "act": "1.2",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 27
+       },
+       {
+        "id": "f-OPET-tobe-P1-t4",
+        "tipo": "tarea",
+        "texto": "Programación y Producción validan ruta, velocidad y tiempos de cambio",
+        "resp": "Programación · Producción",
+        "sistema": "",
+        "act": "1.3",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 184
+       },
+       {
+        "id": "f-OPET-tobe-P1-d1",
+        "tipo": "decision",
+        "texto": "¿Ficha completa y sin duplicados?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 537,
+        "y": 186
+       },
+       {
+        "id": "f-OPET-tobe-P1-t5",
+        "tipo": "tarea",
+        "texto": "Alta en SAP con la plantilla única",
+        "resp": "Dato maestro",
+        "sistema": "SAP",
+        "act": "1.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 199
+       },
+       {
+        "id": "f-OPET-tobe-P1-e6",
+        "tipo": "evento",
+        "texto": "Listo para planificar",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 216
+       },
+       {
+        "id": "f-OPET-tobe-P1-t7",
+        "tipo": "tarea",
+        "texto": "Completar la ficha o reutilizar el material existente («material reemplazante»)",
+        "resp": "Dato maestro",
+        "sistema": "SAP",
+        "act": "1.5",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 334
+       },
+       {
+        "id": "f-OPET-tobe-P1-e10",
+        "tipo": "evento",
+        "texto": "Cierre de mes",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 517
+       },
+       {
+        "id": "f-OPET-tobe-P1-t11",
+        "tipo": "tarea",
+        "texto": "Reequilibrar las rutas por defecto con la carga del mes",
+        "resp": "Programación",
+        "sistema": "SAP / GIO",
+        "act": "1.3",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 491
+       },
+       {
+        "id": "f-OPET-tobe-P1-t12",
+        "tipo": "tarea",
+        "texto": "Auditoría del dato: duplicados, incompletos e incoherencias",
+        "resp": "Dato maestro",
+        "sistema": "SAP",
+        "act": "1.5",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 491
+       },
+       {
+        "id": "f-OPET-tobe-P1-d13",
+        "tipo": "decision",
+        "texto": "¿Cierre de trimestre?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 767,
+        "y": 490
+       },
+       {
+        "id": "f-OPET-tobe-P1-t14",
+        "tipo": "tarea",
+        "texto": "Revisión de ABC/XYZ y estrategias con la transacción automática",
+        "resp": "Dato maestro · Resp. planif. planta · Comercial",
+        "sistema": "SAP",
+        "act": "1.2",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 635
+       },
+       {
+        "id": "f-OPET-tobe-P1-e15",
+        "tipo": "evento",
+        "texto": "Datos al día",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 1010,
+        "y": 517
+       }
+      ],
+      "enlaces": [
+       {
+        "id": "l-OPET-tobe-P1-1",
+        "de": "f-OPET-tobe-P1-e0",
+        "a": "f-OPET-tobe-P1-t1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-2",
+        "de": "f-OPET-tobe-P1-t1",
+        "a": "f-OPET-tobe-P1-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-3",
+        "de": "f-OPET-tobe-P1-t2",
+        "a": "f-OPET-tobe-P1-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-4",
+        "de": "f-OPET-tobe-P1-t3",
+        "a": "f-OPET-tobe-P1-t4",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-5",
+        "de": "f-OPET-tobe-P1-t4",
+        "a": "f-OPET-tobe-P1-d1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-6",
+        "de": "f-OPET-tobe-P1-d1",
+        "a": "f-OPET-tobe-P1-t5",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-7",
+        "de": "f-OPET-tobe-P1-d1",
+        "a": "f-OPET-tobe-P1-t7",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-8",
+        "de": "f-OPET-tobe-P1-t7",
+        "a": "f-OPET-tobe-P1-t5",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-9",
+        "de": "f-OPET-tobe-P1-t5",
+        "a": "f-OPET-tobe-P1-e6",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-10",
+        "de": "f-OPET-tobe-P1-e10",
+        "a": "f-OPET-tobe-P1-t11",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-11",
+        "de": "f-OPET-tobe-P1-t11",
+        "a": "f-OPET-tobe-P1-t12",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-12",
+        "de": "f-OPET-tobe-P1-t12",
+        "a": "f-OPET-tobe-P1-d13",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-13",
+        "de": "f-OPET-tobe-P1-d13",
+        "a": "f-OPET-tobe-P1-t14",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-14",
+        "de": "f-OPET-tobe-P1-d13",
+        "a": "f-OPET-tobe-P1-e15",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P1-15",
+        "de": "f-OPET-tobe-P1-t14",
+        "a": "f-OPET-tobe-P1-e15",
+        "texto": "",
+        "estilo": ""
+       }
+      ]
+     },
+     "P2": {
+      "nodos": [
+       {
+        "id": "f-OPET-tobe-P2-t9",
+        "tipo": "tarea",
+        "texto": "Registro diario de agotados con motivo codificado",
+        "resp": "Demanda y cartera · Comercial",
+        "sistema": "",
+        "act": "2.3",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 35
+       },
+       {
+        "id": "f-OPET-tobe-P2-t10",
+        "tipo": "tarea",
+        "texto": "KPI de precisión y sesgo con acción para cada desviación",
+        "resp": "Demanda y cartera",
+        "sistema": "",
+        "act": "2.4",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 41
+       },
+       {
+        "id": "f-OPET-tobe-P2-e1",
+        "tipo": "evento",
+        "texto": "Inicio del ciclo mensual",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 216
+       },
+       {
+        "id": "f-OPET-tobe-P2-t2",
+        "tipo": "tarea",
+        "texto": "Planificación propone la previsión estadística",
+        "resp": "Demanda y cartera",
+        "sistema": "SAP",
+        "act": "2.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 199
+       },
+       {
+        "id": "f-OPET-tobe-P2-t3",
+        "tipo": "tarea",
+        "texto": "Comercial ajusta la previsión antes del día de cierre",
+        "resp": "Comercial",
+        "sistema": "SAP",
+        "act": "2.1",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 191
+       },
+       {
+        "id": "f-OPET-tobe-P2-t4",
+        "tipo": "tarea",
+        "texto": "Reunión de consenso: previsión, temporales y desviaciones",
+        "resp": "Demanda y cartera · Comercial · S&OP",
+        "sistema": "",
+        "act": "2.2",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 185
+       },
+       {
+        "id": "f-OPET-tobe-P2-d5",
+        "tipo": "decision",
+        "texto": "¿Hay acuerdo?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 767,
+        "y": 340
+       },
+       {
+        "id": "f-OPET-tobe-P2-t6",
+        "tipo": "tarea",
+        "texto": "Cierre de la previsión: el mes en curso queda congelado",
+        "resp": "Resp. planif. planta",
+        "sistema": "SAP",
+        "act": "2.1",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 341
+       },
+       {
+        "id": "f-OPET-tobe-P2-t7",
+        "tipo": "tarea",
+        "texto": "Revisión de temporales por familia con la previsión cerrada",
+        "resp": "Demanda y cartera",
+        "sistema": "",
+        "act": "ap_opet_temporales",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 341
+       },
+       {
+        "id": "f-OPET-tobe-P2-e8",
+        "tipo": "evento",
+        "texto": "Demanda cerrada",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 366
+       },
+       {
+        "id": "f-OPET-tobe-P2-t11",
+        "tipo": "tarea",
+        "texto": "S&OP resuelve la discrepancia",
+        "resp": "S&OP",
+        "sistema": "",
+        "act": "2.2",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 499
+       },
+       {
+        "id": "f-OPET-tobe-P2-n12",
+        "tipo": "nota",
+        "texto": "Cambios en el mes congelado: solo con la aprobación de Planificación.",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 500
+       }
+      ],
+      "enlaces": [
+       {
+        "id": "l-OPET-tobe-P2-1",
+        "de": "f-OPET-tobe-P2-t9",
+        "a": "f-OPET-tobe-P2-t2",
+        "texto": "alimenta",
+        "estilo": "disc"
+       },
+       {
+        "id": "l-OPET-tobe-P2-2",
+        "de": "f-OPET-tobe-P2-t10",
+        "a": "f-OPET-tobe-P2-t4",
+        "texto": "se revisa aquí",
+        "estilo": "disc"
+       },
+       {
+        "id": "l-OPET-tobe-P2-3",
+        "de": "f-OPET-tobe-P2-e1",
+        "a": "f-OPET-tobe-P2-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-4",
+        "de": "f-OPET-tobe-P2-t2",
+        "a": "f-OPET-tobe-P2-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-5",
+        "de": "f-OPET-tobe-P2-t3",
+        "a": "f-OPET-tobe-P2-t4",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-6",
+        "de": "f-OPET-tobe-P2-t4",
+        "a": "f-OPET-tobe-P2-d5",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-7",
+        "de": "f-OPET-tobe-P2-d5",
+        "a": "f-OPET-tobe-P2-t6",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-8",
+        "de": "f-OPET-tobe-P2-d5",
+        "a": "f-OPET-tobe-P2-t11",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-9",
+        "de": "f-OPET-tobe-P2-t11",
+        "a": "f-OPET-tobe-P2-t6",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-10",
+        "de": "f-OPET-tobe-P2-t6",
+        "a": "f-OPET-tobe-P2-t7",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-11",
+        "de": "f-OPET-tobe-P2-t7",
+        "a": "f-OPET-tobe-P2-e8",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P2-12",
+        "de": "f-OPET-tobe-P2-n12",
+        "a": "f-OPET-tobe-P2-t6",
+        "texto": "",
+        "estilo": ""
+       }
+      ]
+     },
+     "P3": {
+      "nodos": [
+       {
+        "id": "f-OPET-tobe-P3-e0",
+        "tipo": "evento",
+        "texto": "Inicio del día",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 67
+       },
+       {
+        "id": "f-OPET-tobe-P3-t1",
+        "tipo": "tarea",
+        "texto": "Revisión única de cartera, stock y cargas con una sola fuente",
+        "resp": "Demanda y cartera",
+        "sistema": "SAP / GIO",
+        "act": "3.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 35
+       },
+       {
+        "id": "f-OPET-tobe-P3-t2",
+        "tipo": "tarea",
+        "texto": "Planificación propone una fecha viable según capacidad y stock",
+        "resp": "Demanda y cartera",
+        "sistema": "GIO",
+        "act": "3.1",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 41
+       },
+       {
+        "id": "f-OPET-tobe-P3-d3",
+        "tipo": "decision",
+        "texto": "¿Llega a la fecha del cliente?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 767,
+        "y": 36
+       },
+       {
+        "id": "f-OPET-tobe-P3-t4",
+        "tipo": "tarea",
+        "texto": "Comercial negocia una nueva fecha con el cliente",
+        "resp": "Comercial",
+        "sistema": "",
+        "act": "3.1",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 191
+       },
+       {
+        "id": "f-OPET-tobe-P3-t5",
+        "tipo": "tarea",
+        "texto": "Se registran las dos fechas: solicitada (servicio) y confirmada (plan)",
+        "resp": "Comercial",
+        "sistema": "SAP",
+        "act": "3.1",
+        "dolor": false,
+        "notas": "",
+        "x": 987,
+        "y": 34
+       },
+       {
+        "id": "f-OPET-tobe-P3-t6",
+        "tipo": "tarea",
+        "texto": "Logística vincula las cargas: cantidad ≤ pendiente y fecha confirmada",
+        "resp": "Logística",
+        "sistema": "SAP",
+        "act": "3.2",
+        "dolor": false,
+        "notas": "",
+        "x": 987,
+        "y": 184
+       },
+       {
+        "id": "f-OPET-tobe-P3-d7",
+        "tipo": "decision",
+        "texto": "¿Pedidos en conflicto?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 997,
+        "y": 340
+       },
+       {
+        "id": "f-OPET-tobe-P3-e12",
+        "tipo": "evento",
+        "texto": "Fin del día",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 1010,
+        "y": 517
+       },
+       {
+        "id": "f-OPET-tobe-P3-t8",
+        "tipo": "tarea",
+        "texto": "Planificación aplica las reglas de prioridad acordadas",
+        "resp": "Resp. planif. planta · consulta a Comercial y Programación",
+        "sistema": "",
+        "act": "3.4",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 335
+       },
+       {
+        "id": "f-OPET-tobe-P3-d9",
+        "tipo": "decision",
+        "texto": "¿Afecta a otras plantas?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 537,
+        "y": 340
+       },
+       {
+        "id": "f-OPET-tobe-P3-t10",
+        "tipo": "tarea",
+        "texto": "Decide S&OP",
+        "resp": "S&OP",
+        "sistema": "",
+        "act": "3.4",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 506
+       },
+       {
+        "id": "f-OPET-tobe-P3-t11",
+        "tipo": "tarea",
+        "texto": "Se informa a Comercial, Programación y Dirección de planta",
+        "resp": "Resp. planif. planta",
+        "sistema": "",
+        "act": "3.4",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 341
+       },
+       {
+        "id": "f-OPET-tobe-P3-e13",
+        "tipo": "evento",
+        "texto": "Prioridad resuelta",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 366
+       },
+       {
+        "id": "f-OPET-tobe-P3-e20",
+        "tipo": "evento",
+        "texto": "Cierre semanal",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 667
+       },
+       {
+        "id": "f-OPET-tobe-P3-t21",
+        "tipo": "tarea",
+        "texto": "Planificación propone los pedidos a saldar con la regla común",
+        "resp": "Demanda y cartera",
+        "sistema": "SAP",
+        "act": "3.3",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 641
+       },
+       {
+        "id": "f-OPET-tobe-P3-t22",
+        "tipo": "tarea",
+        "texto": "Comercial valida y se saldan; Planificación queda avisada",
+        "resp": "Comercial",
+        "sistema": "SAP",
+        "act": "3.3",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 641
+       },
+       {
+        "id": "f-OPET-tobe-P3-e23",
+        "tipo": "evento",
+        "texto": "Cartera limpia",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 780,
+        "y": 667
+       }
+      ],
+      "enlaces": [
+       {
+        "id": "l-OPET-tobe-P3-1",
+        "de": "f-OPET-tobe-P3-e0",
+        "a": "f-OPET-tobe-P3-t1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-2",
+        "de": "f-OPET-tobe-P3-t1",
+        "a": "f-OPET-tobe-P3-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-3",
+        "de": "f-OPET-tobe-P3-t2",
+        "a": "f-OPET-tobe-P3-d3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-4",
+        "de": "f-OPET-tobe-P3-d3",
+        "a": "f-OPET-tobe-P3-t5",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-5",
+        "de": "f-OPET-tobe-P3-d3",
+        "a": "f-OPET-tobe-P3-t4",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-6",
+        "de": "f-OPET-tobe-P3-t4",
+        "a": "f-OPET-tobe-P3-t5",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-7",
+        "de": "f-OPET-tobe-P3-t5",
+        "a": "f-OPET-tobe-P3-t6",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-8",
+        "de": "f-OPET-tobe-P3-t6",
+        "a": "f-OPET-tobe-P3-d7",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-9",
+        "de": "f-OPET-tobe-P3-d7",
+        "a": "f-OPET-tobe-P3-t8",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-10",
+        "de": "f-OPET-tobe-P3-d7",
+        "a": "f-OPET-tobe-P3-e12",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-11",
+        "de": "f-OPET-tobe-P3-t8",
+        "a": "f-OPET-tobe-P3-d9",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-12",
+        "de": "f-OPET-tobe-P3-d9",
+        "a": "f-OPET-tobe-P3-t11",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-13",
+        "de": "f-OPET-tobe-P3-d9",
+        "a": "f-OPET-tobe-P3-t10",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-14",
+        "de": "f-OPET-tobe-P3-t10",
+        "a": "f-OPET-tobe-P3-t11",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-15",
+        "de": "f-OPET-tobe-P3-t11",
+        "a": "f-OPET-tobe-P3-e13",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-16",
+        "de": "f-OPET-tobe-P3-e20",
+        "a": "f-OPET-tobe-P3-t21",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-17",
+        "de": "f-OPET-tobe-P3-t21",
+        "a": "f-OPET-tobe-P3-t22",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P3-18",
+        "de": "f-OPET-tobe-P3-t22",
+        "a": "f-OPET-tobe-P3-e23",
+        "texto": "",
+        "estilo": ""
+       }
+      ]
+     }
+    }
+   }
+  }
+ }
+}

@@ -468,4 +468,14 @@ if __name__ == '__main__':
     meta = data.get('meta', {})
     origen = ('Propuesta inicial' if os.path.basename(src) == 'datos_base.json'
               else f"Datos del equipo · {meta.get('autor') or 'export de la herramienta'} · {meta.get('exportado', '')[:10]}")
+    # aportaciones incorporadas (parches): se nombran por su título
+    pdir = os.path.join(HERE, 'parches')
+    titulos = {}
+    for fn in sorted(os.listdir(pdir)) if os.path.isdir(pdir) else []:
+        if fn.endswith('.json'):
+            with open(os.path.join(pdir, fn), encoding='utf-8') as f:
+                p = json.load(f)
+            titulos[p['id']] = p.get('titulo', p['id'])
+    if meta.get('parches'):
+        origen += ' · incluye: ' + ', '.join(titulos.get(i, i) for i in meta['parches'])
     print('OK', os.path.normpath(build(data, out, origen)))

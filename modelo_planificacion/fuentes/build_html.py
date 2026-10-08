@@ -21,13 +21,21 @@ def main():
         html = f.read()
     with open(os.path.join(HERE, 'logo_blanco.png'), 'rb') as f:
         logo = base64.b64encode(f.read()).decode('ascii')
+    # aportaciones posteriores: se aplican una vez en cada navegador y solo rellenan lo vacío
+    pdir = os.path.join(HERE, 'parches')
+    parches = []
+    for fn in sorted(os.listdir(pdir)) if os.path.isdir(pdir) else []:
+        if fn.endswith('.json'):
+            with open(os.path.join(pdir, fn), encoding='utf-8') as f:
+                parches.append(json.load(f))
     # el JSON va dentro de <script>: se escapa "</" para que no pueda cerrar la etiqueta
     payload = json.dumps(datos, ensure_ascii=False).replace('</', '<\\/')
-    assert html.count('__DATOS__') == 1 and html.count('__LOGO__') == 1
-    html = html.replace('__DATOS__', payload).replace('__LOGO__', logo)
+    payload_p = json.dumps(parches, ensure_ascii=False).replace('</', '<\\/')
+    assert html.count('__DATOS__') == 1 and html.count('__LOGO__') == 1 and html.count('__PARCHES__') == 1
+    html = html.replace('__DATOS__', payload).replace('__PARCHES__', payload_p).replace('__LOGO__', logo)
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write(html)
-    print('OK', os.path.normpath(OUT), f'{len(html) / 1024:.0f} KB', 'desde', fuente)
+    print('OK', os.path.normpath(OUT), f'{len(html) / 1024:.0f} KB', 'desde', fuente, f'+ {len(parches)} parches')
 
 
 if __name__ == '__main__':

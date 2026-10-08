@@ -6,7 +6,7 @@ Kit para centralizar la planificación de packaging en corporativo: **corporativ
 |---|---|
 | `Modelo_Planificacion_CL.html` | Herramienta de trabajo. Se abre con doble clic (Chrome o Edge), no necesita instalación ni conexión. Guarda lo escrito en el propio navegador y exporta un JSON con todo. |
 | `Kit_Modelo_Planificacion_CL.xlsx` | La propuesta inicial en Excel: procesos, flujos (si hay), RACI, roles, asignación, organigramas, empresas, políticas, KPIs, reuniones, decisiones y plan. |
-| `fuentes/` | Origen de ambos: `datos_actuales.json` (último export del equipo, tiene prioridad), `datos_base.py` (propuesta inicial), `plantilla.html`, `build_html.py` y `generar_kit.py`. |
+| `fuentes/` | Origen de ambos: `datos_actuales.json` (último export del equipo, tiene prioridad), `datos_base.py` (propuesta inicial), `parches/` (aportaciones posteriores, como el análisis E2E de Ondupet), `plantilla.html`, `build_html.py` y `generar_kit.py`. |
 
 ## Flujo de trabajo
 
@@ -23,3 +23,5 @@ python3 fuentes/datos_base.py                         # propuesta → fuentes/da
 python3 fuentes/build_html.py                         # herramienta HTML (con datos_actuales.json si existe)
 python3 fuentes/generar_kit.py [export.json] [salida.xlsx]   # Excel (propuesta o un export)
 ```
+
+Cada archivo de `fuentes/parches/` va dentro del HTML y se incorpora **una sola vez en cada navegador**. Solo rellena lo que esté vacío: notas campo a campo, RACI as-is fila a fila, y flujos y apartados que no existan. Así, quien ya tenga datos guardados recibe la aportación sin perder nada de lo que escribió.

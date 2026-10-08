@@ -215,7 +215,7 @@ td.chk.bad{color:var(--warn);font-weight:600}
 .orgstats b{display:block;font-size:18px;margin-top:2px}
 .flowwrap{position:relative}
 .flowcwrap{position:relative;min-width:0}
-.flowzoom{position:absolute;top:10px;right:22px;display:flex;gap:4px;align-items:center;background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:9px;padding:4px;box-shadow:0 1px 4px rgba(0,38,58,.08)}
+.flowzoom{position:absolute;bottom:22px;right:22px;display:flex;gap:4px;align-items:center;background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:9px;padding:4px;box-shadow:0 1px 4px rgba(0,38,58,.08)}
 .flowzoom .hint{min-width:44px;text-align:center}
 #flowsvg .fll{cursor:pointer}
 #flowsvg{display:block;user-select:none;-webkit-user-select:none}
@@ -270,6 +270,7 @@ td.chk.bad{color:var(--warn);font-weight:600}
 <datalist id="dl-titulares"></datalist>
 
 <script id="datos-base" type="application/json">__DATOS__</script>
+<script id="parches" type="application/json">__PARCHES__</script>
 <script>
 'use strict';
 const KEY = 'cl-modelo-planificacion-v1';
@@ -304,7 +305,7 @@ function setStatus() {
   el.textContent = d ? 'Guardado en este navegador · ' + d.toLocaleString('es-ES', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Sin cambios todavía';
 }
 window.addEventListener('beforeunload', e => { if (dirty || !storageOK) { save(); if (!storageOK) { e.preventDefault(); e.returnValue = ''; } } });
-function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2200); }
+function toast(msg, ms = 2200) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), ms); }
 
 /* ---------------------------------------------------------------- utilidades de dominio */
 const ESTADOS = [
@@ -1144,7 +1145,7 @@ function fnodeSVG(n, g, sel, exp) {
     const cw = Math.ceil(fctx.measureText(g.code).width) + 10;
     body += `<rect x="${x + 8}" y="${y + 6}" width="${cw}" height="14" rx="4" fill="#00263A"/>` + txt(g.code, x + 8 + cw / 2, y + 16.5, 9.5, 700, '#98C9EB');
   }
-  if (n.dolor) body += `<circle cx="${x + w - 12}" cy="${y + 12}" r="8" fill="#E4A47C"/>` + txt('!', x + w - 12, y + 16, 11, 700, '#00263A');
+  if (n.dolor && !ev) body += `<circle cx="${x + w - 12}" cy="${y + 12}" r="8" fill="#E4A47C"/>` + txt('!', x + w - 12, y + 16, 11, 700, '#00263A');
   if (exp) return `<g>${shape}${body}</g>`;
   const T = FTIPOS[n.tipo] || FTIPOS.tarea;
   const hs = [[x + w, y + h / 2], [cx, y + h], [x, y + h / 2], [cx, y]].map(([hx, hy]) => `<circle class="fh" data-fh="${n.id}" cx="${hx}" cy="${hy}" r="5.5" fill="#FFFFFF" stroke="#244C5A" stroke-width="1.5"/>`).join('');
@@ -1155,16 +1156,33 @@ function froute(a, ga, b, gb) {
   const acx = a.x + ga.w / 2, acy = a.y + ga.h / 2, bcx = b.x + gb.w / 2, bcy = b.y + gb.h / 2, dx = bcx - acx, dy = bcy - acy;
   const gapH = dx >= 0 ? b.x - (a.x + ga.w) : a.x - (b.x + gb.w);
   const gapV = dy >= 0 ? b.y - (a.y + ga.h) : a.y - (b.y + gb.h);
+  // recta si las dos cajas comparten franja (los rombos y las píldoras solo admiten la conexión en su centro)
+  const straightY = () => {
+    const fix = n => n.tipo === 'decision' || n.tipo === 'evento';
+    const o0 = Math.max(a.y, b.y) + 10, o1 = Math.min(a.y + ga.h, b.y + gb.h) - 16;
+    const y = fix(a) ? acy : fix(b) ? bcy : o1 >= o0 ? Math.round((o0 + o1) / 2) : null;
+    const ok = (n, g, c) => fix(n) ? Math.abs(y - c) < 1 : y >= n.y + 8 && y <= n.y + g.h - 16;
+    return y !== null && ok(a, ga, acy) && ok(b, gb, bcy) ? y : null;
+  };
+  const straightX = () => {
+    const m = (n, g) => n.tipo === 'evento' ? g.h / 2 : 10;
+    const o0 = Math.max(a.x, b.x), o1 = Math.min(a.x + ga.w, b.x + gb.w);
+    const x = a.tipo === 'decision' ? acx : b.tipo === 'decision' ? bcx : Math.round((o0 + o1) / 2);
+    const ok = (n, g, c) => n.tipo === 'decision' ? Math.abs(x - c) < 1 : x >= n.x + m(n, g) && x <= n.x + g.w - m(n, g);
+    return ok(a, ga, acx) && ok(b, gb, bcx) ? x : null;
+  };
   if (gapH < 16 && gapV < 16) {
     // cajas muy juntas: sale por el lateral y entra por arriba o por abajo (en L)
     const sx = dx >= 0 ? a.x + ga.w : a.x, ty = dy >= 0 ? b.y : b.y + gb.h;
     return {d: `M${sx},${acy} H${bcx} V${ty}`, lx: (sx + bcx) / 2, ly: acy};
   }
   if (gapH >= 16 && (Math.abs(dx) >= Math.abs(dy) || gapV < 16)) {
-    const sx = dx >= 0 ? a.x + ga.w : a.x, tx = dx >= 0 ? b.x : b.x + gb.w, mx = Math.round((sx + tx) / 2);
+    const sx = dx >= 0 ? a.x + ga.w : a.x, tx = dx >= 0 ? b.x : b.x + gb.w, mx = Math.round((sx + tx) / 2), y = straightY();
+    if (y !== null) return {d: `M${sx},${y} H${tx}`, lx: mx, ly: y};
     return {d: `M${sx},${acy} H${mx} V${bcy} H${tx}`, lx: mx, ly: (acy + bcy) / 2};
   }
-  const sy = dy >= 0 ? a.y + ga.h : a.y, ty = dy >= 0 ? b.y : b.y + gb.h, my = Math.round((sy + ty) / 2);
+  const sy = dy >= 0 ? a.y + ga.h : a.y, ty = dy >= 0 ? b.y : b.y + gb.h, my = Math.round((sy + ty) / 2), x = straightX();
+  if (x !== null) return {d: `M${x},${sy} V${ty}`, lx: x, ly: my};
   return {d: `M${acx},${sy} V${my} H${bcx} V${ty}`, lx: (acx + bcx) / 2, ly: my};
 }
 function flowSVG(exp) {
@@ -1761,7 +1779,7 @@ document.addEventListener('click', e => {
   if (d.import) return importJSON(d.import);
   if (d.reset) {
     if (!confirm('¿Borrar todo lo escrito y volver a la propuesta inicial?')) return;
-    S = clone(BASE); save(); render(); toast('Propuesta inicial restablecida'); return;
+    S = clone(BASE); applyPatches(); save(); render(); toast('Propuesta inicial restablecida'); return;
   }
 });
 
@@ -1874,6 +1892,40 @@ function exportCSV(kind) {
   download(`${kind}_${stamp()}.csv`, csv(rows), 'text/csv;charset=utf-8');
   toast('CSV descargado');
 }
+// combina sin pisar: solo rellena lo que está vacío (notas campo a campo, RACI fila a fila, flujos y organigramas si están vacíos)
+function mergeData(data) {
+  let n = 0;
+  for (const em in (data.notas || {})) for (const act in data.notas[em]) for (const [k, v] of Object.entries(data.notas[em][act] || {})) {
+    if (v && !(note(em, act)[k])) { setNote(em, act, k, v); n++; }
+  }
+  for (const p of (data.personas || [])) {
+    const cur = S.personas.find(x => x.id === p.id) || S.personas.find(x => x.empresa === p.empresa && x.rol === p.rol && !x.titular.trim() && p.titular);
+    if (cur) { for (const k of ['titular', 'suplente', 'puesto', 'dedicacion', 'email', 'notas']) if (p[k] && !cur[k]) { cur[k] = p[k]; n++; } }
+    else if (p.titular) { S.personas.push(p); n++; }
+  }
+  for (const em in (data.raciAsis || {})) {
+    const src = data.raciAsis[em] || {}, cur = raciAsis(em);
+    for (const act in src) if (!raciRowEmpty(src, act) && raciRowEmpty(cur, act)) { cur[act] = clone(src[act]); n++; }
+  }
+  for (const em in (data.apartados || {})) for (const pid in (data.apartados[em] || {})) for (const a of (data.apartados[em][pid] || [])) {
+    const list = extrasMut(em, pid), P = S.procesos.find(p => p.id === pid);
+    if (!a || !a.id || list.some(x => x.id === a.id)) continue;
+    const nuevo = clone(a);
+    if (P && list.some(x => x.codigo === nuevo.codigo)) nuevo.codigo = aptCode(em, P);
+    list.push(nuevo); n++;
+  }
+  for (const em in (data.flujos || {})) for (const v of ['asis', 'tobe']) for (const pid in ((data.flujos[em] || {})[v] || {})) {
+    const src = data.flujos[em][v][pid] || {};
+    if ((src.nodos || []).length && !flowNodes(em, v, pid).length) {
+      const T = flowMut(em, v, pid); T.nodos = clone(src.nodos); T.enlaces = clone(src.enlaces || []); n += T.nodos.length;
+    }
+  }
+  for (const em in (data.organigramas || {})) for (const v of ['asis', 'tobe']) {
+    const src = (data.organigramas[em] || {})[v] || [];
+    if (src.length && !orgList(em, v).length) { S.organigramas[em][v] = src; n += src.length; }
+  }
+  return n;
+}
 function importJSON(mode) {
   const f = document.getElementById('fileimp').files[0];
   if (!f) { toast('Elige primero un archivo JSON'); return; }
@@ -1886,43 +1938,31 @@ function importJSON(mode) {
       if (!confirm('Se sustituirá todo lo que hay en este navegador por el contenido del archivo. ¿Continuar?')) return;
       S = data;
       for (const k of Object.keys(BASE)) if (S[k] === undefined) S[k] = clone(BASE[k]);
-      save(); render(); toast('Datos importados'); return;
+      applyPatches(); save(); render(); toast('Datos importados'); return;
     }
-    let n = 0;
-    for (const em in (data.notas || {})) for (const act in data.notas[em]) for (const [k, v] of Object.entries(data.notas[em][act] || {})) {
-      if (v && !(note(em, act)[k])) { setNote(em, act, k, v); n++; }
-    }
-    for (const p of (data.personas || [])) {
-      const cur = S.personas.find(x => x.id === p.id) || S.personas.find(x => x.empresa === p.empresa && x.rol === p.rol && !x.titular.trim() && p.titular);
-      if (cur) { for (const k of ['titular', 'suplente', 'puesto', 'dedicacion', 'email', 'notas']) if (p[k] && !cur[k]) { cur[k] = p[k]; n++; } }
-      else if (p.titular) { S.personas.push(p); n++; }
-    }
-    for (const em in (data.raciAsis || {})) {
-      const src = data.raciAsis[em] || {}, cur = raciAsis(em);
-      if (Object.keys(src).length && !Object.keys(cur).some(k => !raciRowEmpty(cur, k))) { S.raciAsis[em] = src; n += Object.keys(src).length; }
-    }
-    for (const em in (data.apartados || {})) for (const pid in (data.apartados[em] || {})) for (const a of (data.apartados[em][pid] || [])) {
-      const list = extrasMut(em, pid), P = S.procesos.find(p => p.id === pid);
-      if (!a || !a.id || list.some(x => x.id === a.id)) continue;
-      const nuevo = clone(a);
-      if (P && list.some(x => x.codigo === nuevo.codigo)) nuevo.codigo = aptCode(em, P);
-      list.push(nuevo); n++;
-    }
-    for (const em in (data.flujos || {})) for (const v of ['asis', 'tobe']) for (const pid in ((data.flujos[em] || {})[v] || {})) {
-      const src = data.flujos[em][v][pid] || {};
-      if ((src.nodos || []).length && !flowNodes(em, v, pid).length) {
-        const T = flowMut(em, v, pid); T.nodos = clone(src.nodos); T.enlaces = clone(src.enlaces || []); n += T.nodos.length;
-      }
-    }
-    for (const em in (data.organigramas || {})) for (const v of ['asis', 'tobe']) {
-      const src = (data.organigramas[em] || {})[v] || [];
-      if (src.length && !orgList(em, v).length) { S.organigramas[em][v] = src; n += src.length; }
-    }
+    const n = mergeData(data);
     save(); render(); toast(`Combinado: ${n} campos añadidos`);
   };
   r.readAsText(f);
 }
 
+/* ---------------------------------------------------------------- aportaciones (parches) */
+// Contenido añadido después de entregar la herramienta. Se incorpora una sola vez en cada navegador y solo
+// rellena lo que esté vacío, así que nunca pisa lo que el equipo ya ha escrito.
+const PARCHES = JSON.parse(document.getElementById('parches').textContent);
+function applyPatches() {
+  S.meta = S.meta || {};
+  S.meta.parches = S.meta.parches || [];
+  const hechos = [];
+  for (const p of PARCHES) {
+    if (S.meta.parches.includes(p.id)) continue;
+    const n = mergeData(p.datos || {});
+    S.meta.parches.push(p.id);
+    if (n) hechos.push(`${p.titulo} (${n} elementos)`);
+  }
+  if (hechos.length) { save(); setTimeout(() => toast('Añadido: ' + hechos.join(' · '), 6000), 300); }
+}
+applyPatches();
 document.getElementById('autor').value = S.meta.autor || '';
 setStatus();
 render();

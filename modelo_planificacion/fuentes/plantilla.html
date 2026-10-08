@@ -213,6 +213,39 @@ td.chk.bad{color:var(--warn);font-weight:600}
 .orgstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .orgstats div{background:var(--card);border-radius:8px;padding:8px 10px}
 .orgstats b{display:block;font-size:18px;margin-top:2px}
+.flowwrap{position:relative}
+.flowcwrap{position:relative;min-width:0}
+.flowzoom{position:absolute;top:10px;right:22px;display:flex;gap:4px;align-items:center;background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:9px;padding:4px;box-shadow:0 1px 4px rgba(0,38,58,.08)}
+.flowzoom .hint{min-width:44px;text-align:center}
+#flowsvg .fll{cursor:pointer}
+#flowsvg{display:block;user-select:none;-webkit-user-select:none}
+#flowsvg .fn{cursor:grab;touch-action:none}
+#flowsvg .fn:focus{outline:none}
+#flowsvg .fsel{display:none}
+#flowsvg .fn.sel .fsel,#flowsvg .fn:focus-visible .fsel{display:block}
+#flowsvg .fh{opacity:0;cursor:crosshair;touch-action:none;transition:opacity .12s}
+#flowsvg .fn:hover .fh,#flowsvg .fn.sel .fh,#flowsvg.linking .fh{opacity:1}
+#flowsvg.linking .fn:hover .fsel{display:block;stroke:#244C5A}
+#flowsvg.moving .fn{cursor:grabbing}
+#flowsvg .fl{cursor:pointer}
+#flowsvg .fl:hover .fvis{stroke:#00263A}
+#flowsvg .fl.sel .fvis{stroke:#00263A;stroke-width:2.8}
+.flowempty{position:absolute;left:0;right:0;top:34%;text-align:center;color:var(--grey);pointer-events:none;padding:0 40px;line-height:1.6}
+.flowbar{gap:8px}
+.flowbar .vsep{width:1px;height:22px;background:var(--border)}
+.flowbar select{padding:5px 8px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:12px;font-weight:600;color:var(--navy);background:#fff;cursor:pointer}
+.fsw{display:inline-block;width:15px;height:10px;margin-right:6px;vertical-align:-1px;border:1.5px solid var(--navy);background:#fff;border-radius:3px}
+.fsw-evento{background:var(--navy);border-radius:6px}
+.fsw-decision{width:9px;height:9px;transform:rotate(45deg);background:var(--tint);border-color:var(--teal);border-radius:1px;margin:0 9px 0 3px}
+.fsw-documento{background:var(--card);border-color:var(--mid);border-radius:2px 2px 7px 0}
+.fsw-nota{background:#FDF3EC;border:1.5px dashed var(--warm)}
+.flowchk{display:flex;gap:8px;align-items:center;margin:0 0 10px;cursor:pointer}
+.flowout{display:grid;grid-template-columns:minmax(0,1fr) 92px auto;gap:6px;align-items:center;margin-bottom:6px;font-size:12px}
+.flowout span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.flowout input{border:1px solid var(--border);border-radius:6px;padding:4px 6px;font:inherit;font-size:12px;width:100%}
+.flowconn{width:100%;margin:2px 0 12px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;font:inherit;background:#fff;color:var(--navy)}
+.flowtips{margin:6px 0 0;padding-left:18px;color:var(--grey);line-height:1.5;font-size:12px}
+.flowtips li{margin-bottom:4px}
 @media (max-width:1100px){.orglay{grid-template-columns:1fr}.orgpanel{position:static}.tiles,.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.expgrid{grid-template-columns:1fr}.notegrid{grid-template-columns:1fr 1fr}.notegrid .half{grid-column:1/-1}}
 @media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}nav{display:flex;flex-wrap:wrap;gap:4px}nav button{width:auto}.procwrap{grid-template-columns:1fr}.proclist{position:static}main{padding:18px 16px 40px}}
 </style>
@@ -356,11 +389,11 @@ function stats() {
 /* ---------------------------------------------------------------- navegación */
 const SECTIONS = [
   ['inicio', 'Resumen'], ['empresas', 'Empresas y plantas'], ['personas', 'Personas y roles asignados'],
-  ['organigrama', 'Organigramas'], ['roles', 'Fichas de rol'], ['procesos', 'Notas por proceso'], ['raci', 'Matriz RACI'],
+  ['organigrama', 'Organigramas'], ['roles', 'Fichas de rol'], ['procesos', 'Notas por proceso'], ['flujos', 'Flujos de proceso'], ['raci', 'Matriz RACI'],
   ['politicas', 'Políticas'], ['kpis', 'KPIs'], ['cadencia', 'Reuniones'], ['decisiones', 'Decisiones'],
   ['plan', 'Plan de despliegue'], ['exportar', 'Exportar / importar'],
 ];
-const ui = {sec: 'inicio', emp: 'OPET', proc: null, editCat: false, filtroEmp: '', raciEmp: '', raciView: 'tobe', raciAsisEmp: 'OPET', raciDiff: true, orgEmp: 'OPET', orgView: 'asis', orgSel: '', orgZoom: 1};
+const ui = {sec: 'inicio', emp: 'OPET', proc: null, editCat: false, filtroEmp: '', raciEmp: '', raciView: 'tobe', raciAsisEmp: 'OPET', raciDiff: true, orgEmp: 'OPET', orgView: 'asis', orgSel: '', orgZoom: 1, flowEmp: 'OPET', flowView: 'asis', flowProc: null, flowSel: '', flowZoom: 1};
 try { Object.assign(ui, JSON.parse(sessionStorage.getItem(KEY + '-ui') || '{}')); } catch (e) {}
 function saveUI() { try { sessionStorage.setItem(KEY + '-ui', JSON.stringify(ui)); } catch (e) {} }
 
@@ -371,10 +404,11 @@ function refreshNav() {
     personas: `${st.asign}/${st.asignTot}`,
     raci: st.raciBad ? `${st.raciBad} avisos` : 'OK',
     decisiones: st.decAb ? `${st.decAb} abiertas` : '',
+    flujos: nFlujos() || '',
   };
   const warn = {raci: st.raciBad > 0};
   document.getElementById('nav').innerHTML = SECTIONS.map(([id, label], i) =>
-    (i === 1 || i === 7 || i === 12 ? '<div class="sep"></div>' : '') +
+    (['empresas', 'politicas', 'exportar'].includes(id) ? '<div class="sep"></div>' : '') +
     `<button data-go="${id}" class="${ui.sec === id ? 'on' : ''}">${esc(label)}${badge[id] ? `<span class="badge${warn[id] ? ' warn' : ''}">${esc(badge[id])}</span>` : ''}</button>`
   ).join('');
 }
@@ -496,7 +530,7 @@ VIEWS.inicio = () => {
   <div class="head"><div><h1>Resumen</h1><p>Herramienta para diseñar el modelo de planificación corporativo: <b>corporativo define</b> procesos, roles, personas, políticas y KPIs, y <b>cada planta ejecuta</b>. Todo lo que escribáis se guarda solo en este navegador.</p></div></div>
   <div class="card" style="margin-bottom:16px"><div class="label">Cómo usarla</div>
     <div class="steps">
-      <div class="step"><div class="num">1</div><div><b>Notas por proceso</b><span class="hint">Por cada empresa y actividad: cómo se hace hoy, quién lo hace y qué falla. Cada planta puede añadir sus propios apartados.</span></div></div>
+      <div class="step"><div class="num">1</div><div><b>Notas y flujos por proceso</b><span class="hint">Por cada empresa y actividad: cómo se hace hoy, quién lo hace y qué falla, y el flujo as-is y to-be de cada proceso. Cada planta puede añadir sus propios apartados.</span></div></div>
       <div class="step"><div class="num">2</div><div><b>Personas y organigramas</b><span class="hint">Titular y suplente de cada rol, y el organigrama as-is y to-be de cada empresa.</span></div></div>
       <div class="step"><div class="num">3</div><div><b>RACI y políticas</b><span class="hint">Ajustad la propuesta: quién es responsable (R), quién decide (A), a quién se consulta (C) y a quién se informa (I).</span></div></div>
       <div class="step"><div class="num">4</div><div><b>Exportar para Claude</b><span class="hint">Descargad el JSON y pasádmelo: con él genero el modelo final.</span></div></div>
@@ -764,7 +798,7 @@ VIEWS.exportar = () => {
   <div class="head"><div><h1>Exportar e importar</h1><p>Todo se guarda en este navegador. Para pasármelo, o para compartirlo con el equipo, descargad el archivo JSON.</p></div></div>
   <div class="expgrid">
     <div class="card"><div class="label">Para Claude</div><h3>Descargar JSON</h3>
-      <p>Contiene todo: empresas, personas, roles, organigramas y RACI (as-is y to-be), notas (con los apartados propios de cada planta), políticas, KPIs, reuniones, decisiones y plan. Con él genero el modelo final: el manual de planificación por proceso, la RACI con nombres por empresa, las fichas de rol y las diapositivas.</p>
+      <p>Contiene todo: empresas, personas, roles, organigramas, flujos de proceso y RACI (as-is y to-be), notas (con los apartados propios de cada planta), políticas, KPIs, reuniones, decisiones y plan. Con él genero el modelo final: el manual de planificación por proceso, la RACI con nombres por empresa, las fichas de rol y las diapositivas.</p>
       <p class="hint">Ahora mismo: ${st.rev} de ${st.revTot} actividades revisadas · ${st.asign} de ${st.asignTot} roles con titular.</p>
       <button class="btn" data-export="json">Descargar JSON</button></div>
     <div class="card"><div class="label">Importar</div><h3>Cargar un JSON</h3>
@@ -1015,16 +1049,508 @@ document.addEventListener('keydown', e => {
   if (box && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); orgSelect(box.dataset.node); }
 });
 
+/* ---------------------------------------------------------------- flujos de proceso */
+const FLOW_TABS = [['asis', 'As-is · cómo se hace hoy'], ['tobe', 'To-be · cómo debe hacerse']];
+const FTIPOS = {
+  evento: {label: 'Inicio / fin', w: 130, h: 46},
+  tarea: {label: 'Tarea', w: 176, h: 62},
+  decision: {label: 'Decisión', w: 156, h: 100},
+  documento: {label: 'Documento / sistema', w: 168, h: 64},
+  nota: {label: 'Nota', w: 176, h: 56},
+};
+const FFONT = "Montserrat, 'Segoe UI', Arial, sans-serif";
+const FG = 10, FPAD = 40;
+const fsnap = v => Math.max(0, Math.round(v / FG) * FG);
+const flowViewName = v => v === 'tobe' ? 'to-be' : 'as-is';
+function flowGet(emp = ui.flowEmp, view = ui.flowView, pid = ui.flowProc) {
+  return ((((S.flujos || {})[emp] || {})[view] || {})[pid]) || null;
+}
+function flowMut(emp = ui.flowEmp, view = ui.flowView, pid = ui.flowProc) {
+  S.flujos = S.flujos || {};
+  const e = S.flujos[emp] = S.flujos[emp] || {}, v = e[view] = e[view] || {};
+  const f = v[pid] = v[pid] || {nodos: [], enlaces: []};
+  f.nodos = f.nodos || []; f.enlaces = f.enlaces || [];
+  return f;
+}
+const flowNodes = (emp, view, pid) => (flowGet(emp, view, pid) || {}).nodos || [];
+const nFlujos = () => Object.values(S.flujos || {}).reduce((s, e) => s + Object.values(e || {}).reduce((t, v) => t + Object.values(v || {}).filter(f => f && (f.nodos || []).length).length, 0), 0);
+function flowActs(emp = ui.flowEmp, pid = ui.flowProc) { const P = S.procesos.find(p => p.id === pid); return P ? procActs(emp, P) : []; }
+const flowName = n => n ? ((n.texto || '').trim() || (FTIPOS[n.tipo] || FTIPOS.tarea).label) : '—';
+
+// texto en varias líneas, medido con la misma fuente que se dibuja
+const fctx = document.createElement('canvas').getContext('2d');
+function fwrap(txt, maxW, font, maxLines) {
+  fctx.font = font;
+  const fits = s => fctx.measureText(s).width <= maxW;
+  const out = [];
+  for (const para of String(txt || '').split(/\n/)) {
+    let line = '';
+    for (let w of para.split(/\s+/).filter(Boolean)) {
+      while (!fits(w) && w.length > 1) { // palabra más ancha que la caja: se parte
+        let k = w.length - 1;
+        while (k > 1 && !fits(w.slice(0, k))) k--;
+        if (line) { out.push(line); line = ''; }
+        out.push(w.slice(0, k)); w = w.slice(k);
+      }
+      const t = line ? line + ' ' + w : w;
+      if (fits(t)) line = t; else { out.push(line); line = w; }
+    }
+    out.push(line);
+  }
+  while (out.length > 1 && !out[out.length - 1]) out.pop();
+  if (out.length <= maxLines) return out;
+  const cut = out.slice(0, maxLines);
+  let l = cut[maxLines - 1];
+  while (l && !fits(l + '…')) l = l.slice(0, -1);
+  cut[maxLines - 1] = l.trimEnd() + '…';
+  return cut;
+}
+function fgeom(n, acts) {
+  const T = FTIPOS[n.tipo] || FTIPOS.tarea, w = T.w, ev = n.tipo === 'evento', dec = n.tipo === 'decision';
+  const font = `${ev ? 700 : 600} 12px ${FFONT}`, inner = dec ? w * 0.58 : w - 22;
+  const empty = !(n.texto || '').trim();
+  const lines = fwrap(empty ? T.label : n.texto, inner, font, dec ? 3 : ev ? 2 : 5);
+  const meta = ev || dec ? '' : [n.resp, n.sistema].filter(Boolean).join(' · ');
+  const metaL = meta ? fwrap(meta, inner, `600 10px ${FFONT}`, 2) : [];
+  const a = !ev && n.tipo !== 'nota' && n.act && acts.find(x => x.id === n.act), code = a ? (a.codigo || a.id) : '';
+  const top = code || n.dolor ? 24 : 10, bottom = 10 + (n.tipo === 'documento' ? 8 : 0) + (metaL.length ? 6 + metaL.length * 13 : 0);
+  const h = dec ? T.h + Math.max(0, lines.length - 2) * 8
+    : ev ? Math.max(T.h, lines.length * 15 + 18)
+      : Math.max(T.h, top + lines.length * 15 + bottom);
+  return {w, h, lines, metaL, code, empty, top, bottom};
+}
+function fnodeSVG(n, g, sel, exp) {
+  const {x, y} = n, {w, h} = g, cx = x + w / 2, ev = n.tipo === 'evento', dec = n.tipo === 'decision';
+  const st = n.dolor ? '#E4A47C' : '', sw = n.dolor ? 2.4 : 1.4;
+  let shape, tf = '#00263A';
+  if (ev) { shape = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h / 2}" fill="#00263A" stroke="${st || '#00263A'}" stroke-width="${sw}"/>`; tf = '#FFFFFF'; }
+  else if (dec) shape = `<path d="M${cx},${y} L${x + w},${y + h / 2} L${cx},${y + h} L${x},${y + h / 2} Z" fill="#EAF3FA" stroke="${st || '#244C5A'}" stroke-width="${sw}"/>`;
+  else if (n.tipo === 'documento') shape = `<path d="M${x},${y + 4} Q${x},${y} ${x + 4},${y} H${x + w - 4} Q${x + w},${y} ${x + w},${y + 4} V${y + h - 8} C${x + w * 0.75},${y + h - 20} ${x + w * 0.25},${y + h + 4} ${x},${y + h - 8} Z" fill="#F5F7F8" stroke="${st || '#3E6E80'}" stroke-width="${sw}"/>`;
+  else if (n.tipo === 'nota') shape = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#FDF3EC" stroke="${st || '#E4A47C'}" stroke-width="1.3" stroke-dasharray="4 3"/>`;
+  else shape = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#FFFFFF" stroke="${st || '#00263A'}" stroke-width="${n.dolor ? 2.4 : 1.3}"/>`;
+  const txt = (s, xx, yy, size, weight, fill, extra = '') => `<text x="${xx}" y="${yy}" text-anchor="middle" font-family="${FFONT}" font-size="${size}" font-weight="${weight}" fill="${fill}"${extra}>${esc(s)}</text>`;
+  const block = g.lines.length * 15;
+  let y0;
+  if (ev || dec) y0 = y + h / 2 - block / 2 + 11;
+  else y0 = y + g.top + (h - g.top - g.bottom - block) / 2 + 11;
+  const tfill = g.empty ? (ev ? '#98C9EB' : '#8A99A6') : tf;
+  let body = g.lines.map((l, i) => txt(l, cx, y0 + i * 15, 12, ev ? 700 : 600, tfill, g.empty ? ' font-style="italic"' : '')).join('');
+  if (g.metaL.length) {
+    const my = y + h - g.bottom + 6 + 10;
+    body += g.metaL.map((l, i) => txt(l, cx, my + i * 13, 10, 600, '#244C5A')).join('');
+  }
+  if (g.code) {
+    fctx.font = `700 9.5px ${FFONT}`;
+    const cw = Math.ceil(fctx.measureText(g.code).width) + 10;
+    body += `<rect x="${x + 8}" y="${y + 6}" width="${cw}" height="14" rx="4" fill="#00263A"/>` + txt(g.code, x + 8 + cw / 2, y + 16.5, 9.5, 700, '#98C9EB');
+  }
+  if (n.dolor) body += `<circle cx="${x + w - 12}" cy="${y + 12}" r="8" fill="#E4A47C"/>` + txt('!', x + w - 12, y + 16, 11, 700, '#00263A');
+  if (exp) return `<g>${shape}${body}</g>`;
+  const T = FTIPOS[n.tipo] || FTIPOS.tarea;
+  const hs = [[x + w, y + h / 2], [cx, y + h], [x, y + h / 2], [cx, y]].map(([hx, hy]) => `<circle class="fh" data-fh="${n.id}" cx="${hx}" cy="${hy}" r="5.5" fill="#FFFFFF" stroke="#244C5A" stroke-width="1.5"/>`).join('');
+  return `<g class="fn${sel ? ' sel' : ''}" data-fnode="${n.id}" tabindex="0" role="button" aria-label="${esc(T.label + ': ' + (n.texto || ''))}"><rect class="fsel" x="${x - 5}" y="${y - 5}" width="${w + 10}" height="${h + 10}" rx="10" fill="none" stroke="#98C9EB" stroke-width="2.5"/>${shape}${body}${hs}</g>`;
+}
+// conexión en ángulo recto entre los lados más cercanos de las dos cajas
+function froute(a, ga, b, gb) {
+  const acx = a.x + ga.w / 2, acy = a.y + ga.h / 2, bcx = b.x + gb.w / 2, bcy = b.y + gb.h / 2, dx = bcx - acx, dy = bcy - acy;
+  const gapH = dx >= 0 ? b.x - (a.x + ga.w) : a.x - (b.x + gb.w);
+  const gapV = dy >= 0 ? b.y - (a.y + ga.h) : a.y - (b.y + gb.h);
+  if (gapH < 16 && gapV < 16) {
+    // cajas muy juntas: sale por el lateral y entra por arriba o por abajo (en L)
+    const sx = dx >= 0 ? a.x + ga.w : a.x, ty = dy >= 0 ? b.y : b.y + gb.h;
+    return {d: `M${sx},${acy} H${bcx} V${ty}`, lx: (sx + bcx) / 2, ly: acy};
+  }
+  if (gapH >= 16 && (Math.abs(dx) >= Math.abs(dy) || gapV < 16)) {
+    const sx = dx >= 0 ? a.x + ga.w : a.x, tx = dx >= 0 ? b.x : b.x + gb.w, mx = Math.round((sx + tx) / 2);
+    return {d: `M${sx},${acy} H${mx} V${bcy} H${tx}`, lx: mx, ly: (acy + bcy) / 2};
+  }
+  const sy = dy >= 0 ? a.y + ga.h : a.y, ty = dy >= 0 ? b.y : b.y + gb.h, my = Math.round((sy + ty) / 2);
+  return {d: `M${acx},${sy} V${my} H${bcx} V${ty}`, lx: (acx + bcx) / 2, ly: my};
+}
+function flowSVG(exp) {
+  const F = flowGet() || {nodos: [], enlaces: []}, acts = flowActs(), sel = ui.flowSel || '';
+  const G = new Map(F.nodos.map(n => [n.id, fgeom(n, acts)])), by = new Map(F.nodos.map(n => [n.id, n]));
+  let x0 = Infinity, y0 = Infinity, x1 = 0, y1 = 0;
+  for (const n of F.nodos) { const g = G.get(n.id); x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y); x1 = Math.max(x1, n.x + g.w); y1 = Math.max(y1, n.y + g.h); }
+  let links = '', labels = '';
+  for (const l of F.enlaces) {
+    const a = by.get(l.de), b = by.get(l.a);
+    if (!a || !b || a === b) continue;
+    const r = froute(a, G.get(a.id), b, G.get(b.id));
+    const dash = l.estilo === 'disc' || a.tipo === 'nota' || b.tipo === 'nota';
+    if ((l.texto || '').trim()) {
+      fctx.font = `700 10.5px ${FFONT}`;
+      const t = l.texto.trim(), tw = Math.ceil(fctx.measureText(t).width);
+      const lab = `<rect x="${r.lx - tw / 2 - 5}" y="${r.ly - 9}" width="${tw + 10}" height="17" rx="4" fill="#FFFFFF" stroke="#D7DFE5"/><text x="${r.lx}" y="${r.ly + 4}" text-anchor="middle" font-family="${FFONT}" font-size="10.5" font-weight="700" fill="#244C5A">${esc(t)}</text>`;
+      labels += exp ? `<g>${lab}</g>` : `<g class="fll" data-flink="${l.id}">${lab}</g>`;
+    }
+    const vis = `<path class="fvis" d="${r.d}" fill="none" stroke="#3E6E80" stroke-width="1.6"${dash ? ' stroke-dasharray="5 4"' : ''} marker-end="url(#flowarrow)"/>`;
+    links += exp ? vis : `<g class="fl${sel === 'l:' + l.id ? ' sel' : ''}" data-flink="${l.id}"><path d="${r.d}" fill="none" stroke="transparent" stroke-width="14"/>${vis}</g>`;
+  }
+  const nodes = F.nodos.map(n => fnodeSVG(n, G.get(n.id), sel === 'n:' + n.id, exp)).join('');
+  const defs = '<defs><marker id="flowarrow" viewBox="0 0 10 10" refX="9.5" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#3E6E80"/></marker></defs>';
+  if (!exp) {
+    const W = Math.max(x1 + 320, 900), H = Math.max(y1 + 220, 460), z = ui.flowZoom || 1;
+    return `<svg id="flowsvg" xmlns="http://www.w3.org/2000/svg" width="${W * z}" height="${H * z}" viewBox="0 0 ${W} ${H}">${defs}${links}${nodes}${labels}<path id="ftemp" d="" fill="none" stroke="#244C5A" stroke-width="1.6" stroke-dasharray="4 4" style="display:none;pointer-events:none"/></svg>`;
+  }
+  // exportación: recorta al contenido y añade un título
+  const P = S.procesos.find(p => p.id === ui.flowProc) || {nombre: ''};
+  const title = `${empName(ui.flowEmp)} · ${P.nombre} · ${flowViewName(ui.flowView)}`;
+  fctx.font = `700 15px ${FFONT}`;
+  const pad = 30, head = 46, W = Math.max(x1 - x0 + pad * 2, fctx.measureText(title).width + pad * 2), H = y1 - y0 + pad * 2 + head;
+  const vx = x0 - pad, vy = y0 - pad - head;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.ceil(W)}" height="${Math.ceil(H)}" viewBox="${vx} ${vy} ${W} ${H}">${defs}<rect x="${vx}" y="${vy}" width="${W}" height="${H}" fill="#FFFFFF"/><text x="${vx + pad}" y="${vy + 30}" font-family="${FFONT}" font-size="15" font-weight="700" fill="#00263A">${esc(title)}</text>${links}${nodes}${labels}</svg>`;
+  return {svg, W: Math.ceil(W), H: Math.ceil(H)};
+}
+function flowCanvasHTML() {
+  const empty = !flowNodes().length;
+  return flowSVG(false) + (empty ? `<div class="flowempty"><b>Este flujo está vacío.</b><br>Añade cajas con la barra de arriba, haz doble clic en el lienzo o pulsa «Partir de las actividades» para empezar con las actividades del proceso.</div>` : '');
+}
+function flowPanelHTML() {
+  const F = flowGet() || {nodos: [], enlaces: []}, acts = flowActs(), s = ui.flowSel || '';
+  const byId = id => F.nodos.find(n => n.id === id);
+  const f = (label, html) => `<div class="fld"><label>${label}</label>${html}</div>`;
+  if (s.startsWith('n:') && byId(s.slice(2))) {
+    const n = byId(s.slice(2)), outs = F.enlaces.filter(l => l.de === n.id);
+    const others = F.nodos.filter(x => x.id !== n.id && !outs.some(l => l.a === x.id));
+    const full = n.tipo !== 'evento' && n.tipo !== 'nota';
+    return `<div class="card"><div class="label">Caja seleccionada</div>
+      ${f('Tipo', `<select data-fn="tipo">${Object.entries(FTIPOS).map(([k, t]) => `<option value="${k}"${k === n.tipo ? ' selected' : ''}>${esc(t.label)}</option>`).join('')}</select>`)}
+      ${f('Texto', `<textarea id="flow-texto" data-fn="texto" rows="2" placeholder="Qué se hace">${esc(n.texto)}</textarea>`)}
+      ${full ? f('Responsable', `<input data-fn="resp" value="${esc(n.resp)}" list="dl-titulares" placeholder="Rol o persona">`)
+        + f('Sistema / herramienta', `<input data-fn="sistema" value="${esc(n.sistema)}" placeholder="p. ej. SAP, GIO, Excel">`)
+        + f('Actividad del proceso', `<select data-fn="act"><option value="">— Ninguna —</option>${acts.map(a => `<option value="${esc(a.id)}"${a.id === n.act ? ' selected' : ''}>${esc((a.codigo || a.id) + ' ' + (a.nombre || ''))}</option>`).join('')}</select>`) : ''}
+      <label class="hint flowchk"><input type="checkbox" data-fn="dolor"${n.dolor ? ' checked' : ''}> Punto de dolor / problema</label>
+      ${f('Notas', `<textarea data-fn="notas" rows="2">${esc(n.notas)}</textarea>`)}
+      <div class="label" style="margin-top:4px">Conexiones que salen</div>
+      ${outs.length ? outs.map(l => `<div class="flowout"><span title="${esc(flowName(byId(l.a)))}">→ ${esc(flowName(byId(l.a)))}</span><input data-flk="${l.id}" value="${esc(l.texto)}" placeholder="Etiqueta" aria-label="Etiqueta de la conexión"><button class="icon" data-flowunlink="${l.id}" title="Quitar conexión" aria-label="Quitar conexión">×</button></div>`).join('') : '<p class="hint" style="margin:2px 0 8px">Ninguna todavía.</p>'}
+      ${others.length ? `<select class="flowconn" data-fconnect="1" aria-label="Conectar con otra caja"><option value="">+ Conectar con…</option>${others.map(x => `<option value="${x.id}">${esc(flowName(x))}</option>`).join('')}</select>` : ''}
+      <div class="btns">
+        <button class="btn small" data-flowadd="tarea" title="Añade una tarea a continuación y la conecta">+ Siguiente tarea</button>
+        <button class="btn small" data-flowadd="decision" title="Añade una decisión a continuación y la conecta">+ Decisión</button>
+        <button class="btn ghost small" data-flowact="dup">Duplicar</button>
+        <button class="btn ghost small" data-flowact="deselect">Cerrar</button>
+        <button class="btn danger small" data-flowact="del" style="grid-column:1/-1">Eliminar caja</button>
+      </div></div>`;
+  }
+  const l = s.startsWith('l:') && F.enlaces.find(x => x.id === s.slice(2));
+  if (l) return `<div class="card"><div class="label">Conexión seleccionada</div>
+      <p style="margin:0 0 12px;line-height:1.45"><b>${esc(flowName(byId(l.de)))}</b> → <b>${esc(flowName(byId(l.a)))}</b></p>
+      ${f('Etiqueta', `<input data-fl="texto" value="${esc(l.texto)}" placeholder="p. ej. Sí / No, semanal, por e-mail">`)}
+      ${f('Línea', `<select data-fl="estilo"><option value="">Continua · flujo de trabajo</option><option value="disc"${l.estilo === 'disc' ? ' selected' : ''}>Discontinua · información</option></select>`)}
+      <div class="btns"><button class="btn ghost small" data-flowact="flip">⇄ Invertir sentido</button><button class="btn ghost small" data-flowact="deselect">Cerrar</button>
+        <button class="btn danger small" data-flowact="del" style="grid-column:1/-1">Eliminar conexión</button></div></div>`;
+  const P = S.procesos.find(p => p.id === ui.flowProc) || {nombre: ''};
+  const linked = new Set(F.nodos.map(n => n.act).filter(Boolean)), miss = acts.filter(a => !linked.has(a.id));
+  return `<div class="card"><div class="label">${esc(empName(ui.flowEmp))} · ${esc(P.nombre)} · ${flowViewName(ui.flowView)}</div>
+    <div class="orgstats" style="margin-top:8px"><div>Cajas<b>${F.nodos.length}</b></div><div>Conexiones<b>${F.enlaces.length}</b></div>
+      <div>Actividades en el flujo<b>${acts.length - miss.length}/${acts.length}</b></div><div>Puntos de dolor<b>${F.nodos.filter(n => n.dolor).length}</b></div></div>
+    ${miss.length && F.nodos.length ? `<p class="hint" style="margin:10px 0 0">Actividades sin caja: ${miss.map(a => esc(a.codigo || a.id)).join(', ')}</p>` : ''}
+    <div class="label" style="margin-top:14px">Cómo se usa</div>
+    <ul class="flowtips">
+      <li>Añade cajas con la barra de arriba o con <b>doble clic</b> en el lienzo.</li>
+      <li><b>Arrastra</b> una caja para moverla. Pulsa una caja o una flecha para editarla.</li>
+      <li>Para conectar, arrastra desde un punto <b>●</b> del borde hasta otra caja. Si lo sueltas en vacío, se crea una tarea nueva ya conectada.</li>
+      <li>Con una caja seleccionada, «+ Tarea» añade la siguiente y la conecta.</li>
+      <li><b>Supr</b> borra lo seleccionado, las flechas del teclado mueven la caja y <b>Ctrl+Z</b> deshace.</li>
+    </ul></div>`;
+}
+VIEWS.flujos = () => {
+  if (!empById(ui.flowEmp)) ui.flowEmp = (S.empresas.find(e => e.id === 'OPET') || S.empresas[0] || {}).id;
+  if (!['asis', 'tobe'].includes(ui.flowView)) ui.flowView = 'asis';
+  if (!S.procesos.find(p => p.id === ui.flowProc)) ui.flowProc = (S.procesos[0] || {}).id;
+  const emp = ui.flowEmp, P = S.procesos.find(p => p.id === ui.flowProc);
+  if (!P) return `<div class="head"><div><h1>Flujos de proceso</h1></div></div><p class="hint">No hay procesos en el catálogo.</p>`;
+  const F = flowGet(), sid = (ui.flowSel || '').slice(2);
+  if (ui.flowSel && !(F && (ui.flowSel[0] === 'n' ? F.nodos : F.enlaces).some(x => x.id === sid))) ui.flowSel = '';
+  const names = new Set(S.roles.map(r => r.corto || r.nombre));
+  for (const p of S.personas.filter(p => p.empresa === emp)) { names.add(p.titular); names.add(p.suplente); }
+  document.getElementById('dl-titulares').innerHTML = [...names].map(s => (s || '').trim()).filter(Boolean).map(t => `<option value="${esc(t)}">`).join('');
+  const nV = v => S.procesos.filter(p => flowNodes(emp, v, p.id).length).length;
+  const sources = [];
+  for (const e of S.empresas) for (const v of ['asis', 'tobe']) if (!(e.id === emp && v === ui.flowView) && flowNodes(e.id, v, P.id).length) sources.push([`${e.id}|${v}`, `${e.nombre} · ${flowViewName(v)}`]);
+  const sw = k => `<i class="fsw fsw-${k}"></i>`;
+  return `
+  <div class="head"><div><h1>Flujos de proceso</h1><p>Un diagrama por empresa y proceso, con dos pestañas independientes: cómo se hace hoy (<b>as-is</b>) y cómo debe hacerse (<b>to-be</b>). Dibujad las cajitas, unidlas con flechas y marcad los puntos de dolor.</p></div>
+    <div class="row"><button class="btn ghost small" data-flowexp="png" title="Imagen del flujo para PowerPoint">Descargar PNG</button><button class="btn ghost small" data-flowexp="svg">SVG</button></div></div>
+  <div class="chips" style="margin-bottom:12px">${S.empresas.map(e => `<button class="chip ${e.id === emp ? 'on' : ''}" data-flowemp="${e.id}">${esc(e.nombre)}</button>`).join('')}</div>
+  <div class="orgbar"><div class="tabs" role="tablist">${FLOW_TABS.map(([v, l]) => `<button role="tab" aria-selected="${v === ui.flowView}" class="${v === ui.flowView ? 'on' : ''}" data-flowview="${v}">${esc(l)}<span class="n">${nV(v)}</span></button>`).join('')}</div></div>
+  <div class="chips" style="margin-bottom:12px">${S.procesos.map(p => { const c = flowNodes(emp, ui.flowView, p.id).length; return `<button class="chip ${p.id === P.id ? 'on' : ''}" data-flowproc="${p.id}">${esc(p.nombre)}${c ? `<span class="n">${c}</span>` : ''}</button>`; }).join('')}</div>
+  <div class="orgbar flowbar">
+    <span class="hint">Añadir</span>
+    ${Object.entries(FTIPOS).map(([k, t]) => `<button class="btn ghost small" data-flowadd="${k}">${sw(k)}${esc(t.label)}</button>`).join('')}
+    <span class="vsep"></span>
+    <button class="btn ghost small" data-flowact="acts" title="Crea una tarea por cada actividad del proceso, en orden y conectadas">Partir de las actividades</button>
+    ${sources.length ? `<select data-flowcopy="1" aria-label="Copiar el flujo de otra empresa o pestaña"><option value="">Copiar de…</option>${sources.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}</select>` : ''}
+    <button class="btn ghost small" data-flowact="undo" title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
+    <button class="btn ghost small" data-flowact="clear">Vaciar</button>
+  </div>
+  <div class="orglay"><div class="flowcwrap"><div class="orgwrap flowwrap" id="flowcanvas">${flowCanvasHTML()}</div>
+    <div class="flowzoom"><button class="btn ghost small" data-flowact="zoomout" aria-label="Alejar">−</button><span class="hint" id="flowzoom">${Math.round((ui.flowZoom || 1) * 100)} %</span><button class="btn ghost small" data-flowact="zoomin" aria-label="Acercar">+</button><button class="btn ghost small" data-flowact="fit" title="Ajustar el flujo al ancho de la pantalla">Ajustar</button></div></div>
+    <div class="orgpanel" id="flowpanel">${flowPanelHTML()}</div></div>
+  <div class="legend" style="margin-top:12px">${Object.entries(FTIPOS).map(([k, t]) => `<span>${sw(k)}${esc(t.label)}</span>`).join('')}
+    <span><i class="fsw" style="border-color:#E4A47C;border-width:2px"></i>Punto de dolor</span>
+    <span><svg width="26" height="8" aria-hidden="true"><path d="M0 4H26" stroke="#3E6E80" stroke-width="2"/></svg>Flujo de trabajo</span>
+    <span><svg width="26" height="8" aria-hidden="true"><path d="M0 4H26" stroke="#3E6E80" stroke-width="2" stroke-dasharray="5 4"/></svg>Información</span></div>`;
+};
+function flowDraw(panel = true) {
+  const c = document.getElementById('flowcanvas');
+  if (c) c.innerHTML = flowCanvasHTML();
+  const p = document.getElementById('flowpanel');
+  if (panel && p) p.innerHTML = flowPanelHTML();
+}
+function flowSelect(s) {
+  if ((ui.flowSel || '') === s) return;
+  ui.flowSel = s; saveUI();
+  document.querySelectorAll('#flowsvg .sel').forEach(x => x.classList.remove('sel'));
+  const el = s && document.querySelector(`#flowsvg [data-f${s[0] === 'n' ? 'node' : 'link'}="${CSS.escape(s.slice(2))}"]`);
+  if (el) el.classList.add('sel');
+  const p = document.getElementById('flowpanel');
+  if (p) p.innerHTML = flowPanelHTML();
+}
+function flowFocusText(id) {
+  const g = document.querySelector(`#flowsvg [data-fnode="${CSS.escape(id)}"]`);
+  if (g && g.scrollIntoView) g.scrollIntoView({block: 'nearest', inline: 'nearest'});
+  const t = document.getElementById('flow-texto');
+  if (t) { t.focus({preventScroll: true}); t.select(); }
+}
+// deshacer: fotos del diagrama antes de cada cambio (solo en esta sesión)
+const fundo = [];
+let flowEditEl = null;
+function flowPushUndo() {
+  fundo.push({k: [ui.flowEmp, ui.flowView, ui.flowProc], f: clone(flowGet() || {nodos: [], enlaces: []})});
+  if (fundo.length > 80) fundo.shift();
+}
+function flowUndo() {
+  const u = fundo.pop();
+  if (!u) { toast('No hay nada que deshacer'); return; }
+  [ui.flowEmp, ui.flowView, ui.flowProc] = u.k;
+  const F = flowMut(); F.nodos = u.f.nodos; F.enlaces = u.f.enlaces;
+  ui.flowSel = ''; saveUI(); save(); render();
+}
+function flowAdd(tipo, opts = {}) {
+  const T = FTIPOS[tipo] || FTIPOS.tarea, acts = flowActs();
+  flowPushUndo();
+  const F = flowMut(), sel = ui.flowSel || '';
+  const src = opts.from !== undefined ? F.nodos.find(n => n.id === opts.from) : sel.startsWith('n:') ? F.nodos.find(n => n.id === sel.slice(2)) : null;
+  const n = {id: uid('f'), tipo, texto: '', resp: '', sistema: '', act: '', dolor: false, notas: '', x: FPAD, y: FPAD};
+  if (tipo === 'evento') n.texto = F.nodos.some(x => x.tipo === 'evento') ? 'Fin' : 'Inicio';
+  const box = o => { const g = fgeom(o, acts); return {x: o.x, y: o.y, w: g.w, h: g.h}; };
+  const hit = () => F.nodos.some(o => { const b = box(o); return n.x < b.x + b.w + 20 && n.x + T.w + 20 > b.x && n.y < b.y + b.h + 20 && n.y + T.h + 20 > b.y; });
+  if (opts.at) { n.x = fsnap(opts.at.x - T.w / 2); n.y = fsnap(opts.at.y - T.h / 2); }
+  else if (src || F.nodos.length) {
+    const b = src ? box(src) : F.nodos.map(box).reduce((m, o) => o.x + o.w > m.x + m.w ? o : m);
+    n.x = fsnap(b.x + b.w + 70); n.y = fsnap(b.y + b.h / 2 - T.h / 2);
+    for (let k = 0; hit() && k < 40; k++) n.y += 110;
+  }
+  F.nodos.push(n);
+  if (src && tipo !== 'nota') F.enlaces.push({id: uid('l'), de: src.id, a: n.id, texto: src.tipo === 'decision' ? flowDecLabel(F, src.id) : ''});
+  ui.flowSel = 'n:' + n.id; saveUI(); save(); render();
+  flowFocusText(n.id);
+}
+function flowDecLabel(F, from) { const k = F.enlaces.filter(x => x.de === from).length; return k === 0 ? 'Sí' : k === 1 ? 'No' : ''; }
+function flowConnect(from, to, keepSel) {
+  const F = flowMut();
+  if (!from || !to || from === to || !F.nodos.some(n => n.id === to)) return;
+  if (F.enlaces.some(l => l.de === from && l.a === to)) { toast('Esas dos cajas ya están conectadas'); return; }
+  flowPushUndo();
+  const src = F.nodos.find(n => n.id === from), l = {id: uid('l'), de: from, a: to, texto: src && src.tipo === 'decision' ? flowDecLabel(F, from) : ''};
+  F.enlaces.push(l);
+  if (!keepSel) ui.flowSel = 'l:' + l.id;
+  saveUI(); save(); flowDraw();
+}
+function flowBounds() {
+  const acts = flowActs();
+  let x1 = 0;
+  for (const n of flowNodes()) x1 = Math.max(x1, n.x + fgeom(n, acts).w);
+  return x1;
+}
+function flowAction(a) {
+  const P = S.procesos.find(p => p.id === ui.flowProc);
+  if (!P) return;
+  if (a === 'zoomin' || a === 'zoomout' || a === 'fit') {
+    if (a === 'fit') { const c = document.getElementById('flowcanvas'), w = flowBounds() + FPAD; ui.flowZoom = Math.min(1, Math.max(0.4, Math.floor((c.clientWidth - 6) / Math.max(w, 1) * 10) / 10)); }
+    else ui.flowZoom = Math.min(1.6, Math.max(0.4, Math.round(((ui.flowZoom || 1) + (a === 'zoomin' ? 0.1 : -0.1)) * 10) / 10));
+    saveUI(); flowDraw(false);
+    document.getElementById('flowzoom').textContent = Math.round(ui.flowZoom * 100) + ' %';
+    return;
+  }
+  if (a === 'deselect') return flowSelect('');
+  if (a === 'undo') return flowUndo();
+  const F = flowGet(), where = `${flowViewName(ui.flowView)} de ${empName(ui.flowEmp)} · ${P.nombre}`;
+  if (a === 'acts') {
+    const acts = flowActs();
+    if (!acts.length) { toast('Este proceso no tiene actividades'); return; }
+    if (F && F.nodos.length && !confirm(`Se sustituirá el flujo ${where} por uno generado con las actividades del proceso. ¿Continuar?`)) return;
+    flowPushUndo();
+    const T = flowMut(), src = ui.flowView === 'asis' ? raciAsis(ui.flowEmp) : S.raci;
+    const resp = act => { const row = src[act.id] || {}; return S.roles.filter(r => row[r.id] === 'R' || row[r.id] === 'A/R').map(r => r.corto || r.nombre).join(', '); };
+    const seq = [{tipo: 'evento', texto: 'Inicio'}].concat(acts.map(x => ({tipo: 'tarea', texto: x.nombre || '', act: x.id, resp: resp(x)}))).concat([{tipo: 'evento', texto: 'Fin'}]);
+    // en serpiente: filas de 4 que cambian de sentido, para que quepa en pantalla
+    const COLS = 4, CW = 236, RH = 140;
+    T.nodos = seq.map((s, i) => {
+      const r = Math.floor(i / COLS), c = r % 2 ? COLS - 1 - i % COLS : i % COLS, t = FTIPOS[s.tipo];
+      const n = {id: uid('f'), tipo: s.tipo, texto: s.texto, resp: s.resp || '', sistema: '', act: s.act || '', dolor: false, notas: '', x: 0, y: 0};
+      const g = fgeom(n, acts);
+      n.x = fsnap(FPAD + c * CW + (CW - t.w) / 2); n.y = fsnap(FPAD + r * RH + (RH - g.h) / 2);
+      return n;
+    });
+    T.enlaces = T.nodos.slice(1).map((n, i) => ({id: uid('l'), de: T.nodos[i].id, a: n.id, texto: ''}));
+    ui.flowSel = ''; saveUI(); save(); render(); toast('Flujo creado con las actividades del proceso');
+    return;
+  }
+  if (a === 'clear') {
+    if (!F || !F.nodos.length) return;
+    if (!confirm(`¿Vaciar el flujo ${where}?`)) return;
+    flowPushUndo(); F.nodos = []; F.enlaces = [];
+    ui.flowSel = ''; saveUI(); save(); render(); toast('Flujo vaciado · Ctrl+Z para deshacer');
+    return;
+  }
+  const s = ui.flowSel || '', id = s.slice(2);
+  if (!F || !s) return;
+  if (s[0] === 'n') {
+    const n = F.nodos.find(x => x.id === id);
+    if (!n) return;
+    flowPushUndo();
+    if (a === 'del') { F.nodos.splice(F.nodos.indexOf(n), 1); F.enlaces = F.enlaces.filter(l => l.de !== n.id && l.a !== n.id); ui.flowSel = ''; }
+    else if (a === 'dup') { const c = {...clone(n), id: uid('f'), x: n.x + 30, y: n.y + 30}; F.nodos.push(c); ui.flowSel = 'n:' + c.id; }
+    else { fundo.pop(); return; }
+  } else {
+    const l = F.enlaces.find(x => x.id === id);
+    if (!l) return;
+    flowPushUndo();
+    if (a === 'del') { F.enlaces.splice(F.enlaces.indexOf(l), 1); ui.flowSel = ''; }
+    else if (a === 'flip') [l.de, l.a] = [l.a, l.de];
+    else { fundo.pop(); return; }
+  }
+  saveUI(); save(); render();
+}
+function flowExport(kind) {
+  if (!flowNodes().length) { toast('Este flujo está vacío'); return; }
+  const {svg, W, H} = flowSVG(true), P = S.procesos.find(p => p.id === ui.flowProc) || {nombre: ''};
+  const base = `flujo_${slug(empName(ui.flowEmp))}_${flowViewName(ui.flowView)}_${slug(P.nombre)}`;
+  if (kind === 'svg') { download(base + '.svg', svg, 'image/svg+xml'); toast('SVG descargado'); return; }
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'), k = 2;
+    c.width = W * k; c.height = H * k;
+    const x = c.getContext('2d');
+    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, c.width, c.height); x.scale(k, k); x.drawImage(img, 0, 0, W, H);
+    c.toBlob(b => { download(base + '.png', b, 'image/png'); toast('PNG descargado'); }, 'image/png');
+  };
+  img.onerror = () => toast('No se pudo generar la imagen; prueba con SVG');
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+// ratón y pantalla táctil: mover cajas, dibujar conexiones, seleccionar
+let fdrag = null, flast = {t: 0, k: null};
+function fpt(e) {
+  const svg = document.getElementById('flowsvg'), p = svg.createSVGPoint();
+  p.x = e.clientX; p.y = e.clientY;
+  return p.matrixTransform(svg.getScreenCTM().inverse());
+}
+document.addEventListener('pointerdown', e => {
+  if (ui.sec !== 'flujos' || e.button !== 0 || !e.target.closest || !e.target.closest('#flowcanvas') || !document.getElementById('flowsvg')) return;
+  const h = e.target.closest('[data-fh]'), nd = e.target.closest('[data-fnode]'), lk = e.target.closest('[data-flink]'), p = fpt(e);
+  const key = h ? null : nd ? 'n:' + nd.dataset.fnode : lk ? 'l:' + lk.dataset.flink : '';
+  const dbl = key !== null && flast.k === key && e.timeStamp - flast.t < 400;
+  flast = {t: dbl ? 0 : e.timeStamp, k: key};
+  if (h) {
+    e.preventDefault();
+    fdrag = {kind: 'link', from: h.dataset.fh, x: +h.getAttribute('cx'), y: +h.getAttribute('cy')};
+    document.getElementById('flowsvg').classList.add('linking');
+    return;
+  }
+  if (nd) {
+    e.preventDefault();
+    const n = flowNodes().find(x => x.id === nd.dataset.fnode);
+    if (!n) return;
+    const ae = document.activeElement;
+    if (ae && ae.closest && ae.closest('#flowpanel')) ae.blur();
+    flowSelect('n:' + n.id);
+    if (dbl) { flowFocusText(n.id); return; }
+    nd.focus({preventScroll: true});
+    fdrag = {kind: 'move', id: n.id, dx: p.x - n.x, dy: p.y - n.y, x0: n.x, y0: n.y, moved: false};
+    return;
+  }
+  if (lk) { flowSelect('l:' + lk.dataset.flink); return; }
+  const cv = e.target.closest('#flowcanvas');
+  if (e.target === cv && (e.offsetX > cv.clientWidth || e.offsetY > cv.clientHeight)) return; // barra de desplazamiento
+  flowSelect('');
+  if (dbl) flowAdd('tarea', {at: p, from: null});
+});
+document.addEventListener('pointermove', e => {
+  if (!fdrag) return;
+  const svg = document.getElementById('flowsvg');
+  if (!svg) { fdrag = null; return; }
+  const p = fpt(e);
+  if (fdrag.kind === 'move') {
+    const n = flowNodes().find(x => x.id === fdrag.id);
+    if (!n) return;
+    const nx = fsnap(p.x - fdrag.dx), ny = fsnap(p.y - fdrag.dy);
+    if (!fdrag.moved && Math.abs(nx - fdrag.x0) + Math.abs(ny - fdrag.y0) < FG) return;
+    if (!fdrag.moved) { flowPushUndo(); fdrag.moved = true; }
+    if (nx === n.x && ny === n.y) return;
+    n.x = nx; n.y = ny;
+    flowDraw(false);
+    document.getElementById('flowsvg').classList.add('moving');
+  } else {
+    fdrag.cx = p.x; fdrag.cy = p.y;
+    const t = document.getElementById('ftemp');
+    t.setAttribute('d', `M${fdrag.x},${fdrag.y} L${p.x},${p.y}`); t.style.display = '';
+  }
+});
+function flowEndDrag(e, cancel) {
+  if (!fdrag) return;
+  const d = fdrag;
+  fdrag = null;
+  const svg = document.getElementById('flowsvg');
+  if (svg) svg.classList.remove('linking', 'moving');
+  if (d.kind === 'move') { if (d.moved) { saveSoon(); flowDraw(false); } return; }
+  const t = document.getElementById('ftemp');
+  if (t) t.style.display = 'none';
+  if (cancel || d.cx === undefined) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY), nd = el && el.closest('[data-fnode]');
+  if (nd) { if (nd.dataset.fnode !== d.from) flowConnect(d.from, nd.dataset.fnode); return; }
+  if (el && el.closest('#flowcanvas') && Math.hypot(d.cx - d.x, d.cy - d.y) > 30) flowAdd('tarea', {at: {x: d.cx, y: d.cy}, from: d.from});
+}
+document.addEventListener('pointerup', e => flowEndDrag(e, false));
+document.addEventListener('pointercancel', e => flowEndDrag(e, true));
+document.addEventListener('focusout', () => { flowEditEl = null; });
+document.addEventListener('keydown', e => {
+  if (ui.sec !== 'flujos') return;
+  const typing = e.target.closest && e.target.closest('input, textarea, select');
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); flowUndo(); return; }
+  if (typing) return;
+  const nd = e.target.closest && e.target.closest('[data-fnode]');
+  if (nd && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); flowSelect('n:' + nd.dataset.fnode); flowFocusText(nd.dataset.fnode); return; }
+  const s = ui.flowSel || '';
+  if (!s) return;
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); flowAction('del'); return; }
+  if (e.key === 'Escape') { flowSelect(''); return; }
+  const mv = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1]}[e.key];
+  if (mv && s[0] === 'n') {
+    const n = flowNodes().find(x => x.id === s.slice(2));
+    if (!n) return;
+    e.preventDefault();
+    flowPushUndo();
+    const k = e.shiftKey ? 50 : FG;
+    n.x = fsnap(n.x + mv[0] * k); n.y = fsnap(n.y + mv[1] * k);
+    saveSoon(); flowDraw(false);
+    const g = document.querySelector(`#flowsvg [data-fnode="${CSS.escape(n.id)}"]`);
+    if (g) g.focus({preventScroll: true});
+  }
+});
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (ui.sec === 'flujos') flowDraw(false); });
+
 /* ---------------------------------------------------------------- render y eventos */
 function autosize(t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; }
 function render() {
   refreshNav();
-  const oc = document.getElementById('orgchart'), sc = oc ? [oc.scrollLeft, oc.scrollTop] : null;
+  const sc = ['orgchart', 'flowcanvas'].map(id => document.getElementById(id)).filter(Boolean).map(el => [el.id, el.scrollLeft, el.scrollTop]);
   document.getElementById('main').innerHTML = VIEWS[ui.sec]();
   document.querySelectorAll('table.grid textarea').forEach(autosize);
   main.querySelectorAll('table.grid[data-grid]').forEach(t => applyFilters(t.dataset.grid));
-  const oc2 = document.getElementById('orgchart');
-  if (oc2 && sc) { oc2.scrollLeft = sc[0]; oc2.scrollTop = sc[1]; }
+  for (const [id, l, t] of sc) { const el = document.getElementById(id); if (el) { el.scrollLeft = l; el.scrollTop = t; } }
 }
 const main = document.getElementById('main');
 
@@ -1091,6 +1617,31 @@ function onEdit(e) {
       if (st) st.innerHTML = orgStatsHTML();
       if (e.type === 'change' && d.org === 'parent') orgRedraw();
     }
+  } else if (d.fn) {
+    const n = flowNodes().find(x => 'n:' + x.id === ui.flowSel);
+    if (!n) return;
+    if (flowEditEl !== el) { flowPushUndo(); flowEditEl = el; }
+    n[d.fn] = el.type === 'checkbox' ? el.checked : el.value;
+    saveSoon(); flowDraw(d.fn === 'tipo');
+  } else if (d.fl || d.flk) {
+    const F = flowGet(), id = d.flk || (ui.flowSel || '').slice(2), l = F && F.enlaces.find(x => x.id === id);
+    if (!l) return;
+    if (flowEditEl !== el) { flowPushUndo(); flowEditEl = el; }
+    l[d.fl || 'texto'] = el.value;
+    saveSoon(); flowDraw(false);
+  } else if (d.fconnect) {
+    if (e.type === 'change' && el.value) flowConnect((ui.flowSel || '').slice(2), el.value, true);
+  } else if (d.flowcopy) {
+    if (e.type !== 'change' || !el.value) return;
+    const [se, sv] = el.value.split('|'), src = flowGet(se, sv, ui.flowProc), cur = flowGet();
+    el.value = '';
+    if (!src || !src.nodos.length) return;
+    if (cur && cur.nodos.length && !confirm(`Se sustituirá este flujo por una copia del ${flowViewName(sv)} de ${empName(se)}. ¿Continuar?`)) return;
+    flowPushUndo();
+    const T = flowMut(), map = {}, ids = new Set(flowActs().map(a => a.id));
+    T.nodos = src.nodos.map(n => { map[n.id] = uid('f'); return {...clone(n), id: map[n.id], act: ids.has(n.act) ? n.act : ''}; });
+    T.enlaces = src.enlaces.filter(l => map[l.de] && map[l.a]).map(l => ({...clone(l), id: uid('l'), de: map[l.de], a: map[l.a]}));
+    ui.flowSel = ''; saveUI(); save(); render(); toast('Flujo copiado');
   } else if (el.id === 'autor') {
     S.meta.autor = el.value; saveSoon();
   }
@@ -1115,6 +1666,23 @@ document.addEventListener('click', e => {
   if (d.orgemp) { ui.orgEmp = d.orgemp; ui.orgSel = ''; saveUI(); render(); return; }
   if (d.orgview) { ui.orgView = d.orgview; ui.orgSel = ''; saveUI(); render(); return; }
   if (d.orgact) return orgAction(d.orgact);
+  if (d.flowemp || d.flowview || d.flowproc) {
+    if (d.flowemp) ui.flowEmp = d.flowemp;
+    if (d.flowview) ui.flowView = d.flowview;
+    if (d.flowproc) ui.flowProc = d.flowproc;
+    ui.flowSel = ''; saveUI(); render();
+    const c = document.getElementById('flowcanvas');
+    if (c) c.scrollLeft = c.scrollTop = 0;
+    return;
+  }
+  if (d.flowadd) return flowAdd(d.flowadd);
+  if (d.flowact) return flowAction(d.flowact);
+  if (d.flowexp) return flowExport(d.flowexp);
+  if (d.flowunlink) {
+    const F = flowGet();
+    if (!F) return;
+    flowPushUndo(); F.enlaces = F.enlaces.filter(l => l.id !== d.flowunlink); save(); flowDraw(); return;
+  }
   if (d.raciview) { ui.raciView = d.raciview; saveUI(); render(); return; }
   if (d.racigrp) return raciFold(d.racigrp);
   if (d.racigrpall) { for (const p of S.procesos) raciFold(p.id, d.racigrpall === 'open'); return; }
@@ -1261,7 +1829,7 @@ document.addEventListener('dragend', () => { drag = null; clearDrop(); });
 
 /* ---------------------------------------------------------------- exportación e importación */
 function download(name, text, type) {
-  const blob = new Blob([text], {type});
+  const blob = text instanceof Blob ? text : new Blob([text], {type});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click();
@@ -1339,6 +1907,12 @@ function importJSON(mode) {
       const nuevo = clone(a);
       if (P && list.some(x => x.codigo === nuevo.codigo)) nuevo.codigo = aptCode(em, P);
       list.push(nuevo); n++;
+    }
+    for (const em in (data.flujos || {})) for (const v of ['asis', 'tobe']) for (const pid in ((data.flujos[em] || {})[v] || {})) {
+      const src = data.flujos[em][v][pid] || {};
+      if ((src.nodos || []).length && !flowNodes(em, v, pid).length) {
+        const T = flowMut(em, v, pid); T.nodos = clone(src.nodos); T.enlaces = clone(src.enlaces || []); n += T.nodos.length;
+      }
     }
     for (const em in (data.organigramas || {})) for (const v of ['asis', 'tobe']) {
       const src = (data.organigramas[em] || {})[v] || [];

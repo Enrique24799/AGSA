@@ -59,6 +59,34 @@ def table(ws, row, headers, rows, widths, wrap_cols=None):
     return row + len(rows)
 
 
+FLOW_TIPOS = {'evento': 'Inicio / fin', 'tarea': 'Tarea', 'decision': 'Decisión',
+              'documento': 'Documento / sistema', 'nota': 'Nota'}
+
+
+def flow_order(nodos, enlaces):
+    """Ordena las cajas de un flujo siguiendo las flechas desde los inicios (y, de lo que quede suelto, por posición)."""
+    by = {n['id']: n for n in nodos}
+    pos = lambda n: (n.get('y', 0), n.get('x', 0))
+    sig, entra = {}, set()
+    for l in enlaces:
+        if l.get('de') in by and l.get('a') in by and l['de'] != l['a']:
+            sig.setdefault(l['de'], []).append(by[l['a']])
+            entra.add(l['a'])
+    inicios = sorted((n for n in nodos if n['id'] not in entra),
+                     key=lambda n: (n.get('tipo') == 'nota', n.get('tipo') != 'evento') + pos(n))
+    orden, vistos = [], set()
+    for ini in inicios + sorted(nodos, key=pos):
+        cola = [ini]
+        while cola:
+            n = cola.pop(0)
+            if n['id'] in vistos:
+                continue
+            vistos.add(n['id'])
+            orden.append(n)
+            cola.extend(sorted(sig.get(n['id'], []), key=pos))
+    return orden
+
+
 def build(data, out, origen):
     roles = data['roles']
     rid = {r['id']: r for r in roles}
@@ -107,6 +135,12 @@ def build(data, out, origen):
         pos = [h[0] for h in hojas].index('Asignación') + 1
         hojas.insert(pos, ('Organigramas', 'Organigramas as-is y to-be de cada empresa: puesto, persona y dependencias',
                            '=COUNTA(Organigramas!D:D)-1', 'puestos'))
+    flujos = data.get('flujos') or {}
+    has_flow = any((f or {}).get('nodos') for e in flujos.values() for v in (e or {}).values() for f in (v or {}).values())
+    if has_flow:
+        hojas.insert([h[0] for h in hojas].index('Procesos') + 1,
+                     ('Flujos', 'Flujos de proceso as-is y to-be por empresa: pasos, responsables y conexiones',
+                      '=COUNT(Flujos!D:D)', 'cajas'))
     if any(any(any(x.values()) for x in v.values()) for v in (data.get('raciAsis') or {}).values()):
         hojas.insert([h[0] for h in hojas].index('RACI') + 1,
                      ('RACI as-is', 'Cómo se hace hoy en cada empresa y diferencias con el estándar', "=COUNTA('RACI as-is'!C:C)-1", 'filas'))
@@ -353,6 +387,38 @@ def build(data, out, origen):
         ws.column_dimensions['A'].width = 28
         for j in range(2, len(procs) + 3):
             ws.column_dimensions[get_column_letter(j)].width = 13
+
+    if has_flow:
+        ws = wb.create_sheet('Flujos', wb.sheetnames.index('Procesos') + 1)
+        apartados = data.get('apartados') or {}
+        rows = []
+        for e in data['empresas']:
+            for vista, vlab in (('asis', 'As-is'), ('tobe', 'To-be')):
+                for p in data['procesos']:
+                    f = (((flujos.get(e['id']) or {}).get(vista) or {}).get(p['id'])) or {}
+                    nodos, enl = f.get('nodos') or [], f.get('enlaces') or []
+                    if not nodos:
+                        continue
+                    codigos = {a['id']: a.get('codigo') or a['id']
+                               for a in p['actividades'] + ((apartados.get(e['id']) or {}).get(p['id']) or [])}
+                    orden = flow_order(nodos, enl)
+                    num = {n['id']: i for i, n in enumerate(orden, 1)}
+                    for n in orden:
+                        siguiente = '; '.join(f"→ {num[l['a']]}" + (f" ({l['texto'].strip()})" if (l.get('texto') or '').strip() else '')
+                                              for l in enl if l.get('de') == n['id'] and l.get('a') in num)
+                        rows.append([e['nombre'], vlab, p['nombre'], num[n['id']], FLOW_TIPOS.get(n.get('tipo'), 'Tarea'),
+                                     n.get('texto', ''), n.get('resp', ''), n.get('sistema', ''),
+                                     codigos.get(n.get('act'), ''), 'Sí' if n.get('dolor') else '', siguiente,
+                                     n.get('notas', '')])
+        end = table(ws, 1, ['Empresa', 'Vista', 'Proceso', 'Nº', 'Tipo', 'Paso', 'Responsable', 'Sistema / herramienta',
+                            'Actividad', 'Punto de dolor', 'Siguiente', 'Notas'],
+                    rows, [20, 8, 16, 5, 16, 42, 22, 20, 9, 9, 22, 30])
+        ws.auto_filter.ref = f'A1:L{end}'
+        for i in range(2, end + 1):
+            ws[f'D{i}'].alignment = CENTER
+            if ws[f'J{i}'].value == 'Sí':
+                for col in 'ABCDEFGHIJKL':
+                    ws[f'{col}{i}'].fill = fill('FBE9DE')
 
     # ---------------------------------------------------------------- resto de tablas
     rn = lambda k: rid.get(k, {}).get('nombre', k or '')

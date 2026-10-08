@@ -1,0 +1,2279 @@
+{
+ "id": "2026-10-08-ondupet-necesidades-plan",
+ "titulo": "Necesidades de Ondupet y plan de acción 2027-2028",
+ "actualizarSiIgual": [
+  {
+   "ruta": [
+    "flujos",
+    "OPET",
+    "asis",
+    "P1"
+   ],
+   "antes": {
+    "nodos": [
+     {
+      "id": "f-OPET-asis-P1-e0",
+      "tipo": "evento",
+      "texto": "Material nuevo",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 90,
+      "y": 67
+     },
+     {
+      "id": "f-OPET-asis-P1-t1",
+      "tipo": "tarea",
+      "texto": "Comercial detecta que hace falta un material nuevo",
+      "resp": "Monica Gordillo",
+      "sistema": "",
+      "act": "1.1",
+      "dolor": false,
+      "notas": "",
+      "x": 297,
+      "y": 41
+     },
+     {
+      "id": "f-OPET-asis-P1-t2",
+      "tipo": "tarea",
+      "texto": "Consulta a Calidad las características técnicas",
+      "resp": "Monica Gordillo · Calidad",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 527,
+      "y": 56
+     },
+     {
+      "id": "f-OPET-asis-P1-t3",
+      "tipo": "tarea",
+      "texto": "Alta del material: molde, velocidad, tiempos de cambio y ruta por defecto",
+      "resp": "Monica Gordillo",
+      "sistema": "SAP",
+      "act": "1.1",
+      "dolor": true,
+      "notas": "No se consulta a Planificación la estrategia (MTS/MTO, ABC) ni la ruta.",
+      "x": 757,
+      "y": 34
+     },
+     {
+      "id": "f-OPET-asis-P1-n1",
+      "tipo": "nota",
+      "texto": "¿Se consulta a Producción y Mantenimiento la ruta por defecto? Duda abierta.",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 987,
+      "y": 43
+     },
+     {
+      "id": "f-OPET-asis-P1-t4",
+      "tipo": "tarea",
+      "texto": "Planificación planifica con el dato tal cual llega",
+      "resp": "Victoriano Perez",
+      "sistema": "GIO",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 757,
+      "y": 206
+     },
+     {
+      "id": "f-OPET-asis-P1-n2",
+      "tipo": "nota",
+      "texto": "Nadie revisa ABC ni estrategias (1.2) ni reequilibra las rutas con la carga del mes (1.3).",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 987,
+      "y": 200
+     },
+     {
+      "id": "f-OPET-asis-P1-d1",
+      "tipo": "decision",
+      "texto": "¿Aparece un duplicado?",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 537,
+      "y": 190
+     },
+     {
+      "id": "f-OPET-asis-P1-e9",
+      "tipo": "evento",
+      "texto": "Material en uso",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 320,
+      "y": 217
+     },
+     {
+      "id": "f-OPET-asis-P1-t5",
+      "tipo": "tarea",
+      "texto": "Corrección puntual con el campo «material reemplazante»",
+      "resp": "Monica Gordillo y equipo",
+      "sistema": "SAP",
+      "act": "1.5",
+      "dolor": true,
+      "notas": "No hay auditoría ni criterio de qué define un material: los duplicados aparecen por casualidad.",
+      "x": 527,
+      "y": 335
+     }
+    ],
+    "enlaces": [
+     {
+      "id": "l-OPET-asis-P1-1",
+      "de": "f-OPET-asis-P1-e0",
+      "a": "f-OPET-asis-P1-t1",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-2",
+      "de": "f-OPET-asis-P1-t1",
+      "a": "f-OPET-asis-P1-t2",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-3",
+      "de": "f-OPET-asis-P1-t2",
+      "a": "f-OPET-asis-P1-t3",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-4",
+      "de": "f-OPET-asis-P1-n1",
+      "a": "f-OPET-asis-P1-t3",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-5",
+      "de": "f-OPET-asis-P1-t3",
+      "a": "f-OPET-asis-P1-t4",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-6",
+      "de": "f-OPET-asis-P1-n2",
+      "a": "f-OPET-asis-P1-t4",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-7",
+      "de": "f-OPET-asis-P1-t4",
+      "a": "f-OPET-asis-P1-d1",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-8",
+      "de": "f-OPET-asis-P1-d1",
+      "a": "f-OPET-asis-P1-t5",
+      "texto": "Sí",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-9",
+      "de": "f-OPET-asis-P1-d1",
+      "a": "f-OPET-asis-P1-e9",
+      "texto": "No",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-10",
+      "de": "f-OPET-asis-P1-t5",
+      "a": "f-OPET-asis-P1-e9",
+      "texto": "",
+      "estilo": ""
+     }
+    ]
+   },
+   "despues": {
+    "nodos": [
+     {
+      "id": "f-OPET-asis-P1-e0",
+      "tipo": "evento",
+      "texto": "Material nuevo",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 90,
+      "y": 67
+     },
+     {
+      "id": "f-OPET-asis-P1-t1",
+      "tipo": "tarea",
+      "texto": "Comercial detecta que hace falta un material nuevo",
+      "resp": "Monica Gordillo",
+      "sistema": "",
+      "act": "1.1",
+      "dolor": false,
+      "notas": "",
+      "x": 297,
+      "y": 41
+     },
+     {
+      "id": "f-OPET-asis-P1-t2",
+      "tipo": "tarea",
+      "texto": "Consulta a Calidad las características técnicas",
+      "resp": "Monica Gordillo · Calidad",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 527,
+      "y": 56
+     },
+     {
+      "id": "f-OPET-asis-P1-t3",
+      "tipo": "tarea",
+      "texto": "Alta del material: molde, velocidad, tiempos de cambio y ruta por defecto",
+      "resp": "Monica Gordillo",
+      "sistema": "GIO",
+      "act": "1.1",
+      "dolor": true,
+      "notas": "No se consulta a Planificación la estrategia (MTS/MTO, ABC) ni la ruta.",
+      "x": 757,
+      "y": 34
+     },
+     {
+      "id": "f-OPET-asis-P1-n1",
+      "tipo": "nota",
+      "texto": "¿Se consulta a Producción y Mantenimiento la ruta por defecto? Duda abierta.",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 987,
+      "y": 43
+     },
+     {
+      "id": "f-OPET-asis-P1-t4",
+      "tipo": "tarea",
+      "texto": "Planificación planifica con el dato tal cual llega",
+      "resp": "Victoriano Perez",
+      "sistema": "GIO",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 757,
+      "y": 206
+     },
+     {
+      "id": "f-OPET-asis-P1-n2",
+      "tipo": "nota",
+      "texto": "Nadie revisa ABC ni estrategias (1.2) ni reequilibra las rutas con la carga del mes (1.3).",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 987,
+      "y": 200
+     },
+     {
+      "id": "f-OPET-asis-P1-d1",
+      "tipo": "decision",
+      "texto": "¿Aparece un duplicado?",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 537,
+      "y": 190
+     },
+     {
+      "id": "f-OPET-asis-P1-e9",
+      "tipo": "evento",
+      "texto": "Material en uso",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 320,
+      "y": 217
+     },
+     {
+      "id": "f-OPET-asis-P1-t5",
+      "tipo": "tarea",
+      "texto": "Corrección puntual con el campo «material reemplazante»",
+      "resp": "Monica Gordillo y equipo",
+      "sistema": "GIO",
+      "act": "1.5",
+      "dolor": true,
+      "notas": "No hay auditoría ni criterio de qué define un material: los duplicados aparecen por casualidad.",
+      "x": 527,
+      "y": 335
+     }
+    ],
+    "enlaces": [
+     {
+      "id": "l-OPET-asis-P1-1",
+      "de": "f-OPET-asis-P1-e0",
+      "a": "f-OPET-asis-P1-t1",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-2",
+      "de": "f-OPET-asis-P1-t1",
+      "a": "f-OPET-asis-P1-t2",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-3",
+      "de": "f-OPET-asis-P1-t2",
+      "a": "f-OPET-asis-P1-t3",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-4",
+      "de": "f-OPET-asis-P1-n1",
+      "a": "f-OPET-asis-P1-t3",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-5",
+      "de": "f-OPET-asis-P1-t3",
+      "a": "f-OPET-asis-P1-t4",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-6",
+      "de": "f-OPET-asis-P1-n2",
+      "a": "f-OPET-asis-P1-t4",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-7",
+      "de": "f-OPET-asis-P1-t4",
+      "a": "f-OPET-asis-P1-d1",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-8",
+      "de": "f-OPET-asis-P1-d1",
+      "a": "f-OPET-asis-P1-t5",
+      "texto": "Sí",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-9",
+      "de": "f-OPET-asis-P1-d1",
+      "a": "f-OPET-asis-P1-e9",
+      "texto": "No",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-asis-P1-10",
+      "de": "f-OPET-asis-P1-t5",
+      "a": "f-OPET-asis-P1-e9",
+      "texto": "",
+      "estilo": ""
+     }
+    ]
+   }
+  },
+  {
+   "ruta": [
+    "flujos",
+    "OPET",
+    "tobe",
+    "P1"
+   ],
+   "antes": {
+    "nodos": [
+     {
+      "id": "f-OPET-tobe-P1-e0",
+      "tipo": "evento",
+      "texto": "Solicitud de material",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 90,
+      "y": 66
+     },
+     {
+      "id": "f-OPET-tobe-P1-t1",
+      "tipo": "tarea",
+      "texto": "Comercial solicita el alta con los datos del cliente",
+      "resp": "Comercial",
+      "sistema": "",
+      "act": "1.1",
+      "dolor": false,
+      "notas": "",
+      "x": 297,
+      "y": 49
+     },
+     {
+      "id": "f-OPET-tobe-P1-t2",
+      "tipo": "tarea",
+      "texto": "Calidad fija las características técnicas",
+      "resp": "Calidad",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 527,
+      "y": 56
+     },
+     {
+      "id": "f-OPET-tobe-P1-t3",
+      "tipo": "tarea",
+      "texto": "Dato maestro asigna estrategia MTS/MTO y ABC/XYZ con el criterio común",
+      "resp": "Dato maestro · consulta a Resp. planif. planta",
+      "sistema": "",
+      "act": "1.2",
+      "dolor": false,
+      "notas": "",
+      "x": 757,
+      "y": 27
+     },
+     {
+      "id": "f-OPET-tobe-P1-t4",
+      "tipo": "tarea",
+      "texto": "Programación y Producción validan ruta, velocidad y tiempos de cambio",
+      "resp": "Programación · Producción",
+      "sistema": "",
+      "act": "1.3",
+      "dolor": false,
+      "notas": "",
+      "x": 757,
+      "y": 184
+     },
+     {
+      "id": "f-OPET-tobe-P1-d1",
+      "tipo": "decision",
+      "texto": "¿Ficha completa y sin duplicados?",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 537,
+      "y": 186
+     },
+     {
+      "id": "f-OPET-tobe-P1-t5",
+      "tipo": "tarea",
+      "texto": "Alta en SAP con la plantilla única",
+      "resp": "Dato maestro",
+      "sistema": "SAP",
+      "act": "1.1",
+      "dolor": false,
+      "notas": "",
+      "x": 297,
+      "y": 199
+     },
+     {
+      "id": "f-OPET-tobe-P1-e6",
+      "tipo": "evento",
+      "texto": "Listo para planificar",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 90,
+      "y": 216
+     },
+     {
+      "id": "f-OPET-tobe-P1-t7",
+      "tipo": "tarea",
+      "texto": "Completar la ficha o reutilizar el material existente («material reemplazante»)",
+      "resp": "Dato maestro",
+      "sistema": "SAP",
+      "act": "1.5",
+      "dolor": false,
+      "notas": "",
+      "x": 527,
+      "y": 334
+     },
+     {
+      "id": "f-OPET-tobe-P1-e10",
+      "tipo": "evento",
+      "texto": "Cierre de mes",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 90,
+      "y": 517
+     },
+     {
+      "id": "f-OPET-tobe-P1-t11",
+      "tipo": "tarea",
+      "texto": "Reequilibrar las rutas por defecto con la carga del mes",
+      "resp": "Programación",
+      "sistema": "SAP / GIO",
+      "act": "1.3",
+      "dolor": false,
+      "notas": "",
+      "x": 297,
+      "y": 491
+     },
+     {
+      "id": "f-OPET-tobe-P1-t12",
+      "tipo": "tarea",
+      "texto": "Auditoría del dato: duplicados, incompletos e incoherencias",
+      "resp": "Dato maestro",
+      "sistema": "SAP",
+      "act": "1.5",
+      "dolor": false,
+      "notas": "",
+      "x": 527,
+      "y": 491
+     },
+     {
+      "id": "f-OPET-tobe-P1-d13",
+      "tipo": "decision",
+      "texto": "¿Cierre de trimestre?",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 767,
+      "y": 490
+     },
+     {
+      "id": "f-OPET-tobe-P1-t14",
+      "tipo": "tarea",
+      "texto": "Revisión de ABC/XYZ y estrategias con la transacción automática",
+      "resp": "Dato maestro · Resp. planif. planta · Comercial",
+      "sistema": "SAP",
+      "act": "1.2",
+      "dolor": false,
+      "notas": "",
+      "x": 757,
+      "y": 635
+     },
+     {
+      "id": "f-OPET-tobe-P1-e15",
+      "tipo": "evento",
+      "texto": "Datos al día",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 1010,
+      "y": 517
+     }
+    ],
+    "enlaces": [
+     {
+      "id": "l-OPET-tobe-P1-1",
+      "de": "f-OPET-tobe-P1-e0",
+      "a": "f-OPET-tobe-P1-t1",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-2",
+      "de": "f-OPET-tobe-P1-t1",
+      "a": "f-OPET-tobe-P1-t2",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-3",
+      "de": "f-OPET-tobe-P1-t2",
+      "a": "f-OPET-tobe-P1-t3",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-4",
+      "de": "f-OPET-tobe-P1-t3",
+      "a": "f-OPET-tobe-P1-t4",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-5",
+      "de": "f-OPET-tobe-P1-t4",
+      "a": "f-OPET-tobe-P1-d1",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-6",
+      "de": "f-OPET-tobe-P1-d1",
+      "a": "f-OPET-tobe-P1-t5",
+      "texto": "Sí",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-7",
+      "de": "f-OPET-tobe-P1-d1",
+      "a": "f-OPET-tobe-P1-t7",
+      "texto": "No",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-8",
+      "de": "f-OPET-tobe-P1-t7",
+      "a": "f-OPET-tobe-P1-t5",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-9",
+      "de": "f-OPET-tobe-P1-t5",
+      "a": "f-OPET-tobe-P1-e6",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-10",
+      "de": "f-OPET-tobe-P1-e10",
+      "a": "f-OPET-tobe-P1-t11",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-11",
+      "de": "f-OPET-tobe-P1-t11",
+      "a": "f-OPET-tobe-P1-t12",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-12",
+      "de": "f-OPET-tobe-P1-t12",
+      "a": "f-OPET-tobe-P1-d13",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-13",
+      "de": "f-OPET-tobe-P1-d13",
+      "a": "f-OPET-tobe-P1-t14",
+      "texto": "Sí",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-14",
+      "de": "f-OPET-tobe-P1-d13",
+      "a": "f-OPET-tobe-P1-e15",
+      "texto": "No",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-15",
+      "de": "f-OPET-tobe-P1-t14",
+      "a": "f-OPET-tobe-P1-e15",
+      "texto": "",
+      "estilo": ""
+     }
+    ]
+   },
+   "despues": {
+    "nodos": [
+     {
+      "id": "f-OPET-tobe-P1-e0",
+      "tipo": "evento",
+      "texto": "Solicitud de material",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 90,
+      "y": 66
+     },
+     {
+      "id": "f-OPET-tobe-P1-t1",
+      "tipo": "tarea",
+      "texto": "Comercial solicita el alta con los datos del cliente",
+      "resp": "Comercial",
+      "sistema": "",
+      "act": "1.1",
+      "dolor": false,
+      "notas": "",
+      "x": 297,
+      "y": 49
+     },
+     {
+      "id": "f-OPET-tobe-P1-t2",
+      "tipo": "tarea",
+      "texto": "Calidad fija las características técnicas",
+      "resp": "Calidad",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 527,
+      "y": 56
+     },
+     {
+      "id": "f-OPET-tobe-P1-t3",
+      "tipo": "tarea",
+      "texto": "Dato maestro asigna estrategia MTS/MTO y ABC/XYZ con el criterio común",
+      "resp": "Dato maestro · consulta a Resp. planif. planta",
+      "sistema": "",
+      "act": "1.2",
+      "dolor": false,
+      "notas": "",
+      "x": 757,
+      "y": 27
+     },
+     {
+      "id": "f-OPET-tobe-P1-t4",
+      "tipo": "tarea",
+      "texto": "Programación y Producción validan ruta, velocidad y tiempos de cambio",
+      "resp": "Programación · Producción",
+      "sistema": "",
+      "act": "1.3",
+      "dolor": false,
+      "notas": "",
+      "x": 757,
+      "y": 184
+     },
+     {
+      "id": "f-OPET-tobe-P1-d1",
+      "tipo": "decision",
+      "texto": "¿Ficha completa y sin duplicados?",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 537,
+      "y": 186
+     },
+     {
+      "id": "f-OPET-tobe-P1-t5",
+      "tipo": "tarea",
+      "texto": "Alta en GIO con la plantilla única",
+      "resp": "Dato maestro",
+      "sistema": "GIO",
+      "act": "1.1",
+      "dolor": false,
+      "notas": "",
+      "x": 297,
+      "y": 199
+     },
+     {
+      "id": "f-OPET-tobe-P1-e6",
+      "tipo": "evento",
+      "texto": "Listo para planificar",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 90,
+      "y": 216
+     },
+     {
+      "id": "f-OPET-tobe-P1-t7",
+      "tipo": "tarea",
+      "texto": "Completar la ficha o reutilizar el material existente («material reemplazante»)",
+      "resp": "Dato maestro",
+      "sistema": "GIO",
+      "act": "1.5",
+      "dolor": false,
+      "notas": "",
+      "x": 527,
+      "y": 334
+     },
+     {
+      "id": "f-OPET-tobe-P1-e10",
+      "tipo": "evento",
+      "texto": "Cierre de mes",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 90,
+      "y": 517
+     },
+     {
+      "id": "f-OPET-tobe-P1-t11",
+      "tipo": "tarea",
+      "texto": "Reequilibrar las rutas por defecto con la carga del mes",
+      "resp": "Programación",
+      "sistema": "GIO",
+      "act": "1.3",
+      "dolor": false,
+      "notas": "",
+      "x": 297,
+      "y": 491
+     },
+     {
+      "id": "f-OPET-tobe-P1-t12",
+      "tipo": "tarea",
+      "texto": "Auditoría del dato: duplicados, incompletos e incoherencias",
+      "resp": "Dato maestro",
+      "sistema": "GIO",
+      "act": "1.5",
+      "dolor": false,
+      "notas": "",
+      "x": 527,
+      "y": 491
+     },
+     {
+      "id": "f-OPET-tobe-P1-d13",
+      "tipo": "decision",
+      "texto": "¿Cierre de trimestre?",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 767,
+      "y": 490
+     },
+     {
+      "id": "f-OPET-tobe-P1-t14",
+      "tipo": "tarea",
+      "texto": "Revisión de ABC/XYZ y estrategias con la transacción automática",
+      "resp": "Dato maestro · Resp. planif. planta · Comercial",
+      "sistema": "GIO",
+      "act": "1.2",
+      "dolor": false,
+      "notas": "",
+      "x": 757,
+      "y": 635
+     },
+     {
+      "id": "f-OPET-tobe-P1-e15",
+      "tipo": "evento",
+      "texto": "Datos al día",
+      "resp": "",
+      "sistema": "",
+      "act": "",
+      "dolor": false,
+      "notas": "",
+      "x": 1010,
+      "y": 517
+     }
+    ],
+    "enlaces": [
+     {
+      "id": "l-OPET-tobe-P1-1",
+      "de": "f-OPET-tobe-P1-e0",
+      "a": "f-OPET-tobe-P1-t1",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-2",
+      "de": "f-OPET-tobe-P1-t1",
+      "a": "f-OPET-tobe-P1-t2",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-3",
+      "de": "f-OPET-tobe-P1-t2",
+      "a": "f-OPET-tobe-P1-t3",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-4",
+      "de": "f-OPET-tobe-P1-t3",
+      "a": "f-OPET-tobe-P1-t4",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-5",
+      "de": "f-OPET-tobe-P1-t4",
+      "a": "f-OPET-tobe-P1-d1",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-6",
+      "de": "f-OPET-tobe-P1-d1",
+      "a": "f-OPET-tobe-P1-t5",
+      "texto": "Sí",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-7",
+      "de": "f-OPET-tobe-P1-d1",
+      "a": "f-OPET-tobe-P1-t7",
+      "texto": "No",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-8",
+      "de": "f-OPET-tobe-P1-t7",
+      "a": "f-OPET-tobe-P1-t5",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-9",
+      "de": "f-OPET-tobe-P1-t5",
+      "a": "f-OPET-tobe-P1-e6",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-10",
+      "de": "f-OPET-tobe-P1-e10",
+      "a": "f-OPET-tobe-P1-t11",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-11",
+      "de": "f-OPET-tobe-P1-t11",
+      "a": "f-OPET-tobe-P1-t12",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-12",
+      "de": "f-OPET-tobe-P1-t12",
+      "a": "f-OPET-tobe-P1-d13",
+      "texto": "",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-13",
+      "de": "f-OPET-tobe-P1-d13",
+      "a": "f-OPET-tobe-P1-t14",
+      "texto": "Sí",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-14",
+      "de": "f-OPET-tobe-P1-d13",
+      "a": "f-OPET-tobe-P1-e15",
+      "texto": "No",
+      "estilo": ""
+     },
+     {
+      "id": "l-OPET-tobe-P1-15",
+      "de": "f-OPET-tobe-P1-t14",
+      "a": "f-OPET-tobe-P1-e15",
+      "texto": "",
+      "estilo": ""
+     }
+    ]
+   }
+  }
+ ],
+ "reemplazar": {
+  "plan": [
+   {
+    "id": "acc01",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Arranque y aprobación del modelo: roles, RACI to-be y calendario",
+    "empresa": "",
+    "proceso": "G",
+    "actividades": "G.1",
+    "responsable": "DIR",
+    "tipo": "Tarea",
+    "inicio": "2027-01-11",
+    "fin": "2027-01-29",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Modelo aprobado por dirección; RACI to-be v1",
+    "notas": ""
+   },
+   {
+    "id": "acc02",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Modelo aprobado por dirección",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Hito",
+    "inicio": "2027-01-29",
+    "fin": "2027-01-29",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   },
+   {
+    "id": "acc03",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Revisar el catálogo de actividades (fusionar 4.4 en 4.1)",
+    "empresa": "",
+    "proceso": "P4",
+    "actividades": "4.1, 4.4",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-01-11",
+    "fin": "2027-01-22",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Catálogo v2",
+    "notas": ""
+   },
+   {
+    "id": "acc04",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Nombrar titulares y suplentes por rol en cada planta",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Tarea",
+    "inicio": "2027-01-18",
+    "fin": "2027-02-12",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Personas y roles asignados con nombre y apellidos",
+    "notas": "Con cada dirección de planta."
+   },
+   {
+    "id": "acc05",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Completar el as-is del resto de plantas (Ondupack, MGT, PDA y Papresa)",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-01-11",
+    "fin": "2027-02-26",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Notas, RACI as-is y flujos as-is por planta",
+    "notas": ""
+   },
+   {
+    "id": "acc06",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Calendario de planificación del grupo: S&OP mensual y reuniones de planta",
+    "empresa": "",
+    "proceso": "G",
+    "actividades": "G.2",
+    "responsable": "SOP",
+    "tipo": "Tarea",
+    "inicio": "2027-02-01",
+    "fin": "2027-02-26",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Calendario 2027 de reuniones",
+    "notas": ""
+   },
+   {
+    "id": "acc07",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Políticas de planificación y KPIs comunes (definición y fórmula)",
+    "empresa": "",
+    "proceso": "P8",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-03-01",
+    "fin": "2027-04-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Políticas y KPIs validados",
+    "notas": ""
+   },
+   {
+    "id": "acc08",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Manual de planificación v1: procedimiento estándar por proceso",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-02-08",
+    "fin": "2027-04-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Manual v1 con el to-be de cada proceso",
+    "notas": "Parte del to-be diseñado en Ondupet."
+   },
+   {
+    "id": "acc09",
+    "fase": "1 · Gobierno y estándares",
+    "nombre": "Manual de planificación v1 publicado",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Hito",
+    "inicio": "2027-04-30",
+    "fin": "2027-04-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   },
+   {
+    "id": "acc10",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Cerrar el E2E de Ondupet: capacidad, programación, entrega y control (5–8)",
+    "empresa": "OPET",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-01-11",
+    "fin": "2027-02-05",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "As-is y to-be de los procesos 5 a 8",
+    "notas": "Si se termina antes de 2027, eliminar esta acción."
+   },
+   {
+    "id": "acc11",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Plantilla única de alta de material con estrategia y ruta",
+    "empresa": "OPET",
+    "proceso": "P1",
+    "actividades": "1.1",
+    "responsable": "MD",
+    "tipo": "Tarea",
+    "inicio": "2027-02-01",
+    "fin": "2027-03-31",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Plantilla de alta en GIO y circuito Comercial → Calidad → Dato maestro",
+    "notas": ""
+   },
+   {
+    "id": "acc12",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Primera revisión de ABC/XYZ y estrategias; después, trimestral",
+    "empresa": "OPET",
+    "proceso": "P1",
+    "actividades": "1.2",
+    "responsable": "MD",
+    "tipo": "Tarea",
+    "inicio": "2027-03-01",
+    "fin": "2027-04-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Materiales reclasificados",
+    "notas": "Con Victoriano Perez y Manuel Jesus Trinidad, usando la transacción automática de GIO."
+   },
+   {
+    "id": "acc13",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Criterio de qué define un material y limpieza de duplicados",
+    "empresa": "OPET",
+    "proceso": "P1",
+    "actividades": "1.5",
+    "responsable": "MD",
+    "tipo": "Tarea",
+    "inicio": "2027-03-01",
+    "fin": "2027-05-28",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Criterio documentado; duplicados unidos con «material reemplazante»",
+    "notas": ""
+   },
+   {
+    "id": "acc14",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Revisión mensual de rutas por defecto con la carga del mes",
+    "empresa": "OPET",
+    "proceso": "P1",
+    "actividades": "1.3",
+    "responsable": "PPR",
+    "tipo": "Tarea",
+    "inicio": "2027-04-05",
+    "fin": "2027-05-28",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Rutina mensual en marcha",
+    "notas": ""
+   },
+   {
+    "id": "acc15",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Levantar y estandarizar el calendario de turnos y paradas",
+    "empresa": "OPET",
+    "proceso": "P1",
+    "actividades": "1.4",
+    "responsable": "RPP",
+    "tipo": "Tarea",
+    "inicio": "2027-04-05",
+    "fin": "2027-05-28",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "As-is y to-be de 1.4",
+    "notas": "El E2E no lo cubre todavía."
+   },
+   {
+    "id": "acc16",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Calendario de previsión con día de cierre y mes en curso congelado",
+    "empresa": "OPET",
+    "proceso": "P2",
+    "actividades": "2.1",
+    "responsable": "RPP",
+    "tipo": "Tarea",
+    "inicio": "2027-02-01",
+    "fin": "2027-03-26",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Calendario y regla de congelación acordados con Comercial",
+    "notas": ""
+   },
+   {
+    "id": "acc17",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Primer cierre de previsión en fecha",
+    "empresa": "OPET",
+    "proceso": "P2",
+    "actividades": "",
+    "responsable": "RPP",
+    "tipo": "Hito",
+    "inicio": "2027-03-31",
+    "fin": "2027-03-31",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   },
+   {
+    "id": "acc18",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Reunión mensual de consenso con revisión de temporales",
+    "empresa": "OPET",
+    "proceso": "P2",
+    "actividades": "2.2, 2.5",
+    "responsable": "SOP",
+    "tipo": "Tarea",
+    "inicio": "2027-03-01",
+    "fin": "2027-04-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Dos ciclos de prueba y acta tipo",
+    "notas": ""
+   },
+   {
+    "id": "acc19",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Definir qué es un agotado y registrarlo a diario con motivo",
+    "empresa": "OPET",
+    "proceso": "P2",
+    "actividades": "2.3",
+    "responsable": "PDC",
+    "tipo": "Tarea",
+    "inicio": "2027-03-01",
+    "fin": "2027-04-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Definición y registro diario",
+    "notas": ""
+   },
+   {
+    "id": "acc20",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "KPI de precisión y sesgo con plan de acción por desviación",
+    "empresa": "OPET",
+    "proceso": "P2",
+    "actividades": "2.4",
+    "responsable": "PDC",
+    "tipo": "Tarea",
+    "inicio": "2027-04-05",
+    "fin": "2027-05-28",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "KPI mensual y lista de acciones",
+    "notas": ""
+   },
+   {
+    "id": "acc21",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Revisión única de cartera y uso de las dos fechas del pedido",
+    "empresa": "OPET",
+    "proceso": "P3",
+    "actividades": "3.1",
+    "responsable": "RPP",
+    "tipo": "Tarea",
+    "inicio": "2027-03-01",
+    "fin": "2027-04-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Fecha confirmada viable en todos los pedidos",
+    "notas": ""
+   },
+   {
+    "id": "acc22",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Validación de cargas contra el pedido: cantidad y fecha",
+    "empresa": "OPET",
+    "proceso": "P3",
+    "actividades": "3.2",
+    "responsable": "LOG",
+    "tipo": "Tarea",
+    "inicio": "2027-04-05",
+    "fin": "2027-06-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Validación activa y KPI de cargas atrasadas",
+    "notas": "Necesita un desarrollo en SAP (Sistemas)."
+   },
+   {
+    "id": "acc23",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Regla de saldado semanal con aviso a Planificación",
+    "empresa": "OPET",
+    "proceso": "P3",
+    "actividades": "3.3",
+    "responsable": "PDC",
+    "tipo": "Tarea",
+    "inicio": "2027-04-05",
+    "fin": "2027-05-14",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Regla y aviso",
+    "notas": ""
+   },
+   {
+    "id": "acc24",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Reglas de prioridad para pedidos en conflicto",
+    "empresa": "OPET",
+    "proceso": "P3",
+    "actividades": "3.4",
+    "responsable": "RPP",
+    "tipo": "Tarea",
+    "inicio": "2027-04-05",
+    "fin": "2027-05-28",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Reglas acordadas con Comercial y S&OP",
+    "notas": ""
+   },
+   {
+    "id": "acc25",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Revisión semanal única del MRP (incluye materias primas y auxiliares)",
+    "empresa": "OPET",
+    "proceso": "P4",
+    "actividades": "4.1, 4.4",
+    "responsable": "PMT",
+    "tipo": "Tarea",
+    "inicio": "2027-02-01",
+    "fin": "2027-02-26",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Procedimiento estándar del grupo",
+    "notas": ""
+   },
+   {
+    "id": "acc26",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Reglas para corregir propuestas de PT y semielaborado con motivo registrado",
+    "empresa": "OPET",
+    "proceso": "P4",
+    "actividades": "4.2, 4.3",
+    "responsable": "RPP",
+    "tipo": "Tarea",
+    "inicio": "2027-04-05",
+    "fin": "2027-05-28",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Reglas y registro de motivos",
+    "notas": ""
+   },
+   {
+    "id": "acc27",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Seguimiento del piloto con KPIs y ajustes",
+    "empresa": "OPET",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "RPP",
+    "tipo": "Tarea",
+    "inicio": "2027-05-03",
+    "fin": "2027-06-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Informe del piloto",
+    "notas": ""
+   },
+   {
+    "id": "acc28",
+    "fase": "2 · Piloto Ondupet",
+    "nombre": "Cierre del piloto y lecciones aprendidas",
+    "empresa": "OPET",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Hito",
+    "inicio": "2027-06-30",
+    "fin": "2027-06-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   },
+   {
+    "id": "acc29",
+    "fase": "3 · Sistemas y herramientas",
+    "nombre": "Papresa integrada en SAP",
+    "empresa": "PAPRESA",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "SIS",
+    "tipo": "Hito",
+    "inicio": "2027-01-01",
+    "fin": "2027-01-01",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": "Objetivo ya fijado; condiciona el despliegue en Papresa."
+   },
+   {
+    "id": "acc30",
+    "fase": "3 · Sistemas y herramientas",
+    "nombre": "SIGPA en MGT y PDA: cierre de pruebas del algoritmo de combinación",
+    "empresa": "MGT",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "SIS",
+    "tipo": "Tarea",
+    "inicio": "2027-01-11",
+    "fin": "2027-03-31",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Algoritmo en producción",
+    "notas": "Proyecto en pruebas. Aplica a MGT y PDA."
+   },
+   {
+    "id": "acc31",
+    "fase": "3 · Sistemas y herramientas",
+    "nombre": "Informe automático de KPIs de planificación",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "SIS",
+    "tipo": "Tarea",
+    "inicio": "2027-03-01",
+    "fin": "2027-06-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Cuadro de mando mensual por planta",
+    "notas": ""
+   },
+   {
+    "id": "acc32",
+    "fase": "3 · Sistemas y herramientas",
+    "nombre": "Algoritmo de combinación en Ondupack (Almendralejo y Navalmoral)",
+    "empresa": "OPACK_ALM",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "SIS",
+    "tipo": "Tarea",
+    "inicio": "2027-03-01",
+    "fin": "2027-09-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": "Proyecto 2027 sin confirmar con negocio."
+   },
+   {
+    "id": "acc33",
+    "fase": "3 · Sistemas y herramientas",
+    "nombre": "Migración de GIO a web en Ondupet",
+    "empresa": "OPET",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "SIS",
+    "tipo": "Tarea",
+    "inicio": "2027-05-03",
+    "fin": "2027-10-29",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": "Proyecto 2027 sin confirmar con negocio."
+   },
+   {
+    "id": "acc34",
+    "fase": "3 · Sistemas y herramientas",
+    "nombre": "PRAE Ondupet: asignación de personas a turnos y máquinas",
+    "empresa": "OPET",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "SIS",
+    "tipo": "Tarea",
+    "inicio": "2027-09-06",
+    "fin": "2028-03-31",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": "Proyecto 2027 sin confirmar con negocio."
+   },
+   {
+    "id": "acc35",
+    "fase": "3 · Sistemas y herramientas",
+    "nombre": "Migración de GIO a web en Ondupack",
+    "empresa": "OPACK_ALM",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "SIS",
+    "tipo": "Tarea",
+    "inicio": "2027-10-04",
+    "fin": "2028-03-31",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": "Proyecto 2027 sin confirmar con negocio. Aplica a las dos plantas."
+   },
+   {
+    "id": "acc36",
+    "fase": "4 · Despliegue en plantas",
+    "nombre": "Despliegue en Ondupack Almendralejo",
+    "empresa": "OPACK_ALM",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-06-07",
+    "fin": "2027-10-29",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "To-be adaptado, RACI con nombres, formación y arranque",
+    "notas": "Agosto, a medio ritmo."
+   },
+   {
+    "id": "acc37",
+    "fase": "4 · Despliegue en plantas",
+    "nombre": "Ondupack Almendralejo trabajando con el modelo",
+    "empresa": "OPACK_ALM",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Hito",
+    "inicio": "2027-10-29",
+    "fin": "2027-10-29",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   },
+   {
+    "id": "acc38",
+    "fase": "4 · Despliegue en plantas",
+    "nombre": "Despliegue en Ondupack Navalmoral",
+    "empresa": "OPACK_NAV",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-09-06",
+    "fin": "2027-12-17",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "To-be adaptado, RACI con nombres, formación y arranque",
+    "notas": ""
+   },
+   {
+    "id": "acc39",
+    "fase": "4 · Despliegue en plantas",
+    "nombre": "Ondupack Navalmoral trabajando con el modelo",
+    "empresa": "OPACK_NAV",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Hito",
+    "inicio": "2027-12-17",
+    "fin": "2027-12-17",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   },
+   {
+    "id": "acc40",
+    "fase": "4 · Despliegue en plantas",
+    "nombre": "Despliegue en MGT y PDA (papeleras)",
+    "empresa": "MGT",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-10-04",
+    "fin": "2028-02-25",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "To-be adaptado, RACI con nombres, formación y arranque",
+    "notas": "Junto con el flujo intercompany. Aplica a MGT y PDA."
+   },
+   {
+    "id": "acc41",
+    "fase": "4 · Despliegue en plantas",
+    "nombre": "MGT y PDA trabajando con el modelo",
+    "empresa": "MGT",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Hito",
+    "inicio": "2028-02-25",
+    "fin": "2028-02-25",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   },
+   {
+    "id": "acc42",
+    "fase": "4 · Despliegue en plantas",
+    "nombre": "Despliegue en Papresa",
+    "empresa": "PAPRESA",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2028-01-10",
+    "fin": "2028-05-26",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "To-be adaptado, RACI con nombres, formación y arranque",
+    "notas": "Después de su integración en SAP y en el intercompany."
+   },
+   {
+    "id": "acc43",
+    "fase": "4 · Despliegue en plantas",
+    "nombre": "Papresa trabajando con el modelo",
+    "empresa": "PAPRESA",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Hito",
+    "inicio": "2028-05-26",
+    "fin": "2028-05-26",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   },
+   {
+    "id": "acc44",
+    "fase": "5 · Consolidación",
+    "nombre": "Auditoría trimestral de cumplimiento del modelo por planta",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "PO",
+    "tipo": "Tarea",
+    "inicio": "2027-07-01",
+    "fin": "2028-06-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Informe trimestral: RACI, KPIs y calendario",
+    "notas": ""
+   },
+   {
+    "id": "acc45",
+    "fase": "5 · Consolidación",
+    "nombre": "Revisión anual del modelo: RACI, políticas y KPIs",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Tarea",
+    "inicio": "2027-12-01",
+    "fin": "2028-01-28",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "Modelo v2",
+    "notas": ""
+   },
+   {
+    "id": "acc46",
+    "fase": "5 · Consolidación",
+    "nombre": "Modelo desplegado en todo el grupo",
+    "empresa": "",
+    "proceso": "",
+    "actividades": "",
+    "responsable": "DIR",
+    "tipo": "Hito",
+    "inicio": "2028-06-30",
+    "fin": "2028-06-30",
+    "estado": "Pendiente",
+    "avance": "",
+    "entregables": "",
+    "notas": ""
+   }
+  ]
+ },
+ "datos": {
+  "notas": {
+   "OPET": {
+    "4.1": {
+     "estado": "propio",
+     "quien": "Victoriano Perez (Planificación) y Barbara Ayuste (Compras)",
+     "herramienta": "SAP · MRP y transacción de faltas de materia prima y auxiliares",
+     "frecuencia": "Semanal",
+     "situacion": "Cada semana, Planificación y Compras analizan juntos el MRP. Tienen preparada en SAP una transacción que muestra las faltas de materias primas y auxiliares.",
+     "problemas": "No se han detectado problemas. Falta confirmar cómo se tratan las excepciones del MRP y quién lanza los pedidos de las faltas.",
+     "propuesta": "Tomarlo como base del estándar del grupo: revisión semanal Planificación–Compras con la transacción de faltas, incluyendo materias primas y auxiliares (4.4) en la misma revisión.",
+     "prioridad": "Baja"
+    },
+    "4.2": {
+     "estado": "propio",
+     "quien": "Victoriano Perez",
+     "herramienta": "GIO · pantalla de propuesta de fabricación (por material y pedido)",
+     "frecuencia": "Diaria",
+     "situacion": "En GIO hay una pantalla que da, por material (y por pedido en los MTO), una propuesta de fabricación. Victoriano la consulta cada día y la corrige si ve desviaciones del accuracy o si Comercial le llama.",
+     "problemas": "Las correcciones son manuales y dependen de la persona; los cambios de Comercial llegan por teléfono y no queda registro del motivo. Los errores de la previsión (2.4) acaban corrigiéndose aquí.",
+     "propuesta": "Corregir la propuesta solo con un motivo registrado y con reglas comunes. Los cambios de Comercial entran por la previsión o la cartera, no por llamada, y el KPI de accuracy indica dónde mirar.",
+     "prioridad": "Media"
+    },
+    "4.3": {
+     "estado": "propio",
+     "quien": "Victoriano Perez",
+     "herramienta": "GIO · pantalla de necesidades de semielaborado",
+     "frecuencia": "Diaria",
+     "situacion": "Una pantalla de GIO propone automáticamente las necesidades de semielaborado. Victoriano la revisa cada día con la misma lógica que el producto terminado.",
+     "problemas": "Igual que en 4.2: correcciones manuales sin registro que dependen de una sola persona.",
+     "propuesta": "Mismas reglas de corrección que en 4.2. A medio plazo, que la revise el planificador de materiales para repartir la carga de Victoriano.",
+     "prioridad": "Media"
+    },
+    "4.4": {
+     "estado": "propio",
+     "quien": "Victoriano Perez y Barbara Ayuste (dentro de 4.1)",
+     "herramienta": "SAP · transacción de faltas",
+     "frecuencia": "Semanal",
+     "situacion": "Se hace dentro de la revisión semanal del MRP (4.1).",
+     "propuesta": "Fusionar 4.4 con 4.1 en el catálogo corporativo (lo propone el equipo en el E2E).",
+     "prioridad": "Baja",
+     "notas": "Del E2E: está duplicado, debería ir incluido en 4.1."
+    }
+   }
+  },
+  "apartados": {
+   "OPET": {}
+  },
+  "raciAsis": {
+   "OPET": {
+    "4.1": {
+     "RPP": "A/R",
+     "CMP": "R"
+    },
+    "4.2": {
+     "RPP": "A",
+     "PDC": "R",
+     "COM": "C"
+    },
+    "4.3": {
+     "RPP": "A/R"
+    },
+    "4.4": {
+     "RPP": "A/R",
+     "CMP": "R"
+    }
+   }
+  },
+  "flujos": {
+   "OPET": {
+    "asis": {
+     "P4": {
+      "nodos": [
+       {
+        "id": "f-OPET-asis-P4-e0",
+        "tipo": "evento",
+        "texto": "Inicio de semana",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 67
+       },
+       {
+        "id": "f-OPET-asis-P4-t1",
+        "tipo": "tarea",
+        "texto": "Ejecución del MRP",
+        "resp": "",
+        "sistema": "SAP",
+        "act": "4.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 56
+       },
+       {
+        "id": "f-OPET-asis-P4-t2",
+        "tipo": "tarea",
+        "texto": "Planificación y Compras revisan el MRP y las faltas de MP y auxiliares",
+        "resp": "Victoriano Perez · Barbara Ayuste",
+        "sistema": "SAP",
+        "act": "4.1",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 35
+       },
+       {
+        "id": "f-OPET-asis-P4-t3",
+        "tipo": "tarea",
+        "texto": "Compras gestiona las necesidades de materias primas y auxiliares",
+        "resp": "Barbara Ayuste",
+        "sistema": "SAP",
+        "act": "4.4",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 41
+       },
+       {
+        "id": "f-OPET-asis-P4-n4",
+        "tipo": "nota",
+        "texto": "4.4 duplica a 4.1: se propone fusionarlas.",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 987,
+        "y": 62
+       },
+       {
+        "id": "f-OPET-asis-P4-e5",
+        "tipo": "evento",
+        "texto": "Cada día",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 217
+       },
+       {
+        "id": "f-OPET-asis-P4-t6",
+        "tipo": "tarea",
+        "texto": "GIO propone la fabricación de producto terminado (por material y pedido en MTO)",
+        "resp": "",
+        "sistema": "GIO",
+        "act": "4.2",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 184
+       },
+       {
+        "id": "f-OPET-asis-P4-t7",
+        "tipo": "tarea",
+        "texto": "Planificación revisa y corrige la propuesta",
+        "resp": "Victoriano Perez",
+        "sistema": "GIO",
+        "act": "4.2",
+        "dolor": true,
+        "notas": "Corrige por desviaciones del accuracy que detecta él o por llamadas de Comercial; no queda registro del motivo.",
+        "x": 527,
+        "y": 199
+       },
+       {
+        "id": "f-OPET-asis-P4-t8",
+        "tipo": "tarea",
+        "texto": "GIO propone las necesidades de semielaborado",
+        "resp": "",
+        "sistema": "GIO",
+        "act": "4.3",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 191
+       },
+       {
+        "id": "f-OPET-asis-P4-t9",
+        "tipo": "tarea",
+        "texto": "Planificación las revisa con la misma lógica",
+        "resp": "Victoriano Perez",
+        "sistema": "GIO",
+        "act": "4.3",
+        "dolor": true,
+        "notas": "Depende de una sola persona.",
+        "x": 757,
+        "y": 349
+       },
+       {
+        "id": "f-OPET-asis-P4-e10",
+        "tipo": "evento",
+        "texto": "Propuesta revisada",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 550,
+        "y": 366
+       },
+       {
+        "id": "f-OPET-asis-P4-n11",
+        "tipo": "nota",
+        "texto": "Comercial llama para pedir cambios en la propuesta.",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 358
+       }
+      ],
+      "enlaces": [
+       {
+        "id": "l-OPET-asis-P4-1",
+        "de": "f-OPET-asis-P4-e0",
+        "a": "f-OPET-asis-P4-t1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-2",
+        "de": "f-OPET-asis-P4-t1",
+        "a": "f-OPET-asis-P4-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-3",
+        "de": "f-OPET-asis-P4-t2",
+        "a": "f-OPET-asis-P4-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-4",
+        "de": "f-OPET-asis-P4-n4",
+        "a": "f-OPET-asis-P4-t3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-5",
+        "de": "f-OPET-asis-P4-e5",
+        "a": "f-OPET-asis-P4-t6",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-6",
+        "de": "f-OPET-asis-P4-t6",
+        "a": "f-OPET-asis-P4-t7",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-7",
+        "de": "f-OPET-asis-P4-t7",
+        "a": "f-OPET-asis-P4-t8",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-8",
+        "de": "f-OPET-asis-P4-t8",
+        "a": "f-OPET-asis-P4-t9",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-9",
+        "de": "f-OPET-asis-P4-t9",
+        "a": "f-OPET-asis-P4-e10",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-asis-P4-10",
+        "de": "f-OPET-asis-P4-n11",
+        "a": "f-OPET-asis-P4-t7",
+        "texto": "llamadas",
+        "estilo": ""
+       }
+      ]
+     }
+    },
+    "tobe": {
+     "P4": {
+      "nodos": [
+       {
+        "id": "f-OPET-tobe-P4-e0",
+        "tipo": "evento",
+        "texto": "Inicio de semana",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 67
+       },
+       {
+        "id": "f-OPET-tobe-P4-t1",
+        "tipo": "tarea",
+        "texto": "MRP con la previsión consensuada y el mes congelado",
+        "resp": "Materiales",
+        "sistema": "SAP",
+        "act": "4.1",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 41
+       },
+       {
+        "id": "f-OPET-tobe-P4-t2",
+        "tipo": "tarea",
+        "texto": "Revisión semanal de excepciones y faltas de materias primas y auxiliares",
+        "resp": "Materiales · Compras",
+        "sistema": "SAP",
+        "act": "4.1",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 34
+       },
+       {
+        "id": "f-OPET-tobe-P4-n12",
+        "tipo": "nota",
+        "texto": "Incluye materias primas y auxiliares: 4.4 se integra en 4.1.",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 208
+       },
+       {
+        "id": "f-OPET-tobe-P4-d3",
+        "tipo": "decision",
+        "texto": "¿Faltas sin cubrir?",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 767,
+        "y": 40
+       },
+       {
+        "id": "f-OPET-tobe-P4-t4",
+        "tipo": "tarea",
+        "texto": "Compras acelera o busca alternativa e informa a Programación",
+        "resp": "Compras",
+        "sistema": "SAP",
+        "act": "4.1",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 191
+       },
+       {
+        "id": "f-OPET-tobe-P4-e5",
+        "tipo": "evento",
+        "texto": "Materiales cubiertos",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 1010,
+        "y": 66
+       },
+       {
+        "id": "f-OPET-tobe-P4-e6",
+        "tipo": "evento",
+        "texto": "Cada día",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 90,
+        "y": 367
+       },
+       {
+        "id": "f-OPET-tobe-P4-t7",
+        "tipo": "tarea",
+        "texto": "GIO propone la fabricación de producto terminado (MTO y MTS)",
+        "resp": "Demanda y cartera",
+        "sistema": "GIO",
+        "act": "4.2",
+        "dolor": false,
+        "notas": "",
+        "x": 297,
+        "y": 341
+       },
+       {
+        "id": "f-OPET-tobe-P4-t8",
+        "tipo": "tarea",
+        "texto": "Revisión con reglas comunes: solo se corrige con un motivo registrado",
+        "resp": "Demanda y cartera",
+        "sistema": "GIO",
+        "act": "4.2",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 334
+       },
+       {
+        "id": "f-OPET-tobe-P4-t9",
+        "tipo": "tarea",
+        "texto": "Necesidades de semielaborado ajustadas a la propuesta validada",
+        "resp": "Materiales",
+        "sistema": "GIO",
+        "act": "4.3",
+        "dolor": false,
+        "notas": "",
+        "x": 757,
+        "y": 334
+       },
+       {
+        "id": "f-OPET-tobe-P4-e10",
+        "tipo": "evento",
+        "texto": "Plan propuesto a Programación",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 1010,
+        "y": 366
+       },
+       {
+        "id": "f-OPET-tobe-P4-n11",
+        "tipo": "nota",
+        "texto": "Los cambios de Comercial entran por la previsión o la cartera, no por llamada.",
+        "resp": "",
+        "sistema": "",
+        "act": "",
+        "dolor": false,
+        "notas": "",
+        "x": 527,
+        "y": 500
+       }
+      ],
+      "enlaces": [
+       {
+        "id": "l-OPET-tobe-P4-1",
+        "de": "f-OPET-tobe-P4-e0",
+        "a": "f-OPET-tobe-P4-t1",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-2",
+        "de": "f-OPET-tobe-P4-t1",
+        "a": "f-OPET-tobe-P4-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-3",
+        "de": "f-OPET-tobe-P4-n12",
+        "a": "f-OPET-tobe-P4-t2",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-4",
+        "de": "f-OPET-tobe-P4-t2",
+        "a": "f-OPET-tobe-P4-d3",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-5",
+        "de": "f-OPET-tobe-P4-d3",
+        "a": "f-OPET-tobe-P4-e5",
+        "texto": "No",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-6",
+        "de": "f-OPET-tobe-P4-d3",
+        "a": "f-OPET-tobe-P4-t4",
+        "texto": "Sí",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-7",
+        "de": "f-OPET-tobe-P4-t4",
+        "a": "f-OPET-tobe-P4-e5",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-8",
+        "de": "f-OPET-tobe-P4-e6",
+        "a": "f-OPET-tobe-P4-t7",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-9",
+        "de": "f-OPET-tobe-P4-t7",
+        "a": "f-OPET-tobe-P4-t8",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-10",
+        "de": "f-OPET-tobe-P4-t8",
+        "a": "f-OPET-tobe-P4-t9",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-11",
+        "de": "f-OPET-tobe-P4-t9",
+        "a": "f-OPET-tobe-P4-e10",
+        "texto": "",
+        "estilo": ""
+       },
+       {
+        "id": "l-OPET-tobe-P4-12",
+        "de": "f-OPET-tobe-P4-n11",
+        "a": "f-OPET-tobe-P4-t8",
+        "texto": "",
+        "estilo": ""
+       }
+      ]
+     }
+    }
+   }
+  }
+ }
+}

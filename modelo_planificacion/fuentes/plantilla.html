@@ -30,7 +30,12 @@ nav button.on{background:var(--blue);color:var(--navy);font-weight:700}
 nav .badge{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:10px;background:rgba(255,255,255,.12);color:#fff}
 nav button.on .badge{background:var(--navy);color:var(--blue)}
 nav .badge.warn{background:var(--warm);color:var(--navy)}
-nav .sep{height:1px;margin:8px 12px}
+nav .ngrp{margin-bottom:4px}
+nav button.nh{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);padding:10px 12px 4px}
+nav button.nh:hover{background:none;color:#fff}
+nav .nh .tw{font-size:9px;transition:transform .15s}
+nav .ngrp.closed .nh .tw{transform:rotate(-90deg)}
+nav .ngrp button[data-go]{padding:7px 12px 7px 16px}
 .side-foot{padding:14px 18px 18px;border-top:1px solid rgba(255,255,255,.1)}
 .side-foot label{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);font-weight:700}
 .side-foot input{width:100%;margin:6px 0 10px;padding:7px 9px;border-radius:7px;border:1px solid rgba(255,255,255,.25);background:var(--navy2);color:#fff}
@@ -213,6 +218,54 @@ td.chk.bad{color:var(--warn);font-weight:600}
 .orgstats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .orgstats div{background:var(--card);border-radius:8px;padding:8px 10px}
 .orgstats b{display:block;font-size:18px;margin-top:2px}
+.gwrap{border:1px solid var(--border);border-radius:12px;background:#fff;overflow:auto;max-height:calc(100vh - 300px);min-height:200px}
+.ghead{display:flex;position:sticky;top:0;z-index:4;background:var(--card);border-bottom:1px solid var(--border)}
+.ghead .gl,.grow .gl{position:sticky;left:0;width:470px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;border-right:1px solid var(--border)}
+.ghead .gl{z-index:5;background:var(--card);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--teal)}
+.gt{position:relative;flex:none}
+.gtop,.gbot{position:relative;height:26px}
+.gtop{border-bottom:1px solid var(--border)}
+.gc{position:absolute;top:0;height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--grey);border-left:1px solid var(--border);overflow:hidden;white-space:nowrap}
+.gtop .gc{color:var(--navy);font-weight:700}
+.gbody{position:relative}
+.gbg{position:absolute;top:0;bottom:0;pointer-events:none}
+.gbg i{position:absolute;top:0;bottom:0}
+.gbg .gl1{border-left:1px solid #F0F3F5}
+.gbg .gl2{border-left:1px solid #D7DFE5}
+.gbg .ghoy{border-left:2px dashed var(--navy)}
+.grow{display:flex;height:32px;border-bottom:1px solid #F0F3F5;position:relative}
+.grow .gl{z-index:2;background:#fff;font-size:12px;cursor:pointer}
+.grow:hover .gl{background:#FAFBFC}
+.grow.sel .gl{background:var(--tint)}
+.grow.ggrp,.grow.ggrp .gl{background:var(--card);cursor:pointer}
+.grow.ggrp .gl b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grow.ggrp .tw{font-size:9px;width:10px;transition:transform .15s}
+.grow.ggrp.closed .tw{transform:rotate(-90deg)}
+.gname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gemp{font-size:10px;font-weight:700;color:var(--teal);background:var(--tint);border-radius:8px;padding:1px 7px;white-space:nowrap}
+.gresp{width:84px;flex:none;color:var(--grey);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gdate{width:118px;flex:none;color:var(--grey);font-size:11px;text-align:right;white-space:nowrap}
+.gbar{position:absolute;top:9px;height:14px;border-radius:4px;background:color-mix(in srgb,var(--c) 26%,#fff);box-shadow:inset 0 0 0 1px var(--c);cursor:grab;touch-action:none}
+.gbar>i{position:absolute;left:0;top:0;bottom:0;background:var(--c);border-radius:4px}
+.gbar.late{outline:2px dashed #d03b3b;outline-offset:2px}
+.gbar.drag,.ghito.drag{cursor:grabbing;opacity:.8}
+.gbar .gh{position:absolute;top:-4px;bottom:-4px;width:10px;cursor:ew-resize}
+.gbar .gh.l{left:-5px}
+.gbar .gh.r{right:-5px}
+.ghito{position:absolute;top:9px;width:14px;height:14px;transform:rotate(45deg);background:var(--navy);border:2px solid #fff;box-shadow:0 0 0 1px var(--navy);cursor:grab;touch-action:none}
+.gsum{position:absolute;top:13px;height:6px;border-radius:3px;background:var(--c);opacity:.6}
+.gst{font-weight:700;margin-right:5px}
+.gst.bad{color:#d03b3b}
+.gst.ok{color:#0ca30c}
+.gst.cur{color:var(--mid)}
+.gtip{position:fixed;z-index:50;display:none;background:var(--navy);color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:8px;pointer-events:none;max-width:320px;box-shadow:0 4px 14px rgba(0,38,58,.2)}
+.gtip div{color:#DCE7EF}
+.gform{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 14px}
+.gform .gwide{grid-column:span 2}
+.gform textarea{min-height:38px}
+.gleg-h{display:inline-block;width:9px;height:9px;background:var(--navy);transform:rotate(45deg);margin:0 7px 0 2px}
+.gleg-b{display:inline-block;position:relative;width:26px;height:10px;border-radius:3px;background:#CFE0F6;box-shadow:inset 0 0 0 1px #2a78d6;margin-right:6px;vertical-align:-1px}
+.gleg-b i{position:absolute;left:0;top:0;bottom:0;width:55%;background:#2a78d6;border-radius:3px}
 .flowwrap{position:relative}
 .flowcwrap{position:relative;min-width:0}
 .flowzoom{position:absolute;bottom:22px;right:22px;display:flex;gap:4px;align-items:center;background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:9px;padding:4px;box-shadow:0 1px 4px rgba(0,38,58,.08)}
@@ -247,7 +300,7 @@ td.chk.bad{color:var(--warn);font-weight:600}
 .flowtips{margin:6px 0 0;padding-left:18px;color:var(--grey);line-height:1.5;font-size:12px}
 .flowtips li{margin-bottom:4px}
 @media (max-width:1100px){.orglay{grid-template-columns:1fr}.orgpanel{position:static}.tiles,.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.expgrid{grid-template-columns:1fr}.notegrid{grid-template-columns:1fr 1fr}.notegrid .half{grid-column:1/-1}}
-@media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}nav{display:flex;flex-wrap:wrap;gap:4px}nav button{width:auto}.procwrap{grid-template-columns:1fr}.proclist{position:static}main{padding:18px 16px 40px}}
+@media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}nav{display:flex;flex-wrap:wrap;gap:4px}nav .ngrp{display:flex;flex-wrap:wrap;gap:4px;width:100%}nav button.nh{width:100%}nav button{width:auto}.procwrap{grid-template-columns:1fr}.proclist{position:static}main{padding:18px 16px 40px}}
 </style>
 </head>
 <body>
@@ -268,6 +321,7 @@ td.chk.bad{color:var(--warn);font-weight:600}
 <main id="main"></main>
 <div class="toast" id="toast"></div>
 <datalist id="dl-titulares"></datalist>
+<datalist id="dl-fases"></datalist>
 
 <script id="datos-base" type="application/json">__DATOS__</script>
 <script id="parches" type="application/json">__PARCHES__</script>
@@ -384,18 +438,21 @@ function stats() {
   const asign = S.personas.filter(p => p.titular.trim()).length;
   const raciBad = acts.filter(a => raciCheck(a.id)).length;
   const decAb = S.decisiones.filter(d => d.estado !== 'Decidida').length;
-  return {rev, revTot, nExtra: revTot - acts.length * emps.length, asign, asignTot: S.personas.length, raciBad, nActs: acts.length, decAb};
+  const late = S.plan.filter(r => planLate(r)).length;
+  return {late, rev, revTot, nExtra: revTot - acts.length * emps.length, asign, asignTot: S.personas.length, raciBad, nActs: acts.length, decAb};
 }
 
 /* ---------------------------------------------------------------- navegación */
-const SECTIONS = [
-  ['inicio', 'Resumen'], ['empresas', 'Empresas y plantas'], ['personas', 'Personas y roles asignados'],
-  ['organigrama', 'Organigramas'], ['roles', 'Fichas de rol'], ['procesos', 'Notas por proceso'], ['flujos', 'Flujos de proceso'], ['raci', 'Matriz RACI'],
-  ['politicas', 'Políticas'], ['kpis', 'KPIs'], ['cadencia', 'Reuniones'], ['decisiones', 'Decisiones'],
-  ['plan', 'Plan de despliegue'], ['exportar', 'Exportar / importar'],
+const GROUPS = [
+  ['Resumen', [['inicio', 'Resumen'], ['exportar', 'Exportar / importar']]],
+  ['Datos maestros', [['empresas', 'Empresas y plantas'], ['personas', 'Personas y roles asignados'], ['organigrama', 'Organigramas'], ['roles', 'Fichas de rol']]],
+  ['Diagnóstico y diseño', [['procesos', 'Notas por proceso'], ['flujos', 'Flujos de proceso'], ['raci', 'Matriz RACI'], ['politicas', 'Políticas'], ['kpis', 'KPIs'], ['cadencia', 'Reuniones']]],
+  ['Plan de acción', [['plan', 'Plan de acción'], ['gantt', 'Gantt'], ['decisiones', 'Decisiones']]],
 ];
-const ui = {sec: 'inicio', emp: 'OPET', proc: null, editCat: false, filtroEmp: '', raciEmp: '', raciView: 'tobe', raciAsisEmp: 'OPET', raciDiff: true, orgEmp: 'OPET', orgView: 'asis', orgSel: '', orgZoom: 1, flowEmp: 'OPET', flowView: 'asis', flowProc: null, flowSel: '', flowZoom: 1};
+const SECTIONS = GROUPS.flatMap(g => g[1]);
+const ui = {sec: 'inicio', emp: 'OPET', proc: null, editCat: false, filtroEmp: '', raciEmp: '', raciView: 'tobe', raciAsisEmp: 'OPET', raciDiff: true, orgEmp: 'OPET', orgView: 'asis', orgSel: '', orgZoom: 1, flowEmp: 'OPET', flowView: 'asis', flowProc: null, flowSel: '', flowZoom: 1, ganttScale: 'meses', ganttEmp: '', ganttSel: null, navClosed: []};
 try { Object.assign(ui, JSON.parse(sessionStorage.getItem(KEY + '-ui') || '{}')); } catch (e) {}
+if (!SECTIONS.some(x => x[0] === ui.sec)) ui.sec = 'inicio';
 function saveUI() { try { sessionStorage.setItem(KEY + '-ui', JSON.stringify(ui)); } catch (e) {} }
 
 function refreshNav() {
@@ -406,12 +463,16 @@ function refreshNav() {
     raci: st.raciBad ? `${st.raciBad} avisos` : 'OK',
     decisiones: st.decAb ? `${st.decAb} abiertas` : '',
     flujos: nFlujos() || '',
+    plan: S.plan.length || '',
+    gantt: st.late ? `${st.late} atrasadas` : '',
   };
-  const warn = {raci: st.raciBad > 0};
-  document.getElementById('nav').innerHTML = SECTIONS.map(([id, label], i) =>
-    (['empresas', 'politicas', 'exportar'].includes(id) ? '<div class="sep"></div>' : '') +
-    `<button data-go="${id}" class="${ui.sec === id ? 'on' : ''}">${esc(label)}${badge[id] ? `<span class="badge${warn[id] ? ' warn' : ''}">${esc(badge[id])}</span>` : ''}</button>`
-  ).join('');
+  const warn = {raci: st.raciBad > 0, gantt: st.late > 0};
+  const closed = new Set(ui.navClosed || []);
+  document.getElementById('nav').innerHTML = GROUPS.map(([g, items]) => {
+    const open = !closed.has(g) || items.some(([id]) => id === ui.sec);
+    return `<div class="ngrp${open ? '' : ' closed'}"><button class="nh" data-navgrp="${esc(g)}" aria-expanded="${open}"><span>${esc(g)}</span><span class="tw">▾</span></button>` +
+      (open ? items.map(([id, label]) => `<button data-go="${id}" class="${ui.sec === id ? 'on' : ''}">${esc(label)}${badge[id] ? `<span class="badge${warn[id] ? ' warn' : ''}">${esc(badge[id])}</span>` : ''}</button>`).join('') : '') + '</div>';
+  }).join('');
 }
 function go(sec) { ui.sec = sec; saveUI(); render(); window.scrollTo(0, 0); }
 
@@ -423,6 +484,8 @@ function field(list, i, c, v) {
     return `<select ${a}>${opts.map(([val, lab]) => `<option value="${esc(val)}"${val === (v ?? '') ? ' selected' : ''}>${esc(lab)}</option>`).join('')}</select>`;
   }
   if (c.type === 'area') return `<textarea ${a} rows="1" placeholder="${esc(c.ph || '')}">${esc(v)}</textarea>`;
+  if (c.type === 'date') return `<input type="date" ${a} value="${esc(v)}">`;
+  if (c.type === 'number') return `<input type="number" min="0" max="100" step="5" ${a} value="${esc(v)}">`;
   return `<input ${a} value="${esc(v)}" placeholder="${esc(c.ph || '')}"${c.list ? ` list="${c.list}"` : ''}>`;
 }
 const GRIDS = {};
@@ -496,7 +559,7 @@ const NEW = {
   kpis: () => ({id: uid('kpi'), nombre: '', definicion: '', formula: '', frecuencia: '', responsable: '', objetivo: '', notas: ''}),
   cadencia: () => ({id: uid('cad'), nombre: '', frecuencia: '', duracion: '', participantes: '', entradas: '', salidas: '', notas: ''}),
   decisiones: () => ({id: uid('dec'), nombre: '', opciones: '', recomendacion: '', responsable: '', fecha: '', estado: 'Abierta', resolucion: ''}),
-  plan: () => ({id: uid('fase'), nombre: '', actividades: '', entregables: '', plazo: '', responsable: '', estado: 'Pendiente', notas: ''}),
+  plan: () => ({id: uid('acc'), fase: '', nombre: '', empresa: '', proceso: '', actividades: '', responsable: '', tipo: 'Tarea', inicio: '', fin: '', estado: 'Pendiente', avance: '', entregables: '', notas: ''}),
 };
 const optRoles = (blank = true) => () => (blank ? [['', '—']] : []).concat(S.roles.map(r => [r.id, r.nombre || r.id]));
 const optEmps = () => S.empresas.map(e => [e.id, e.nombre || e.id]);
@@ -784,22 +847,13 @@ VIEWS.decisiones = () => `
     {k: 'resolucion', label: 'Resolución', type: 'area', w: 220},
   ], {addLabel: 'Añadir decisión'})}`;
 
-VIEWS.plan = () => `
-  <div class="head"><div><h1>Plan de despliegue</h1><p>Fases propuestas para pasar de la situación actual al modelo centralizado.</p></div></div>
-  ${grid('plan', [
-    {k: 'nombre', label: 'Fase', type: 'area', w: 160}, {k: 'actividades', label: 'Actividades', type: 'area', w: 300},
-    {k: 'entregables', label: 'Entregables', type: 'area', w: 220}, {k: 'plazo', label: 'Plazo', w: 100}, respCol,
-    {k: 'estado', label: 'Estado', type: 'select', options: optList(['Pendiente', 'En curso', 'Hecho']), w: 110},
-    {k: 'notas', label: 'Notas', type: 'area', w: 200},
-  ], {addLabel: 'Añadir fase'})}`;
-
 VIEWS.exportar = () => {
   const st = stats();
   return `
   <div class="head"><div><h1>Exportar e importar</h1><p>Todo se guarda en este navegador. Para pasármelo, o para compartirlo con el equipo, descargad el archivo JSON.</p></div></div>
   <div class="expgrid">
     <div class="card"><div class="label">Para Claude</div><h3>Descargar JSON</h3>
-      <p>Contiene todo: empresas, personas, roles, organigramas, flujos de proceso y RACI (as-is y to-be), notas (con los apartados propios de cada planta), políticas, KPIs, reuniones, decisiones y plan. Con él genero el modelo final: el manual de planificación por proceso, la RACI con nombres por empresa, las fichas de rol y las diapositivas.</p>
+      <p>Contiene todo: empresas, personas, roles, organigramas, flujos de proceso y RACI (as-is y to-be), notas (con los apartados propios de cada planta), políticas, KPIs, reuniones, decisiones y plan de acción. Con él genero el modelo final: el manual de planificación por proceso, la RACI con nombres por empresa, las fichas de rol y las diapositivas.</p>
       <p class="hint">Ahora mismo: ${st.rev} de ${st.revTot} actividades revisadas · ${st.asign} de ${st.asignTot} roles con titular.</p>
       <button class="btn" data-export="json">Descargar JSON</button></div>
     <div class="card"><div class="label">Importar</div><h3>Cargar un JSON</h3>
@@ -1048,6 +1102,258 @@ document.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   const box = e.target.closest && e.target.closest('[data-node]');
   if (box && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); orgSelect(box.dataset.node); }
+});
+
+/* ---------------------------------------------------------------- plan de acción y Gantt */
+const PLAN_ESTADOS = ['Pendiente', 'En curso', 'Hecho', 'Bloqueado'];
+// paleta categórica validada (orden fijo): el color sigue a la fase, nunca a su posición en un filtro
+const FASE_COLORS = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const DAY = 864e5;
+const GSCALES = {semanas: [16, 'Semanas'], meses: [3.4, 'Meses'], trimestres: [1.2, 'Trimestres']};
+const GLW = 470;
+const pd = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : null; };
+const fd = t => new Date(t).toISOString().slice(0, 10);
+const fShort = (t, yr = true) => { const d = new Date(t); return `${d.getUTCDate()} ${MESES[d.getUTCMonth()]}${yr ? ' ' + String(d.getUTCFullYear()).slice(2) : ''}`; };
+const optFases = () => planFases().map(f => [f, f]);
+function planFases() {
+  const out = [];
+  for (const r of S.plan) { const f = (r.fase || '').trim() || 'Sin fase'; if (!out.includes(f)) out.push(f); }
+  return out;
+}
+function faseColor(f) { const i = planFases().indexOf(f); return i >= 0 && i < FASE_COLORS.length ? FASE_COLORS[i] : '#8A99A6'; }
+function planDates(r) {
+  let a = pd(r.inicio), b = pd(r.fin);
+  if (r.tipo === 'Hito') { a = b = b ?? a; return a === null ? null : [a, a]; }
+  if (a === null) a = b;
+  if (b === null) b = a;
+  if (a === null) return null;
+  return b < a ? [b, a] : [a, b];
+}
+const planAvance = r => r.estado === 'Hecho' ? 100 : Math.max(0, Math.min(100, +r.avance || 0));
+const planLate = r => { const d = planDates(r), hoy = pd(fd(Date.now())); return d && r.estado !== 'Hecho' && d[1] < hoy; };
+function empShort(id) {
+  const e = empById(id);
+  if (!e) return 'Grupo';
+  const w = e.nombre.split(/[\s·]+/).filter(Boolean);
+  const dup = S.empresas.filter(x => x.nombre.split(/[\s·]+/)[0] === w[0]).length > 1;
+  return dup && w[1] ? `${w[0]} ${w[1].slice(0, 3)}.` : w[0];
+}
+const PLAN_COLS = [
+  {k: 'fase', label: 'Fase', w: 170, list: 'dl-fases', ph: 'p. ej. 2 · Piloto Ondupet'},
+  {k: 'nombre', label: 'Acción', type: 'area', w: 300},
+  {k: 'empresa', label: 'Empresa', type: 'select', options: () => [['', 'Grupo (todas)']].concat(optEmps()), w: 160},
+  {k: 'proceso', label: 'Proceso', type: 'select', options: () => [['', '—']].concat(S.procesos.map(p => [p.id, p.nombre])), w: 140},
+  {k: 'actividades', label: 'Actividades', w: 100, ph: 'p. ej. 1.1, 1.5'},
+  {k: 'responsable', label: 'Responsable', type: 'select', options: optRoles(), w: 200},
+  {k: 'tipo', label: 'Tipo', type: 'select', options: optList(['Tarea', 'Hito']), w: 90},
+  {k: 'inicio', label: 'Inicio', type: 'date', w: 140},
+  {k: 'fin', label: 'Fin', type: 'date', w: 140},
+  {k: 'estado', label: 'Estado', type: 'select', options: optList(PLAN_ESTADOS), w: 110},
+  {k: 'avance', label: '% avance', type: 'number', w: 80},
+  {k: 'entregables', label: 'Entregables', type: 'area', w: 220},
+  {k: 'notas', label: 'Notas', type: 'area', w: 200},
+];
+function fasesDatalist() { document.getElementById('dl-fases').innerHTML = planFases().map(f => `<option value="${esc(f)}">`).join(''); }
+VIEWS.plan = () => {
+  fasesDatalist();
+  const fs = planFases();
+  const sinFecha = S.plan.filter(r => !planDates(r)).length;
+  return `
+  <div class="head"><div><h1>Plan de acción</h1><p>Acciones para pasar del as-is al to-be, agrupadas por fase, con empresa, responsable y fechas. Lo que cambies aquí se ve en el <b>Gantt</b>, y al revés.</p></div>
+    <div class="row"><button class="btn small" data-go="gantt">Ver Gantt</button></div></div>
+  <div class="legend" style="margin-bottom:10px">${fs.map(f => `<span><i class="sw" style="background:${faseColor(f)}"></i>${esc(f)} <span class="muted">· ${S.plan.filter(r => ((r.fase || '').trim() || 'Sin fase') === f).length}</span></span>`).join('')}${sinFecha ? `<span class="muted">${sinFecha} sin fechas (no salen en el Gantt)</span>` : ''}</div>
+  ${grid('plan', PLAN_COLS, {addLabel: 'Añadir acción'})}`;
+};
+VIEWS.gantt = () => {
+  fasesDatalist();
+  if (!GSCALES[ui.ganttScale]) ui.ganttScale = 'meses';
+  const conPlan = new Set(S.plan.map(r => r.empresa || ''));
+  const emps = [['', 'Todas']].concat(S.empresas.filter(e => conPlan.has(e.id)).map(e => [e.id, e.nombre]));
+  if (!emps.some(e => e[0] === (ui.ganttEmp || ''))) ui.ganttEmp = '';
+  if (ui.ganttSel != null && !S.plan[ui.ganttSel]) ui.ganttSel = null;
+  return `
+  <div class="head"><div><h1>Gantt del plan de acción</h1><p>Arrastra una barra para moverla en el tiempo o sus extremos para cambiar inicio y fin. Pulsa una acción para editarla abajo; pulsa una fase para plegarla. Si filtras por empresa, también se ven las acciones de todo el grupo.</p></div>
+    <div class="row"><button class="btn ghost small" data-go="plan">Editar en tabla</button></div></div>
+  <div class="orgbar">
+    <div class="tabs" role="tablist" aria-label="Escala">${Object.entries(GSCALES).map(([k, v]) => `<button role="tab" aria-selected="${k === ui.ganttScale}" class="${k === ui.ganttScale ? 'on' : ''}" data-gscale="${k}">${v[1]}</button>`).join('')}</div>
+    <div class="chips">${emps.map(([id, n]) => `<button class="chip ${id === (ui.ganttEmp || '') ? 'on' : ''}" data-gemp="${id || '_'}">${esc(n)}</button>`).join('')}</div>
+    <span style="flex:1"></span>
+    <button class="btn small" data-gact="add">+ Acción</button>
+    <button class="btn ghost small" data-gact="open">Desplegar fases</button>
+    <button class="btn ghost small" data-gact="close">Contraer fases</button>
+  </div>
+  <div class="gwrap" id="gantt">${ganttHTML()}</div>
+  <div class="legend" style="margin:10px 0 14px">${planFases().map(f => `<span><i class="sw" style="background:${faseColor(f)}"></i>${esc(f)}</span>`).join('')}
+    <span><i class="gleg-h"></i>Hito</span><span><i class="gleg-b"><i></i></i>Parte rellena = % de avance</span><span><span class="gst bad">⚠ Atrasada</span></span></div>
+  <div id="gpanel">${ganttPanelHTML()}</div>`;
+};
+function ganttHTML() {
+  if (!S.plan.length) return `<div class="orgempty"><b>El plan está vacío.</b><br><span class="hint">Pulsa «+ Acción» o añade filas en «Plan de acción».</span></div>`;
+  const px = GSCALES[ui.ganttScale][0], f = ui.ganttEmp || '';
+  const rows = S.plan.map((r, i) => ({r, i, d: planDates(r)})).filter(x => !f || x.r.empresa === f || !x.r.empresa);
+  const ds = rows.map(x => x.d).filter(Boolean);
+  const hoy = pd(fd(Date.now()));
+  const t0 = ds.length ? Math.min(...ds.map(d => d[0])) : hoy, t1 = ds.length ? Math.max(...ds.map(d => d[1])) : hoy;
+  const a0 = new Date(t0), a1 = new Date(t1), q = ui.ganttScale === 'trimestres' ? 3 : 1;
+  const start = Date.UTC(a0.getUTCFullYear(), Math.floor(a0.getUTCMonth() / q) * q, 1);
+  const end = Date.UTC(a1.getUTCFullYear(), (Math.floor(a1.getUTCMonth() / q) + 1) * q + (q === 1 ? 1 : 0), 1);
+  const W = Math.round((end - start) / DAY * px), X = t => Math.round((t - start) / DAY * px);
+  // cabecera: dos niveles según la escala
+  const months = [];
+  for (let y = a0.getUTCFullYear(), m = new Date(start).getUTCMonth(); ; m++) {
+    const t = Date.UTC(y, m, 1);
+    if (t >= end) break;
+    months.push(t);
+  }
+  const cell = (a, b, txt, cls = '') => `<div class="gc${cls}" style="left:${X(a)}px;width:${X(b) - X(a)}px">${txt}</div>`;
+  const nextM = (t, k = 1) => { const d = new Date(t); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + k, 1); };
+  let top = '', bot = '', lines = '';
+  if (ui.ganttScale === 'semanas') {
+    for (const m of months) { const d = new Date(m); top += cell(m, nextM(m), `${MESES[d.getUTCMonth()]} ${d.getUTCFullYear()}`); lines += `<i class="gl2" style="left:${X(m)}px"></i>`; }
+    let w = start + ((8 - new Date(start).getUTCDay()) % 7) * DAY;
+    for (; w < end; w += 7 * DAY) { bot += cell(w, Math.min(w + 7 * DAY, end), new Date(w).getUTCDate()); lines += `<i class="gl1" style="left:${X(w)}px"></i>`; }
+  } else if (ui.ganttScale === 'meses') {
+    for (const m of months) {
+      const d = new Date(m);
+      if (d.getUTCMonth() % 3 === 0 || m === start) { const qe = Math.min(Date.UTC(d.getUTCFullYear(), Math.floor(d.getUTCMonth() / 3) * 3 + 3, 1), end); top += cell(m, qe, `T${Math.floor(d.getUTCMonth() / 3) + 1} ${d.getUTCFullYear()}`); lines += `<i class="gl2" style="left:${X(m)}px"></i>`; }
+      bot += cell(m, nextM(m), MESES[d.getUTCMonth()]);
+      lines += `<i class="gl1" style="left:${X(m)}px"></i>`;
+    }
+  } else {
+    for (const m of months) {
+      const d = new Date(m);
+      if (d.getUTCMonth() === 0 || m === start) { top += cell(m, Math.min(Date.UTC(d.getUTCFullYear() + 1, 0, 1), end), d.getUTCFullYear()); lines += `<i class="gl2" style="left:${X(m)}px"></i>`; }
+      if (d.getUTCMonth() % 3 === 0) { bot += cell(m, nextM(m, 3), `T${d.getUTCMonth() / 3 + 1}`); lines += `<i class="gl1" style="left:${X(m)}px"></i>`; }
+    }
+  }
+  if (hoy >= start && hoy < end) lines += `<i class="ghoy" style="left:${X(hoy)}px" title="Hoy"></i>`;
+  const closed = new Set(ui.ganttClosed || []);
+  let body = '';
+  for (const fase of planFases()) {
+    const fr = rows.filter(x => ((x.r.fase || '').trim() || 'Sin fase') === fase);
+    if (!fr.length) continue;
+    const c = faseColor(fase), fd2 = fr.map(x => x.d).filter(Boolean), cl = closed.has(fase);
+    const sum = fd2.length ? (() => { const a = Math.min(...fd2.map(d => d[0])), b = Math.max(...fd2.map(d => d[1])); return `<div class="gsum" style="left:${X(a)}px;width:${Math.max(X(b + DAY) - X(a), 4)}px;--c:${c}" title="${esc(fase)}: ${fShort(a)} – ${fShort(b)}"></div>`; })() : '';
+    const done = fr.filter(x => x.r.estado === 'Hecho').length;
+    body += `<div class="grow ggrp${cl ? ' closed' : ''}" data-gfase="${esc(fase)}" style="width:${GLW + W}px"><div class="gl"><span class="tw">▾</span><i class="sw" style="background:${c}"></i><b>${esc(fase)}</b><span class="muted">${done}/${fr.length}</span></div><div class="gt" style="width:${W}px">${sum}</div></div>`;
+    if (cl) continue;
+    for (const {r, i, d} of fr) {
+      const late = planLate(r), av = planAvance(r);
+      const st = late ? '<span class="gst bad" title="Atrasada">⚠</span>' : r.estado === 'Hecho' ? '<span class="gst ok" title="Hecho">✓</span>' : r.estado === 'Bloqueado' ? '<span class="gst bad" title="Bloqueado">⛔</span>' : r.estado === 'En curso' ? '<span class="gst cur" title="En curso">●</span>' : '';
+      const fechas = d ? (r.tipo === 'Hito' ? fShort(d[0]) : `${fShort(d[0], new Date(d[0]).getUTCFullYear() !== new Date(d[1]).getUTCFullYear())} – ${fShort(d[1])}`) : '<span class="muted">sin fechas</span>';
+      let bar = '';
+      if (d && r.tipo === 'Hito') bar = `<div class="ghito" data-gbar="${i}" style="left:${X(d[0]) + Math.round(px / 2) - 8}px"></div>`;
+      else if (d) bar = `<div class="gbar${late ? ' late' : ''}" data-gbar="${i}" style="left:${X(d[0])}px;width:${Math.max(X(d[1] + DAY) - X(d[0]), 6)}px;--c:${c}"><i style="width:${av}%"></i><b class="gh l" data-gh="l"></b><b class="gh r" data-gh="r"></b></div>`;
+      body += `<div class="grow${ui.ganttSel === i ? ' sel' : ''}" data-gi="${i}" style="width:${GLW + W}px"><div class="gl" data-gsel="${i}"><span class="gname" title="${esc(r.nombre)}">${st}${r.tipo === 'Hito' ? '◆ ' : ''}${esc(r.nombre || 'Sin nombre')}</span>${!f && r.empresa ? `<span class="gemp">${esc(empShort(r.empresa))}</span>` : ''}<span class="gresp" title="${esc(roleName(r.responsable))}">${esc(r.responsable ? (roleById(r.responsable) || {}).corto || roleName(r.responsable) : '—')}</span><span class="gdate" data-gdate="${i}">${fechas}</span></div><div class="gt" style="width:${W}px">${bar}</div></div>`;
+    }
+  }
+  const head = `<div class="ghead" style="width:${GLW + W}px"><div class="gl"><span class="gname">Acción</span><span class="gresp">Resp.</span><span class="gdate">Fechas</span></div><div class="gt" style="width:${W}px"><div class="gtop">${top}</div><div class="gbot">${bot}</div></div></div>`;
+  ganttGeo = {start, px};
+  return `${head}<div class="gbody" style="width:${GLW + W}px"><div class="gbg" style="left:${GLW}px;width:${W}px">${lines}</div>${body}</div>`;
+}
+let ganttGeo = {start: 0, px: 1};
+function ganttPanelHTML() {
+  const i = ui.ganttSel, r = i != null && S.plan[i];
+  if (!r) return `<p class="hint">Pulsa una acción para editarla aquí.</p>`;
+  const f = c => `<div class="fld${c.type === 'area' ? ' gwide' : ''}"><label>${esc(c.label)}</label>${field('plan', i, c, r[c.k])}</div>`;
+  return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><div class="label">Acción seleccionada</div>
+      <div class="row"><button class="btn ghost small" data-gact="dup">Duplicar</button><button class="btn danger small" data-gact="del">Eliminar</button><button class="btn ghost small" data-gact="deselect">Cerrar</button></div></div>
+    <div class="gform">${PLAN_COLS.map(f).join('')}</div></div>`;
+}
+function ganttDraw(panel) {
+  const g = document.getElementById('gantt');
+  if (g) g.innerHTML = ganttHTML();
+  const p = document.getElementById('gpanel');
+  if (panel && p) p.innerHTML = ganttPanelHTML();
+}
+function ganttSelect(i) {
+  ui.ganttSel = i; saveUI();
+  document.querySelectorAll('#gantt .grow.sel').forEach(x => x.classList.remove('sel'));
+  const row = i != null && document.querySelector(`#gantt .grow[data-gi="${i}"]`);
+  if (row) row.classList.add('sel');
+  const p = document.getElementById('gpanel');
+  if (p) p.innerHTML = ganttPanelHTML();
+}
+function ganttAction(a) {
+  const i = ui.ganttSel, r = i != null ? S.plan[i] : null;
+  if (a === 'open' || a === 'close') { ui.ganttClosed = a === 'open' ? [] : planFases(); saveUI(); ganttDraw(); return; }
+  if (a === 'deselect') return ganttSelect(null);
+  if (a === 'add') {
+    const base = r || S.plan[S.plan.length - 1];
+    const d = base && planDates(base), ini = d ? d[1] + DAY : pd('2027-01-04');
+    const n = {...NEW.plan(), fase: base ? base.fase : '', empresa: ui.ganttEmp || (base ? base.empresa : ''), inicio: fd(ini), fin: fd(ini + 27 * DAY)};
+    const at = r ? i + 1 : S.plan.length;
+    S.plan.splice(at, 0, n);
+    ui.ganttSel = at;
+  } else if (!r) return;
+  else if (a === 'dup') { S.plan.splice(i + 1, 0, {...clone(r), id: uid('acc'), nombre: r.nombre + ' (copia)'}); ui.ganttSel = i + 1; }
+  else if (a === 'del') {
+    if (!confirm(`¿Eliminar «${r.nombre || 'esta acción'}» del plan?`)) return;
+    S.plan.splice(i, 1); ui.ganttSel = null;
+  } else return;
+  save(); saveUI(); ganttDraw(true);
+  const nm = document.querySelector('#gpanel [data-k="nombre"]');
+  if (a === 'add' && nm) { nm.focus({preventScroll: true}); nm.closest('.card').scrollIntoView({block: 'nearest'}); }
+}
+// arrastrar barras: mover o cambiar inicio / fin (al día)
+let gdrag = null;
+document.addEventListener('pointerdown', e => {
+  if (ui.sec !== 'gantt' || e.button !== 0 || !e.target.closest) return;
+  const b = e.target.closest('[data-gbar]');
+  if (!b) return;
+  const i = +b.dataset.gbar, r = S.plan[i], d = r && planDates(r);
+  if (!d) return;
+  e.preventDefault();
+  const h = e.target.closest('[data-gh]');
+  gdrag = {i, el: b, mode: h ? h.dataset.gh : 'move', x0: e.clientX, a: d[0], b: d[1], moved: false, hito: r.tipo === 'Hito'};
+  b.classList.add('drag');
+});
+document.addEventListener('pointermove', e => {
+  if (!gdrag) return;
+  const g = gdrag, {start, px} = ganttGeo, dd = Math.round((e.clientX - g.x0) / px);
+  if (!g.moved && Math.abs(e.clientX - g.x0) < 4) return;
+  g.moved = true;
+  let a = g.a, b = g.b;
+  if (g.mode === 'move' || g.hito) { a += dd * DAY; b += dd * DAY; }
+  else if (g.mode === 'l') a = Math.min(g.a + dd * DAY, g.b);
+  else b = Math.max(g.b + dd * DAY, g.a);
+  g.na = a; g.nb = b;
+  const X = t => Math.round((t - start) / DAY * px);
+  if (g.hito) g.el.style.left = (X(a) + Math.round(px / 2) - 8) + 'px';
+  else { g.el.style.left = X(a) + 'px'; g.el.style.width = Math.max(X(b + DAY) - X(a), 6) + 'px'; }
+  const dt = document.querySelector(`[data-gdate="${g.i}"]`);
+  if (dt) dt.textContent = g.hito ? fShort(a) : `${fShort(a)} – ${fShort(b)}`;
+  ganttTip(e, `${g.hito ? fShort(a) : `${fShort(a)} → ${fShort(b)} · ${Math.round((b - a) / DAY) + 1} días`}`);
+});
+document.addEventListener('pointerup', () => {
+  if (!gdrag) return;
+  const g = gdrag;
+  gdrag = null;
+  g.el.classList.remove('drag');
+  ganttTip(null);
+  if (!g.moved) { ganttSelect(g.i); return; }
+  const r = S.plan[g.i];
+  if (g.na !== undefined) { if (g.hito) { r.fin = fd(g.na); r.inicio = fd(g.na); } else { r.inicio = fd(g.na); r.fin = fd(g.nb); } }
+  ui.ganttSel = g.i; save(); saveUI(); ganttDraw(true);
+});
+// información al pasar el ratón
+function ganttTip(e, html) {
+  let t = document.getElementById('gtip');
+  if (!t) { t = document.createElement('div'); t.id = 'gtip'; t.className = 'gtip'; document.body.appendChild(t); }
+  if (!e) { t.style.display = 'none'; return; }
+  t.innerHTML = html; t.style.display = 'block';
+  const x = Math.min(e.clientX + 14, window.innerWidth - t.offsetWidth - 8), y = e.clientY + 16 + t.offsetHeight > window.innerHeight ? e.clientY - t.offsetHeight - 10 : e.clientY + 16;
+  t.style.left = x + 'px'; t.style.top = y + 'px';
+}
+document.addEventListener('mousemove', e => {
+  if (ui.sec !== 'gantt' || gdrag) return;
+  const b = e.target.closest && e.target.closest('[data-gbar]');
+  if (!b) { ganttTip(null); return; }
+  const r = S.plan[+b.dataset.gbar], d = r && planDates(r);
+  if (!d) return;
+  const dur = Math.round((d[1] - d[0]) / DAY) + 1;
+  ganttTip(e, `<b>${esc(r.nombre)}</b><div>${esc(r.fase || '')}</div><div>${r.tipo === 'Hito' ? 'Hito · ' + fShort(d[0]) : `${fShort(d[0])} → ${fShort(d[1])} · ${dur} días`}</div><div>${esc(r.empresa ? empName(r.empresa) : 'Todo el grupo')} · ${esc(roleName(r.responsable))}</div><div>${esc(r.estado || 'Pendiente')}${r.tipo === 'Hito' ? '' : ` · ${planAvance(r)} %`}${planLate(r) ? ' · ⚠ atrasada' : ''}</div>`);
 });
 
 /* ---------------------------------------------------------------- flujos de proceso */
@@ -1534,6 +1840,17 @@ function flowEndDrag(e, cancel) {
 document.addEventListener('pointerup', e => flowEndDrag(e, false));
 document.addEventListener('pointercancel', e => flowEndDrag(e, true));
 document.addEventListener('focusout', () => { flowEditEl = null; });
+document.addEventListener('click', e => {
+  if (ui.sec !== 'gantt' || !e.target.closest || e.target.closest('[data-gbar]')) return;
+  const g = e.target.closest('[data-gfase]');
+  if (g) {
+    const set = new Set(ui.ganttClosed || []), f = g.dataset.gfase;
+    if (set.has(f)) set.delete(f); else set.add(f);
+    ui.ganttClosed = [...set]; saveUI(); ganttDraw(); return;
+  }
+  const r = e.target.closest('[data-gsel]');
+  if (r) ganttSelect(+r.dataset.gsel);
+});
 document.addEventListener('keydown', e => {
   if (ui.sec !== 'flujos') return;
   const typing = e.target.closest && e.target.closest('input, textarea, select');
@@ -1564,7 +1881,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if
 function autosize(t) { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; }
 function render() {
   refreshNav();
-  const sc = ['orgchart', 'flowcanvas'].map(id => document.getElementById(id)).filter(Boolean).map(el => [el.id, el.scrollLeft, el.scrollTop]);
+  const sc = ['orgchart', 'flowcanvas', 'gantt'].map(id => document.getElementById(id)).filter(Boolean).map(el => [el.id, el.scrollLeft, el.scrollTop]);
   document.getElementById('main').innerHTML = VIEWS[ui.sec]();
   document.querySelectorAll('table.grid textarea').forEach(autosize);
   main.querySelectorAll('table.grid[data-grid]').forEach(t => applyFilters(t.dataset.grid));
@@ -1584,6 +1901,7 @@ function onEdit(e) {
     S[d.list][+d.i][d.k] = el.value;
     if (el.tagName === 'TEXTAREA' && el.closest('table.grid')) autosize(el);
     saveSoon();
+    if (d.list === 'plan' && ui.sec === 'gantt') ganttDraw(false);
   } else if (d.note) {
     setNote(ui.emp, d.note, d.nk, el.value);
     if (d.nk === 'estado') {
@@ -1680,7 +1998,15 @@ document.addEventListener('change', e => { if (e.target.tagName === 'SELECT' || 
 document.addEventListener('click', e => {
   const b = e.target.closest('button, td.cell, tr[data-racigrp]'); if (!b) return;
   const d = b.dataset;
+  if (d.navgrp !== undefined) {
+    const set = new Set(ui.navClosed || []);
+    if (set.has(d.navgrp)) set.delete(d.navgrp); else set.add(d.navgrp);
+    ui.navClosed = [...set]; saveUI(); refreshNav(); return;
+  }
   if (d.go) return go(d.go);
+  if (d.gscale) { ui.ganttScale = d.gscale; saveUI(); render(); return; }
+  if (d.gemp) { ui.ganttEmp = d.gemp === '_' ? '' : d.gemp; saveUI(); render(); return; }
+  if (d.gact) return ganttAction(d.gact);
   if (d.orgemp) { ui.orgEmp = d.orgemp; ui.orgSel = ''; saveUI(); render(); return; }
   if (d.orgview) { ui.orgView = d.orgview; ui.orgSel = ''; saveUI(); render(); return; }
   if (d.orgact) return orgAction(d.orgact);
@@ -1950,13 +2276,24 @@ function importJSON(mode) {
 // Contenido añadido después de entregar la herramienta. Se incorpora una sola vez en cada navegador y solo
 // rellena lo que esté vacío, así que nunca pisa lo que el equipo ya ha escrito.
 const PARCHES = JSON.parse(document.getElementById('parches').textContent);
+// sustituye un elemento solo si sigue exactamente como lo dejó una aportación anterior (si alguien lo ha tocado, se respeta)
+function patchUpdate(u) {
+  let o = S;
+  for (const k of u.ruta.slice(0, -1)) { o = o && typeof o === 'object' ? o[k] : null; }
+  const last = u.ruta[u.ruta.length - 1];
+  if (!o || JSON.stringify(o[last]) !== JSON.stringify(u.antes)) return 0;
+  o[last] = clone(u.despues);
+  return 1;
+}
 function applyPatches() {
   S.meta = S.meta || {};
   S.meta.parches = S.meta.parches || [];
   const hechos = [];
   for (const p of PARCHES) {
     if (S.meta.parches.includes(p.id)) continue;
-    const n = mergeData(p.datos || {});
+    let n = mergeData(p.datos || {});
+    for (const u of (p.actualizarSiIgual || [])) n += patchUpdate(u);
+    for (const [k, v] of Object.entries(p.reemplazar || {})) { S[k] = clone(v); n += Array.isArray(v) ? v.length : 1; }
     S.meta.parches.push(p.id);
     if (n) hechos.push(`${p.titulo} (${n} elementos)`);
   }

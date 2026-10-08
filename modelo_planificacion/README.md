@@ -5,8 +5,15 @@ Kit para centralizar la planificación de packaging en corporativo: **corporativ
 | Archivo | Para qué sirve |
 |---|---|
 | `Modelo_Planificacion_CL.html` | Herramienta de trabajo. Se abre con doble clic (Chrome o Edge), no necesita instalación ni conexión. Guarda lo escrito en el propio navegador y exporta un JSON con todo. |
-| `Kit_Modelo_Planificacion_CL.xlsx` | La propuesta inicial en Excel: procesos, flujos (si hay), RACI, roles, asignación, organigramas, empresas, políticas, KPIs, reuniones, decisiones y plan. |
+| `Kit_Modelo_Planificacion_CL.xlsx` | Foto en Excel de todo lo anterior: notas y madurez, procesos, flujos, RACI (to-be y as-is), roles, asignación, organigramas, empresas, políticas, KPIs, reuniones, decisiones, plan de acción y Gantt mensual (calculado desde la hoja Plan). |
 | `fuentes/` | Origen de ambos: `datos_actuales.json` (último export del equipo, tiene prioridad), `datos_base.py` (propuesta inicial), `parches/` (aportaciones posteriores, como el análisis E2E de Ondupet), `plantilla.html`, `build_html.py` y `generar_kit.py`. |
+
+## Organización del menú
+
+- **Resumen**: Resumen, Exportar / importar.
+- **Datos maestros**: Empresas y plantas, Personas y roles, Organigramas, Fichas de rol.
+- **Diagnóstico y diseño**: Notas por proceso, Flujos de proceso y Matriz RACI (as-is y to-be), Políticas, KPIs y Reuniones.
+- **Plan de acción**: Plan de acción (tabla), Gantt (barras que se arrastran para cambiar fechas) y Decisiones.
 
 ## Flujo de trabajo
 

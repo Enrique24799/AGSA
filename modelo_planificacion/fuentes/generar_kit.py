@@ -87,6 +87,100 @@ def flow_order(nodos, enlaces):
     return orden
 
 
+FASE_COLORS = ['2A78D6', 'EB6834', '1BAF7A', 'EDA100', 'E87BA4', '008300', '4A3AA7', 'E34948']  # mismo orden que el Gantt de la herramienta
+
+
+def fecha(s):
+    try:
+        return dt.date.fromisoformat(s) if s else None
+    except ValueError:
+        return None
+
+
+def plan_y_gantt(wb, data, rn):
+    """Hoja Plan (tabla con fechas reales) y hoja Gantt (un mes por columna, calculada con fórmulas desde Plan)."""
+    from openpyxl.formatting.rule import FormulaRule
+    emp = {e['id']: e['nombre'] for e in data['empresas']}
+    proc = {p['id']: p['nombre'] for p in data['procesos']}
+    plan = data.get('plan', [])
+    ws = wb.create_sheet('Plan')
+    rows = []
+    for x in plan:
+        av = x.get('avance')
+        av = (100 if x.get('estado') == 'Hecho' else float(av)) / 100 if (av not in (None, '') or x.get('estado') == 'Hecho') else None
+        rows.append([x.get('fase', ''), x.get('nombre', ''), emp.get(x.get('empresa'), 'Grupo (todas)'), proc.get(x.get('proceso'), ''),
+                     x.get('actividades', ''), rn(x.get('responsable')), x.get('tipo') or 'Tarea', fecha(x.get('inicio')),
+                     fecha(x.get('fin')), None, x.get('estado', ''), av, x.get('entregables', ''), x.get('notas', '')])
+    end = table(ws, 1, ['Fase', 'Acción', 'Empresa', 'Proceso', 'Actividades', 'Responsable', 'Tipo', 'Inicio', 'Fin', 'Días',
+                        'Estado', '% avance', 'Entregables', 'Notas'], rows, [22, 46, 20, 15, 11, 26, 8, 11, 11, 7, 11, 9, 36, 30])
+    for i in range(2, end + 1):
+        ws[f'H{i}'].number_format = ws[f'I{i}'].number_format = 'dd/mm/yyyy'
+        ws[f'J{i}'] = f'=IF(AND(H{i}<>"",I{i}<>""),I{i}-H{i}+1,"")'
+        ws[f'L{i}'].number_format = '0%'
+        for c in 'GHIJKL':
+            ws[f'{c}{i}'].alignment = Alignment(horizontal='center', vertical='top')
+    ws.auto_filter.ref = f'A1:N{end}'
+    fases = []
+    for x in plan:
+        f = (x.get('fase') or '').strip() or 'Sin fase'
+        if f not in fases:
+            fases.append(f)
+    for k, f in enumerate(fases[:len(FASE_COLORS)]):
+        ws.conditional_formatting.add(f'A2:A{end}', FormulaRule(formula=[f'$A2="{f}"'], fill=fill(FASE_COLORS[k]),
+                                                                  font=Font(name=F, size=10, bold=True, color='FFFFFF')))
+    # ---- Gantt mensual
+    fechas = [d for x in plan for d in (fecha(x.get('inicio')), fecha(x.get('fin'))) if d]
+    if not fechas:
+        return
+    m0, m1 = min(fechas).replace(day=1), max(fechas).replace(day=1)
+    meses = []
+    while m0 <= m1:
+        meses.append(m0)
+        m0 = (m0.replace(day=28) + dt.timedelta(days=4)).replace(day=1)
+    g = wb.create_sheet('Gantt')
+    g.sheet_view.showGridLines = False
+    title(g, 'Gantt del plan de acción', 'Se calcula desde la hoja Plan: si cambias allí una fecha, aquí se mueve la barra. ◆ = hito.')
+    heads = ['Fase', 'Acción', 'Empresa', 'Responsable', 'Inicio', 'Fin']
+    for j, h in enumerate(heads, 1):
+        c = g.cell(row=4, column=j, value=h)
+        c.font, c.fill, c.alignment, c.border = Font(name=F, size=9, bold=True, color='FFFFFF'), fill(NAVY), CENTER, BOX
+    c0 = len(heads) + 1
+    for k, m in enumerate(meses):
+        col = c0 + k
+        c = g.cell(row=4, column=col, value=m)
+        c.number_format = 'mmm yy'
+        c.font, c.fill, c.alignment, c.border = Font(name=F, size=8, bold=True, color='FFFFFF'), fill(TEAL if m.month % 3 == 1 else NAVY), CENTER, BOX
+        g.column_dimensions[get_column_letter(col)].width = 5.2
+        q = g.cell(row=3, column=col, value=f'T{(m.month - 1) // 3 + 1} {m.year}' if m.month % 3 == 1 or k == 0 else None)
+        q.font = Font(name=F, size=8, bold=True, color=TEAL)
+    last = get_column_letter(c0 + len(meses) - 1)
+    for i in range(len(plan)):
+        r, pr = 5 + i, 2 + i
+        for j, ref in enumerate(['A', 'B', 'C', 'F', 'H', 'I'], 1):
+            c = g.cell(row=r, column=j, value=f'=IF(Plan!{ref}{pr}="","",Plan!{ref}{pr})')
+            c.font, c.border = Font(name=F, size=9, color=NAVY), BOX
+            c.alignment = Alignment(vertical='center', wrap_text=False)
+            if j >= 5:
+                c.number_format, c.alignment = 'dd/mm/yy', Alignment(horizontal='center', vertical='center')
+        for k in range(len(meses)):
+            col = get_column_letter(c0 + k)
+            c = g[f'{col}{r}']
+            c.value = (f'=IF(OR($E{r}="",$F{r}=""),"",IF(AND($E{r}<=EOMONTH({col}$4,0),$F{r}>={col}$4),'
+                       f'IF(Plan!$G{pr}="Hito","◆",1),""))')
+            c.number_format = ';;;@'
+            c.alignment = CENTER
+            c.font = Font(name=F, size=10, bold=True, color=NAVY)
+            c.border = Border(left=Side(style='hair', color=BORDER), bottom=Side(style='hair', color=BORDER))
+    rng = f'{get_column_letter(c0)}5:{last}{4 + len(plan)}'
+    first = f'{get_column_letter(c0)}5'
+    for k, f in enumerate(fases[:len(FASE_COLORS)]):
+        g.conditional_formatting.add(rng, FormulaRule(formula=[f'AND({first}=1,$A5="{f}")'], fill=fill(FASE_COLORS[k])))
+    for col, w in zip('ABCDEF', [20, 44, 16, 22, 9, 9]):
+        g.column_dimensions[col].width = w
+    g.freeze_panes = g.cell(row=5, column=c0)
+    g.page_setup.orientation = 'landscape'
+
+
 def build(data, out, origen):
     roles = data['roles']
     rid = {r['id']: r for r in roles}
@@ -121,7 +215,8 @@ def build(data, out, origen):
         ('KPIs', 'Cuadro de mando común', '=COUNTA(KPIs!A:A)-1', 'KPIs'),
         ('Reuniones', 'Cadencia de planificación del grupo', '=COUNTA(Reuniones!A:A)-1', 'reuniones'),
         ('Decisiones', 'Decisiones que hay que cerrar con dirección', '=COUNTIF(Decisiones!F:F,"Abierta")', 'abiertas'),
-        ('Plan', 'Plan de despliegue por fases', '=COUNTA(Plan!A:A)-1', 'fases'),
+        ('Plan', 'Plan de acción: acciones por fase, empresa, responsable y fechas', '=COUNTA(Plan!B:B)-1', 'acciones'),
+        ('Gantt', 'Cronograma mensual del plan de acción (se calcula desde la hoja Plan)', '=COUNTIF(Plan!G:G,"Hito")', 'hitos'),
     ]
     has_notes = (any(v for e in data.get('notas', {}).values() for v in e.values())
                  or any(v for e in (data.get('apartados') or {}).values() for v in e.values()))
@@ -440,12 +535,10 @@ def build(data, out, origen):
         ('Decisiones', ['Decisión', 'Opciones', 'Recomendación', 'Quién decide', 'Fecha límite', 'Estado', 'Resolución'],
          [[x['nombre'], x['opciones'], x['recomendacion'], x['responsable'], x['fecha'], x['estado'], x['resolucion']]
           for x in data['decisiones']], [34, 48, 44, 26, 12, 11, 34]),
-        ('Plan', ['Fase', 'Actividades', 'Entregables', 'Plazo', 'Responsable', 'Estado', 'Notas'],
-         [[x['nombre'], x['actividades'], x['entregables'], x['plazo'], rn(x['responsable']), x['estado'], x['notas']]
-          for x in data['plan']], [20, 60, 40, 12, 30, 12, 26]),
     ]
     for name, headers, rows, widths in specs:
         table(wb.create_sheet(name), 1, headers, rows, widths)
+    plan_y_gantt(wb, data, rn)
 
     for ws in wb.worksheets:
         ws.sheet_properties.tabColor = NAVY if ws.title in ('Portada', 'RACI') else BLUE

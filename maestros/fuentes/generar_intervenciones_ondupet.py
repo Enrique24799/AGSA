@@ -357,27 +357,35 @@ def celda(ws, r, j, v, centrada=False, fmt=None, bold=False):
     return c
 
 
-def construir(salida):
+def construir(salida, empresa='Ondupet', palancas=PALANCAS, cajas_flujo=CAJAS, intervenciones=INTERVENCIONES,
+              fase_nuevas=None, segunda=None):
+    """segunda = (planta, meses): añade fechas desplazadas para una segunda planta con su propia celda."""
     wb = Workbook()
     wi = wb.active
     wi.title = 'Intervenciones'
     wp = wb.create_sheet('Por palanca')
     wc = wb.create_sheet('Cajas del flujo')
 
-    nombre_pal = {p[0]: p[1] for p in PALANCAS}
-    hall_pal = {p[0]: p[2] for p in PALANCAS}
+    nombre_pal = {p[0]: p[1] for p in palancas}
+    hall_pal = {p[0]: p[2] for p in palancas}
+    fase_nuevas = fase_nuevas or {}
     cont = {}
 
     # --- Intervenciones (orden del formulario) ---
-    titulo(wi, 'Intervenciones propuestas · P2R × Ondupet',
+    titulo(wi, f'Intervenciones propuestas · P2R × {empresa}',
            'Una fila por intervención, con los campos en el orden del formulario «Nueva intervención». '
-           'Responsable: lo trae la palanca. Confianza: EST. Las fechas siguen el plan de despliegue 2027–2028.')
+           'Responsable: lo trae la palanca. Confianza: EST. Las fechas siguen el plan de despliegue 2027–2028.' +
+           (f' Las dos últimas columnas desplazan las fechas {segunda[1]} meses para {segunda[0]}, si es una celda aparte.' if segunda else ''))
     cab = ['ID', 'Palanca origen', 'Hallazgos que cura', 'De qué es este trabajo', 'Nombre', 'Qué hay que hacer',
            'Cambia tareas del flujo', 'Cajas del flujo → qué le pasa', 'Qué queremos cambiar (para el comité)',
            'Cobertura objetivo %', 'Excepción humana objetivo %', 'Resultado esperado', 'Criterio de éxito',
            'Empieza', 'Termina (go-live)', 'Confianza', 'Depende de', 'Lo que falta decidir', 'Detalle del maestro']
-    cabecera(wi, 4, cab, [8, 30, 18, 15, 30, 56, 10, 40, 46, 11, 11, 36, 40, 12, 12, 10, 34, 30, 16])
-    for k, it in enumerate(INTERVENCIONES):
+    anchos = [8, 30, 18, 15, 30, 56, 10, 40, 46, 11, 11, 36, 40, 12, 12, 10, 34, 30, 16]
+    if segunda:
+        cab += [f'Empieza · {segunda[0]}', f'Termina · {segunda[0]}']
+        anchos += [13, 13]
+    cabecera(wi, 4, cab, anchos)
+    for k, it in enumerate(intervenciones):
         r = 5 + k
         n = cont[it['pal']] = cont.get(it['pal'], 0) + 1
         iid = f"{it['pal'].split('-')[1]}.{n}"
@@ -385,13 +393,15 @@ def construir(salida):
         vals = [iid, f"{it['pal']} · {nombre_pal[it['pal']]}", hall_pal[it['pal']], it['tipo'], it['nombre'], it['que'],
                 'Sí' if it['cajas'] else 'No', cajas or None, it['comite'] or None, it['cob'], it['exc'], it['res'],
                 it['crit'], it['ini'], it['fin'], 'EST', it['dep'] or None, it['dec'] or None, it['det'] or None]
+        if segunda:
+            vals += [f'=EDATE(N{r},{segunda[1]})', f'=EDATE(O{r},{segunda[1]})']
         for j, v in enumerate(vals, 1):
-            fmt = '0%' if j in (10, 11) else 'dd/mm/yyyy' if j in (14, 15) else None
-            celda(wi, r, j, v, centrada=j in (1, 4, 7, 10, 11, 14, 15, 16), fmt=fmt)
+            fmt = '0%' if j in (10, 11) else 'dd/mm/yyyy' if j in (14, 15, 20, 21) else None
+            celda(wi, r, j, v, centrada=j in (1, 4, 7, 10, 11, 14, 15, 16, 20, 21), fmt=fmt)
         wi.cell(r, 4).fill = fill(COLOR_TIPO[it['tipo']])
-    i_ult = 4 + len(INTERVENCIONES)
+    i_ult = 4 + len(intervenciones)
     wi.freeze_panes = 'F5'
-    wi.auto_filter.ref = f'A4:S{i_ult}'
+    wi.auto_filter.ref = f'A4:{wi.cell(4, len(cab)).column_letter}{i_ult}'
 
     # --- Por palanca (fórmulas sobre Intervenciones) ---
     titulo(wp, 'Resumen por palanca', 'Se recalcula al cambiar la hoja Intervenciones.')
@@ -399,7 +409,7 @@ def construir(salida):
     cabecera(wp, 4, ['Palanca', 'Nombre', 'Hallazgos', 'Intervenciones', *tipos, 'Empieza', 'Último go-live'],
              [10, 36, 22, 13, 11, 15, 10, 10, 12, 14])
     rng = lambda col: f'Intervenciones!${col}$5:${col}${i_ult}'
-    for k, (pid, nom, hs) in enumerate(PALANCAS):
+    for k, (pid, nom, hs) in enumerate(palancas):
         r = 5 + k
         crit = f'"{pid} · {nom}"'
         vals = [pid, nom, hs, f'=COUNTIF({rng("B")},{crit})',
@@ -407,7 +417,7 @@ def construir(salida):
                 f'=_xlfn.MINIFS({rng("N")},{rng("B")},{crit})', f'=_xlfn.MAXIFS({rng("O")},{rng("B")},{crit})']
         for j, v in enumerate(vals, 1):
             celda(wp, r, j, v, centrada=j != 2 and j != 3, fmt='dd/mm/yyyy' if j >= 9 else None)
-    t = 5 + len(PALANCAS)
+    t = 5 + len(palancas)
     celda(wp, t, 1, 'Total', bold=True)
     for j in range(4, 9):
         col = wp.cell(4, j).column_letter
@@ -415,14 +425,19 @@ def construir(salida):
     wp.freeze_panes = 'A5'
 
     # --- Cajas del flujo: qué intervención toca cada caja ---
-    titulo(wc, 'Cajas del flujo as-is de Ondupet que cambian',
+    titulo(wc, f'Cajas del flujo as-is de {empresa} que cambian',
            'Lo que el to-be pintará en cada caja. «Nueva tarea» son tareas que añade una intervención.')
     cabecera(wc, 4, ['Fase', 'Caja', 'Nº intervenciones', 'Intervenciones y qué le pasa'], [30, 52, 14, 80])
-    todas = CAJAS + sorted({(None, c) for it in INTERVENCIONES for c, q in it['cajas'] if q == NUEVA}, key=str)
+    nuevas = []
+    for it in intervenciones:
+        for c, q in it['cajas']:
+            if q == NUEVA and c not in nuevas:
+                nuevas.append(c)
+    todas = cajas_flujo + [(fase_nuevas.get(c, 'S&OP y Plan Maestro') + ' (nueva)', c) for c in nuevas]
     for k, (fase, caja) in enumerate(todas):
         r = 5 + k
-        toca = [f"{it['nombre']} ({it['tipo']}) → {q}" for it in INTERVENCIONES for c, q in it['cajas'] if c == caja]
-        celda(wc, r, 1, fase or 'S&OP y Plan Maestro (nueva)')
+        toca = [f"{it['nombre']} ({it['tipo']}) → {q}" for it in intervenciones for c, q in it['cajas'] if c == caja]
+        celda(wc, r, 1, fase)
         celda(wc, r, 2, caja)
         celda(wc, r, 3, f'=SUMPRODUCT(--ISNUMBER(SEARCH(B{r}&" → ",Intervenciones!$H$5:$H${i_ult})))', centrada=True)
         celda(wc, r, 4, '\n'.join(toca) or None)

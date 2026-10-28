@@ -7,37 +7,34 @@
 <style>
 :root{
   color-scheme:light;
-  --page:#f9f9f7;--surface:#fcfcfb;--card:#ffffff;
+  --page:#f9f9f7;--card:#ffffff;--surface:#fcfcfb;
   --ink:#0b0b0b;--ink-2:#52514e;--muted:#898781;
   --grid:#e1e0d9;--axis:#c3c2b7;--band:#f0efec;--ring:rgba(11,11,11,.10);
   --brand:#0d1b2a;--accent:#0077b6;
-  --ok-bar:#b9b7ae;--good:#0ca30c;--good-ink:#006300;--warning:#fab219;--critical:#d03b3b;
-  --warn-wash:#fff7e3;--crit-wash:#fdeeee;--good-wash:#eaf6ea;
+  --good:#0ca30c;--good-ink:#006300;--warning:#fab219;--critical:#d03b3b;
+  --warn-wash:#fff7e3;--crit-wash:#fdeeee;--good-wash:#eaf6ea;--chip:#f1f0ec;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --page:#0d0d0d;--surface:#1a1a19;--card:#1a1a19;
+    --page:#0d0d0d;--card:#1a1a19;--surface:#1a1a19;
     --ink:#f0efec;--ink-2:#c3c2b7;--muted:#898781;
     --grid:#2c2c2a;--axis:#383835;--band:#262624;--ring:rgba(255,255,255,.10);
-    --brand:#f0efec;--accent:#3987e5;
-    --ok-bar:#5d5c57;--good-ink:#0ca30c;
-    --warn-wash:#2b2412;--crit-wash:#2e1717;--good-wash:#14240f;
+    --brand:#f0efec;--accent:#3987e5;--good-ink:#0ca30c;
+    --warn-wash:#2b2412;--crit-wash:#2e1717;--good-wash:#14240f;--chip:#262624;
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --page:#0d0d0d;--surface:#1a1a19;--card:#1a1a19;
+  --page:#0d0d0d;--card:#1a1a19;--surface:#1a1a19;
   --ink:#f0efec;--ink-2:#c3c2b7;--muted:#898781;
   --grid:#2c2c2a;--axis:#383835;--band:#262624;--ring:rgba(255,255,255,.10);
-  --brand:#f0efec;--accent:#3987e5;
-  --ok-bar:#5d5c57;--good-ink:#0ca30c;
-  --warn-wash:#2b2412;--crit-wash:#2e1717;--good-wash:#14240f;
+  --brand:#f0efec;--accent:#3987e5;--good-ink:#0ca30c;
+  --warn-wash:#2b2412;--crit-wash:#2e1717;--good-wash:#14240f;--chip:#262624;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--ink);line-height:1.45;}
 .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 40px;}
-/* Cabecera */
 .top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:22px;}
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
 h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spacing:-.01em;}
@@ -45,72 +42,66 @@ h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spa
 .verdict{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:15px;font-weight:600;border:1px solid var(--ring);background:var(--card);}
 .verdict .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
 /* KPI */
-.kpis{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr;gap:14px;margin-bottom:22px;}
+.kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:14px;margin-bottom:22px;}
 .tile{background:var(--card);border:1px solid var(--ring);border-radius:12px;padding:18px 20px;}
-.tile .lbl{font-size:13px;color:var(--ink-2);font-weight:500;}
+.tile .lbl{font-size:13px;color:var(--ink-2);font-weight:500;display:flex;align-items:center;gap:6px;}
 .tile .val{font-size:32px;font-weight:650;margin:6px 0 2px;letter-spacing:-.01em;}
 .tile.hero .val{font-size:48px;line-height:1.05;}
-.tile .val small{font-size:15px;font-weight:500;color:var(--ink-2);margin-left:4px;}
+.tile .val small{font-size:15px;font-weight:500;color:var(--ink-2);margin-left:5px;}
 .tile .sub{font-size:13px;color:var(--muted);}
-.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;margin-top:8px;}
-.tag i{width:8px;height:8px;border-radius:50%;display:inline-block;}
-.tag.ok{background:var(--good-wash);color:var(--good-ink);} .tag.ok i{background:var(--good);}
-.tag.warn{background:var(--warn-wash);color:var(--ink);} .tag.warn i{background:var(--warning);}
-.tag.crit{background:var(--crit-wash);color:var(--ink);} .tag.crit i{background:var(--critical);}
 /* Tarjetas */
 .card{background:var(--card);border:1px solid var(--ring);border-radius:12px;padding:20px 22px;margin-bottom:22px;}
 .card h2{font-size:17px;font-weight:650;margin-bottom:2px;}
-.card .lead{font-size:13px;color:var(--muted);margin-bottom:14px;}
-/* Lista de atención */
-.issue{display:grid;grid-template-columns:110px 1fr 150px;gap:6px 18px;align-items:start;padding:14px 16px 14px 14px;border-radius:10px;border-left:5px solid var(--warning);background:var(--warn-wash);margin-bottom:10px;}
-.issue.crit{border-left-color:var(--critical);background:var(--crit-wash);}
-.issue .sev{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px;padding-top:2px;}
-.issue .sev svg{flex-shrink:0;}
-.issue .who{font-size:13px;color:var(--ink-2);}
-.issue .who b{color:var(--ink);font-size:14px;}
-.issue .what{font-size:15px;font-weight:600;margin:3px 0 4px;}
-.issue .risk{font-size:13.5px;color:var(--ink-2);}
-.issue .risk b{color:var(--ink);font-weight:600;}
-.issue .num{text-align:right;}
-.issue .num .big{font-size:24px;font-weight:650;display:block;line-height:1.1;}
-.issue .num .small{font-size:12.5px;color:var(--ink-2);}
-.allok{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:10px;background:var(--good-wash);font-size:15px;font-weight:600;}
-/* Gráfico */
-.chartbox{position:relative;}
-#chart svg{display:block;width:100%;}
-#chart text{font-family:inherit;}
-.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;color:var(--ink-2);margin:2px 0 10px;}
-.legend span{display:inline-flex;align-items:center;gap:6px;}
-.legend i{display:inline-block;width:14px;height:10px;border-radius:2px;}
-.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--ring);box-shadow:0 6px 24px rgba(0,0,0,.14);border-radius:8px;padding:9px 12px;font-size:12.5px;min-width:190px;opacity:0;transition:opacity .12s;z-index:5;}
-.tip b{font-size:13.5px;}
-.tip .r{display:flex;justify-content:space-between;gap:14px;color:var(--ink-2);font-variant-numeric:tabular-nums;}
-.tip .r span:last-child{color:var(--ink);font-weight:600;}
-details{margin-top:12px;}
+.card .lead{font-size:13px;color:var(--muted);margin-bottom:12px;}
+.grp{margin-top:16px;}
+.grp:first-of-type{margin-top:6px;}
+.grp-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding-bottom:8px;border-bottom:1px solid var(--grid);}
+.grp-h h3{font-size:15px;font-weight:650;display:flex;align-items:center;gap:7px;}
+.grp-h .n{font-size:13px;color:var(--ink-2);}
+.grp-h p{flex-basis:100%;font-size:13px;color:var(--ink-2);}
+/* Filas de órdenes */
+.row,.rowh{display:grid;grid-template-columns:92px minmax(200px,1.7fr) minmax(130px,1fr) 150px 112px 150px;gap:14px;align-items:center;padding:11px 12px;}
+.rowh{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding-top:10px;padding-bottom:4px;}
+.row{border-radius:9px;margin-top:6px;border-left:4px solid var(--warning);background:var(--warn-wash);}
+.row.crit{border-left-color:var(--critical);background:var(--crit-wash);}
+.sev{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px;}
+.who b{font-size:14px;}
+.who div{font-size:12.5px;color:var(--ink-2);}
+.mat{display:inline-block;font-size:12.5px;font-weight:600;background:var(--chip);border:1px solid var(--ring);border-radius:6px;padding:2px 8px;white-space:nowrap;}
+.kgs{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;}
+.kgs b{color:var(--ink);font-weight:600;}
+.dv{text-align:right;}
+.dv .big{display:block;font-size:20px;font-weight:650;line-height:1.1;}
+.dv .pct{font-size:12.5px;color:var(--ink-2);}
+.none{font-size:13.5px;color:var(--ink-2);padding:12px;}
+.mini{display:block;width:100%;height:22px;}
+.allok{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:10px;background:var(--good-wash);font-size:15px;font-weight:600;margin-top:8px;}
+/* Tablas */
+details{margin-top:4px;}
 summary{cursor:pointer;font-size:13px;color:var(--accent);font-weight:600;}
-.tw{overflow-x:auto;margin-top:10px;}
+.tw{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
 th{text-align:left;font-weight:600;color:var(--ink-2);padding:7px 10px;border-bottom:1px solid var(--axis);white-space:nowrap;}
-td{padding:7px 10px;border-bottom:1px solid var(--grid);white-space:nowrap;}
+td{padding:8px 10px;border-bottom:1px solid var(--grid);white-space:nowrap;}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;}
+.st{display:inline-flex;align-items:center;gap:6px;}
 /* Pie */
 .foot{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;font-size:12.5px;color:var(--muted);border-top:1px solid var(--grid);padding-top:14px;}
-.foot label{display:inline-flex;align-items:center;gap:6px;}
-.foot input{width:64px;padding:3px 6px;border:1px solid var(--axis);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;text-align:right;}
 .foot button{background:none;border:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:0;}
 .foot .sp{flex:1;}
-@media (max-width:900px){
+@media (max-width:980px){
   .kpis{grid-template-columns:1fr 1fr;}
   .tile.hero{grid-column:1 / -1;}
+  .rowh{display:none;}
+  .row{grid-template-columns:1fr auto;grid-template-areas:"sev dv" "who dv" "mat mat" "kgs kgs" "mini mini";gap:4px 12px;}
+  .row .sev{grid-area:sev;} .row .who{grid-area:who;} .row .m{grid-area:mat;margin-top:4px;}
+  .row .kgs{grid-area:kgs;} .row .dv{grid-area:dv;align-self:start;} .row .bar{grid-area:mini;max-width:260px;}
 }
 @media (max-width:600px){
   .wrap{padding:18px 16px 32px;}
   h1{font-size:21px;}
   .kpis{grid-template-columns:1fr;}
   .tile.hero .val{font-size:40px;}
-  .issue{grid-template-columns:1fr;gap:4px;}
-  .issue .num{text-align:left;}
-  .issue .num .big{display:inline;margin-right:8px;font-size:20px;}
 }
 </style>
 </head>
@@ -119,7 +110,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;}
   <header class="top">
     <div>
       <div class="eyebrow">ONDUPET · Balance de masas</div>
-      <h1>Consumo de bobina frente a lo fabricado</h1>
+      <h1>Desviaciones de consumo de bobina</h1>
       <div class="meta" id="meta"></div>
     </div>
     <div class="verdict" id="verdict"></div>
@@ -128,28 +119,24 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;}
   <section class="kpis" id="kpis"></section>
 
   <section class="card">
-    <h2>Órdenes que necesitan atención</h2>
-    <p class="lead">Ordenadas por gravedad e impacto. Cada una indica qué pasa y qué puede pasar si no se actúa.</p>
-    <div id="attention"></div>
+    <h2>Órdenes con desviación</h2>
+    <p class="lead" id="lead"></p>
+    <div id="lista"></div>
   </section>
 
   <section class="card">
-    <h2>Desviación de cada orden</h2>
-    <p class="lead" id="chartLead"></p>
-    <div class="legend">
-      <span><i style="background:var(--ok-bar)"></i>Dentro de tolerancia</span>
-      <span><i style="background:var(--warning)"></i>Revisar</span>
-      <span><i style="background:var(--critical)"></i>Crítico</span>
-      <span><i style="background:var(--band);outline:1px solid var(--grid)"></i>Franja de tolerancia</span>
-    </div>
-    <div class="chartbox"><div id="chart"></div><div class="tip" id="tip"></div></div>
-    <details><summary>Ver los datos en tabla</summary><div class="tw"><table id="tbl"></table></div></details>
+    <h2>Desviación por material</h2>
+    <p class="lead">Suma de todas las órdenes de cada bobina.</p>
+    <div class="tw"><table id="tMat"></table></div>
+  </section>
+
+  <section class="card">
+    <details><summary id="sumTodas">Ver todas las órdenes</summary><div class="tw" style="margin-top:10px"><table id="tTodas"></table></div></details>
   </section>
 
   <footer class="foot">
-    <span>Desviación = consumo final de bobina (consumido − devuelto) frente al teórico de lo notificado (cantidad notificada × LdM).</span>
+    <span>Desviación = consumo de bobina (consumido − devuelto) frente al teórico de lo notificado (cantidad notificada × consumo de la LdM).</span>
     <span class="sp"></span>
-    <label>Precio de referencia <input type="number" id="precio" min="0" step="0.05"> €/kg</label>
     <span id="fuente"></span>
     <button type="button" onclick="document.getElementById('fJSON').click()">Cargar datos</button>
     <button type="button" id="btnDemo" onclick="usarDemo()">Ver demo</button>
@@ -356,7 +343,7 @@ function calcularBalance(datos){
 /* ===================== FIN MOTOR DE CÁLCULO ===================== */
 
 /* =====================================================================
-   DATOS DEMO (semana tipo con un caso de cada problema)
+   DATOS DEMO
    ===================================================================== */
 function datosDemo(){
   return {
@@ -370,7 +357,7 @@ function datosDemo(){
       {maquina:'T2',seq:2,of:'OF-26422',pedido:'PED-6124',articulo:'Envase 500 cc',bobina:'LAM-PET-500x800',gUd:20,cantPlan:5000,cantFab:5000},
       {maquina:'T2',seq:3,of:'OF-26423',pedido:'PED-6120',articulo:'Envase 1000 cc',bobina:'LAM-PET-500x800',gUd:25,cantPlan:30000,cantFab:30000},
       {maquina:'T2',seq:4,of:'OF-26424',pedido:'PED-6130',articulo:'Bandeja 187x137',bobina:'LAM-PET-450x700',gUd:18,cantPlan:10000,cantFab:8800},
-      {maquina:'T3',seq:1,of:'OF-26431',pedido:'PED-6140',articulo:'Bandeja 260x190 h50',bobina:'LAM-PET-600x900',gUd:24,cantPlan:25000,cantFab:25000},
+      {maquina:'T3',seq:1,of:'OF-26431',pedido:'PED-6140',articulo:'Bandeja 260x190 h50',bobina:'LAM-PET-600x900',gUd:24,cantPlan:25000,cantFab:27000},
       {maquina:'T3',seq:2,of:'OF-26432',pedido:'PED-6141',articulo:'Bandeja 260x190 h60',bobina:'LAM-PET-600x900',gUd:26,cantPlan:15000,cantFab:14600},
       {maquina:'T3',seq:3,of:'OF-26433',pedido:'PED-6145',articulo:'Bandeja 210x150',bobina:'LAM-PET-600x900',gUd:20,cantPlan:12000,cantFab:12000}
     ],
@@ -383,11 +370,11 @@ function datosDemo(){
       {fecha:'2026-10-20T07:15',lote:'L-251022',bobina:'LAM-PET-500x800',kg:400,of:'OF-26423'},
       {fecha:'2026-10-21T06:00',lote:'L-251003',bobina:'LAM-PET-450x700',kg:150,of:'OF-26424'},
       {fecha:'2026-10-20T06:00',lote:'L-251030',bobina:'LAM-PET-600x900',kg:700,of:'OF-26431'},
-      {fecha:'2026-10-21T09:20',lote:'L-251031',bobina:'LAM-PET-600x900',kg:650,of:'OF-26432'},
-      {fecha:'2026-10-21T15:45',lote:'L-251090',bobina:'LAM-PET-550x900',kg:350,of:'OF-26432'}
+      {fecha:'2026-10-21T09:20',lote:'L-251031',bobina:'LAM-PET-600x900',kg:650,of:'OF-26432'}
     ],
     devoluciones:[
       {fecha:'2026-10-19T22:00',lote:'L-251002',kg:140},
+      {fecha:'2026-10-20T21:40',lote:'L-251010',kg:90},
       {fecha:'2026-10-20T22:15',lote:'L-251022',kg:90},
       {fecha:'2026-10-21T23:30',lote:'L-251031',kg:128}
     ],
@@ -398,204 +385,113 @@ function datosDemo(){
 /* =====================================================================
    VISTA DE DIRECCIÓN
    ===================================================================== */
-var LS_DATOS='ondupet_balance_direccion_datos_v1',LS_PRECIO='ondupet_balance_direccion_precio_v1';
-var DATOS=null,FUENTE='demo',PRECIO=1.6,ANALISIS=null;
-var SEV={1:{cls:'ok',txt:'En tolerancia'},2:{cls:'warn',txt:'Revisar'},3:{cls:'crit',txt:'Crítico'}};
+var LS_DATOS='ondupet_balance_direccion_datos_v1';
+var DATOS=null,FUENTE='demo';
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function nf(x,d){return (x==null||!isFinite(x))?'—':(Math.abs(x)<Math.pow(10,-d)/2?0:x).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function sg(x,d){return (x>=Math.pow(10,-d)/2?'+':x<=-Math.pow(10,-d)/2?'−':'')+nf(Math.abs(x),d);}
-function eur(x){return '≈ '+nf(Math.round(x),0)+' €';}
+function pct(x){return x==null?'—':sg(x,1)+' %';}
 function fechaCorta(s){var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');if(!m)return '';var meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return (+m[3])+' '+meses[+m[2]-1]+' '+m[1];}
-function iconoSev(s){
+function icono(s){
   if(s===3)return '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1 13 12H1z" fill="var(--critical)"/><rect x="6.3" y="5" width="1.4" height="3.6" rx=".7" fill="#fff"/><circle cx="7" cy="10.3" r=".8" fill="#fff"/></svg>';
   if(s===2)return '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="var(--warning)"/><rect x="6.3" y="3.4" width="1.4" height="4.4" rx=".7" fill="#0b0b0b"/><circle cx="7" cy="10.1" r=".8" fill="#0b0b0b"/></svg>';
   return '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="var(--good)"/><path d="M4.2 7.2 6.2 9.1 9.9 5.1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
+var SEV={1:'En tolerancia',2:'Revisar',3:'Crítico'},SEV_CORTO={1:'OK',2:'Revisar',3:'Crítico'};
 
-// Diagnóstico por orden: qué pasa, gravedad, impacto en kg y qué puede pasar
-function analizar(datos,R,tol){
-  var porOf={};R.ordenes.forEach(function(o){porOf[o.of]=o;});
-  var fuera={};
-  (datos.consumos||[]).forEach(function(c){
-    var o=porOf[String(c.of||'').trim()],mat=String(c.bobina||'').trim(),kg=num(c.kg);
-    if(o&&o.bobina&&mat&&mat!==o.bobina&&kg>0){var f=fuera[o.of]=fuera[o.of]||{kg:0,mats:[]};f.kg+=kg;if(f.mats.indexOf(mat)<0)f.mats.push(mat);}
-  });
-  var lotesNoImp={};
-  var filas=R.ordenes.map(function(o){
-    var inc=[];
-    // Sobrante sin devolver: la última orden de la cadena tiene exceso de un lote que aún no se ha devuelto
-    var pendKg=0,pendLotes=[];
-    if(o===o.cadena.ultima)o.filas.forEach(function(p){if(p.exc>EPS&&p.L.devuelto<=EPS){pendKg+=p.exc;pendLotes.push(p.L.lote);}});
-    if(pendKg>0.5)inc.push({sev:2,kg:pendKg,big:nf(pendKg,0)+' kg',
-      que:'Sobrante de bobina sin devolver',
-      det:'del lote '+pendLotes.join(', ')+' · desviación provisional '+(o.desvPct==null?'—':sg(o.desvPct,1)+' %'),
-      riesgo:'Si no se devuelve antes de cerrar la orden, el pedido absorbe <b>'+nf(pendKg,0)+' kg de merma ('+eur(pendKg*PRECIO)+')</b>.'});
-    if(fuera[o.of]){var f=fuera[o.of];inc.push({sev:3,kg:f.kg,big:nf(f.kg,0)+' kg',
-      que:'Bobina fuera de la lista de materiales',
-      det:'de '+f.mats.join(', ')+' sin repartir',
-      riesgo:'Ese consumo <b>no llega al coste de ningún pedido ('+eur(f.kg*PRECIO)+')</b> y el stock de SAP descuadra hasta que se asigne o se devuelva.'});}
-    o.filas.forEach(function(p){if(p.L.noImputado>EPS&&!lotesNoImp[p.L.lote]){lotesNoImp[p.L.lote]=1;inc.push({sev:3,kg:p.L.noImputado,big:nf(p.L.noImputado,0)+' kg',
-      que:'Devolución mayor que el consumo',
-      det:'del lote '+p.L.lote+' sin imputar',
-      riesgo:'El stock de bobina en SAP queda <b>inflado en '+nf(p.L.noImputado,0)+' kg</b>. Revisar la pesada de la devolución.'});}});
-    if(!pendKg){
-      if(o.tReal<=EPS&&o.consNeto>0.5)inc.push({sev:2,kg:o.consNeto,big:nf(o.consNeto,0)+' kg',que:'Consumo sin producción notificada',det:'consumidos sin cantidad notificada',
-        riesgo:'Si la orden no se notifica, <b>'+nf(o.consNeto,0)+' kg</b> quedarán como merma.'});
-      else if(o.desvPct!=null&&Math.abs(o.desvPct)>tol){
-        var s=Math.abs(o.desvPct)>2*tol?3:2,kg=Math.abs(o.desv);
-        if(o.desv>0)inc.push({sev:s,kg:kg,big:sg(o.desvPct,1)+' %',que:'Consume más bobina de la teórica',det:sg(o.desv,0)+' kg sobre lo notificado',
-          riesgo:'<b>Sobrecoste '+eur(kg*PRECIO)+'</b> en el pedido. Si se repite, revisar pérdidas de arranque o el consumo de la LdM.'});
-        else inc.push({sev:s,kg:kg,big:sg(o.desvPct,1)+' %',que:'Consume menos bobina de la teórica',det:sg(o.desv,0)+' kg sobre lo notificado',
-          riesgo:'Probable <b>consumo sin declarar ('+nf(kg,0)+' kg)</b>: el stock de SAP queda por encima del real y el coste del pedido, infravalorado.'});
-      }
+// Gravedad por desviación: fuera de ±tol = revisar; fuera de ±2·tol = crítico
+function gravedad(o,tol){
+  if(o.tReal<=EPS)return o.consNeto>0.5?3:1;     // consumo sin producción notificada
+  var a=Math.abs(o.desvPct);
+  return a>2*tol?3:a>tol?2:1;
+}
+
+// Barra divergente pequeña: centro = teórico, franja = tolerancia
+function mini(v,sev,tol,M){
+  var W=150,H=22,c=W/2,sx=function(x){return c+Math.max(-1,Math.min(1,x/M))*(c-4);};
+  var col=sev===3?'var(--critical)':sev===2?'var(--warning)':'var(--axis)';
+  var s='<svg class="mini" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">';
+  s+='<rect x="'+sx(-tol)+'" y="2" width="'+(sx(tol)-sx(-tol))+'" height="'+(H-4)+'" fill="var(--band)"/>';
+  if(v!=null){
+    var xb=sx(v),xa=c,w=Math.abs(xb-xa),r=Math.min(3,w),y=6,h=H-12;
+    if(w>0.5){
+      var d=v>=0?'M'+xa+','+y+'H'+(xb-r)+'Q'+xb+','+y+' '+xb+','+(y+r)+'V'+(y+h-r)+'Q'+xb+','+(y+h)+' '+(xb-r)+','+(y+h)+'H'+xa+'Z'
+                 :'M'+xa+','+y+'H'+(xb+r)+'Q'+xb+','+y+' '+xb+','+(y+r)+'V'+(y+h-r)+'Q'+xb+','+(y+h)+' '+(xb+r)+','+(y+h)+'H'+xa+'Z';
+      s+='<path d="'+d+'" fill="'+col+'"/>';
     }
-    inc.sort(function(a,b){return b.sev-a.sev||b.kg-a.kg;});
-    var sev=inc.length?inc[0].sev:1;
-    return {o:o,inc:inc,sev:sev,pendKg:pendKg,fueraKg:fuera[o.of]?fuera[o.of].kg:0,impacto:inc.reduce(function(s,i){return s+i.kg;},0)};
-  });
-  var regularizar=0;filas.forEach(function(f){regularizar+=f.pendKg+f.fueraKg;});
-  R.lotes.forEach(function(L){regularizar+=L.noImputado;});
-  return {filas:filas,regularizar:regularizar};
+  }
+  s+='<line x1="'+c+'" x2="'+c+'" y1="1" y2="'+(H-1)+'" stroke="var(--axis)" stroke-width="1.5"/></svg>';
+  return s;
 }
 
 function render(){
   var tol=num(DATOS.cfg&&DATOS.cfg.tol)||3;
-  var R=calcularBalance(DATOS);
-  var A=ANALISIS=analizar(DATOS,R,tol);
-  var T=R.tot;
-  var crit=A.filas.filter(function(f){return f.sev===3;}).length,warn=A.filas.filter(function(f){return f.sev===2;}).length;
-  var maqs={};R.ordenes.forEach(function(o){maqs[o.maquina]=1;});
+  var R=calcularBalance(DATOS),T=R.tot;
+  var filas=R.ordenes.map(function(o){return {o:o,sev:gravedad(o,tol)};});
+  var exceso=filas.filter(function(f){return f.sev>1&&f.o.desv>0;}),falta=filas.filter(function(f){return f.sev>1&&f.o.desv<0;});
+  var orden=function(a,b){return b.sev-a.sev||Math.abs(b.o.desv)-Math.abs(a.o.desv);};
+  exceso.sort(orden);falta.sort(orden);
+  var kgEx=exceso.reduce(function(s,f){return s+f.o.desv;},0),kgFa=falta.reduce(function(s,f){return s+f.o.desv;},0);
+  var maxSev=function(l){return l.reduce(function(m,f){return Math.max(m,f.sev);},1);};
+  var nFuera=exceso.length+falta.length,maqs={};R.ordenes.forEach(function(o){maqs[o.maquina]=1;});
 
-  // Cabecera
   var fechas=(DATOS.consumos||[]).map(function(c){return c.fecha||'';}).concat((DATOS.devoluciones||[]).map(function(d){return d.fecha||'';})).filter(Boolean).sort();
   document.getElementById('meta').textContent=(fechas.length?'Del '+fechaCorta(fechas[0])+' al '+fechaCorta(fechas[fechas.length-1])+' · ':'')+R.ordenes.length+' órdenes · '+Object.keys(maqs).length+' máquinas';
-  var v=document.getElementById('verdict');
-  if(crit)v.innerHTML='<span class="dot" style="background:var(--critical)"></span>'+crit+(crit===1?' orden crítica':' órdenes críticas')+(warn?' · '+warn+' a revisar':'');
-  else if(warn)v.innerHTML='<span class="dot" style="background:var(--warning)"></span>'+warn+(warn===1?' orden a revisar':' órdenes a revisar');
-  else v.innerHTML='<span class="dot" style="background:var(--good)"></span>Todo dentro de tolerancia';
+  var nCrit=exceso.concat(falta).filter(function(f){return f.sev===3;}).length;
+  document.getElementById('verdict').innerHTML=nFuera?
+    '<span class="dot" style="background:var('+(nCrit?'--critical':'--warning')+')"></span>'+nFuera+(nFuera===1?' orden fuera':' órdenes fuera')+' de tolerancia (±'+nf(tol,0)+' %)':
+    '<span class="dot" style="background:var(--good)"></span>Todas las órdenes dentro de tolerancia';
 
-  // KPIs
-  var sGlobal=T.desvPct==null?1:Math.abs(T.desvPct)>2*tol?3:Math.abs(T.desvPct)>tol?2:1;
-  var pend=A.filas.reduce(function(s,f){return s+f.pendKg;},0);
   document.getElementById('kpis').innerHTML=
-    '<div class="tile hero"><div class="lbl">Merma de bobina</div><div class="val">'+(T.desvPct==null?'—':sg(T.desvPct,1)+' %')+'</div>'+
-      '<div class="sub">'+sg(T.desv,0)+' kg sobre '+nf(T.tReal,0)+' kg teóricos'+(pend>0.5?' · incluye '+nf(pend,0)+' kg aún sin devolver':'')+'</div>'+
-      '<span class="tag '+SEV[sGlobal].cls+'"><i></i>'+(sGlobal===1?'Dentro de tolerancia (±'+nf(tol,0)+' %)':sGlobal===2?'Por encima de tolerancia (±'+nf(tol,0)+' %)':'Muy por encima de tolerancia (±'+nf(tol,0)+' %)')+'</span></div>'+
-    '<div class="tile"><div class="lbl">Coste estimado de la merma</div><div class="val">'+(T.desv>0?nf(Math.round(T.desv*PRECIO),0)+'<small>€</small>':'0<small>€</small>')+'</div><div class="sub">A '+nf(PRECIO,2)+' €/kg de referencia</div></div>'+
-    '<div class="tile"><div class="lbl">Órdenes con problemas</div><div class="val">'+(crit+warn)+'<small>de '+R.ordenes.length+'</small></div><div class="sub">'+crit+' críticas · '+warn+' a revisar</div></div>'+
-    '<div class="tile"><div class="lbl">Bobina por regularizar</div><div class="val">'+nf(A.regularizar,0)+'<small>kg</small></div><div class="sub">Sin devolver, sin asignar o mal pesada</div></div>';
+    '<div class="tile hero"><div class="lbl">Desviación global</div><div class="val">'+pct(T.desvPct)+'</div><div class="sub">'+sg(T.desv,0)+' kg sobre '+nf(T.tReal,0)+' kg teóricos</div></div>'+
+    '<div class="tile"><div class="lbl">'+icono(maxSev(exceso)).replace('width="14"','width="13"')+'Consumo por encima</div><div class="val">'+exceso.length+'<small>'+(exceso.length===1?'orden':'órdenes')+'</small></div><div class="sub">'+(exceso.length?sg(kgEx,0)+' kg sobre el teórico':'Ninguna fuera de tolerancia')+'</div></div>'+
+    '<div class="tile"><div class="lbl">'+icono(maxSev(falta)).replace('width="14"','width="13"')+'Falta consumo</div><div class="val">'+falta.length+'<small>'+(falta.length===1?'orden':'órdenes')+'</small></div><div class="sub">'+(falta.length?sg(kgFa,0)+' kg bajo el teórico':'Ninguna fuera de tolerancia')+'</div></div>'+
+    '<div class="tile"><div class="lbl">En tolerancia</div><div class="val">'+(R.ordenes.length-nFuera)+'<small>de '+R.ordenes.length+'</small></div><div class="sub">Dentro de ±'+nf(tol,0)+' %</div></div>';
 
-  // Lista de atención
-  var lista=A.filas.filter(function(f){return f.sev>1;}).sort(function(a,b){return b.sev-a.sev||b.impacto-a.impacto;});
-  var h='';
-  lista.forEach(function(f){
-    var o=f.o,p=f.inc[0];
-    h+='<article class="issue '+(f.sev===3?'crit':'warn')+'">'+
-      '<div class="sev">'+iconoSev(f.sev)+SEV[f.sev].txt+'</div>'+
-      '<div><div class="who"><b>'+esc(o.of)+'</b> · '+esc(o.pedido)+' · '+esc(o.maquina)+' · '+esc(o.articulo)+'</div>'+
-        '<div class="what">'+esc(p.que)+'</div>'+
-        '<div class="risk">'+p.riesgo+'</div>'+
-        (f.inc.length>1?'<div class="risk" style="margin-top:4px">Además: '+f.inc.slice(1).map(function(i){return esc(i.que.toLowerCase())+' ('+esc(i.big)+' '+esc(i.det)+')';}).join('; ')+'.</div>':'')+
-      '</div>'+
-      '<div class="num"><span class="big">'+esc(p.big)+'</span>'+
-        '<span class="small">'+esc(p.det)+'</span></div>'+
-    '</article>';
-  });
-  document.getElementById('attention').innerHTML=h||'<div class="allok">'+iconoSev(1)+'Ninguna orden necesita atención: todas están dentro de tolerancia.</div>';
+  document.getElementById('lead').textContent='Solo las órdenes fuera de ±'+nf(tol,0)+' %. Crítico: fuera de ±'+nf(2*tol,0)+' %.';
+  var M=Math.max(2*tol,Math.max.apply(null,exceso.concat(falta).map(function(f){return f.o.desvPct==null?0:Math.abs(f.o.desvPct);}).concat([0])));
+  function grupo(titulo,ico,texto,lista){
+    var h='<div class="grp"><div class="grp-h"><h3>'+ico+titulo+'</h3><span class="n">'+lista.length+(lista.length===1?' orden':' órdenes')+'</span><p>'+texto+'</p></div>';
+    if(!lista.length)return h+'<div class="none">Ninguna orden.</div></div>';
+    h+='<div class="rowh"><span>Estado</span><span>Orden</span><span>Material</span><span>Teórico → consumido</span><span style="text-align:right">Desviación</span><span>±'+nf(tol,0)+' %</span></div>';
+    lista.forEach(function(f){var o=f.o;
+      h+='<div class="row'+(f.sev===3?' crit':'')+'">'+
+        '<div class="sev">'+icono(f.sev)+SEV[f.sev]+'</div>'+
+        '<div class="who"><b>'+esc(o.of)+'</b> · '+esc(o.pedido)+'<div>'+esc(o.maquina)+' · '+esc(o.articulo)+' · '+nf(o.cantFab,0)+' ud notificadas</div></div>'+
+        '<div class="m"><span class="mat">'+esc(o.bobina||'—')+'</span></div>'+
+        '<div class="kgs"><b>'+nf(o.tReal,0)+'</b> → <b>'+nf(o.consNeto,0)+'</b> kg</div>'+
+        '<div class="dv"><span class="big">'+sg(o.desv,0)+' kg</span><span class="pct">'+pct(o.desvPct)+'</span></div>'+
+        '<div class="bar">'+mini(o.desvPct==null?M:o.desvPct,f.sev,tol,M)+'</div>'+
+      '</div>';
+    });
+    return h+'</div>';
+  }
+  document.getElementById('lista').innerHTML=nFuera?
+    grupo('Consumo por encima del teórico',icono(maxSev(exceso)),'Se ha consumido más bobina de la que corresponde a lo notificado: merma por pérdidas de arranque, sobrante sin devolver o consumo de la LdM corto.',exceso)+
+    grupo('Falta consumo',icono(maxSev(falta)),'Se ha consumido menos bobina de la que corresponde a lo notificado: probable consumo sin declarar, y el stock de bobina en SAP queda por encima del real.',falta):
+    '<div class="allok">'+icono(1)+'Todas las órdenes están dentro de tolerancia.</div>';
 
-  document.getElementById('chartLead').textContent='Consumo final frente al teórico de lo notificado, por máquina. A la derecha consume más de lo teórico (merma); a la izquierda, menos. Tolerancia ±'+nf(tol,0)+' %.';
-  dibujarGrafico(A.filas,R,tol);
-  tabla(A.filas);
+  // Por material
+  var mats={},lm=[];
+  filas.forEach(function(f){var o=f.o,k=o.bobina||'—';if(!mats[k]){mats[k]={mat:k,n:0,fuera:0,teo:0,cons:0};lm.push(mats[k]);}var m=mats[k];m.n++;if(f.sev>1)m.fuera++;m.teo+=o.tReal;m.cons+=o.consNeto;});
+  lm.forEach(function(m){m.desv=m.cons-m.teo;m.pct=m.teo>EPS?m.desv/m.teo*100:null;m.sev=m.pct==null?1:Math.abs(m.pct)>2*tol?3:Math.abs(m.pct)>tol?2:1;});
+  lm.sort(function(a,b){return Math.abs(b.desv)-Math.abs(a.desv);});
+  var t='<thead><tr><th>Material</th><th class="n">Órdenes</th><th class="n">Fuera de tolerancia</th><th class="n">Teórico (kg)</th><th class="n">Consumido (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desviación %</th><th>Estado</th></tr></thead><tbody>';
+  lm.forEach(function(m){t+='<tr><td><span class="mat">'+esc(m.mat)+'</span></td><td class="n">'+m.n+'</td><td class="n">'+m.fuera+'</td><td class="n">'+nf(m.teo,0)+'</td><td class="n">'+nf(m.cons,0)+'</td><td class="n"><b>'+sg(m.desv,0)+'</b></td><td class="n">'+pct(m.pct)+'</td><td><span class="st">'+icono(m.sev)+SEV_CORTO[m.sev]+'</span></td></tr>';});
+  document.getElementById('tMat').innerHTML=t+'</tbody>';
+
+  // Todas las órdenes
+  document.getElementById('sumTodas').textContent='Ver todas las órdenes ('+R.ordenes.length+')';
+  var a='<thead><tr><th>Máquina</th><th>OF</th><th>Pedido</th><th>Material</th><th class="n">Notificado (ud)</th><th class="n">Teórico (kg)</th><th class="n">Consumido (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desviación %</th><th>Estado</th></tr></thead><tbody>';
+  filas.forEach(function(f){var o=f.o;a+='<tr><td>'+esc(o.maquina)+'</td><td>'+esc(o.of)+'</td><td>'+esc(o.pedido)+'</td><td>'+esc(o.bobina)+'</td><td class="n">'+nf(o.cantFab,0)+'</td><td class="n">'+nf(o.tReal,1)+'</td><td class="n">'+nf(o.consNeto,1)+'</td><td class="n">'+sg(o.desv,1)+'</td><td class="n">'+pct(o.desvPct)+'</td><td><span class="st">'+icono(f.sev)+SEV_CORTO[f.sev]+'</span></td></tr>';});
+  document.getElementById('tTodas').innerHTML=a+'</tbody>';
 
   document.getElementById('fuente').textContent=FUENTE==='demo'?'Datos de demostración':'Datos cargados';
   document.getElementById('btnDemo').style.display=FUENTE==='demo'?'none':'';
 }
 
-// Barras divergentes de desviación %: gris = en tolerancia, color = problema
-function dibujarGrafico(filas,R,tol){
-  var cont=document.getElementById('chart'),W=Math.max(320,cont.clientWidth||900),narrow=W<560;
-  var labW=narrow?78:190,padR=narrow?58:64,rowH=28,barH=14,headH=30,axisH=26,top=6;
-  var porMaq=[],idx={};
-  filas.forEach(function(f){var m=f.o.maquina;if(!(m in idx)){idx[m]=porMaq.length;porMaq.push({m:m,filas:[]});}porMaq[idx[m]].filas.push(f);});
-  var vals=filas.map(function(f){return f.o.desvPct==null?0:f.o.desvPct;});
-  var lo=Math.min(-tol*2,Math.min.apply(null,vals)),hi=Math.max(tol*2,Math.max.apply(null,vals));
-  var paso=(hi-lo)>60?20:(hi-lo)>30?10:5;
-  lo=Math.floor(lo/paso)*paso;hi=Math.ceil(hi/paso)*paso;
-  var x0=labW,x1=W-padR,xs=function(v){return x0+(v-lo)/(hi-lo)*(x1-x0);};
-  // marcas del eje con al menos 48 px entre etiquetas
-  var pasoEje=paso;while((x1-x0)/((hi-lo)/pasoEje)<48)pasoEje*=2;
-  var H=top+porMaq.length*headH+filas.length*rowH+axisH;
-  var s='<svg viewBox="0 0 '+W+' '+H+'" height="'+H+'" role="img" aria-label="Desviación de consumo de bobina por orden">';
-  var plotTop=top,plotBot=H-axisH;
-  // franja de tolerancia, rejilla y eje cero
-  s+='<rect x="'+xs(-tol)+'" y="'+plotTop+'" width="'+(xs(tol)-xs(-tol))+'" height="'+(plotBot-plotTop)+'" fill="var(--band)"/>';
-  for(var t=Math.ceil(lo/pasoEje)*pasoEje;t<=hi;t+=pasoEje){
-    var X=xs(t);
-    if(t!==0)s+='<line x1="'+X+'" x2="'+X+'" y1="'+plotTop+'" y2="'+plotBot+'" stroke="var(--grid)" stroke-width="1"/>';
-    s+='<text x="'+X+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+(t>0?'+':t<0?'−':'')+Math.abs(t)+' %</text>';
-  }
-  s+='<line x1="'+xs(0)+'" x2="'+xs(0)+'" y1="'+plotTop+'" y2="'+plotBot+'" stroke="var(--axis)" stroke-width="1.5"/>';
-  var y=top;
-  porMaq.forEach(function(g){
-    var c=0,tr=0;g.filas.forEach(function(f){c+=f.o.consNeto;tr+=f.o.tReal;});
-    var pct=tr>EPS?(c-tr)/tr*100:null;
-    s+='<text x="0" y="'+(y+headH-10)+'" font-size="13" font-weight="650" fill="var(--ink)">Máquina '+esc(g.m)+(pct==null?'':'<tspan font-weight="400" fill="var(--ink-2)">  ·  '+sg(pct,1)+' % en total</tspan>')+'</text>';
-    y+=headH;
-    g.filas.forEach(function(f){
-      var o=f.o,v=o.desvPct==null?0:o.desvPct,cy=y+rowH/2,xa=xs(0),xb=xs(v);
-      var col=f.sev===3?'var(--critical)':f.sev===2?'var(--warning)':'var(--ok-bar)';
-      s+='<g class="row" data-of="'+esc(o.of)+'">';
-      s+='<rect x="0" y="'+y+'" width="'+W+'" height="'+rowH+'" fill="transparent"/>';
-      s+='<text x="0" y="'+(cy+4)+'" font-size="12.5" fill="var(--ink)">'+esc(o.of)+(narrow?'':'<tspan fill="var(--muted)"> · '+esc(o.pedido)+'</tspan>')+'</text>';
-      var w=Math.abs(xb-xa);
-      if(w>0.5){
-        var r=Math.min(4,w),xL=Math.min(xa,xb),yT=cy-barH/2;
-        // extremo de datos redondeado, base recta
-        var d=v>=0?
-          'M'+xa+','+yT+'H'+(xb-r)+'Q'+xb+','+yT+' '+xb+','+(yT+r)+'V'+(yT+barH-r)+'Q'+xb+','+(yT+barH)+' '+(xb-r)+','+(yT+barH)+'H'+xa+'Z':
-          'M'+xa+','+yT+'H'+(xb+r)+'Q'+xb+','+yT+' '+xb+','+(yT+r)+'V'+(yT+barH-r)+'Q'+xb+','+(yT+barH)+' '+(xb+r)+','+(yT+barH)+'H'+xa+'Z';
-        s+='<path d="'+d+'" fill="'+col+'"/>';
-      }
-      if(f.sev>1){
-        // etiqueta en la punta; si no cabe a la izquierda, al otro lado del cero
-        var txt=(o.desvPct==null?'—':sg(v,1)+' %'),tw=txt.length*7,izq=v<0&&xb-6-tw>=x0;
-        var lx=v>=0?xb+6:(izq?xb-6:xa+6);
-        s+='<text x="'+lx+'" y="'+(cy+4)+'" text-anchor="'+(v<0&&izq?'end':'start')+'" font-size="12" font-weight="600" fill="var(--ink)">'+txt+'</text>';
-      }
-      s+='</g>';
-      y+=rowH;
-    });
-  });
-  s+='</svg>';
-  cont.innerHTML=s;
-  var tip=document.getElementById('tip'),box=cont.parentNode;
-  cont.querySelectorAll('.row').forEach(function(g){
-    var f=filas.filter(function(x){return x.o.of===g.getAttribute('data-of');})[0];
-    g.addEventListener('mousemove',function(e){
-      var o=f.o,b=box.getBoundingClientRect();
-      tip.innerHTML='<b>'+esc(o.of)+'</b> · '+esc(o.pedido)+'<div style="color:var(--muted);margin-bottom:6px">'+esc(o.articulo)+'</div>'+
-        '<div class="r"><span>Teórico notificado</span><span>'+nf(o.tReal,0)+' kg</span></div>'+
-        '<div class="r"><span>Consumo final</span><span>'+nf(o.consNeto,0)+' kg</span></div>'+
-        '<div class="r"><span>Desviación</span><span>'+sg(o.desv,0)+' kg · '+(o.desvPct==null?'—':sg(o.desvPct,1)+' %')+'</span></div>'+
-        '<div class="r"><span>Estado</span><span>'+SEV[f.sev].txt+'</span></div>';
-      var lx=e.clientX-b.left+14,ly=e.clientY-b.top+14;
-      if(lx+220>b.width)lx=e.clientX-b.left-230;
-      tip.style.left=lx+'px';tip.style.top=ly+'px';tip.style.opacity=1;
-    });
-    g.addEventListener('mouseleave',function(){tip.style.opacity=0;});
-  });
-}
-
-function tabla(filas){
-  var h='<thead><tr><th>Máquina</th><th>OF</th><th>Pedido</th><th>Artículo</th><th class="n">Teórico notificado (kg)</th><th class="n">Consumo final (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desviación %</th><th>Estado</th></tr></thead><tbody>';
-  filas.forEach(function(f){var o=f.o;
-    h+='<tr><td>'+esc(o.maquina)+'</td><td>'+esc(o.of)+'</td><td>'+esc(o.pedido)+'</td><td>'+esc(o.articulo)+'</td><td class="n">'+nf(o.tReal,1)+'</td><td class="n">'+nf(o.consNeto,1)+'</td><td class="n">'+sg(o.desv,1)+'</td><td class="n">'+(o.desvPct==null?'—':sg(o.desvPct,1)+' %')+'</td><td>'+SEV[f.sev].txt+(f.inc.length?' · '+esc(f.inc[0].que):'')+'</td></tr>';
-  });
-  document.getElementById('tbl').innerHTML=h+'</tbody>';
-}
-
-/* ---------- Datos y preferencias ---------- */
+/* ---------- Datos ---------- */
 function valido(o){return o&&Array.isArray(o.ordenes)&&Array.isArray(o.consumos)&&Array.isArray(o.devoluciones);}
 function cargarJSON(inp){
   var f=inp.files&&inp.files[0];if(!f)return;
@@ -610,18 +506,10 @@ function cargarJSON(inp){
   rd.readAsText(f);
 }
 function usarDemo(){DATOS=datosDemo();FUENTE='demo';try{localStorage.removeItem(LS_DATOS);}catch(e){}render();}
-document.getElementById('precio').addEventListener('change',function(){
-  var p=parseFloat(this.value);PRECIO=isFinite(p)&&p>=0?p:1.6;this.value=PRECIO;
-  try{localStorage.setItem(LS_PRECIO,String(PRECIO));}catch(e){}
-  render();
-});
-var rTimer;window.addEventListener('resize',function(){clearTimeout(rTimer);rTimer=setTimeout(function(){if(ANALISIS){var R=calcularBalance(DATOS);dibujarGrafico(analizar(DATOS,R,num(DATOS.cfg&&DATOS.cfg.tol)||3).filas,R,num(DATOS.cfg&&DATOS.cfg.tol)||3);}},150);});
 
 (function(){
-  try{var p=parseFloat(localStorage.getItem(LS_PRECIO));if(isFinite(p)&&p>=0)PRECIO=p;}catch(e){}
   try{var o=JSON.parse(localStorage.getItem(LS_DATOS)||'null');if(valido(o)){DATOS=o;FUENTE='cargados';}}catch(e){}
   if(!DATOS)DATOS=datosDemo();
-  document.getElementById('precio').value=PRECIO;
   render();
 })();
 </script>

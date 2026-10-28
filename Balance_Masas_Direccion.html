@@ -9,7 +9,7 @@
   color-scheme:light;
   --page:#f9f9f7;--card:#ffffff;--surface:#fcfcfb;
   --ink:#0b0b0b;--ink-2:#52514e;--muted:#898781;
-  --grid:#e1e0d9;--axis:#c3c2b7;--band:#f0efec;--ring:rgba(11,11,11,.10);
+  --grid:#e1e0d9;--axis:#c3c2b7;--band:#f0efec;--ring:rgba(11,11,11,.10);--ok-bar:#b9b7ae;
   --brand:#0d1b2a;--accent:#0077b6;
   --good:#0ca30c;--good-ink:#006300;--warning:#fab219;--critical:#d03b3b;
   --warn-wash:#fff7e3;--crit-wash:#fdeeee;--good-wash:#eaf6ea;--chip:#f1f0ec;
@@ -20,7 +20,7 @@
     --page:#0d0d0d;--card:#1a1a19;--surface:#1a1a19;
     --ink:#f0efec;--ink-2:#c3c2b7;--muted:#898781;
     --grid:#2c2c2a;--axis:#383835;--band:#262624;--ring:rgba(255,255,255,.10);
-    --brand:#f0efec;--accent:#3987e5;--good-ink:#0ca30c;
+    --brand:#f0efec;--accent:#3987e5;--good-ink:#0ca30c;--ok-bar:#5d5c57;
     --warn-wash:#2b2412;--crit-wash:#2e1717;--good-wash:#14240f;--chip:#262624;
   }
 }
@@ -29,7 +29,7 @@
   --page:#0d0d0d;--card:#1a1a19;--surface:#1a1a19;
   --ink:#f0efec;--ink-2:#c3c2b7;--muted:#898781;
   --grid:#2c2c2a;--axis:#383835;--band:#262624;--ring:rgba(255,255,255,.10);
-  --brand:#f0efec;--accent:#3987e5;--good-ink:#0ca30c;
+  --brand:#f0efec;--accent:#3987e5;--good-ink:#0ca30c;--ok-bar:#5d5c57;
   --warn-wash:#2b2412;--crit-wash:#2e1717;--good-wash:#14240f;--chip:#262624;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -76,15 +76,27 @@ h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spa
 .none{font-size:13.5px;color:var(--ink-2);padding:12px;}
 .mini{display:block;width:100%;height:22px;}
 .allok{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:10px;background:var(--good-wash);font-size:15px;font-weight:600;margin-top:8px;}
-/* Tablas */
-details{margin-top:4px;}
-summary{cursor:pointer;font-size:13px;color:var(--accent);font-weight:600;}
-.tw{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;font-weight:600;color:var(--ink-2);padding:7px 10px;border-bottom:1px solid var(--axis);white-space:nowrap;}
-td{padding:8px 10px;border-bottom:1px solid var(--grid);white-space:nowrap;}
-td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;}
-.st{display:inline-flex;align-items:center;gap:6px;}
+/* Gráfico */
+.card-h{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:flex-start;justify-content:space-between;}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;user-select:none;padding-top:2px;}
+.switch input{position:absolute;opacity:0;width:0;height:0;}
+.switch span{position:relative;width:34px;height:20px;border-radius:999px;background:var(--axis);transition:background .15s;flex-shrink:0;}
+.switch span:after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s;}
+.switch input:checked+span{background:var(--accent);}
+.switch input:checked+span:after{transform:translateX(14px);}
+.switch input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px;}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:12.5px;color:var(--ink-2);margin:4px 0 8px;}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:2px;}
+.legend i.k-mat{height:12px;width:18px;}
+.legend i.k-of{height:6px;width:18px;}
+.chartbox{position:relative;}
+#chart svg{display:block;width:100%;}
+#chart text{font-family:inherit;}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--ring);box-shadow:0 6px 24px rgba(0,0,0,.14);border-radius:8px;padding:9px 12px;font-size:12.5px;min-width:200px;opacity:0;transition:opacity .12s;z-index:5;}
+.tip b{font-size:13.5px;}
+.tip .r{display:flex;justify-content:space-between;gap:14px;color:var(--ink-2);font-variant-numeric:tabular-nums;}
+.tip .r span:last-child{color:var(--ink);font-weight:600;}
 /* Pie */
 .foot{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;font-size:12.5px;color:var(--muted);border-top:1px solid var(--grid);padding-top:14px;}
 .foot button{background:none;border:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:0;}
@@ -125,13 +137,19 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;}
   </section>
 
   <section class="card">
-    <h2>Desviación por material</h2>
-    <p class="lead">Suma de todas las órdenes de cada bobina.</p>
-    <div class="tw"><table id="tMat"></table></div>
-  </section>
-
-  <section class="card">
-    <details><summary id="sumTodas">Ver todas las órdenes</summary><div class="tw" style="margin-top:10px"><table id="tTodas"></table></div></details>
+    <div class="card-h">
+      <div><h2>Desviación por material y orden</h2><p class="lead" id="chartLead"></p></div>
+      <label class="switch"><input type="checkbox" id="verTodas"><span></span>Ver también las órdenes en tolerancia</label>
+    </div>
+    <div class="legend">
+      <span><i class="k-mat" style="background:var(--ink-2)"></i>Total del material</span>
+      <span><i class="k-of" style="background:var(--ink-2)"></i>Orden</span>
+      <span><i style="background:var(--ok-bar)"></i>En tolerancia</span>
+      <span><i style="background:var(--warning)"></i>Revisar</span>
+      <span><i style="background:var(--critical)"></i>Crítico</span>
+      <span><i style="background:var(--band);outline:1px solid var(--grid)"></i>Franja de tolerancia</span>
+    </div>
+    <div class="chartbox"><div id="chart"></div><div class="tip" id="tip"></div></div>
   </section>
 
   <footer class="foot">
@@ -386,7 +404,7 @@ function datosDemo(){
    VISTA DE DIRECCIÓN
    ===================================================================== */
 var LS_DATOS='ondupet_balance_direccion_datos_v1';
-var DATOS=null,FUENTE='demo';
+var DATOS=null,FUENTE='demo',FILAS=[],TOL=3;
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function nf(x,d){return (x==null||!isFinite(x))?'—':(Math.abs(x)<Math.pow(10,-d)/2?0:x).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
@@ -398,7 +416,7 @@ function icono(s){
   if(s===2)return '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="var(--warning)"/><rect x="6.3" y="3.4" width="1.4" height="4.4" rx=".7" fill="#0b0b0b"/><circle cx="7" cy="10.1" r=".8" fill="#0b0b0b"/></svg>';
   return '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="var(--good)"/><path d="M4.2 7.2 6.2 9.1 9.9 5.1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
-var SEV={1:'En tolerancia',2:'Revisar',3:'Crítico'},SEV_CORTO={1:'OK',2:'Revisar',3:'Crítico'};
+var SEV={1:'En tolerancia',2:'Revisar',3:'Crítico'};
 
 // Gravedad por desviación: fuera de ±tol = revisar; fuera de ±2·tol = crítico
 function gravedad(o,tol){
@@ -472,24 +490,102 @@ function render(){
     grupo('Falta consumo',icono(maxSev(falta)),'Se ha consumido menos bobina de la que corresponde a lo notificado: probable consumo sin declarar, y el stock de bobina en SAP queda por encima del real.',falta):
     '<div class="allok">'+icono(1)+'Todas las órdenes están dentro de tolerancia.</div>';
 
-  // Por material
-  var mats={},lm=[];
-  filas.forEach(function(f){var o=f.o,k=o.bobina||'—';if(!mats[k]){mats[k]={mat:k,n:0,fuera:0,teo:0,cons:0};lm.push(mats[k]);}var m=mats[k];m.n++;if(f.sev>1)m.fuera++;m.teo+=o.tReal;m.cons+=o.consNeto;});
-  lm.forEach(function(m){m.desv=m.cons-m.teo;m.pct=m.teo>EPS?m.desv/m.teo*100:null;m.sev=m.pct==null?1:Math.abs(m.pct)>2*tol?3:Math.abs(m.pct)>tol?2:1;});
-  lm.sort(function(a,b){return Math.abs(b.desv)-Math.abs(a.desv);});
-  var t='<thead><tr><th>Material</th><th class="n">Órdenes</th><th class="n">Fuera de tolerancia</th><th class="n">Teórico (kg)</th><th class="n">Consumido (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desviación %</th><th>Estado</th></tr></thead><tbody>';
-  lm.forEach(function(m){t+='<tr><td><span class="mat">'+esc(m.mat)+'</span></td><td class="n">'+m.n+'</td><td class="n">'+m.fuera+'</td><td class="n">'+nf(m.teo,0)+'</td><td class="n">'+nf(m.cons,0)+'</td><td class="n"><b>'+sg(m.desv,0)+'</b></td><td class="n">'+pct(m.pct)+'</td><td><span class="st">'+icono(m.sev)+SEV_CORTO[m.sev]+'</span></td></tr>';});
-  document.getElementById('tMat').innerHTML=t+'</tbody>';
-
-  // Todas las órdenes
-  document.getElementById('sumTodas').textContent='Ver todas las órdenes ('+R.ordenes.length+')';
-  var a='<thead><tr><th>Máquina</th><th>OF</th><th>Pedido</th><th>Material</th><th class="n">Notificado (ud)</th><th class="n">Teórico (kg)</th><th class="n">Consumido (kg)</th><th class="n">Desviación (kg)</th><th class="n">Desviación %</th><th>Estado</th></tr></thead><tbody>';
-  filas.forEach(function(f){var o=f.o;a+='<tr><td>'+esc(o.maquina)+'</td><td>'+esc(o.of)+'</td><td>'+esc(o.pedido)+'</td><td>'+esc(o.bobina)+'</td><td class="n">'+nf(o.cantFab,0)+'</td><td class="n">'+nf(o.tReal,1)+'</td><td class="n">'+nf(o.consNeto,1)+'</td><td class="n">'+sg(o.desv,1)+'</td><td class="n">'+pct(o.desvPct)+'</td><td><span class="st">'+icono(f.sev)+SEV_CORTO[f.sev]+'</span></td></tr>';});
-  document.getElementById('tTodas').innerHTML=a+'</tbody>';
+  document.getElementById('chartLead').textContent='Barra gruesa: desviación total de cada material. Barras finas: sus órdenes fuera de tolerancia. A la derecha, consumo por encima del teórico; a la izquierda, falta consumo. Tolerancia ±'+nf(tol,0)+' %.';
+  FILAS=filas;TOL=tol;
+  dibujarGrafico();
 
   document.getElementById('fuente').textContent=FUENTE==='demo'?'Datos de demostración':'Datos cargados';
   document.getElementById('btnDemo').style.display=FUENTE==='demo'?'none':'';
 }
+
+/* ---------- Gráfico: material (barra gruesa) y sus órdenes (barras finas) ---------- */
+function dibujarGrafico(){
+  var filas=FILAS,tol=TOL,todas=document.getElementById('verTodas').checked;
+  var cont=document.getElementById('chart'),W=Math.max(320,cont.clientWidth||900),narrow=W<600;
+  var labW=narrow?118:250,padR=narrow?56:70,matH=34,ofH=24,top=4,axisH=26,barM=14,barO=8;
+  // agrupar por material
+  var mats={},lm=[];
+  filas.forEach(function(f){var k=f.o.bobina||'—';if(!mats[k]){mats[k]={mat:k,filas:[],teo:0,cons:0,fuera:0};lm.push(mats[k]);}var m=mats[k];m.filas.push(f);m.teo+=f.o.tReal;m.cons+=f.o.consNeto;if(f.sev>1)m.fuera++;});
+  lm.forEach(function(m){m.desv=m.cons-m.teo;m.pct=m.teo>EPS?m.desv/m.teo*100:null;m.sev=m.pct==null?1:Math.abs(m.pct)>2*tol?3:Math.abs(m.pct)>tol?2:1;
+    m.vis=m.filas.filter(function(f){return todas||f.sev>1;}).sort(function(a,b){return (b.o.desvPct||0)-(a.o.desvPct||0);});});
+  lm.sort(function(a,b){return Math.abs(b.desv)-Math.abs(a.desv);});
+  var filasG=[];lm.forEach(function(m){filasG.push({t:'m',m:m});m.vis.forEach(function(f){filasG.push({t:'o',f:f,m:m});});});
+  var vals=filasG.map(function(r){return r.t==='m'?(r.m.pct||0):(r.f.o.desvPct||0);});
+  var lo=Math.min(-tol*2,Math.min.apply(null,vals)),hi=Math.max(tol*2,Math.max.apply(null,vals));
+  var paso=(hi-lo)>60?20:(hi-lo)>30?10:5;lo=Math.floor(lo/paso)*paso;hi=Math.ceil(hi/paso)*paso;
+  var x0=labW,x1=W-padR,xs=function(v){return x0+(v-lo)/(hi-lo)*(x1-x0);};
+  var pasoEje=paso;while((x1-x0)/((hi-lo)/pasoEje)<48)pasoEje*=2;
+  var H=top+filasG.reduce(function(h,r){return h+(r.t==='m'?matH:ofH);},0)+axisH,plotBot=H-axisH;
+  var col=function(sev){return sev===3?'var(--critical)':sev===2?'var(--warning)':'var(--ok-bar)';};
+  function barra(v,cy,bh,c){
+    var xa=xs(0),xb=xs(v),w=Math.abs(xb-xa);if(w<=0.5)return '';
+    var r=Math.min(bh/2>4?4:bh/2,w),y=cy-bh/2;
+    var d=v>=0?'M'+xa+','+y+'H'+(xb-r)+'Q'+xb+','+y+' '+xb+','+(y+r)+'V'+(y+bh-r)+'Q'+xb+','+(y+bh)+' '+(xb-r)+','+(y+bh)+'H'+xa+'Z'
+               :'M'+xa+','+y+'H'+(xb+r)+'Q'+xb+','+y+' '+xb+','+(y+r)+'V'+(y+bh-r)+'Q'+xb+','+(y+bh)+' '+(xb+r)+','+(y+bh)+'H'+xa+'Z';
+    return '<path d="'+d+'" fill="'+c+'"/>';
+  }
+  function etiqueta(v,cy,txt,peso){
+    var xa=xs(0),xb=xs(v),tw=txt.length*7,izq=v<0&&xb-6-tw>=x0;
+    var lx=v>=0?xb+6:(izq?xb-6:xa+6);
+    return '<text x="'+lx+'" y="'+(cy+4)+'" text-anchor="'+(v<0&&izq?'end':'start')+'" font-size="12" font-weight="'+peso+'" fill="var(--ink)">'+txt+'</text>';
+  }
+  var s='<svg viewBox="0 0 '+W+' '+H+'" height="'+H+'" role="img" aria-label="Desviación de consumo de bobina por material y orden">';
+  s+='<rect x="'+xs(-tol)+'" y="'+top+'" width="'+(xs(tol)-xs(-tol))+'" height="'+(plotBot-top)+'" fill="var(--band)"/>';
+  for(var t=Math.ceil(lo/pasoEje)*pasoEje;t<=hi;t+=pasoEje){
+    var X=xs(t);
+    if(t!==0)s+='<line x1="'+X+'" x2="'+X+'" y1="'+top+'" y2="'+plotBot+'" stroke="var(--grid)" stroke-width="1"/>';
+    s+='<text x="'+X+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+(t>0?'+':t<0?'−':'')+Math.abs(t)+' %</text>';
+  }
+  var y=top,primero=true;
+  filasG.forEach(function(r,i){
+    var h=r.t==='m'?matH:ofH,cy=y+h/2;
+    if(r.t==='m'&&!primero)s+='<line x1="0" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="var(--grid)" stroke-width="1"/>';
+    primero=false;
+    s+='<g class="hit" data-i="'+i+'"><rect x="0" y="'+y+'" width="'+W+'" height="'+h+'" fill="transparent"/>';
+    if(r.t==='m'){
+      var m=r.m;
+      s+='<text x="0" y="'+(cy+4)+'" font-size="'+(narrow?12:13)+'" font-weight="650" fill="var(--ink)">'+esc(m.mat)+(narrow?'':'<tspan font-weight="400" fill="var(--ink-2)">  ·  '+m.filas.length+(m.filas.length===1?' orden':' órdenes')+(m.fuera?', '+m.fuera+' fuera':'')+'</tspan>')+'</text>';
+      s+=barra(m.pct||0,cy,barM,col(m.sev));
+      s+=etiqueta(m.pct||0,cy,(m.pct==null?'—':sg(m.pct,1)+' %')+(narrow?'':'  ·  '+sg(m.desv,0)+' kg'),650);
+    }else{
+      var o=r.f.o,v=o.desvPct==null?0:o.desvPct;
+      s+='<text x="'+(narrow?8:16)+'" y="'+(cy+4)+'" font-size="12" fill="var(--ink-2)">'+esc(o.of)+(narrow?'':'<tspan fill="var(--muted)"> · '+esc(o.pedido)+'</tspan>')+'</text>';
+      s+=barra(v,cy,barO,col(r.f.sev));
+      if(r.f.sev>1)s+=etiqueta(v,cy,o.desvPct==null?'—':sg(v,1)+' %',500);
+    }
+    s+='</g>';
+    y+=h;
+  });
+  s+='<line x1="'+xs(0)+'" x2="'+xs(0)+'" y1="'+top+'" y2="'+plotBot+'" stroke="var(--axis)" stroke-width="1.5"/>';
+  s+='</svg>';
+  cont.innerHTML=s;
+  var tip=document.getElementById('tip'),box=cont.parentNode;
+  cont.querySelectorAll('.hit').forEach(function(g){
+    var r=filasG[+g.getAttribute('data-i')];
+    g.addEventListener('mousemove',function(e){
+      var b=box.getBoundingClientRect(),h;
+      if(r.t==='m'){var m=r.m;
+        h='<b>'+esc(m.mat)+'</b><div style="color:var(--muted);margin-bottom:6px">'+m.filas.length+' órdenes · '+m.fuera+' fuera de tolerancia</div>'+
+          '<div class="r"><span>Teórico notificado</span><span>'+nf(m.teo,0)+' kg</span></div>'+
+          '<div class="r"><span>Consumido</span><span>'+nf(m.cons,0)+' kg</span></div>'+
+          '<div class="r"><span>Desviación</span><span>'+sg(m.desv,0)+' kg · '+pct(m.pct)+'</span></div>';
+      }else{var o=r.f.o;
+        h='<b>'+esc(o.of)+'</b> · '+esc(o.pedido)+'<div style="color:var(--muted);margin-bottom:6px">'+esc(o.bobina)+' · '+esc(o.maquina)+' · '+esc(o.articulo)+'</div>'+
+          '<div class="r"><span>Teórico notificado</span><span>'+nf(o.tReal,0)+' kg</span></div>'+
+          '<div class="r"><span>Consumido</span><span>'+nf(o.consNeto,0)+' kg</span></div>'+
+          '<div class="r"><span>Desviación</span><span>'+sg(o.desv,0)+' kg · '+pct(o.desvPct)+'</span></div>'+
+          '<div class="r"><span>Estado</span><span>'+SEV[r.f.sev]+'</span></div>';
+      }
+      tip.innerHTML=h;
+      var lx=e.clientX-b.left+14,ly=e.clientY-b.top+14;
+      if(lx+230>b.width)lx=e.clientX-b.left-240;
+      tip.style.left=Math.max(0,lx)+'px';tip.style.top=ly+'px';tip.style.opacity=1;
+    });
+    g.addEventListener('mouseleave',function(){tip.style.opacity=0;});
+  });
+}
+document.getElementById('verTodas').addEventListener('change',dibujarGrafico);
+var rTimer;window.addEventListener('resize',function(){clearTimeout(rTimer);rTimer=setTimeout(dibujarGrafico,150);});
 
 /* ---------- Datos ---------- */
 function valido(o){return o&&Array.isArray(o.ordenes)&&Array.isArray(o.consumos)&&Array.isArray(o.devoluciones);}

@@ -11,7 +11,7 @@ from pathlib import Path
 from generar_intervenciones_ondupet import D, I, NUEVA, construir
 
 PALANCAS = [
-    ('P2R-01', 'Gestión de la demanda', 'HT-P2R-13'),
+    ('P2R-01', 'Gestión de la demanda', 'HT-P2R-01'),
     ('P2R-02', 'S&OP y plan de capacidad', 'HT-P2R-03'),
     ('P2R-05', 'Planificación de materiales por excepción', 'HT-P2R-06, HT-P2R-07'),
     ('P2R-06', 'Programación estable y optimizada', 'HT-P2R-08, HT-P2R-09'),

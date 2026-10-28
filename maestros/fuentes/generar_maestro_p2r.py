@@ -28,12 +28,12 @@ FASES = ['Demanda y previsión', 'S&OP y Plan Maestro', 'Necesidades y Aprovisio
 # ---------------------------------------------------------------- nivel alto
 # (id, fase, hallazgo, descripción, familia, naturaleza, métrica, palancas, nota)
 HALLAZGOS = [
-    ('H01', 1, 'Previsión inestable',
-     'La previsión no se cierra ni se consensúa, cambia dentro del mes en curso y su horizonte no cubre las decisiones que alimenta.',
-     FAM_I, CIRC, '€ de previsión mensual cambiada tras el cierre o sin consensuar', ['PL01'], ''),
-    ('H02', 1, 'Previsión sin medición ni aprendizaje',
-     'No se miden precisión ni sesgo, la demanda perdida no se registra y las desviaciones no llevan acción.',
-     FAM_I, CIRC, 'Familias fuera de umbral sin acción / mes', ['PL01'], ''),
+    ('H01', 1, 'Demanda sin previsión fiable',
+     'No hay previsión, o la que hay no se cierra, no se consensúa ni se mide: el plan trabaja con una demanda que cambia '
+     'o que no se conoce, y la demanda perdida no se registra.',
+     FAM_I, CIRC, '€ de demanda mensual planificada sin previsión cerrada y consensuada', ['PL01'],
+     'Agrupa «Previsión inestable», «Previsión sin medición ni aprendizaje» y «Sin previsión de demanda»: '
+     'cada celda describe su caso.'),
     ('H03', 2, 'Demanda y capacidad sin equilibrar',
      'Sin S&OP, la capacidad (turnos, reservas, intercompany) se decide por intuición y a mano, y el desequilibrio se arregla con urgencias.',
      FAM_I, TRANS, 'Horas de línea y turnos no ajustados a la carga / mes', ['PL02'],
@@ -73,7 +73,7 @@ HALLAZGOS = [
 # (id, palanca, qué cambia, KPI)
 PALANCAS = [
     ('PL01', 'Gestión de la demanda',
-     'La previsión se cierra en fecha, se consensúa cada mes entre Comercial y Planificación, cubre el horizonte de las decisiones y se mide y corrige.',
+     'Hay previsión, al menos de la demanda repetitiva; se cierra en fecha, se consensúa cada mes entre Comercial y Planificación, cubre el horizonte de las decisiones y se mide y corrige.',
      'Precisión y sesgo por familia · cambios tras el cierre'),
     ('PL02', 'S&OP y plan de capacidad',
      'Demanda y capacidad se equilibran cada mes, con datos y con dirección: turnos, reservas de capacidad e intercompany se deciden con escenarios, no con urgencias.',
@@ -106,12 +106,14 @@ DETALLE_H = [
     ('H03', 1, 'No hay consenso de demanda entre Comercial y Planificación, o hay reunión pero no decide', FAM_I, CIRC,
      '€ de previsión mensual sin consensuar', 'H01', ''),
     ('H05', 1, 'La demanda perdida (agotados, pedidos rechazados) no se registra y el histórico sale sesgado', FAM_I, CIRC,
-     'Agotados o rechazos / mes sin registrar', 'H02', 'Sin este dato, la previsión estadística (PL01) aprende el sesgo.'),
-    ('H06', 1, 'No se miden precisión ni sesgo, o se miden sin umbral', FAM_I, CIRC, 'Familias sin KPI de precisión', 'H02', ''),
+     'Agotados o rechazos / mes sin registrar', 'H01', 'Sin este dato, la previsión estadística (PL01) aprende el sesgo.'),
+    ('H06', 1, 'No se miden precisión ni sesgo, o se miden sin umbral', FAM_I, CIRC, 'Familias sin KPI de precisión', 'H01', ''),
     ('H07', 1, 'Las desviaciones de previsión no llevan análisis de causa ni acción', FAM_I, CIRC,
-     'Desviaciones fuera de umbral sin acción / mes', 'H02', ''),
+     'Desviaciones fuera de umbral sin acción / mes', 'H01', ''),
     ('H08', 1, 'El horizonte de previsión es más corto que el plazo de las decisiones que alimenta (turnos, compras de plazo largo, intercompany)',
      FAM_I, TRANS, '€ de compras o turnos decididos sin previsión', 'H01', ''),
+    ('H45', 1, 'No hay previsión: se planifica solo con la cartera, aunque haya clientes o referencias con consumo repetitivo',
+     FAM_I, CIRC, '€ de demanda repetitiva / mes sin previsión', 'H01', 'Caso de Ondupack y de MGT.'),
     ('H09', 2, 'No hay S&OP: el desequilibrio entre demanda y capacidad no se decide con dirección y se arregla abajo, con urgencias',
      FAM_I, FUGA, 'Horas extra y turnos no planificados / mes', 'H03',
      'Puede solapar con H10 y H29 (mismas horas extra): cuantificar una vez.'),
@@ -170,7 +172,7 @@ DETALLE_H = [
 
 # (id, palanca, tipo principal, tipo secundario, evoluciona a IA, hallazgos detalle, KPI, intervención tipo, nivel alto, nota)
 DETALLE_P = [
-    ('PL01', 'Previsión estadística por familia y material, a 12–18 meses', 'Auto', '', 'Sí', ['H08'], 'Precisión (1–WMAPE)',
+    ('PL01', 'Previsión estadística por familia y material, a 12–18 meses', 'Auto', '', 'Sí', ['H08', 'H45'], 'Precisión (1–WMAPE)',
      'Modelo por familia y material con histórico limpio (incluida la demanda perdida) y estacionalidad; Comercial solo revisa las excepciones antes del cierre.',
      'PL01', ''),
     ('PL02', 'Calendario de demanda con día de cierre y mes en curso congelado', 'Política', '', 'No', ['H02'], 'Cambios tras el cierre',
@@ -267,8 +269,8 @@ ONDUPET_H = [
     (4, 'Temporales calculados a mano cada mes', 'H03', 'H18', '2 y 4 caen en el mismo hallazgo de nivel alto.'),
     (5, 'No se modifican las fechas al cliente aunque se sepa que no se llega', 'H05', 'H16', 'Familia: Oportunidad (ingreso expuesto).'),
     (6, 'Saldado de pedidos manual; a veces no se hace', 'X05', '', 'Va a O2C × Ondupet con «Detectado en: P2R».'),
-    (7, 'Corrección manual de desviaciones de demanda', 'H02', '',
-     'A confirmar: su detalle (antiguo H20) lo borraste; lo más cercano es H02.'),
+    (7, 'Corrección manual de desviaciones de demanda', 'H01', '',
+     'A confirmar: su detalle (antiguo H20) lo borraste; lo más cercano es H01.'),
     (8, 'Revisión de faltas manual', 'H06', 'H23', ''),
     (9, 'Secuenciación a mano', 'H08', 'H28', ''),
 ]

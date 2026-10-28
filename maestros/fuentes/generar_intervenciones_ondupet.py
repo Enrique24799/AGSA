@@ -18,7 +18,7 @@ NAVY, GREY, BORDER = '00263A', '5B6B78', 'D7DFE5'
 COLOR_TIPO = {'Negocio': 'EEF1F4', 'Automatización': 'E3F3EA', 'Agente': 'EEE9FB', 'Consulta': 'E4EEFB'}
 
 PALANCAS = [
-    ('P2R-01', 'Gestión de la demanda', 'HT-P2R-01, HT-P2R-02'),
+    ('P2R-01', 'Gestión de la demanda', 'HT-P2R-01'),
     ('P2R-02', 'S&OP y plan de capacidad', 'HT-P2R-03'),
     ('P2R-03', 'Política de inventario por segmento', 'HT-P2R-04, HT-P2R-05'),
     ('P2R-04', 'Promesa de fecha fiable', 'HT-P2R-05'),

@@ -2,7 +2,6 @@
 
 Los hallazgos, palancas e intervenciones son los dados de alta en la aplicación (capturas del 29/10/2026). Las
 capturas solo muestran el nombre de cada intervención: la descripción sale de la propuesta con ese mismo contenido.
-En MGT aún no hay intervenciones dadas de alta: se muestran las propuestas, pendientes de revisar.
 """
 from openpyxl.styles import Alignment, Border, Font, Side
 
@@ -184,15 +183,35 @@ INTERVENCIONES = {
         ('INT-02', 'Agente de causa raíz', 'agente', 'P2R-08', 'Seguimiento del Servicio', 0, 'Agente de causa raíz'),
     ],
 }
-TIPO_DICE = {'Negocio': 'negocio', 'Automatización': 'software', 'Agente': 'agente', 'Consulta': 'software'}
 INTERVENCIONES['MGT'] = [
-    ('propuesta', it['nombre'], TIPO_DICE[it['tipo']], it['pal'], it['cajas'][0][0] if it['cajas'] else NC, None, it['que'])
-    for it in mgt.INTERVENCIONES]
+    ('ACC-01', 'Previsión de papel de Ondupack', 'negocio', 'P2R-01', NC, None, 'Previsión de papel de Ondupack por ciclo'),
+    ('ACC-02', 'Previsión de los clientes externos repetitivos', 'negocio', 'P2R-01', NC, None,
+     'Previsión de los clientes externos repetitivos'),
+    ('ACC-03', 'Política de llenado de capacidad', 'negocio', 'P2R-02', NC, None, 'Política de llenado de capacidad'),
+    ('ACC-04', 'Revisión mensual de capacidad y ciclos', 'negocio', 'P2R-02', NC, None, 'Revisión mensual de capacidad y ciclos'),
+    ('INT-01', 'Agente de escenarios de ciclo', 'agente', 'P2R-02', 'Carga de Capacidad', 0, 'Agente de escenarios de ciclo'),
+    ('ACC-05', 'Pull system con Ondupack, con mínimo y máximo por referencia', 'negocio', 'P2R-03', NC, None,
+     'Pull system con Ondupack'),
+    ('INT-02', 'Agente de stock intercompany', 'agente', 'P2R-03', 'Plan Fabricación', 0, 'Agente de stock intercompany'),
+    ('INT-04', 'Copiloto de plazos para Comercial', 'agente', 'P2R-04', 'Demanda Externa', 0, 'Copiloto de plazos para Comercial'),
+    ('ACC-06', 'MRP de materias primas en SAP', 'software', 'P2R-05', NC, None, 'MRP de materias primas en SAP'),
+    ('INT-03', 'Agente de compras de materiales', 'agente', 'P2R-05', 'MRP', 0, 'Agente de compras de materiales'),
+    ('ACC-07', 'Algoritmo con lo ya fabricado y fecha límite de cartera', 'software', 'P2R-06', NC, None,
+     'Algoritmo con lo ya fabricado y fecha límite de cartera'),
+    ('INT-05', 'Agente de urgencias', 'agente', 'P2R-06', 'Programación', 0, 'Agente de urgencias'),
+    ('ACC-11', 'Disponibilidad de material por orden', 'software', 'P2R-07', NC, None, 'Disponibilidad de material por orden'),
+    ('ACC-08', 'Pilar de servicio semanal', 'negocio', 'P2R-08', NC, None, 'Pilar de servicio semanal'),
+    ('ACC-09', 'KPI de servicio', 'negocio', 'P2R-08', NC, None, 'KPI de servicio'),
+    ('ACC-10', 'Visibilidad de stock y cargas para Ondupack', 'software', 'P2R-08', NC, None,
+     'Visibilidad de stock y cargas para Ondupack'),
+    ('INT-06', 'Agente de coordinación de cargas con Ondupack', 'agente', 'P2R-08', 'Entregas a Ondupack y Cierre', 0,
+     'Agente de coordinación de cargas con Ondupack'),
+]
 
 CABECERA = {
     'Ondupet': 'Process owner: celda sin activar. Capacidad liberada que calcula la aplicación: 17,4 k€.',
-    'MGT': 'Process owner: celda sin activar. Sin intervenciones dadas de alta: las de la tabla son las propuestas, '
-           'pendientes de revisar (en gris).',
+    'MGT': 'Process owner: celda sin activar. La capacidad de los agentes sale a 0 € porque la celda aún no tiene '
+           'dedicación de personas por fase.',
     'Ondupack Almendralejo': 'Process owner: Enrique Tejada. La capacidad de los agentes sale a 0 € porque la celda aún no '
                              'tiene dedicación de personas por fase.',
 }
@@ -207,6 +226,10 @@ NOTAS = {
     'MGT': [
         'OPP-02 cuelga de P2R-03 y de P2R-04 (aviso ⚠ en P2R-03); lo cura P2R-04, así que se puede quitar de P2R-03.',
         'P2R-05 no cura HT-P2R-06 en MGT (no está asignado), solo HT-P2R-07.',
+        'P2R-04 solo tiene el copiloto de plazos: sin la «Fecha confirmada por Planificación» (negocio) nada cambia cómo se '
+        'promete la fecha, que es lo que describe OPP-02.',
+        'INF-08 menciona las órdenes impresas en papel, pero P2R-07 no tiene la «Orden digital a producción»; y el descuadre '
+        'de báscula de INF-04 depende del proceso de inventario.',
         'En la aplicación la descripción de cada hallazgo es solo el nombre del tipo; aquí van las descripciones acordadas, '
         'para copiarlas.',
     ],
@@ -228,7 +251,6 @@ def hoja_empresa(wb, empresa, palancas_cat):
     ws = wb.create_sheet(empresa)
     hall = HALLAZGOS[empresa]
     interv = INTERVENCIONES[empresa]
-    propuesta = empresa == 'MGT'
     titulo(ws, f'P2R × {empresa} · hallazgos, palancas e intervenciones', CABECERA[empresa])
     cab = ['Palanca', 'Qué cambia', 'Hallazgo', 'Familia · naturaleza', 'Anclaje (actividad · fase)', 'Descripción del hallazgo',
            'Intervención', 'De qué es', 'Qué hay que hacer', 'Caja que cambia', 'Capacidad (est.)']
@@ -254,11 +276,9 @@ def hoja_empresa(wb, empresa, palancas_cat):
                     celda(ws, fila, j, None)
             if k < len(its):
                 cod, nom, tipo, _, caja, cap, desc = its[k]
-                vals = [f'{cod} · {nom}' if not propuesta else nom, tipo, descripcion(empresa, desc), caja, cap]
+                vals = [f'{cod} · {nom}', tipo, descripcion(empresa, desc), caja, cap]
                 for j, v in enumerate(vals, 7):
                     c = celda(ws, fila, j, v, centrada=j in (8, 10, 11), fmt='#,##0 "€"' if j == 11 else None)
-                    if propuesta:
-                        c.font = Font(name=F, size=10, italic=True, color=GRIS)
                     if j == 11 and v is None:
                         c.value = '—'
             else:

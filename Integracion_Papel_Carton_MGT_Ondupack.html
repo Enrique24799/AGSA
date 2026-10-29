@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Integración Papel–Cartón MGT–Ondupack</title>
+<style>
+:root{--primary:#0d1b2a;--secondary:#1b2838;--accent:#00b4d8;--accent2:#0077b6;--danger:#e63946;--warning:#f4a261;--success:#2a9d8f;--bg:#f0f2f5;--card:#fff;--text:#1a1a2e;--tl:#6c757d;--border:#dee2e6;--win:#e3f3f0;}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.55;}
+.hero{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:36px 16px 30px;}
+.hero .in{max-width:1040px;margin:0 auto;}
+.hero small{color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:2px;}
+.hero h1{font-size:28px;line-height:1.25;margin:6px 0 6px;}
+.hero p{color:rgba(255,255,255,.7);font-size:14px;}
+nav{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--border);}
+nav .in{max-width:1040px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:0 16px;}
+nav a{flex:none;padding:13px 12px;font-size:13px;color:var(--tl);text-decoration:none;border-bottom:3px solid transparent;}
+nav a:hover{color:var(--accent2);border-bottom-color:var(--accent);}
+main{max-width:1040px;margin:0 auto;padding:24px 16px 48px;}
+section{background:var(--card);border-radius:10px;padding:26px;box-shadow:0 1px 6px rgba(0,0,0,.05);margin-bottom:22px;scroll-margin-top:60px;}
+h2{font-size:20px;color:var(--primary);margin-bottom:10px;padding-left:12px;border-left:4px solid var(--accent);}
+h3{font-size:15px;color:var(--primary);margin:22px 0 10px;}
+p{margin-bottom:10px;}
+.lead{font-size:16px;color:var(--secondary);}
+.summary{border-left:4px solid var(--accent2);background:linear-gradient(90deg,rgba(0,180,216,.08),transparent 70%);}
+.summary p{font-size:16px;margin:0;}
+.note{font-size:13px;color:var(--tl);margin-top:10px;}
+ul.dot,ol.num{padding-left:22px;margin-bottom:6px;}
+ul.dot li,ol.num li{margin-bottom:5px;}
+.tw{overflow-x:auto;margin:6px 0 4px;border:1px solid var(--border);border-radius:8px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th{background:var(--primary);color:#fff;text-align:left;font-weight:600;padding:10px 12px;font-size:12.5px;letter-spacing:.3px;}
+td{padding:10px 12px;border-top:1px solid var(--border);vertical-align:top;}
+tbody tr:nth-child(even) td{background:#f8f9fb;}
+td.hoy{color:#b02a37;}
+td.idx{color:var(--tl);font-weight:600;width:34px;}
+td.win{background:var(--win)!important;font-weight:600;}
+.legend{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--tl);margin-top:8px;}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;background:var(--win);border:1px solid #b9ded7;}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;}
+.pc>div{border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
+.pc .pro{border-top:4px solid var(--success);}
+.pc .con{border-top:4px solid var(--danger);}
+.pc h4{font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.pc .pro h4{color:var(--success);}.pc .con h4{color:var(--danger);}
+.pc ul{list-style:none;}
+.pc li{position:relative;padding-left:20px;margin-bottom:7px;font-size:14px;}
+.pc .pro li::before{content:'+';position:absolute;left:2px;top:-1px;color:var(--success);font-weight:700;}
+.pc .con li::before{content:'−';position:absolute;left:2px;top:-1px;color:var(--danger);font-weight:700;}
+.people{background:#f8f9fb;border-radius:8px;padding:14px 18px;}
+.dia{overflow-x:auto;margin-top:6px;}
+.dia svg{display:block;width:100%;min-width:700px;height:auto;}
+.dia text{font-family:'Segoe UI',Tahoma,sans-serif;fill:var(--text);text-anchor:middle;font-size:11.5px;}
+.dia text.n{font-size:13px;font-weight:600;}
+.dia text.p{font-size:13px;font-weight:600;text-anchor:start;}
+.checks{list-style:none;margin-top:6px;}
+.checks li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--border);}
+.checks li:first-child{border-top:none;}
+.checks input{margin-top:4px;width:16px;height:16px;accent-color:var(--accent2);flex:none;}
+@media (max-width:720px){.pc{grid-template-columns:1fr;}.hero h1{font-size:23px;}section{padding:20px 16px;}}
+@page{margin:14mm 12mm;}
+@media print{
+  body{background:#fff;font-size:12.5px;}
+  nav{display:none;}
+  .hero{padding:18px 20px;border-radius:10px;margin-bottom:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .dia{break-inside:avoid;}
+  main{padding:12px 0;}
+  section{box-shadow:none;border:1px solid var(--border);break-inside:auto;}
+  tr,.pc>div,.checks li{break-inside:avoid;}
+  th,td.win,.summary,.pc>div{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .dia svg{min-width:0;max-width:600px;margin:0 auto;}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="in">
+    <small>Integración papeleras – cartoneras del grupo</small>
+    <h1>Integración papel–cartón MGT–Ondupack</h1>
+    <p>Valoración de escenarios · 29 de octubre de 2026</p>
+  </div>
+</header>
+
+<nav>
+  <div class="in">
+    <a href="#resumen">Resumen</a>
+    <a href="#vistazo">De un vistazo</a>
+    <a href="#actual">Situación actual</a>
+    <a href="#e1">Escenario 1</a>
+    <a href="#e2">Escenario 2</a>
+    <a href="#responsabilidades">Responsabilidades</a>
+    <a href="#comparativa">Comparativa</a>
+    <a href="#propuesta">Propuesta</a>
+  </div>
+</nav>
+
+<main>
+
+<section id="resumen" class="summary">
+  <p>Los dos escenarios no son excluyentes: el 1 resuelve el <strong>cómo</strong> (un dato único, pedidos automáticos y reglas de reposición) y el 2 el <strong>quién</strong> (un único dueño del plan papel–cartón). Ninguno funciona si antes no se asignan las responsabilidades que hoy no tiene nadie: plan de necesidades, ciclo y fecha de corte, urgentes, stock en MGT y transporte. Propuesta: arrancar el escenario 1 con un responsable de planificación integrada (un rol, no un departamento) y escalar al escenario 2 solo si el modelo se extiende a más plantas del grupo.</p>
+</section>
+
+<section id="vistazo">
+  <h2>De un vistazo</h2>
+  <p class="lead">Hoy el plan viaja por correo; el escenario 1 lo pasa a SAP y el 2 a un equipo común.</p>
+  <div class="dia">
+    <svg viewBox="0 0 760 624" role="img" aria-label="Flujo de información y decisión: hoy, escenario 1 y escenario 2">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8a96a3"/></marker>
+      </defs>
+      <g fill="none" stroke-width="1.25">
+        <!-- Paneles -->
+        <rect x="24" y="16" width="712" height="152" rx="8" stroke="#d5dbe1"/>
+        <rect x="24" y="192" width="712" height="196" rx="8" stroke="#d5dbe1"/>
+        <rect x="24" y="412" width="712" height="196" rx="8" stroke="#d5dbe1"/>
+        <!-- Hoy -->
+        <rect x="40" y="48" width="200" height="104" rx="8" stroke="#8a96a3"/>
+        <rect x="280" y="48" width="200" height="104" rx="8" stroke="#8a96a3" stroke-dasharray="5 4"/>
+        <rect x="520" y="48" width="200" height="104" rx="8" stroke="#8a96a3"/>
+        <path d="M242 100H278" stroke="#8a96a3" stroke-dasharray="5 4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+        <path d="M482 100H518" stroke="#8a96a3" stroke-dasharray="5 4" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+        <!-- Escenario 1 -->
+        <rect x="40" y="224" width="200" height="104" rx="8" stroke="#8a96a3"/>
+        <rect x="280" y="224" width="200" height="104" rx="8" stroke="#0077b6" stroke-width="2" fill="#e3f4fa"/>
+        <rect x="520" y="224" width="200" height="104" rx="8" stroke="#8a96a3"/>
+        <path d="M242 276H278" stroke="#8a96a3" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+        <path d="M482 276H518" stroke="#8a96a3" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+        <line x1="380" y1="328" x2="380" y2="340" stroke="#8a96a3"/>
+        <rect x="40" y="340" width="680" height="32" rx="8" stroke="#8a96a3" stroke-width="1" fill="#f0f2f5"/>
+        <!-- Escenario 2 -->
+        <rect x="40" y="444" width="200" height="104" rx="8" stroke="#8a96a3"/>
+        <rect x="280" y="444" width="200" height="104" rx="8" stroke="#0077b6" stroke-width="2" fill="#e3f4fa"/>
+        <rect x="520" y="444" width="200" height="104" rx="8" stroke="#8a96a3"/>
+        <path d="M242 496H278" stroke="#8a96a3" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+        <path d="M482 496H518" stroke="#8a96a3" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+        <line x1="380" y1="548" x2="380" y2="560" stroke="#8a96a3"/>
+        <rect x="40" y="560" width="680" height="32" rx="8" stroke="#8a96a3" stroke-width="1" fill="#f0f2f5"/>
+      </g>
+      <!-- Textos: Hoy -->
+      <text class="p" x="40" y="38">Hoy: personas y correo</text>
+      <text class="n" x="140" y="72">Ondupack</text>
+      <text x="140" y="88">Una persona decide qué</text>
+      <text x="140" y="104">se fabrica; otra secuencia</text>
+      <text x="140" y="120">Marca cadencia de camiones</text>
+      <text class="n" x="380" y="72">Correo, todo a mano</text>
+      <text x="380" y="88">Necesidades 10 días antes</text>
+      <text x="380" y="104">del ciclo</text>
+      <text x="380" y="120">Urgentes caso a caso</text>
+      <text x="380" y="136">Pedidos de compra y venta</text>
+      <text class="n" x="620" y="72">MGT</text>
+      <text x="620" y="88">Fabrica por ciclos</text>
+      <text x="620" y="104">Guarda stock de Ondupack</text>
+      <text x="620" y="120">sin acuerdo de propiedad</text>
+      <!-- Textos: Escenario 1 -->
+      <text class="p" x="40" y="214">Escenario 1: el sistema propone y genera los pedidos</text>
+      <text class="n" x="140" y="248">Ondupack</text>
+      <text x="140" y="264">Fija mínimos y máximos</text>
+      <text x="140" y="280">por material</text>
+      <text x="140" y="296">Plan de fabricación</text>
+      <text x="140" y="312">separado de secuenciación</text>
+      <text class="n" x="380" y="248">SAP: monitor común</text>
+      <text x="380" y="264">Pedido de compra genera</text>
+      <text x="380" y="280">el de venta automático</text>
+      <text x="380" y="296">Stock, tránsito y fabricado</text>
+      <text x="380" y="312">visibles para ambas</text>
+      <text class="n" x="620" y="248">MGT</text>
+      <text x="620" y="264">Publica ciclos y corte</text>
+      <text x="620" y="280">Asigna pedidos a ciclo</text>
+      <text x="620" y="296">Confirma fechas</text>
+      <text x="620" y="312">Corrige excepciones</text>
+      <text x="380" y="360">Responsable de la integración (sobre ambas plantas): arbitra conflictos y urgentes fuera de regla</text>
+      <!-- Textos: Escenario 2 -->
+      <text class="p" x="40" y="434">Escenario 2: un equipo común decide el plan</text>
+      <text class="n" x="140" y="468">Ondupack</text>
+      <text x="140" y="484">Secuencia dentro del plan</text>
+      <text x="140" y="500">Comercial: interlocutor</text>
+      <text x="140" y="516">con el departamento</text>
+      <text class="n" x="380" y="468">Planificación común</text>
+      <text x="380" y="484">Plan de cartón y</text>
+      <text x="380" y="500">necesidades de papel</text>
+      <text x="380" y="516">Ciclos, stock y transporte</text>
+      <text x="380" y="532">Urgentes y prioridades</text>
+      <text class="n" x="620" y="468">MGT</text>
+      <text x="620" y="484">Fabrica el ciclo</text>
+      <text x="620" y="500">que fija el departamento</text>
+      <text x="620" y="516">Carga según la cadencia</text>
+      <text x="380" y="580">Depende de una dirección por encima de ambas plantas; arbitra entre ellas</text>
+    </svg>
+  </div>
+  <p class="note">En el escenario 1 la información la mueve el sistema y las excepciones suben a un responsable; en el 2 la mueve y la decide un equipo único.</p>
+</section>
+
+<section id="actual">
+  <h2>Situación actual</h2>
+  <p class="lead">Hoy la coordinación MGT–Ondupack depende de cuatro personas y del correo: no hay un dato común ni reglas escritas sobre plazos, urgentes, stock o transporte.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Ámbito</th><th>Cómo funciona hoy</th><th>Problema que genera</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Pedido de necesidades</strong></td><td>Angélica hace que Joan Carles pase pedido con las necesidades 10 días antes del ciclo</td><td>Plazo y formato informales; lo que no llega a tiempo no entra en el ciclo</td></tr>
+      <tr><td><strong>Urgentes</strong></td><td>Se gestionan a mano, caso a caso</td><td>Sin criterio de qué es urgente, quién lo aprueba ni quién paga el sobrecoste (cambio de ciclo, transporte extra)</td></tr>
+      <tr><td><strong>Pedidos de compra y venta</strong></td><td>Se crean a mano en cada sociedad</td><td>Doble grabación, errores de cantidad, ancho o fecha, y horas administrativas</td></tr>
+      <tr><td><strong>Qué fabrica Ondupack</strong></td><td>Teresa decide qué se fabrica; Rosado solo secuencia</td><td>Decisión clave sin criterio escrito y concentrada en una persona; no hay un plan formal del que salgan las necesidades de papel</td></tr>
+      <tr><td><strong>Almacén</strong></td><td>Ondupack usa en parte a MGT como almacén</td><td>Stock y coste de almacenaje en MGT sin acuerdo de propiedad, espacio ni antigüedad máxima</td></tr>
+      <tr><td><strong>Transporte</strong></td><td>La cartonera marca la cadencia de camiones y cuándo le tiene que llegar</td><td>La papelera no puede planificar cargas ni asegurar camiones completos</td></tr>
+      <tr><td><strong>Visibilidad</strong></td><td>Necesidades, fabricado y stock se consultan a mano y se comunican por correo</td><td>No hay una versión única del dato; las discrepancias se descubren tarde</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">El problema de fondo es que el conflicto natural entre papelera (ciclos largos, camiones completos) y cartonera (poco stock propio, flexibilidad) no tiene a nadie que lo arbitre.</p>
+</section>
+
+<section id="e1">
+  <h2>Escenario 1 — Integración SAP y sistema pull</h2>
+  <p class="lead">Se activa la integración papel–cartón diseñada en SAP: Ondupack fija mínimos y máximos por material y el sistema genera los pedidos de compra y de venta, con un monitor común de stock y necesidades.</p>
+
+  <h3>Qué incluye</h3>
+  <ul class="dot">
+    <li>Monitor común MGT–Ondupack: stock en Ondupack, stock de Ondupack en MGT, en tránsito, pedidos abiertos y fabricado por ciclo.</li>
+    <li>Mínimo y máximo por material (calidad, gramaje y ancho) fijados por Ondupack: al bajar del mínimo se propone la reposición hasta el máximo.</li>
+    <li>Pedido de compra en Ondupack que crea automáticamente el pedido de venta en MGT, sin doble grabación.</li>
+    <li>Asignación de cada pedido al ciclo de máquina que le corresponde según un calendario de ciclos publicado.</li>
+  </ul>
+
+  <h3>Roles necesarios</h3>
+  <p>No se crea estructura nueva, pero hay que nombrar estos roles dentro de los puestos actuales:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Rol</th><th>Sociedad</th><th>Responsabilidades</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Responsable de la integración (dueño del proceso)</strong></td><td>Por encima de ambas plantas</td><td>Arbitrar conflictos entre plantas, aprobar urgentes fuera de regla y revisar KPIs cada mes</td></tr>
+      <tr><td><strong>Responsable de parámetros de reposición</strong></td><td>Ondupack</td><td>Calcular y revisar cada mes mínimos y máximos por material; decidir qué materiales entran en el sistema pull</td></tr>
+      <tr><td><strong>Planificador de producción</strong></td><td>Ondupack</td><td>Fijar el plan de fabricación (qué y cuándo) del que salen las necesidades de papel, separado de la secuenciación</td></tr>
+      <tr><td><strong>Programador / secuenciador</strong></td><td>Ondupack</td><td>Secuenciar onduladora y transformación dentro del plan aprobado (como hoy)</td></tr>
+      <tr><td><strong>Planificador de ciclos y pedidos intercompany</strong></td><td>MGT</td><td>Publicar calendario de ciclos y fecha de corte; asignar pedidos a ciclo; confirmar fechas; vigilar el monitor y corregir excepciones</td></tr>
+      <tr><td><strong>Coordinador logístico</strong></td><td>MGT y Ondupack</td><td>Acordar ventanas de carga y cadencia de camiones; controlar el stock de Ondupack en MGT</td></tr>
+      <tr><td><strong>Usuarios clave SAP y datos maestros</strong></td><td>Ambas</td><td>Mantener materiales, anchos, plazos y parámetros; formar al resto; primer nivel de soporte</td></tr>
+      <tr><td><strong>Soporte SAP (IT o consultor)</strong></td><td>Grupo</td><td>Revalidar el diseño original, configurar, probar y dar soporte tras el arranque</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Pros y contras</h3>
+  <div class="pc">
+    <div class="pro">
+      <h4>Pros</h4>
+      <ul>
+        <li>Elimina la grabación manual de pedidos de compra y venta y sus errores.</li>
+        <li>Una sola versión del dato (stock, necesidades, fabricado) para ambas sociedades; el correo deja de ser el canal principal.</li>
+        <li>La señal de reposición sale de reglas y no de una persona: vacaciones y bajas dejan de ser un riesgo.</li>
+        <li>Reduce stock y urgentes si mínimos y máximos están bien dimensionados.</li>
+        <li>El diseño ya existe: menos coste y plazo que partir de cero, y sin aumentar plantilla.</li>
+        <li>Deja trazabilidad y datos para medir nivel de servicio, coberturas y urgentes.</li>
+        <li>Replicable a otras parejas papelera–cartonera del grupo con el mismo diseño.</li>
+      </ul>
+    </div>
+    <div class="con">
+      <h4>Contras</h4>
+      <ul>
+        <li>No decide por sí solo: si papelera y cartonera discrepan, el sistema no arbitra.</li>
+        <li>Depende de la calidad de datos maestros y parámetros; con datos malos automatiza el error.</li>
+        <li>El mínimo/máximo funciona en materiales de alta rotación y demanda estable; especiales y bajo consumo seguirán a mano.</li>
+        <li>Choca con el ciclo de máquina: la reposición solo se fabrica cuando esa calidad entra en ciclo, así que el mínimo debe cubrir ciclo + transporte + seguridad, y con ciclos largos sube el stock.</li>
+        <li>Ondupack fija los parámetros sola: sin límite acordado, tiene incentivo a sobredimensionarlos y desplazar stock a MGT.</li>
+        <li>Los anchos que pide el sistema pueden no combinar bien en bobinadora (más recorte en MGT) si no se acuerda un catálogo de anchos.</li>
+        <li>Proyecto SAP: revalidar un diseño hecho hace tiempo, pruebas, formación y periodo de convivencia con dedicación de usuarios clave.</li>
+        <li>Los urgentes siguen necesitando un procedimiento manual.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Impacto en personas</h3>
+  <div class="people">
+    <ul class="dot">
+      <li>Sin aumento de plantilla; cambia el contenido del trabajo.</li>
+      <li>Quien hoy graba pedidos y cruza correos pasa a vigilar el monitor y gestionar excepciones.</li>
+      <li>La decisión de qué se fabrica en Ondupack se formaliza como rol de planificación, separado de la secuenciación.</li>
+      <li>Dedicación parcial de usuarios clave durante el proyecto (a dimensionar con IT) y formación de todos los usuarios.</li>
+      <li>Cambio de cultura: el pedido lo genera el sistema y las excepciones se escalan por regla, no por correo.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="e2">
+  <h2>Escenario 2 — Departamento de planificación común</h2>
+  <p class="lead">Se crea un equipo único que planifica papel y cartón como una sola cadena: recibe la demanda de Ondupack, fija su plan de fabricación y sus necesidades de papel, y las encaja en los ciclos de MGT.</p>
+
+  <h3>Qué incluye</h3>
+  <ul class="dot">
+    <li>Un plan integrado: demanda de clientes de Ondupack → plan de fabricación de cartón → necesidades de papel → ciclos de MGT → transporte.</li>
+    <li>Reunión semanal de planificación y revisión mensual de demanda y capacidad con ambas plantas.</li>
+    <li>Punto único de entrada de urgentes, con autoridad para decidir.</li>
+    <li>Gestión del stock de Ondupack en las dos ubicaciones y de la cadencia de camiones.</li>
+    <li>Puede arrancar con las herramientas actuales y apoyarse después en SAP.</li>
+    <li>Alcance a decidir: solo la interfaz papel–cartón, o la planificación completa de ambas plantas (incluidos los clientes externos de MGT).</li>
+  </ul>
+
+  <h3>Roles necesarios</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Rol</th><th>Dónde</th><th>Responsabilidades</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Responsable de planificación integrada</strong></td><td>Departamento, dependiendo de una dirección por encima de ambas plantas</td><td>Dueño del plan papel–cartón; arbitra prioridades entre plantas; aprueba urgentes; responde de los KPIs</td></tr>
+      <tr><td><strong>Planificador de demanda y producción de cartón</strong></td><td>Departamento</td><td>Convertir cartera y previsión de Ondupack en plan de fabricación y necesidades de papel</td></tr>
+      <tr><td><strong>Planificador de papel y ciclos</strong></td><td>Departamento</td><td>Construir los ciclos de MGT con la demanda de Ondupack (y de externos si entra en alcance); fecha de corte y confirmaciones</td></tr>
+      <tr><td><strong>Planificador de inventario y logística</strong></td><td>Departamento</td><td>Niveles de stock en ambas ubicaciones, cadencia de camiones, cargas completas y transporte urgente</td></tr>
+      <tr><td><strong>Gestión de pedidos y datos</strong></td><td>Departamento</td><td>Pedidos de compra y venta (a mano mientras no haya integración), datos maestros e informe de KPIs</td></tr>
+      <tr><td><strong>Programador / secuenciador</strong></td><td>Ondupack (sigue en planta)</td><td>Secuenciar dentro del plan que fija el departamento</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Núcleo orientativo, a validar con volúmenes y número de referencias: un responsable y 2–3 planificadores, cubiertos en lo posible con quienes hoy hacen estas tareas en MGT y Ondupack.</p>
+
+  <h3>Pros y contras</h3>
+  <div class="pc">
+    <div class="pro">
+      <h4>Pros</h4>
+      <ul>
+        <li>Un único dueño del plan de punta a punta, que decide con criterio de grupo (servicio y margen total) y no de planta.</li>
+        <li>Arbitra el conflicto papelera–cartonera: ciclos largos y camiones completos frente a poco stock y flexibilidad.</li>
+        <li>Urgentes y demanda volátil se gestionan con criterio y un solo interlocutor.</li>
+        <li>Puede arrancar en semanas con las herramientas actuales, sin esperar a un proyecto SAP.</li>
+        <li>Reúne y documenta el conocimiento que hoy está repartido entre personas.</li>
+        <li>Base para un centro de planificación del grupo si se suman más plantas.</li>
+      </ul>
+    </div>
+    <div class="con">
+      <h4>Contras</h4>
+      <ul>
+        <li>Coste de estructura permanente: un responsable con nivel suficiente y posibles incorporaciones.</li>
+        <li>Sin sistema mantiene pedidos manuales y correo: riesgo de ser una centralita que añade un paso más.</li>
+        <li>Resistencia de las plantas a perder la decisión de qué fabricar y cuándo.</li>
+        <li>Si depende de una de las dos plantas pierde neutralidad; necesita un sponsor por encima de ambas.</li>
+        <li>Sigue dependiendo de personas, ahora concentradas en el departamento, si no se apoya en reglas y sistema.</li>
+        <li>Lento de consolidar: selección, reparto de funciones y curva de aprendizaje.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Impacto en personas</h3>
+  <div class="people">
+    <ul class="dot">
+      <li>Nueva estructura: cambian dependencia jerárquica y descripción de puestos de quienes se integren.</li>
+      <li>Quienes hoy hacen estas funciones en MGT y Ondupack pasan, total o parcialmente, al departamento; hay que decidir quién y con qué dedicación.</li>
+      <li>La función que hoy decide qué se fabrica en Ondupack pasa al departamento o queda como interlocutor comercial con él.</li>
+      <li>Ubicación y forma de trabajo (en una planta, repartido o híbrido) a decidir.</li>
+      <li>Cambios de puesto y dependencia a tratar con RRHH y, si aplica, con la representación de los trabajadores.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="responsabilidades">
+  <h2>Responsabilidades hoy sin dueño</h2>
+  <p class="lead">Hay 12 responsabilidades que hoy se cubren de hecho o no se cubren; hay que asignarlas en cualquiera de los dos escenarios.</p>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>Responsabilidad y qué hay que definir</th><th>Hoy</th><th>Escenario 1</th><th>Escenario 2</th></tr></thead>
+    <tbody>
+      <tr><td class="idx">1</td><td><strong>Plan de necesidades de papel</strong> de Ondupack: horizonte, frecuencia y qué es firme y qué previsión</td><td class="hoy">Pedido 10 días antes del ciclo, informal</td><td>Planificador de producción de Ondupack, más la reposición automática por mínimos y máximos</td><td>Planificador de demanda y producción de cartón</td></tr>
+      <tr><td class="idx">2</td><td><strong>Plan de fabricación de Ondupack</strong> (qué y cuándo), separado de la secuenciación</td><td class="hoy">Lo decide una persona sin criterio escrito</td><td>Planificador de producción de Ondupack</td><td>Departamento; el secuenciador sigue en planta</td></tr>
+      <tr><td class="idx">3</td><td><strong>Calendario de ciclos de MGT</strong>, fecha de corte de pedidos y horizonte congelado</td><td class="hoy">10 días de hecho, sin regla escrita</td><td>Planificador de ciclos de MGT</td><td>Planificador de papel y ciclos</td></tr>
+      <tr><td class="idx">4</td><td><strong>Mínimos y máximos por material</strong> y su revisión</td><td class="hoy">No existen</td><td>Responsable de parámetros de Ondupack, validados por MGT</td><td>Planificador de inventario y logística</td></tr>
+      <tr><td class="idx">5</td><td><strong>Pedidos de compra y venta</strong></td><td class="hoy">A mano en las dos sociedades</td><td>Automáticos en SAP; las excepciones las corrige el planificador de ciclos de MGT</td><td>Gestión de pedidos del departamento, a mano hasta integrar SAP</td></tr>
+      <tr><td class="idx">6</td><td><strong>Urgentes</strong>: qué es urgente, quién lo pide, quién lo aprueba y quién paga el sobrecoste</td><td class="hoy">A mano, sin criterio</td><td>Lo pide planificación de Ondupack; dentro de regla lo acepta el planificador de ciclos; fuera de regla decide el responsable de la integración</td><td>Responsable de planificación integrada</td></tr>
+      <tr><td class="idx">7</td><td><strong>Stock de Ondupack en MGT</strong>: propiedad (vendido o en depósito), espacio y antigüedad máximos y quién paga el almacenaje</td><td class="hoy">Uso de hecho, sin acuerdo</td><td>Acuerdo entre direcciones; lo controla el coordinador logístico</td><td>Acuerdo entre direcciones; lo controla el planificador de inventario y logística</td></tr>
+      <tr><td class="idx">8</td><td><strong>Transporte</strong>: cadencia, ventanas de carga y coste de camiones incompletos o urgentes</td><td class="hoy">Lo marca la cartonera</td><td>Coordinador logístico, con regla acordada por ambas</td><td>Planificador de inventario y logística</td></tr>
+      <tr><td class="idx">9</td><td><strong>Datos maestros</strong>: catálogo de calidades, gramajes y anchos, plazos y rutas</td><td class="hoy">Sin dueño claro</td><td>Usuarios clave SAP de cada sociedad</td><td>Gestión de pedidos y datos, con usuarios clave</td></tr>
+      <tr><td class="idx">10</td><td><strong>Visibilidad</strong>: qué se publica (necesidades, fabricado, stock, tránsito), cada cuánto y dónde</td><td class="hoy">A mano, por correo</td><td>Monitor SAP; lo vigila el planificador de ciclos de MGT</td><td>Informe del departamento, o monitor SAP si se activa</td></tr>
+      <tr><td class="idx">11</td><td><strong>Prioridades con capacidad limitada</strong> (Ondupack frente a clientes externos de MGT) y arbitraje</td><td class="hoy">No definido</td><td>Responsable de la integración</td><td>Responsable de planificación integrada, con la dirección</td></tr>
+      <tr><td class="idx">12</td><td><strong>Seguimiento y KPIs</strong>: nivel de servicio, coberturas, urgentes, % de pedidos automáticos</td><td class="hoy">No existe</td><td>Responsable de la integración, revisión mensual</td><td>Departamento: reunión semanal y revisión mensual</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="comparativa">
+  <h2>Comparativa</h2>
+  <p class="lead">El escenario 1 gana en coste, dependencia de personas e impacto organizativo; el 2 gana en urgentes, arbitraje y rapidez de arranque.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Criterio</th><th>Escenario 1 — SAP y pull</th><th>Escenario 2 — Departamento común</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Problema que ataca</strong></td><td>Trabajo manual, falta de dato común y señal de reposición</td><td>Falta de dueño del plan y de arbitraje entre plantas</td></tr>
+      <tr><td><strong>Coste</strong></td><td class="win">Proyecto SAP sobre un diseño existente y dedicación de usuarios clave; sin plantilla nueva</td><td>Estructura permanente: responsable y 2–3 planificadores</td></tr>
+      <tr><td><strong>Plazo hasta ver resultados</strong></td><td>Meses: revalidar diseño, probar y arrancar</td><td class="win">Semanas para arrancar; meses para consolidar</td></tr>
+      <tr><td><strong>Dependencia de personas</strong></td><td class="win">Baja: la reposición sale de reglas</td><td>Media: se concentra en el departamento</td></tr>
+      <tr><td><strong>Urgentes y demanda volátil</strong></td><td>Débil: necesita un procedimiento aparte</td><td class="win">Fuerte: decisión con criterio y un solo interlocutor</td></tr>
+      <tr><td><strong>Arbitraje papelera–cartonera</strong></td><td>No lo resuelve; necesita un dueño del proceso</td><td class="win">Lo resuelve si el departamento es neutral</td></tr>
+      <tr><td><strong>Stock</strong></td><td>Baja si los parámetros están bien; riesgo de desplazarlo a MGT</td><td>Depende del criterio del equipo; sin reglas, sin garantía</td></tr>
+      <tr><td><strong>Impacto organizativo</strong></td><td class="win">Bajo: roles nuevos dentro de puestos actuales</td><td>Alto: puestos, dependencias y quizá ubicación nuevos</td></tr>
+      <tr><td><strong>Escalabilidad al grupo</strong></td><td>Alta: mismo diseño replicable</td><td>Alta si se convierte en centro de planificación del grupo, con más plantilla</td></tr>
+      <tr><td><strong>Riesgo principal</strong></td><td>Automatizar el desorden con datos y parámetros malos</td><td>Crear una capa más sin sistema que la soporte</td></tr>
+    </tbody>
+  </table></div>
+  <span class="legend"><i></i>Escenario con ventaja en ese criterio</span>
+</section>
+
+<section id="propuesta">
+  <h2>Propuesta y decisiones previas</h2>
+  <p class="lead">Propuesta: escenario 1 más un responsable de planificación integrada con autoridad sobre ambas plantas, y revisar a los 6 meses si hace falta escalar a departamento común. La mayor parte de los problemas actuales son de trabajo manual y visibilidad, que resuelve el sistema; el hueco de arbitraje lo cubre un rol, sin coste de estructura para una sola pareja de plantas.</p>
+  <ol class="num">
+    <li>Asignar ya las 12 responsabilidades de la tabla anterior y acordar por escrito stock en MGT, transporte y urgentes.</li>
+    <li>Revalidar con IT el diseño SAP y arrancar con los materiales de alta rotación.</li>
+    <li>Ampliar al resto de materiales con consumo regular; los especiales siguen bajo pedido.</li>
+    <li>A los 6 meses, revisar KPIs y decidir si se escala al escenario 2, sobre todo si se suman más plantas del grupo.</li>
+  </ol>
+
+  <h3>Decisiones que dirección debe tomar antes de arrancar cualquiera de los dos</h3>
+  <ul class="checks">
+    <li><input type="checkbox" id="d1"><label for="d1">Alcance: solo la interfaz papel–cartón o la planificación completa de ambas plantas.</label></li>
+    <li><input type="checkbox" id="d2"><label for="d2">Stock de Ondupack en MGT: vendido o en depósito, espacio y antigüedad máximos y quién paga el almacenaje.</label></li>
+    <li><input type="checkbox" id="d3"><label for="d3">Prioridad de Ondupack frente a clientes externos de MGT cuando falte capacidad.</label></li>
+    <li><input type="checkbox" id="d4"><label for="d4">De quién depende el responsable de planificación integrada (una dirección por encima de ambas plantas).</label></li>
+    <li><input type="checkbox" id="d5"><label for="d5">Fecha de corte de pedidos y horizonte congelado del ciclo.</label></li>
+    <li><input type="checkbox" id="d6"><label for="d6">Vigencia del diseño SAP original, antes de comprometer fechas.</label></li>
+  </ul>
+</section>
+
+</main>
+</body>
+</html>

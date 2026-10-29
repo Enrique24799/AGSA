@@ -193,7 +193,6 @@ td.win{background:var(--win)!important;font-weight:600;}
   <div class="card">
     <h3>Roles y responsabilidades</h3>
     <div class="legend">
-      <span><i class="nuevo"></i>Función nueva (personal actual)</span>
       <span><i class="cambia"></i>Cambia (se formaliza o amplía funciones)</span>
       <span><i class="sistema"></i>Sistema</span>
       <span><em class="nv">Nueva</em>Función que ese puesto no hace hoy</span>
@@ -213,9 +212,7 @@ td.win{background:var(--win)!important;font-weight:600;}
         <div class="br">
           <div class="grp">
             <header>Común a ambas</header>
-            <div class="node nuevo"><span class="tag">Nuevo</span><h4>Responsable de la integración</h4><ul><li>Prioridades y arbitraje entre plantas</li><li>Urgentes fuera de regla</li><li>KPIs y revisión mensual</li></ul></div>
-            <div class="node nuevo"><span class="tag">Nuevo</span><h4>Coordinador logístico</h4><ul><li>Cadencia de camiones</li><li>Stock de Ondupack en MGT</li></ul></div>
-            <div class="node nuevo"><span class="tag">Nuevo</span><h4>Usuarios clave SAP</h4><ul><li>Datos maestros y formación</li></ul></div>
+            <div class="node cambia"><span class="tag">Amplía funciones</span><h4>Usuarios clave SAP</h4><ul><li>Supervisan el flujo automático<em class="nv">Nueva</em></li><li>Datos maestros y formación</li></ul></div>
             <div class="node sistema"><span class="tag">Sistema</span><h4>SAP</h4><ul><li>Pedidos de compra y venta automáticos</li><li>Monitor común de stock y necesidades</li></ul></div>
           </div>
         </div>
@@ -227,7 +224,7 @@ td.win{background:var(--win)!important;font-weight:600;}
         </div>
       </div>
     </div>
-    <p class="note">Cada función sigue dependiendo de su planta; el responsable de la integración coordina el proceso, no a las personas.</p>
+    <p class="note">Sin puestos nuevos: SAP ejecuta el flujo y los usuarios clave actuales lo supervisan.</p>
   </div>
 
   <div class="pc">
@@ -239,7 +236,7 @@ td.win{background:var(--win)!important;font-weight:600;}
       <li>Replicable al resto de papeleras y cartoneras del grupo.</li>
     </ul></div>
     <div class="con"><h3>Contras</h3><ul>
-      <li>El sistema no arbitra cuando las plantas discrepan.</li>
+      <li>Nadie arbitra si las plantas discrepan: mandan los mínimos y máximos.</li>
       <li>Exige datos maestros y parámetros fiables.</li>
       <li>Con ciclos largos, el mínimo obliga a tener más stock.</li>
       <li>Urgentes y materiales especiales siguen a mano.</li>
@@ -250,7 +247,7 @@ td.win{background:var(--win)!important;font-weight:600;}
   <div class="sec">
     <h3>Impacto en personas</h3>
     <div class="kg">
-      <div class="kc"><div class="kl">Plantilla</div><div class="kv">Sin aumento</div><div class="ks">Las funciones nuevas las asume personal actual</div></div>
+      <div class="kc"><div class="kl">Plantilla</div><div class="kv">Sin aumento</div><div class="ks">Los usuarios clave SAP ya existen; no hay puestos nuevos</div></div>
       <div class="kc"><div class="kl">Puestos</div><div class="kv">Cambian tareas</div><div class="ks">De grabar pedidos y cruzar correos a gestionar excepciones</div></div>
       <div class="kc"><div class="kl">Proyecto</div><div class="kv">Usuarios clave + IT</div><div class="ks">Dedicación parcial para revalidar, probar y formar</div></div>
     </div>
@@ -322,7 +319,7 @@ td.win{background:var(--win)!important;font-weight:600;}
         <tr><td class="k">Plazo</td><td>Meses</td><td class="win">Semanas para arrancar</td></tr>
         <tr><td class="k">Dependencia de personas</td><td class="win">Baja: deciden las reglas</td><td>Media: se concentra en el equipo</td></tr>
         <tr><td class="k">Urgentes</td><td>Procedimiento aparte</td><td class="win">Un interlocutor que decide</td></tr>
-        <tr><td class="k">Arbitraje entre plantas</td><td>Necesita un dueño del proceso</td><td class="win">Lo resuelve si es neutral</td></tr>
+        <tr><td class="k">Arbitraje entre plantas</td><td>No hay arbitraje: mandan los parámetros</td><td class="win">Lo resuelve si es neutral</td></tr>
         <tr><td class="k">Impacto organizativo</td><td class="win">Bajo</td><td>Alto</td></tr>
         <tr><td class="k">Escalabilidad al grupo</td><td>Alta: diseño replicable</td><td>Alta: centro de planificación</td></tr>
         <tr><td class="k">Riesgo principal</td><td>Automatizar el desorden</td><td>Una capa más sin sistema</td></tr>
@@ -335,7 +332,7 @@ td.win{background:var(--win)!important;font-weight:600;}
       <li><input type="checkbox" id="d1"><label for="d1">Alcance: solo la interfaz papel–cartón o la planificación completa de ambas plantas.</label></li>
       <li><input type="checkbox" id="d2"><label for="d2">Stock de Ondupack en MGT: propiedad, límites y quién paga el almacenaje.</label></li>
       <li><input type="checkbox" id="d3"><label for="d3">Prioridad de Ondupack frente a clientes externos de MGT.</label></li>
-      <li><input type="checkbox" id="d4"><label for="d4">De quién depende el responsable: una dirección por encima de ambas plantas.</label></li>
+      <li><input type="checkbox" id="d4"><label for="d4">Escenario 2: de quién depende el responsable de planificación integrada.</label></li>
       <li><input type="checkbox" id="d5"><label for="d5">Fecha de corte y horizonte congelado del ciclo.</label></li>
       <li><input type="checkbox" id="d6"><label for="d6">Validez actual del diseño SAP original.</label></li>
     </ul>

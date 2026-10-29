@@ -15,7 +15,7 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--t
 .hero p{color:rgba(255,255,255,.7);font-size:14px;}
 .tabs{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.04);}
 .tabs .in{max-width:1180px;margin:0 auto;display:flex;overflow-x:auto;padding:0 16px;}
-.tabs button{flex:none;background:none;border:none;border-bottom:3px solid transparent;padding:15px 18px;font:inherit;font-size:14px;color:var(--tl);cursor:pointer;}
+.tabs button{flex:none;background:none;border:none;border-bottom:3px solid transparent;padding:15px 16px;font:inherit;font-size:14px;color:var(--tl);cursor:pointer;}
 .tabs button:hover{color:var(--accent2);}
 .tabs button[aria-selected="true"]{color:var(--primary);font-weight:600;border-bottom-color:var(--accent);}
 .tabs button span{display:inline-block;background:var(--bg);color:var(--tl);border-radius:10px;font-size:11px;font-weight:600;padding:1px 7px;margin-right:6px;}
@@ -75,6 +75,11 @@ td.win{background:var(--win)!important;font-weight:600;}
 .legend i.igual{background:#fff;border-color:#c4cbd3;}
 .node.sistema{border-style:dashed;border-color:var(--accent2);}
 .node.sistema .tag{background:#e3eef8;color:var(--accent2);}
+.br>.node{height:100%;}
+.stubs>div{height:22px;position:relative;}
+.stubs>div::before{content:'';position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed var(--accent2);}
+.node.ia{background:#f4f9fd;}
+.node.ia ul{display:flex;flex-wrap:wrap;gap:2px 28px;}
 .legend i.sistema{border-style:dashed;border-color:var(--accent2);background:#fff;}
 .nv{display:inline-block;font-style:normal;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;background:var(--accent2);color:#fff;border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:1px;line-height:1.4;}
 .legend .nv{margin:0 2px 0 0;}
@@ -106,6 +111,7 @@ td.win{background:var(--win)!important;font-weight:600;}
 @media screen and (max-width:860px){
   .branches.c3{grid-template-columns:1fr;}
   .br{padding-top:0;}.br::before,.br::after{display:none;}
+  .stubs{display:none;}.node.ia{margin-top:10px;}
   .top .node{width:100%;}.org .branches{margin-top:10px;}.org .top .vline{height:10px;}
   .chips{grid-template-columns:1fr 1fr;}
   .pc,.kg,.checks{grid-template-columns:1fr;}
@@ -141,9 +147,10 @@ td.win{background:var(--win)!important;font-weight:600;}
 <nav class="tabs" role="tablist">
   <div class="in">
     <button role="tab" data-t="actual" aria-selected="true"><span>0</span>Situación actual</button>
-    <button role="tab" data-t="e1" aria-selected="false"><span>1</span>Escenario 1 · SAP y sistema pull</button>
+    <button role="tab" data-t="e1" aria-selected="false"><span>1</span>Escenario 1 · SAP y pull</button>
     <button role="tab" data-t="e2" aria-selected="false"><span>2</span>Escenario 2 · Departamento común</button>
-    <button role="tab" data-t="comp" aria-selected="false"><span>3</span>Comparativa y decisiones</button>
+    <button role="tab" data-t="e3" aria-selected="false"><span>3</span>Escenario 3 · Departamento + IA</button>
+    <button role="tab" data-t="comp" aria-selected="false"><span>4</span>Comparativa</button>
   </div>
 </nav>
 
@@ -305,25 +312,84 @@ td.win{background:var(--win)!important;font-weight:600;}
   </div>
 </section>
 
+<!-- ============ ESCENARIO 3 ============ -->
+<section class="panel" id="p-e3" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Escenario 3 — Departamento común con agentes de IA</h2>
+    <p class="sub">El mismo departamento del escenario 2, apoyado por agentes de IA que proponen automáticamente los pedidos de compra y venta según el % de saturación de cada planta y las necesidades actuales. El equipo valida y decide.</p>
+  </div>
+
+  <div class="card">
+    <h3>Organigrama</h3>
+    <div class="legend">
+      <span><i class="nuevo"></i>Puesto nuevo</span>
+      <span><i class="sistema"></i>Sistema</span>
+      <span><em class="nv">Nueva</em>Cambio respecto al escenario 2</span>
+    </div>
+    <div class="org">
+      <div class="top">
+        <div class="node dir"><h4>Dirección</h4><small>por encima de ambas plantas</small></div>
+        <div class="vline"></div>
+        <div class="node nuevo"><span class="tag">Nuevo</span><h4>Responsable de planificación integrada</h4><ul><li>Dueño del plan papel–cartón</li><li>Prioridades y arbitraje entre plantas</li><li>Discrepancias de mínimos y máximos</li><li>Urgentes y KPIs</li><li>Datos maestros</li><li>Reglas de los agentes de IA<em class="nv">Nueva</em></li></ul></div>
+      </div>
+      <div class="branches c3">
+        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificación cartón</h4><ul><li>Plan de fabricación de Ondupack</li><li>Necesidades de papel</li><li>Mínimos y máximos</li></ul></div></div>
+        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificación papel</h4><ul><li>Ciclos de MGT</li><li>Fecha de corte y confirmaciones</li><li>Mínimos y máximos</li></ul></div></div>
+        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Coordinador logístico</h4><ul><li>Stock de Ondupack en MGT</li><li>Cadencia de camiones</li><li>Valida los pedidos que propone la IA<em class="nv">Nueva</em></li><li>Informes de visibilidad</li></ul></div></div>
+      </div>
+      <div class="branches c3 stubs"><div></div><div></div><div></div></div>
+      <div class="node sistema ia"><span class="tag">Sistema · IA</span><h4>Agentes de IA</h4><ul><li>Proponen pedidos de compra y venta</li><li>Según el % de saturación de cada planta</li><li>Y las necesidades actuales</li></ul></div>
+    </div>
+    <p class="note">La IA propone y las personas validan y deciden. Los agentes necesitan datos fiables de stock, pedidos y saturación de cada planta.</p>
+  </div>
+
+  <div class="pc">
+    <div class="pro"><h3>Pros</h3><ul>
+      <li>Mantiene lo del escenario 2: un dueño del plan y arbitraje con criterio de grupo.</li>
+      <li>Pedidos de compra y venta propuestos automáticamente, sin grabarlos a mano.</li>
+      <li>Tiene en cuenta la saturación real de cada planta, no solo el stock.</li>
+      <li>El equipo pasa de calcular a validar y decidir.</li>
+      <li>Permite sumar plantas del grupo sin crecer en la misma proporción.</li>
+    </ul></div>
+    <div class="con"><h3>Contras</h3><ul>
+      <li>Coste del escenario 2 más el desarrollo de los agentes.</li>
+      <li>Necesita datos fiables y actualizados de stock, pedidos y saturación.</li>
+      <li>El plazo más largo: equipo, datos y agentes.</li>
+      <li>Riesgo de aceptar propuestas sin revisarlas.</li>
+      <li>Tecnología nueva: piloto, validación y mantenimiento de reglas.</li>
+    </ul></div>
+  </div>
+
+  <div class="sec">
+    <h3>Impacto en personas</h3>
+    <div class="kg">
+      <div class="kc"><div class="kl">Plantilla</div><div class="kv">Responsable + 3 puestos</div><div class="ks">Igual que el escenario 2</div></div>
+      <div class="kc"><div class="kl">Puestos</div><div class="kv">De calcular a validar</div><div class="ks">La IA propone; el equipo revisa y decide</div></div>
+      <div class="kc"><div class="kl">Capacidades</div><div class="kv">Datos e IA</div><div class="ks">Formación del equipo y soporte de IT para mantener los agentes</div></div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ COMPARATIVA ============ -->
 <section class="panel" id="p-comp" role="tabpanel" hidden>
   <div class="card">
     <h2>Comparativa</h2>
-    <p class="sub">El escenario 1 gana en coste, dependencia de personas e impacto organizativo; el 2, en urgentes, arbitraje y rapidez de arranque.</p>
+    <p class="sub">El escenario 1 gana en coste, dependencia de personas e impacto organizativo; el 2, en rapidez de arranque; el 2 y el 3, en urgentes y arbitraje; y solo el 3 tiene en cuenta la saturación de cada planta.</p>
   </div>
   <div class="card">
     <div class="legend"><span><i style="background:var(--win);border-color:#b9ded7"></i>Escenario con ventaja en ese criterio</span></div>
     <div class="tw"><table>
-      <thead><tr><th>Criterio</th><th>Escenario 1 · SAP y sistema pull</th><th>Escenario 2 · Departamento común</th></tr></thead>
+      <thead><tr><th>Criterio</th><th>Escenario 1 · SAP y sistema pull</th><th>Escenario 2 · Departamento común</th><th>Escenario 3 · Departamento + IA</th></tr></thead>
       <tbody>
-        <tr><td class="k">Coste</td><td class="win">Proyecto SAP; sin plantilla nueva</td><td>Estructura permanente</td></tr>
-        <tr><td class="k">Plazo</td><td>Meses</td><td class="win">Semanas para arrancar</td></tr>
-        <tr><td class="k">Dependencia de personas</td><td class="win">Baja: deciden las reglas</td><td>Media: se concentra en el equipo</td></tr>
-        <tr><td class="k">Urgentes</td><td>Procedimiento aparte</td><td class="win">Un interlocutor que decide</td></tr>
-        <tr><td class="k">Arbitraje entre plantas</td><td>No hay arbitraje: mandan los parámetros</td><td class="win">Lo resuelve si es neutral</td></tr>
-        <tr><td class="k">Impacto organizativo</td><td class="win">Bajo</td><td>Alto</td></tr>
-        <tr><td class="k">Escalabilidad al grupo</td><td>Alta: diseño replicable</td><td>Alta: centro de planificación</td></tr>
-        <tr><td class="k">Riesgo principal</td><td>Automatizar el desorden</td><td>Una capa más sin sistema</td></tr>
+        <tr><td class="k">Coste</td><td class="win">Proyecto SAP; sin plantilla nueva</td><td>Estructura permanente</td><td>Estructura + desarrollo de IA</td></tr>
+        <tr><td class="k">Plazo</td><td>Meses</td><td class="win">Semanas para arrancar</td><td>El más largo: equipo, datos y agentes</td></tr>
+        <tr><td class="k">Dependencia de personas</td><td class="win">Baja: deciden las reglas</td><td>Media: se concentra en el equipo</td><td>Media: la IA propone, el equipo valida</td></tr>
+        <tr><td class="k">Urgentes</td><td>Procedimiento aparte</td><td class="win">Un interlocutor que decide</td><td class="win">Interlocutor + propuesta automática</td></tr>
+        <tr><td class="k">Arbitraje entre plantas</td><td>No hay arbitraje: mandan los parámetros</td><td class="win">Lo resuelve si es neutral</td><td class="win">Lo resuelve, con datos de saturación</td></tr>
+        <tr><td class="k">Saturación de cada planta</td><td>No se tiene en cuenta</td><td>A criterio del equipo</td><td class="win">Automática en cada propuesta</td></tr>
+        <tr><td class="k">Impacto organizativo</td><td class="win">Bajo</td><td>Alto</td><td>Alto</td></tr>
+        <tr><td class="k">Escalabilidad al grupo</td><td>Alta: diseño replicable</td><td>Alta: centro de planificación</td><td>Alta: más plantas sin crecer igual</td></tr>
+        <tr><td class="k">Riesgo principal</td><td>Automatizar el desorden</td><td>Una capa más sin sistema</td><td>Fiarse de la IA sin datos fiables</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -333,9 +399,10 @@ td.win{background:var(--win)!important;font-weight:600;}
       <li><input type="checkbox" id="d1"><label for="d1">Alcance: solo la interfaz papel–cartón o la planificación completa de ambas plantas.</label></li>
       <li><input type="checkbox" id="d2"><label for="d2">Stock de Ondupack en MGT: propiedad, límites y quién paga el almacenaje.</label></li>
       <li><input type="checkbox" id="d3"><label for="d3">Prioridad de Ondupack frente a clientes externos de MGT.</label></li>
-      <li><input type="checkbox" id="d4"><label for="d4">Escenario 2: de quién depende el responsable de planificación integrada.</label></li>
+      <li><input type="checkbox" id="d4"><label for="d4">Escenarios 2 y 3: de quién depende el responsable de planificación integrada.</label></li>
       <li><input type="checkbox" id="d5"><label for="d5">Fecha de corte y horizonte congelado del ciclo.</label></li>
       <li><input type="checkbox" id="d6"><label for="d6">Validez actual del diseño SAP original.</label></li>
+      <li><input type="checkbox" id="d7"><label for="d7">Escenario 3: qué datos alimentan a los agentes y quién valida sus propuestas.</label></li>
     </ul>
   </div>
 </section>

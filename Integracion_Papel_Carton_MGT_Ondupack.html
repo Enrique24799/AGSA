@@ -50,11 +50,8 @@ td.win{background:var(--win)!important;font-weight:600;}
 .org{min-width:0;}
 .org .top{display:flex;flex-direction:column;align-items:center;}
 .vline{width:0;height:22px;border-left:2px solid var(--line);}
-.vline.dash{border-left-style:dashed;height:30px;}
 .branches{display:grid;gap:18px;}
 .branches.c3{grid-template-columns:1fr 1.15fr 1fr;}
-.branches.c4{grid-template-columns:repeat(4,1fr);}
-.branches.c2{grid-template-columns:1fr 1fr;max-width:780px;margin:0 auto;}
 .br{position:relative;padding-top:22px;}
 .br::before{content:'';position:absolute;top:0;left:50%;height:22px;border-left:2px solid var(--line);}
 .br::after{content:'';position:absolute;top:0;left:-9px;right:-9px;border-top:2px solid var(--line);}
@@ -79,11 +76,11 @@ td.win{background:var(--win)!important;font-weight:600;}
 .node.sistema{border-style:dashed;border-color:var(--accent2);}
 .node.sistema .tag{background:#e3eef8;color:var(--accent2);}
 .legend i.sistema{border-style:dashed;border-color:var(--accent2);background:#fff;}
+.nv{display:inline-block;font-style:normal;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;background:var(--accent2);color:#fff;border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:1px;line-height:1.4;}
+.legend .nv{margin:0 2px 0 0;}
 .node.dir{background:var(--primary);border-color:var(--primary);color:#fff;text-align:center;padding:9px 12px;}
 .node.dir h4{margin:0;}
 .node.dir small{color:rgba(255,255,255,.65);font-size:12px;}
-.plantas{border:1.5px dashed #c4cbd3;border-radius:12px;padding:14px;}
-.plantas>header{text-align:center;font-size:12.5px;color:var(--tl);margin-bottom:12px;}
 /* Pros / contras */
 .pc{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 .pc>div{background:var(--card);border-radius:10px;padding:20px 22px;box-shadow:0 1px 6px rgba(0,0,0,.05);}
@@ -107,7 +104,7 @@ td.win{background:var(--win)!important;font-weight:600;}
 .checks li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--border);font-size:14px;}
 .checks input{margin-top:3px;width:16px;height:16px;accent-color:var(--accent2);flex:none;}
 @media screen and (max-width:860px){
-  .branches.c3,.branches.c4,.branches.c2{grid-template-columns:1fr;}
+  .branches.c3{grid-template-columns:1fr;}
   .br{padding-top:0;}.br::before,.br::after{display:none;}
   .top .node{width:100%;}.org .branches{margin-top:10px;}.org .top .vline{height:10px;}
   .chips{grid-template-columns:1fr 1fr;}
@@ -205,6 +202,7 @@ td.win{background:var(--win)!important;font-weight:600;}
       <span><i class="cambia"></i>Se formaliza (hoy se hace de hecho)</span>
       <span><i class="igual"></i>Sin cambios</span>
       <span><i class="sistema"></i>Sistema</span>
+      <span><em class="nv">Nueva</em>Función que hoy no se hace</span>
     </div>
     <div class="org">
       <div class="top">
@@ -214,9 +212,8 @@ td.win{background:var(--win)!important;font-weight:600;}
         <div class="br">
           <div class="grp">
             <header>Ondupack</header>
-            <div class="node cambia"><span class="tag">Se formaliza</span><h4>Planificador de producción</h4><ul><li>Plan de fabricación</li><li>Plan de necesidades de papel</li><li>Solicita urgentes</li></ul></div>
-            <div class="node nuevo"><span class="tag">Nuevo</span><h4>Responsable de parámetros</h4><ul><li>Mínimos y máximos por material</li><li>Revisión mensual</li></ul></div>
-            <div class="node igual"><span class="tag">Sin cambios</span><h4>Programador / secuenciador</h4><ul><li>Secuencia el plan aprobado</li></ul></div>
+            <div class="node cambia"><span class="tag">Se formaliza</span><h4>Responsable de compras</h4><ul><li>Mínimos y máximos por material<em class="nv">Nueva</em></li><li>Revisión mensual de parámetros<em class="nv">Nueva</em></li><li>Plan de necesidades de papel</li><li>Solicita urgentes</li></ul></div>
+            <div class="node igual"><span class="tag">Sin cambios</span><h4>Planificador</h4><ul><li>Secuencia el plan aprobado</li></ul></div>
           </div>
         </div>
         <div class="br">
@@ -231,8 +228,7 @@ td.win{background:var(--win)!important;font-weight:600;}
         <div class="br">
           <div class="grp">
             <header>MGT</header>
-            <div class="node cambia"><span class="tag">Se formaliza</span><h4>Planificador de ciclos e intercompany</h4><ul><li>Calendario de ciclos y fecha de corte</li><li>Acepta urgentes dentro de regla</li><li>Corrige excepciones de pedidos</li></ul></div>
-            <div class="node igual"><span class="tag">Sin cambios</span><h4>Producción</h4><ul><li>Fabrica según el ciclo</li></ul></div>
+            <div class="node cambia"><span class="tag">Se formaliza</span><h4>Planificador</h4><ul><li>Calendario de ciclos y fecha de corte</li><li>Acepta urgentes dentro de regla</li><li>Corrige excepciones de pedidos</li></ul></div>
           </div>
         </div>
       </div>
@@ -276,40 +272,18 @@ td.win{background:var(--win)!important;font-weight:600;}
 
   <div class="card">
     <h3>Organigrama</h3>
-    <div class="legend">
-      <span><i class="nuevo"></i>Puesto nuevo</span>
-      <span><i class="cambia"></i>Se redefine</span>
-      <span><i class="igual"></i>Sin cambios</span>
-    </div>
     <div class="org">
       <div class="top">
         <div class="node dir"><h4>Dirección</h4><small>por encima de ambas plantas</small></div>
         <div class="vline"></div>
-        <div class="node nuevo"><span class="tag">Nuevo</span><h4>Responsable de planificación integrada</h4><ul><li>Dueño del plan papel–cartón</li><li>Prioridades y arbitraje entre plantas</li><li>Urgentes y KPIs</li></ul></div>
+        <div class="node nuevo"><span class="tag">Nuevo</span><h4>Responsable de planificación integrada</h4><ul><li>Dueño del plan papel–cartón</li><li>Prioridades y arbitraje entre plantas</li><li>Urgentes y KPIs</li><li>Datos maestros</li></ul></div>
       </div>
-      <div class="branches c4">
+      <div class="branches c3">
         <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificación cartón</h4><ul><li>Plan de fabricación de Ondupack</li><li>Necesidades de papel</li></ul></div></div>
         <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificación papel</h4><ul><li>Ciclos de MGT</li><li>Fecha de corte y confirmaciones</li></ul></div></div>
-        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Inventario y logística</h4><ul><li>Mínimos y máximos</li><li>Stock de Ondupack en MGT</li><li>Cadencia de camiones</li></ul></div></div>
-        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Pedidos y datos</h4><ul><li>Pedidos de compra y venta</li><li>Datos maestros</li><li>Informes de visibilidad</li></ul></div></div>
-      </div>
-      <div class="top"><div class="vline dash"></div></div>
-      <div class="plantas">
-        <header>Siguen en su planta y ejecutan el plan del departamento</header>
-        <div class="branches c2">
-          <div class="grp">
-            <header>Ondupack</header>
-            <div class="node igual"><span class="tag">Sin cambios</span><h4>Programador / secuenciador</h4><ul><li>Secuencia el plan del departamento</li></ul></div>
-            <div class="node cambia"><span class="tag">Se redefine</span><h4>Comercial</h4><ul><li>Traslada prioridades de clientes al departamento</li></ul></div>
-          </div>
-          <div class="grp">
-            <header>MGT</header>
-            <div class="node igual"><span class="tag">Sin cambios</span><h4>Producción</h4><ul><li>Fabrica el ciclo planificado</li></ul></div>
-          </div>
-        </div>
+        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Coordinador logístico</h4><ul><li>Mínimos y máximos</li><li>Stock de Ondupack en MGT</li><li>Cadencia de camiones</li></ul></div></div>
       </div>
     </div>
-    <p class="note">Cuatro funciones cubiertas por 2–3 planificadores, en lo posible con personal actual de MGT y Ondupack. Dimensionamiento orientativo, a validar con volúmenes.</p>
   </div>
 
   <div class="pc">
@@ -332,7 +306,7 @@ td.win{background:var(--win)!important;font-weight:600;}
   <div class="sec">
     <h3>Impacto en personas</h3>
     <div class="kg">
-      <div class="kc"><div class="kl">Plantilla</div><div class="kv">Responsable + 2–3 planificadores</div><div class="ks">Reasignados de MGT y Ondupack o nuevas incorporaciones</div></div>
+      <div class="kc"><div class="kl">Plantilla</div><div class="kv">Responsable + 3 puestos</div><div class="ks">Reasignados de MGT y Ondupack o nuevas incorporaciones</div></div>
       <div class="kc"><div class="kl">Puestos</div><div class="kv">Nueva dependencia</div><div class="ks">Cambian jerarquía, funciones y quizá ubicación</div></div>
       <div class="kc"><div class="kl">RRHH</div><div class="kv">Proceso formal</div><div class="ks">Cambios de puesto y, si aplica, representación de los trabajadores</div></div>
     </div>

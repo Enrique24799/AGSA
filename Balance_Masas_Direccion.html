@@ -35,18 +35,29 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--page);color:var(--ink);line-height:1.45;}
 .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 40px;}
-.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:22px;}
+.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:18px;}
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
 h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spacing:-.01em;}
 .meta{font-size:14px;color:var(--ink-2);}
 .verdict{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;font-size:15px;font-weight:600;border:1px solid var(--ring);background:var(--card);}
 .verdict .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+/* Filtros */
+.filters{display:flex;flex-wrap:wrap;gap:12px 12px;align-items:flex-end;background:var(--card);border:1px solid var(--ring);border-radius:12px;padding:14px 18px;margin-bottom:18px;}
+.f{display:flex;flex-direction:column;gap:4px;}
+.f label{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.f select,.f input{height:34px;padding:0 10px;border:1px solid var(--axis);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;}
+.f select:focus,.f input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+.f input[type=search]{width:120px;}
+.f input[type=date]{width:138px;}
+.f.pct input{width:56px;text-align:right;}
+.f.pct .in{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-2);}
+.fsep{width:1px;align-self:stretch;background:var(--grid);margin:0 4px;}
+.freset{background:none;border:none;color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer;height:34px;}
 /* KPI */
-.kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:14px;margin-bottom:22px;}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
 .tile{background:var(--card);border:1px solid var(--ring);border-radius:12px;padding:18px 20px;}
 .tile .lbl{font-size:13px;color:var(--ink-2);font-weight:500;display:flex;align-items:center;gap:6px;}
 .tile .val{font-size:32px;font-weight:650;margin:6px 0 2px;letter-spacing:-.01em;}
-.tile.hero .val{font-size:48px;line-height:1.05;}
 .tile .val small{font-size:15px;font-weight:500;color:var(--ink-2);margin-left:5px;}
 .tile .sub{font-size:13px;color:var(--muted);}
 /* Tarjetas */
@@ -60,7 +71,7 @@ h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spa
 .grp-h .n{font-size:13px;color:var(--ink-2);}
 .grp-h p{flex-basis:100%;font-size:13px;color:var(--ink-2);}
 /* Filas de órdenes */
-.row,.rowh{display:grid;grid-template-columns:92px minmax(200px,1.7fr) minmax(130px,1fr) 150px 112px 150px;gap:14px;align-items:center;padding:11px 12px;}
+.row,.rowh{display:grid;grid-template-columns:92px minmax(200px,1.7fr) minmax(150px,1fr) 170px 120px;gap:14px;align-items:center;padding:11px 12px;}
 .rowh{font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding-top:10px;padding-bottom:4px;}
 .row{border-radius:9px;margin-top:6px;border-left:4px solid var(--warning);background:var(--warn-wash);}
 .row.crit{border-left-color:var(--critical);background:var(--crit-wash);}
@@ -68,13 +79,13 @@ h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spa
 .who b{font-size:14px;}
 .who div{font-size:12.5px;color:var(--ink-2);}
 .mat{display:inline-block;font-size:12.5px;font-weight:600;background:var(--chip);border:1px solid var(--ring);border-radius:6px;padding:2px 8px;white-space:nowrap;}
+.mtipo{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;}
 .kgs{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;}
 .kgs b{color:var(--ink);font-weight:600;}
 .dv{text-align:right;}
 .dv .big{display:block;font-size:20px;font-weight:650;line-height:1.1;}
 .dv .pct{font-size:12.5px;color:var(--ink-2);}
 .none{font-size:13.5px;color:var(--ink-2);padding:12px;}
-.mini{display:block;width:100%;height:22px;}
 .allok{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:10px;background:var(--good-wash);font-size:15px;font-weight:600;margin-top:8px;}
 /* Gráfico */
 .card-h{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:flex-start;justify-content:space-between;}
@@ -102,18 +113,20 @@ h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spa
 .foot button{background:none;border:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:0;}
 .foot .sp{flex:1;}
 @media (max-width:980px){
-  .kpis{grid-template-columns:1fr 1fr;}
-  .tile.hero{grid-column:1 / -1;}
   .rowh{display:none;}
-  .row{grid-template-columns:1fr auto;grid-template-areas:"sev dv" "who dv" "mat mat" "kgs kgs" "mini mini";gap:4px 12px;}
+  .row{grid-template-columns:1fr auto;grid-template-areas:"sev dv" "who dv" "mat mat" "kgs kgs";gap:4px 12px;}
   .row .sev{grid-area:sev;} .row .who{grid-area:who;} .row .m{grid-area:mat;margin-top:4px;}
-  .row .kgs{grid-area:kgs;} .row .dv{grid-area:dv;align-self:start;} .row .bar{grid-area:mini;max-width:260px;}
+  .row .kgs{grid-area:kgs;} .row .dv{grid-area:dv;align-self:start;}
+  .fsep{display:none;}
 }
 @media (max-width:600px){
   .wrap{padding:18px 16px 32px;}
   h1{font-size:21px;}
   .kpis{grid-template-columns:1fr;}
-  .tile.hero .val{font-size:40px;}
+  .filters{padding:12px 14px;}
+  .f{flex:1 1 140px;}
+  .f select,.f input,.f input[type=search]{width:100%;}
+  .f.pct{flex:1 1 120px;}
 }
 </style>
 </head>
@@ -122,11 +135,23 @@ h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spa
   <header class="top">
     <div>
       <div class="eyebrow">ONDUPET · Balance de masas</div>
-      <h1>Desviaciones de consumo de bobina</h1>
+      <h1>Desviaciones de consumo de material</h1>
       <div class="meta" id="meta"></div>
     </div>
     <div class="verdict" id="verdict"></div>
   </header>
+
+  <section class="filters" aria-label="Filtros">
+    <div class="f"><label for="fMaq">Máquina</label><select id="fMaq"></select></div>
+    <div class="f"><label for="fDesde">Desde</label><input type="date" id="fDesde"></div>
+    <div class="f"><label for="fHasta">Hasta</label><input type="date" id="fHasta"></div>
+    <div class="f"><label for="fTipo">Material</label><select id="fTipo"><option value="">Todos</option><option value="bobina">Bobina</option><option value="auxiliar">Auxiliar</option></select></div>
+    <div class="f"><label for="fPedido">Pedido</label><input type="search" id="fPedido" list="lPedidos" placeholder="Todos" autocomplete="off"><datalist id="lPedidos"></datalist></div>
+    <div class="fsep"></div>
+    <div class="f pct"><label for="uOk">Sin desviación hasta</label><div class="in">± <input type="number" id="uOk" min="0" step="0.5"> %</div></div>
+    <div class="f pct"><label for="uCrit">Crítico desde</label><div class="in">± <input type="number" id="uCrit" min="0" step="0.5"> %</div></div>
+    <button type="button" class="freset" id="fReset">Restablecer</button>
+  </section>
 
   <section class="kpis" id="kpis"></section>
 
@@ -144,16 +169,16 @@ h1{font-size:26px;font-weight:650;color:var(--brand);margin:2px 0 4px;letter-spa
     <div class="legend">
       <span><i class="k-mat" style="background:var(--ink-2)"></i>Total del material</span>
       <span><i class="k-of" style="background:var(--ink-2)"></i>Orden</span>
-      <span><i style="background:var(--ok-bar)"></i>En tolerancia</span>
+      <span><i style="background:var(--ok-bar)"></i>Sin desviación</span>
       <span><i style="background:var(--warning)"></i>Revisar</span>
       <span><i style="background:var(--critical)"></i>Crítico</span>
-      <span><i style="background:var(--band);outline:1px solid var(--grid)"></i>Franja de tolerancia</span>
+      <span><i style="background:var(--band);outline:1px solid var(--grid)"></i>Franja sin desviación</span>
     </div>
     <div class="chartbox"><div id="chart"></div><div class="tip" id="tip"></div></div>
   </section>
 
   <footer class="foot">
-    <span>Desviación = consumo de bobina (consumido − devuelto) frente al teórico de lo notificado (cantidad notificada × consumo de la LdM).</span>
+    <span>Desviación = consumo real (consumido − devuelto) frente al teórico de lo notificado (cantidad notificada × consumo de la LdM).</span>
     <span class="sp"></span>
     <span id="fuente"></span>
     <button type="button" onclick="document.getElementById('fJSON').click()">Cargar datos</button>
@@ -362,7 +387,15 @@ function calcularBalance(datos){
 
 /* =====================================================================
    DATOS DEMO
+   Mismo formato que el JSON exportado desde la herramienta (ordenes,
+   consumos, devoluciones) más un bloque opcional de auxiliares:
+     auxiliares: [{of, material, descripcion, unidad:'kg'|'ud',
+                   ldm: consumo por 1.000 ud de producto (en su unidad),
+                   consumido, fecha}]
+   Las fechas de la demo son relativas a hoy para que el filtro por
+   defecto (últimos 5 días) muestre datos.
    ===================================================================== */
+function diaISO(off,hora){var d=new Date();d.setDate(d.getDate()+off);var p=function(n){return ('0'+n).slice(-2);};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+(hora?'T'+hora:'');}
 function datosDemo(){
   return {
     ordenes:[
@@ -377,140 +410,172 @@ function datosDemo(){
       {maquina:'T2',seq:4,of:'OF-26424',pedido:'PED-6130',articulo:'Bandeja 187x137',bobina:'LAM-PET-450x700',gUd:18,cantPlan:10000,cantFab:8800},
       {maquina:'T3',seq:1,of:'OF-26431',pedido:'PED-6140',articulo:'Bandeja 260x190 h50',bobina:'LAM-PET-600x900',gUd:24,cantPlan:25000,cantFab:27000},
       {maquina:'T3',seq:2,of:'OF-26432',pedido:'PED-6141',articulo:'Bandeja 260x190 h60',bobina:'LAM-PET-600x900',gUd:26,cantPlan:15000,cantFab:14600},
-      {maquina:'T3',seq:3,of:'OF-26433',pedido:'PED-6145',articulo:'Bandeja 210x150',bobina:'LAM-PET-600x900',gUd:20,cantPlan:12000,cantFab:12000}
+      {maquina:'T3',seq:3,of:'OF-26433',pedido:'PED-6145',articulo:'Bandeja 210x150',bobina:'LAM-PET-600x900',gUd:20,cantPlan:12000,cantFab:12000},
+      {maquina:'T4',seq:1,of:'OF-26401',pedido:'PED-6090',articulo:'Tarrina 250 cc',bobina:'LAM-PET-400x650',gUd:12,cantPlan:20000,cantFab:20000},
+      {maquina:'T4',seq:2,of:'OF-26402',pedido:'PED-6092',articulo:'Tarrina 375 cc',bobina:'LAM-PET-400x650',gUd:15,cantPlan:12000,cantFab:12000}
     ],
     consumos:[
-      {fecha:'2026-10-19T06:05',lote:'L-251001',bobina:'LAM-PET-450x700',kg:600,of:'OF-26411'},
-      {fecha:'2026-10-19T13:40',lote:'L-251002',bobina:'LAM-PET-450x700',kg:400,of:'OF-26412'},
-      {fecha:'2026-10-20T06:10',lote:'L-251010',bobina:'LAM-PET-300x560',kg:500,of:'OF-26414'},
-      {fecha:'2026-10-19T06:00',lote:'L-251020',bobina:'LAM-PET-500x800',kg:420,of:'OF-26421'},
-      {fecha:'2026-10-19T14:30',lote:'L-251021',bobina:'LAM-PET-500x800',kg:410,of:'OF-26423'},
-      {fecha:'2026-10-20T07:15',lote:'L-251022',bobina:'LAM-PET-500x800',kg:400,of:'OF-26423'},
-      {fecha:'2026-10-21T06:00',lote:'L-251003',bobina:'LAM-PET-450x700',kg:150,of:'OF-26424'},
-      {fecha:'2026-10-20T06:00',lote:'L-251030',bobina:'LAM-PET-600x900',kg:700,of:'OF-26431'},
-      {fecha:'2026-10-21T09:20',lote:'L-251031',bobina:'LAM-PET-600x900',kg:650,of:'OF-26432'}
+      {fecha:diaISO(-4,'06:05'),lote:'L-251001',bobina:'LAM-PET-450x700',kg:600,of:'OF-26411'},
+      {fecha:diaISO(-4,'13:40'),lote:'L-251002',bobina:'LAM-PET-450x700',kg:400,of:'OF-26412'},
+      {fecha:diaISO(-3,'06:10'),lote:'L-251010',bobina:'LAM-PET-300x560',kg:500,of:'OF-26414'},
+      {fecha:diaISO(-4,'06:00'),lote:'L-251020',bobina:'LAM-PET-500x800',kg:420,of:'OF-26421'},
+      {fecha:diaISO(-4,'14:30'),lote:'L-251021',bobina:'LAM-PET-500x800',kg:410,of:'OF-26423'},
+      {fecha:diaISO(-3,'07:15'),lote:'L-251022',bobina:'LAM-PET-500x800',kg:400,of:'OF-26423'},
+      {fecha:diaISO(-2,'06:00'),lote:'L-251003',bobina:'LAM-PET-450x700',kg:150,of:'OF-26424'},
+      {fecha:diaISO(-3,'06:00'),lote:'L-251030',bobina:'LAM-PET-600x900',kg:700,of:'OF-26431'},
+      {fecha:diaISO(-2,'09:20'),lote:'L-251031',bobina:'LAM-PET-600x900',kg:650,of:'OF-26432'},
+      {fecha:diaISO(-8,'06:00'),lote:'L-250990',bobina:'LAM-PET-400x650',kg:450,of:'OF-26401'}
     ],
     devoluciones:[
-      {fecha:'2026-10-19T22:00',lote:'L-251002',kg:140},
-      {fecha:'2026-10-20T21:40',lote:'L-251010',kg:90},
-      {fecha:'2026-10-20T22:15',lote:'L-251022',kg:90},
-      {fecha:'2026-10-21T23:30',lote:'L-251031',kg:128}
+      {fecha:diaISO(-4,'22:00'),lote:'L-251002',kg:140},
+      {fecha:diaISO(-3,'21:40'),lote:'L-251010',kg:90},
+      {fecha:diaISO(-3,'22:15'),lote:'L-251022',kg:90},
+      {fecha:diaISO(-2,'23:30'),lote:'L-251031',kg:128},
+      {fecha:diaISO(-8,'23:00'),lote:'L-250990',kg:18}
     ],
-    cfg:{tol:3}
+    auxiliares:[
+      {of:'OF-26411',material:'CAJ-600x400',descripcion:'Caja cartón 600x400',unidad:'ud',ldm:2.5,consumido:50,fecha:diaISO(-4)},
+      {of:'OF-26415',material:'BOLSA-PE-40',descripcion:'Bolsa PE 40 µm',unidad:'ud',ldm:10,consumido:160,fecha:diaISO(-3)},
+      {of:'OF-26423',material:'CAJ-500x350',descripcion:'Caja cartón 500x350',unidad:'ud',ldm:2,consumido:68,fecha:diaISO(-3)},
+      {of:'OF-26423',material:'FILM-ESTIR-23',descripcion:'Film estirable 23 µm',unidad:'kg',ldm:0.5,consumido:15.2,fecha:diaISO(-3)},
+      {of:'OF-26431',material:'ETQ-100x150',descripcion:'Etiqueta de caja 100x150',unidad:'ud',ldm:4,consumido:103,fecha:diaISO(-3)}
+    ]
   };
 }
 
 /* =====================================================================
    VISTA DE DIRECCIÓN
    ===================================================================== */
-var LS_DATOS='ondupet_balance_direccion_datos_v1';
-var DATOS=null,FUENTE='demo',FILAS=[],TOL=3;
+var LS_DATOS='ondupet_balance_direccion_datos_v1',LS_UMBRALES='ondupet_balance_direccion_umbrales_v1';
+var DATOS=null,FUENTE='demo',ITEMS=[],VISIBLES=[];
+var U={ok:3,crit:6};
+var MAQUINAS=['T1','T2','T3','T4','T5','T6'];
+var SEV={1:'Sin desviación',2:'Revisar',3:'Crítico'};
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function nf(x,d){return (x==null||!isFinite(x))?'—':(Math.abs(x)<Math.pow(10,-d)/2?0:x).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function sg(x,d){return (x>=Math.pow(10,-d)/2?'+':x<=-Math.pow(10,-d)/2?'−':'')+nf(Math.abs(x),d);}
 function pct(x){return x==null?'—':sg(x,1)+' %';}
+function dec(x,u){return u==='kg'&&Math.abs(x)<10?1:0;}
+function cant(x,u){return nf(x,dec(x,u))+' '+u;}
+function cantS(x,u){return sg(x,dec(x,u))+' '+u;}
 function fechaCorta(s){var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');if(!m)return '';var meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];return (+m[3])+' '+meses[+m[2]-1]+' '+m[1];}
 function icono(s){
   if(s===3)return '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1 13 12H1z" fill="var(--critical)"/><rect x="6.3" y="5" width="1.4" height="3.6" rx=".7" fill="#fff"/><circle cx="7" cy="10.3" r=".8" fill="#fff"/></svg>';
   if(s===2)return '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="var(--warning)"/><rect x="6.3" y="3.4" width="1.4" height="4.4" rx=".7" fill="#0b0b0b"/><circle cx="7" cy="10.1" r=".8" fill="#0b0b0b"/></svg>';
   return '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="var(--good)"/><path d="M4.2 7.2 6.2 9.1 9.9 5.1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
-var SEV={1:'En tolerancia',2:'Revisar',3:'Crítico'};
 
-// Gravedad por desviación: fuera de ±tol = revisar; fuera de ±2·tol = crítico
-function gravedad(o,tol){
-  if(o.tReal<=EPS)return o.consNeto>0.5?3:1;     // consumo sin producción notificada
-  var a=Math.abs(o.desvPct);
-  return a>2*tol?3:a>tol?2:1;
+// Una partida por orden y material: la bobina (con el reparto del motor) y cada auxiliar
+function construirItems(datos){
+  var R=calcularBalance(datos),items=[],porOf={},fechasLote={};
+  R.trazaCons.forEach(function(t){if(t.fecha)(fechasLote[t.lote]=fechasLote[t.lote]||[]).push(t.fecha.slice(0,10));});
+  R.ordenes.forEach(function(o){
+    var f=[];if(o.fecha)f.push(String(o.fecha).slice(0,10));
+    o.filas.forEach(function(p){(fechasLote[p.L.lote]||[]).forEach(function(x){f.push(x);});});
+    porOf[o.of]={o:o,fechas:f};
+    items.push({tipo:'bobina',material:o.bobina||'—',desc:'Bobina',unidad:'kg',teo:o.tReal,cons:o.consNeto,o:o,fechas:f});
+  });
+  (datos.auxiliares||[]).forEach(function(a){
+    var x=porOf[String(a.of||'').trim()];if(!x)return;
+    var o=x.o,teo=o.cantFab*num(a.ldm)/1000;
+    items.push({tipo:'auxiliar',material:String(a.material||'—'),desc:a.descripcion||'Auxiliar',unidad:a.unidad==='kg'?'kg':'ud',
+      teo:teo,cons:num(a.consumido),o:o,fechas:a.fecha?[String(a.fecha).slice(0,10)]:x.fechas});
+  });
+  items.forEach(function(it){it.desv=it.cons-it.teo;it.pct=it.teo>EPS?it.desv/it.teo*100:null;});
+  return items;
 }
-
-// Barra divergente pequeña: centro = teórico, franja = tolerancia
-function mini(v,sev,tol,M){
-  var W=150,H=22,c=W/2,sx=function(x){return c+Math.max(-1,Math.min(1,x/M))*(c-4);};
-  var col=sev===3?'var(--critical)':sev===2?'var(--warning)':'var(--axis)';
-  var s='<svg class="mini" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">';
-  s+='<rect x="'+sx(-tol)+'" y="2" width="'+(sx(tol)-sx(-tol))+'" height="'+(H-4)+'" fill="var(--band)"/>';
-  if(v!=null){
-    var xb=sx(v),xa=c,w=Math.abs(xb-xa),r=Math.min(3,w),y=6,h=H-12;
-    if(w>0.5){
-      var d=v>=0?'M'+xa+','+y+'H'+(xb-r)+'Q'+xb+','+y+' '+xb+','+(y+r)+'V'+(y+h-r)+'Q'+xb+','+(y+h)+' '+(xb-r)+','+(y+h)+'H'+xa+'Z'
-                 :'M'+xa+','+y+'H'+(xb+r)+'Q'+xb+','+y+' '+xb+','+(y+r)+'V'+(y+h-r)+'Q'+xb+','+(y+h)+' '+(xb+r)+','+(y+h)+'H'+xa+'Z';
-      s+='<path d="'+d+'" fill="'+col+'"/>';
-    }
+function gravedad(it){
+  if(it.teo<=EPS)return it.cons>0.005?3:1;   // consumo sin cantidad notificada
+  var a=Math.abs(it.pct);
+  return a>=U.crit?3:a>U.ok?2:1;
+}
+function filtro(){
+  return {maq:document.getElementById('fMaq').value,desde:document.getElementById('fDesde').value,hasta:document.getElementById('fHasta').value,
+    tipo:document.getElementById('fTipo').value,pedido:document.getElementById('fPedido').value.trim().toLowerCase()};
+}
+function pasa(it,F){
+  if(F.maq&&it.o.maquina!==F.maq)return false;
+  if(F.tipo&&it.tipo!==F.tipo)return false;
+  if(F.pedido&&String(it.o.pedido||'').toLowerCase().indexOf(F.pedido)<0)return false;
+  if(F.desde||F.hasta){
+    if(!it.fechas.length)return false;
+    if(!it.fechas.some(function(d){return (!F.desde||d>=F.desde)&&(!F.hasta||d<=F.hasta);}))return false;
   }
-  s+='<line x1="'+c+'" x2="'+c+'" y1="1" y2="'+(H-1)+'" stroke="var(--axis)" stroke-width="1.5"/></svg>';
-  return s;
+  return true;
 }
+function sumaPorUnidad(l){
+  var u={};l.forEach(function(it){u[it.unidad]=(u[it.unidad]||0)+it.desv;});
+  return Object.keys(u).sort().map(function(k){return cantS(u[k],k);}).join(' · ');
+}
+function ofsDistintas(l){var s={};l.forEach(function(it){s[it.o.of]=1;});return Object.keys(s).length;}
 
 function render(){
-  var tol=num(DATOS.cfg&&DATOS.cfg.tol)||3;
-  var R=calcularBalance(DATOS),T=R.tot;
-  var filas=R.ordenes.map(function(o){return {o:o,sev:gravedad(o,tol)};});
-  var exceso=filas.filter(function(f){return f.sev>1&&f.o.desv>0;}),falta=filas.filter(function(f){return f.sev>1&&f.o.desv<0;});
-  var orden=function(a,b){return b.sev-a.sev||Math.abs(b.o.desv)-Math.abs(a.o.desv);};
+  var F=filtro();
+  VISIBLES=ITEMS.filter(function(it){return pasa(it,F);}).map(function(it){it.sev=gravedad(it);return it;});
+  var exceso=VISIBLES.filter(function(it){return it.sev>1&&it.desv>0;}),falta=VISIBLES.filter(function(it){return it.sev>1&&it.desv<0;});
+  var orden=function(a,b){return b.sev-a.sev||Math.abs(b.pct||1e9)-Math.abs(a.pct||1e9);};
   exceso.sort(orden);falta.sort(orden);
-  var kgEx=exceso.reduce(function(s,f){return s+f.o.desv;},0),kgFa=falta.reduce(function(s,f){return s+f.o.desv;},0);
-  var maxSev=function(l){return l.reduce(function(m,f){return Math.max(m,f.sev);},1);};
-  var nFuera=exceso.length+falta.length,maqs={};R.ordenes.forEach(function(o){maqs[o.maquina]=1;});
+  var maxSev=function(l){return l.reduce(function(m,it){return Math.max(m,it.sev);},1);};
+  var nOf=ofsDistintas(VISIBLES),nFueraOf=ofsDistintas(exceso.concat(falta)),maqs={};
+  VISIBLES.forEach(function(it){maqs[it.o.maquina]=1;});
 
-  var fechas=(DATOS.consumos||[]).map(function(c){return c.fecha||'';}).concat((DATOS.devoluciones||[]).map(function(d){return d.fecha||'';})).filter(Boolean).sort();
-  document.getElementById('meta').textContent=(fechas.length?'Del '+fechaCorta(fechas[0])+' al '+fechaCorta(fechas[fechas.length-1])+' · ':'')+R.ordenes.length+' órdenes · '+Object.keys(maqs).length+' máquinas';
-  var nCrit=exceso.concat(falta).filter(function(f){return f.sev===3;}).length;
-  document.getElementById('verdict').innerHTML=nFuera?
-    '<span class="dot" style="background:var('+(nCrit?'--critical':'--warning')+')"></span>'+nFuera+(nFuera===1?' orden fuera':' órdenes fuera')+' de tolerancia (±'+nf(tol,0)+' %)':
-    '<span class="dot" style="background:var(--good)"></span>Todas las órdenes dentro de tolerancia';
+  document.getElementById('meta').textContent=(F.desde||F.hasta?(F.desde?'Del '+fechaCorta(F.desde):'Hasta')+(F.hasta?(F.desde?' al ':' ')+fechaCorta(F.hasta):' en adelante')+' · ':'')+
+    nOf+(nOf===1?' orden':' órdenes')+' · '+Object.keys(maqs).length+(Object.keys(maqs).length===1?' máquina':' máquinas');
+  var v=document.getElementById('verdict');
+  if(!VISIBLES.length)v.innerHTML='<span class="dot" style="background:var(--axis)"></span>Sin datos con estos filtros';
+  else if(nFueraOf)v.innerHTML='<span class="dot" style="background:var('+(maxSev(exceso.concat(falta))===3?'--critical':'--warning')+')"></span>'+nFueraOf+(nFueraOf===1?' orden con desviación':' órdenes con desviación');
+  else v.innerHTML='<span class="dot" style="background:var(--good)"></span>Ninguna orden con desviación';
 
+  var nEx=ofsDistintas(exceso),nFa=ofsDistintas(falta);
   document.getElementById('kpis').innerHTML=
-    '<div class="tile hero"><div class="lbl">Desviación global</div><div class="val">'+pct(T.desvPct)+'</div><div class="sub">'+sg(T.desv,0)+' kg sobre '+nf(T.tReal,0)+' kg teóricos</div></div>'+
-    '<div class="tile"><div class="lbl">'+icono(maxSev(exceso)).replace('width="14"','width="13"')+'Consumo por encima</div><div class="val">'+exceso.length+'<small>'+(exceso.length===1?'orden':'órdenes')+'</small></div><div class="sub">'+(exceso.length?sg(kgEx,0)+' kg sobre el teórico':'Ninguna fuera de tolerancia')+'</div></div>'+
-    '<div class="tile"><div class="lbl">'+icono(maxSev(falta)).replace('width="14"','width="13"')+'Falta consumo</div><div class="val">'+falta.length+'<small>'+(falta.length===1?'orden':'órdenes')+'</small></div><div class="sub">'+(falta.length?sg(kgFa,0)+' kg bajo el teórico':'Ninguna fuera de tolerancia')+'</div></div>'+
-    '<div class="tile"><div class="lbl">En tolerancia</div><div class="val">'+(R.ordenes.length-nFuera)+'<small>de '+R.ordenes.length+'</small></div><div class="sub">Dentro de ±'+nf(tol,0)+' %</div></div>';
+    '<div class="tile"><div class="lbl">'+icono(maxSev(exceso)).replace('width="14"','width="13"')+'Consumo por encima</div><div class="val">'+nEx+'<small>'+(nEx===1?'orden':'órdenes')+'</small></div><div class="sub">'+(exceso.length?sumaPorUnidad(exceso)+' sobre el teórico':'Ninguna con desviación')+'</div></div>'+
+    '<div class="tile"><div class="lbl">'+icono(maxSev(falta)).replace('width="14"','width="13"')+'Falta consumo</div><div class="val">'+nFa+'<small>'+(nFa===1?'orden':'órdenes')+'</small></div><div class="sub">'+(falta.length?sumaPorUnidad(falta)+' bajo el teórico':'Ninguna con desviación')+'</div></div>';
 
-  document.getElementById('lead').textContent='Solo las órdenes fuera de ±'+nf(tol,0)+' %. Crítico: fuera de ±'+nf(2*tol,0)+' %.';
-  var M=Math.max(2*tol,Math.max.apply(null,exceso.concat(falta).map(function(f){return f.o.desvPct==null?0:Math.abs(f.o.desvPct);}).concat([0])));
-  function grupo(titulo,ico,texto,lista){
-    var h='<div class="grp"><div class="grp-h"><h3>'+ico+titulo+'</h3><span class="n">'+lista.length+(lista.length===1?' orden':' órdenes')+'</span><p>'+texto+'</p></div>';
+  document.getElementById('lead').textContent='Sin desviación hasta ±'+nf(U.ok,1).replace(',0','')+' %. Revisar por encima de ese valor. Crítico desde ±'+nf(U.crit,1).replace(',0','')+' %.';
+  function grupo(titulo,texto,lista){
+    var h='<div class="grp"><div class="grp-h"><h3>'+icono(maxSev(lista))+titulo+'</h3><span class="n">'+ofsDistintas(lista)+(ofsDistintas(lista)===1?' orden':' órdenes')+'</span><p>'+texto+'</p></div>';
     if(!lista.length)return h+'<div class="none">Ninguna orden.</div></div>';
-    h+='<div class="rowh"><span>Estado</span><span>Orden</span><span>Material</span><span>Teórico → consumido</span><span style="text-align:right">Desviación</span><span>±'+nf(tol,0)+' %</span></div>';
-    lista.forEach(function(f){var o=f.o;
-      h+='<div class="row'+(f.sev===3?' crit':'')+'">'+
-        '<div class="sev">'+icono(f.sev)+SEV[f.sev]+'</div>'+
+    h+='<div class="rowh"><span>Estado</span><span>Orden</span><span>Material</span><span>Teórico → consumido</span><span style="text-align:right">Desviación</span></div>';
+    lista.forEach(function(it){var o=it.o;
+      h+='<div class="row'+(it.sev===3?' crit':'')+'">'+
+        '<div class="sev">'+icono(it.sev)+SEV[it.sev]+'</div>'+
         '<div class="who"><b>'+esc(o.of)+'</b> · '+esc(o.pedido)+'<div>'+esc(o.maquina)+' · '+esc(o.articulo)+' · '+nf(o.cantFab,0)+' ud notificadas</div></div>'+
-        '<div class="m"><span class="mat">'+esc(o.bobina||'—')+'</span></div>'+
-        '<div class="kgs"><b>'+nf(o.tReal,0)+'</b> → <b>'+nf(o.consNeto,0)+'</b> kg</div>'+
-        '<div class="dv"><span class="big">'+sg(o.desv,0)+' kg</span><span class="pct">'+pct(o.desvPct)+'</span></div>'+
-        '<div class="bar">'+mini(o.desvPct==null?M:o.desvPct,f.sev,tol,M)+'</div>'+
+        '<div class="m"><span class="mat">'+esc(it.material)+'</span><span class="mtipo">'+(it.tipo==='bobina'?'Bobina':'Auxiliar · '+esc(it.desc))+'</span></div>'+
+        '<div class="kgs"><b>'+nf(it.teo,dec(it.teo,it.unidad))+'</b> → <b>'+nf(it.cons,dec(it.cons,it.unidad))+'</b> '+it.unidad+'</div>'+
+        '<div class="dv"><span class="big">'+cantS(it.desv,it.unidad)+'</span><span class="pct">'+pct(it.pct)+'</span></div>'+
       '</div>';
     });
     return h+'</div>';
   }
-  document.getElementById('lista').innerHTML=nFuera?
-    grupo('Consumo por encima del teórico',icono(maxSev(exceso)),'Se ha consumido más bobina de la que corresponde a lo notificado: merma por pérdidas de arranque, sobrante sin devolver o consumo de la LdM corto.',exceso)+
-    grupo('Falta consumo',icono(maxSev(falta)),'Se ha consumido menos bobina de la que corresponde a lo notificado: probable consumo sin declarar, y el stock de bobina en SAP queda por encima del real.',falta):
-    '<div class="allok">'+icono(1)+'Todas las órdenes están dentro de tolerancia.</div>';
+  document.getElementById('lista').innerHTML=!VISIBLES.length?'<div class="none">No hay órdenes en el periodo y con los filtros seleccionados.</div>':
+    (exceso.length||falta.length)?
+    grupo('Consumo por encima del teórico','Se ha consumido más material del que corresponde a lo notificado: merma (pérdidas de arranque, sobrante sin devolver) o consumo de la LdM corto.',exceso)+
+    grupo('Falta consumo','Se ha consumido menos material del que corresponde a lo notificado: probable consumo sin declarar, y el stock en SAP queda por encima del real.',falta):
+    '<div class="allok">'+icono(1)+'Ninguna orden con desviación en el periodo seleccionado.</div>';
 
-  document.getElementById('chartLead').textContent='Barra gruesa: desviación total de cada material. Barras finas: sus órdenes fuera de tolerancia. A la derecha, consumo por encima del teórico; a la izquierda, falta consumo. Tolerancia ±'+nf(tol,0)+' %.';
-  FILAS=filas;TOL=tol;
+  document.getElementById('chartLead').textContent='Barra gruesa: desviación total de cada material. Barras finas: sus órdenes con desviación. Solo se muestran los materiales con desviación. A la derecha, consumo por encima del teórico; a la izquierda, falta consumo.';
   dibujarGrafico();
-
   document.getElementById('fuente').textContent=FUENTE==='demo'?'Datos de demostración':'Datos cargados';
   document.getElementById('btnDemo').style.display=FUENTE==='demo'?'none':'';
 }
 
 /* ---------- Gráfico: material (barra gruesa) y sus órdenes (barras finas) ---------- */
 function dibujarGrafico(){
-  var filas=FILAS,tol=TOL,todas=document.getElementById('verTodas').checked;
-  var cont=document.getElementById('chart'),W=Math.max(320,cont.clientWidth||900),narrow=W<600;
-  var labW=narrow?118:250,padR=narrow?56:70,matH=34,ofH=24,top=4,axisH=26,barM=14,barO=8;
-  // agrupar por material
+  var items=VISIBLES,tol=U.ok,todas=document.getElementById('verTodas').checked;
+  var cont=document.getElementById('chart');
+  if(!items.length){cont.innerHTML='<div class="none">Sin datos con estos filtros.</div>';return;}
+  var W=Math.max(320,cont.clientWidth||900),narrow=W<600;
+  var labW=narrow?118:290,padR=narrow?56:80,matH=34,ofH=24,top=4,axisH=26,barM=14,barO=8;
   var mats={},lm=[];
-  filas.forEach(function(f){var k=f.o.bobina||'—';if(!mats[k]){mats[k]={mat:k,filas:[],teo:0,cons:0,fuera:0};lm.push(mats[k]);}var m=mats[k];m.filas.push(f);m.teo+=f.o.tReal;m.cons+=f.o.consNeto;if(f.sev>1)m.fuera++;});
-  lm.forEach(function(m){m.desv=m.cons-m.teo;m.pct=m.teo>EPS?m.desv/m.teo*100:null;m.sev=m.pct==null?1:Math.abs(m.pct)>2*tol?3:Math.abs(m.pct)>tol?2:1;
-    m.vis=m.filas.filter(function(f){return todas||f.sev>1;}).sort(function(a,b){return (b.o.desvPct||0)-(a.o.desvPct||0);});});
-  lm.sort(function(a,b){return Math.abs(b.desv)-Math.abs(a.desv);});
-  var filasG=[];lm.forEach(function(m){filasG.push({t:'m',m:m});m.vis.forEach(function(f){filasG.push({t:'o',f:f,m:m});});});
-  var vals=filasG.map(function(r){return r.t==='m'?(r.m.pct||0):(r.f.o.desvPct||0);});
+  items.forEach(function(it){var k=it.tipo+'|'+it.material;if(!mats[k]){mats[k]={mat:it.material,tipo:it.tipo,desc:it.desc,unidad:it.unidad,items:[],teo:0,cons:0,fuera:0};lm.push(mats[k]);}var m=mats[k];m.items.push(it);m.teo+=it.teo;m.cons+=it.cons;if(it.sev>1)m.fuera++;});
+  lm.forEach(function(m){m.desv=m.cons-m.teo;m.pct=m.teo>EPS?m.desv/m.teo*100:null;m.sev=gravedad(m);
+    m.vis=m.items.filter(function(it){return todas||it.sev>1;}).sort(function(a,b){return (b.pct||0)-(a.pct||0);});});
+  lm.sort(function(a,b){return b.sev-a.sev||Math.abs(b.pct||0)-Math.abs(a.pct||0);});
+  if(!todas)lm=lm.filter(function(m){return m.sev>1||m.fuera>0;});
+  if(!lm.length){cont.innerHTML='<div class="none">Ningún material con desviación. Activa «Ver también las órdenes en tolerancia» para verlos todos.</div>';return;}
+  var filasG=[];lm.forEach(function(m){filasG.push({t:'m',m:m});m.vis.forEach(function(it){filasG.push({t:'o',it:it,m:m});});});
+  var vals=filasG.map(function(r){return r.t==='m'?(r.m.pct||0):(r.it.pct||0);});
   var lo=Math.min(-tol*2,Math.min.apply(null,vals)),hi=Math.max(tol*2,Math.max.apply(null,vals));
   var paso=(hi-lo)>60?20:(hi-lo)>30?10:5;lo=Math.floor(lo/paso)*paso;hi=Math.ceil(hi/paso)*paso;
   var x0=labW,x1=W-padR,xs=function(v){return x0+(v-lo)/(hi-lo)*(x1-x0);};
@@ -529,7 +594,7 @@ function dibujarGrafico(){
     var lx=v>=0?xb+6:(izq?xb-6:xa+6);
     return '<text x="'+lx+'" y="'+(cy+4)+'" text-anchor="'+(v<0&&izq?'end':'start')+'" font-size="12" font-weight="'+peso+'" fill="var(--ink)">'+txt+'</text>';
   }
-  var s='<svg viewBox="0 0 '+W+' '+H+'" height="'+H+'" role="img" aria-label="Desviación de consumo de bobina por material y orden">';
+  var s='<svg viewBox="0 0 '+W+' '+H+'" height="'+H+'" role="img" aria-label="Desviación de consumo por material y orden">';
   s+='<rect x="'+xs(-tol)+'" y="'+top+'" width="'+(xs(tol)-xs(-tol))+'" height="'+(plotBot-top)+'" fill="var(--band)"/>';
   for(var t=Math.ceil(lo/pasoEje)*pasoEje;t<=hi;t+=pasoEje){
     var X=xs(t);
@@ -543,21 +608,20 @@ function dibujarGrafico(){
     primero=false;
     s+='<g class="hit" data-i="'+i+'"><rect x="0" y="'+y+'" width="'+W+'" height="'+h+'" fill="transparent"/>';
     if(r.t==='m'){
-      var m=r.m;
-      s+='<text x="0" y="'+(cy+4)+'" font-size="'+(narrow?12:13)+'" font-weight="650" fill="var(--ink)">'+esc(m.mat)+(narrow?'':'<tspan font-weight="400" fill="var(--ink-2)">  ·  '+m.filas.length+(m.filas.length===1?' orden':' órdenes')+(m.fuera?', '+m.fuera+' fuera':'')+'</tspan>')+'</text>';
+      var m=r.m,n=m.items.length;
+      s+='<text x="0" y="'+(cy+4)+'" font-size="'+(narrow?12:13)+'" font-weight="650" fill="var(--ink)">'+esc(m.mat)+(narrow?'':'<tspan font-weight="400" fill="var(--ink-2)">  ·  '+(m.fuera?m.fuera+' de '+n+' con desviación':n+(n===1?' orden':' órdenes'))+'</tspan>')+'</text>';
       s+=barra(m.pct||0,cy,barM,col(m.sev));
-      s+=etiqueta(m.pct||0,cy,(m.pct==null?'—':sg(m.pct,1)+' %')+(narrow?'':'  ·  '+sg(m.desv,0)+' kg'),650);
+      s+=etiqueta(m.pct||0,cy,pct(m.pct)+(narrow?'':'  ·  '+cantS(m.desv,m.unidad)),650);
     }else{
-      var o=r.f.o,v=o.desvPct==null?0:o.desvPct;
+      var it=r.it,o=it.o,v=it.pct==null?0:it.pct;
       s+='<text x="'+(narrow?8:16)+'" y="'+(cy+4)+'" font-size="12" fill="var(--ink-2)">'+esc(o.of)+(narrow?'':'<tspan fill="var(--muted)"> · '+esc(o.pedido)+'</tspan>')+'</text>';
-      s+=barra(v,cy,barO,col(r.f.sev));
-      if(r.f.sev>1)s+=etiqueta(v,cy,o.desvPct==null?'—':sg(v,1)+' %',500);
+      s+=barra(v,cy,barO,col(it.sev));
+      if(it.sev>1)s+=etiqueta(v,cy,pct(it.pct),500);
     }
     s+='</g>';
     y+=h;
   });
-  s+='<line x1="'+xs(0)+'" x2="'+xs(0)+'" y1="'+top+'" y2="'+plotBot+'" stroke="var(--axis)" stroke-width="1.5"/>';
-  s+='</svg>';
+  s+='<line x1="'+xs(0)+'" x2="'+xs(0)+'" y1="'+top+'" y2="'+plotBot+'" stroke="var(--axis)" stroke-width="1.5"/></svg>';
   cont.innerHTML=s;
   var tip=document.getElementById('tip'),box=cont.parentNode;
   cont.querySelectorAll('.hit').forEach(function(g){
@@ -565,48 +629,82 @@ function dibujarGrafico(){
     g.addEventListener('mousemove',function(e){
       var b=box.getBoundingClientRect(),h;
       if(r.t==='m'){var m=r.m;
-        h='<b>'+esc(m.mat)+'</b><div style="color:var(--muted);margin-bottom:6px">'+m.filas.length+' órdenes · '+m.fuera+' fuera de tolerancia</div>'+
-          '<div class="r"><span>Teórico notificado</span><span>'+nf(m.teo,0)+' kg</span></div>'+
-          '<div class="r"><span>Consumido</span><span>'+nf(m.cons,0)+' kg</span></div>'+
-          '<div class="r"><span>Desviación</span><span>'+sg(m.desv,0)+' kg · '+pct(m.pct)+'</span></div>';
-      }else{var o=r.f.o;
-        h='<b>'+esc(o.of)+'</b> · '+esc(o.pedido)+'<div style="color:var(--muted);margin-bottom:6px">'+esc(o.bobina)+' · '+esc(o.maquina)+' · '+esc(o.articulo)+'</div>'+
-          '<div class="r"><span>Teórico notificado</span><span>'+nf(o.tReal,0)+' kg</span></div>'+
-          '<div class="r"><span>Consumido</span><span>'+nf(o.consNeto,0)+' kg</span></div>'+
-          '<div class="r"><span>Desviación</span><span>'+sg(o.desv,0)+' kg · '+pct(o.desvPct)+'</span></div>'+
-          '<div class="r"><span>Estado</span><span>'+SEV[r.f.sev]+'</span></div>';
+        h='<b>'+esc(m.mat)+'</b><div style="color:var(--muted);margin-bottom:6px">'+(m.tipo==='bobina'?'Bobina':'Auxiliar · '+esc(m.desc))+' · '+m.items.length+' órdenes, '+m.fuera+' con desviación</div>'+
+          '<div class="r"><span>Teórico notificado</span><span>'+cant(m.teo,m.unidad)+'</span></div>'+
+          '<div class="r"><span>Consumido</span><span>'+cant(m.cons,m.unidad)+'</span></div>'+
+          '<div class="r"><span>Desviación</span><span>'+cantS(m.desv,m.unidad)+' · '+pct(m.pct)+'</span></div>';
+      }else{var it=r.it,o=it.o;
+        h='<b>'+esc(o.of)+'</b> · '+esc(o.pedido)+'<div style="color:var(--muted);margin-bottom:6px">'+esc(it.material)+' · '+esc(o.maquina)+' · '+esc(o.articulo)+'</div>'+
+          '<div class="r"><span>Teórico notificado</span><span>'+cant(it.teo,it.unidad)+'</span></div>'+
+          '<div class="r"><span>Consumido</span><span>'+cant(it.cons,it.unidad)+'</span></div>'+
+          '<div class="r"><span>Desviación</span><span>'+cantS(it.desv,it.unidad)+' · '+pct(it.pct)+'</span></div>'+
+          '<div class="r"><span>Estado</span><span>'+SEV[it.sev]+'</span></div>';
       }
       tip.innerHTML=h;
       var lx=e.clientX-b.left+14,ly=e.clientY-b.top+14;
-      if(lx+230>b.width)lx=e.clientX-b.left-240;
+      if(lx+240>b.width)lx=e.clientX-b.left-250;
       tip.style.left=Math.max(0,lx)+'px';tip.style.top=ly+'px';tip.style.opacity=1;
     });
     g.addEventListener('mouseleave',function(){tip.style.opacity=0;});
   });
 }
+
+/* ---------- Filtros y umbrales ---------- */
+function prepararFiltros(){
+  var maqs=MAQUINAS.slice();
+  (DATOS.ordenes||[]).forEach(function(o){var m=String(o.maquina||'').trim();if(m&&maqs.indexOf(m)<0)maqs.push(m);});
+  var sel=document.getElementById('fMaq'),act=sel.value;
+  sel.innerHTML='<option value="">Todas</option>'+maqs.map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>';}).join('');
+  sel.value=maqs.indexOf(act)>=0?act:'';
+  var peds={};(DATOS.ordenes||[]).forEach(function(o){if(o.pedido)peds[o.pedido]=1;});
+  document.getElementById('lPedidos').innerHTML=Object.keys(peds).sort().map(function(p){return '<option value="'+esc(p)+'">';}).join('');
+}
+function filtrosPorDefecto(){
+  document.getElementById('fMaq').value='';
+  document.getElementById('fDesde').value=diaISO(-5);
+  document.getElementById('fHasta').value=diaISO(0);
+  document.getElementById('fTipo').value='';
+  document.getElementById('fPedido').value='';
+}
+function leerUmbrales(){
+  var ok=parseFloat(document.getElementById('uOk').value),cr=parseFloat(document.getElementById('uCrit').value);
+  U.ok=isFinite(ok)&&ok>=0?ok:3;
+  U.crit=isFinite(cr)&&cr>U.ok?cr:Math.max(U.ok,U.ok*2||6);
+  document.getElementById('uOk').value=U.ok;document.getElementById('uCrit').value=U.crit;
+  try{localStorage.setItem(LS_UMBRALES,JSON.stringify(U));}catch(e){}
+  render();
+}
+['fMaq','fDesde','fHasta','fTipo'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
+document.getElementById('fPedido').addEventListener('input',render);
+document.getElementById('uOk').addEventListener('change',leerUmbrales);
+document.getElementById('uCrit').addEventListener('change',leerUmbrales);
+document.getElementById('fReset').addEventListener('click',function(){filtrosPorDefecto();render();});
 document.getElementById('verTodas').addEventListener('change',dibujarGrafico);
 var rTimer;window.addEventListener('resize',function(){clearTimeout(rTimer);rTimer=setTimeout(dibujarGrafico,150);});
 
 /* ---------- Datos ---------- */
 function valido(o){return o&&Array.isArray(o.ordenes)&&Array.isArray(o.consumos)&&Array.isArray(o.devoluciones);}
+function usarDatos(o,fuente){DATOS=o;FUENTE=fuente;ITEMS=construirItems(DATOS);prepararFiltros();render();}
 function cargarJSON(inp){
   var f=inp.files&&inp.files[0];if(!f)return;
   var rd=new FileReader();
   rd.onload=function(){
-    try{var o=JSON.parse(rd.result);if(!valido(o))throw new Error();DATOS=o;FUENTE='cargados';
+    try{var o=JSON.parse(rd.result);if(!valido(o))throw new Error();
       try{localStorage.setItem(LS_DATOS,JSON.stringify(o));}catch(e){}
-      render();
+      usarDatos(o,'cargados');
     }catch(e){alert('El fichero no tiene el formato esperado: usa el JSON exportado desde la herramienta de Balance de Masas.');}
     inp.value='';
   };
   rd.readAsText(f);
 }
-function usarDemo(){DATOS=datosDemo();FUENTE='demo';try{localStorage.removeItem(LS_DATOS);}catch(e){}render();}
+function usarDemo(){try{localStorage.removeItem(LS_DATOS);}catch(e){}usarDatos(datosDemo(),'demo');}
 
 (function(){
-  try{var o=JSON.parse(localStorage.getItem(LS_DATOS)||'null');if(valido(o)){DATOS=o;FUENTE='cargados';}}catch(e){}
-  if(!DATOS)DATOS=datosDemo();
-  render();
+  try{var u=JSON.parse(localStorage.getItem(LS_UMBRALES)||'null');if(u&&isFinite(u.ok)&&isFinite(u.crit)&&u.crit>u.ok){U.ok=u.ok;U.crit=u.crit;}}catch(e){}
+  document.getElementById('uOk').value=U.ok;document.getElementById('uCrit').value=U.crit;
+  filtrosPorDefecto();
+  var o=null;try{o=JSON.parse(localStorage.getItem(LS_DATOS)||'null');}catch(e){}
+  if(valido(o))usarDatos(o,'cargados');else usarDatos(datosDemo(),'demo');
 })();
 </script>
 </body>

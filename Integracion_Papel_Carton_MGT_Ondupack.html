@@ -76,10 +76,10 @@ td.win{background:var(--win)!important;font-weight:600;}
 .node.sistema{border-style:dashed;border-color:var(--accent2);}
 .node.sistema .tag{background:#e3eef8;color:var(--accent2);}
 .br>.node{height:100%;}
-.stubs>div{height:22px;position:relative;}
-.stubs>div::before{content:'';position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed var(--accent2);}
-.node.ia{background:#f4f9fd;}
-.node.ia ul{display:flex;flex-wrap:wrap;gap:2px 28px;}
+.branches.c2{grid-template-columns:1fr 1fr;max-width:760px;margin:0 auto;}
+/* Flujos */
+.flow{overflow-x:auto;border:1px solid var(--border);border-radius:10px;}
+.flow svg{display:block;width:100%;min-width:860px;height:auto;font-family:'Segoe UI',Tahoma,sans-serif;}
 .legend i.sistema{border-style:dashed;border-color:var(--accent2);background:#fff;}
 .nv{display:inline-block;font-style:normal;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;background:var(--accent2);color:#fff;border-radius:3px;padding:1px 5px;margin-left:6px;vertical-align:1px;line-height:1.4;}
 .legend .nv{margin:0 2px 0 0;}
@@ -109,9 +109,8 @@ td.win{background:var(--win)!important;font-weight:600;}
 .checks li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--border);font-size:14px;}
 .checks input{margin-top:3px;width:16px;height:16px;accent-color:var(--accent2);flex:none;}
 @media screen and (max-width:860px){
-  .branches.c3{grid-template-columns:1fr;}
+  .branches.c3,.branches.c2{grid-template-columns:1fr;}
   .br{padding-top:0;}.br::before,.br::after{display:none;}
-  .stubs{display:none;}.node.ia{margin-top:10px;}
   .top .node{width:100%;}.org .branches{margin-top:10px;}.org .top .vline{height:10px;}
   .chips{grid-template-columns:1fr 1fr;}
   .pc,.kg,.checks{grid-template-columns:1fr;}
@@ -130,6 +129,7 @@ td.win{background:var(--win)!important;font-weight:600;}
   main,.hero .in{max-width:none;}main{padding:10px 0 0;}
   .card{padding:16px 18px;margin-bottom:10px;}.hero{padding:16px 18px;}
   .card,.pc,.kg,.sec,.node,.grp,.chip,tr,.pc>div,.kc{break-inside:avoid;}
+  .flow{overflow:visible;}.flow svg{min-width:0;}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
 </style>
@@ -149,8 +149,7 @@ td.win{background:var(--win)!important;font-weight:600;}
     <button role="tab" data-t="actual" aria-selected="true"><span>0</span>Situación actual</button>
     <button role="tab" data-t="e1" aria-selected="false"><span>1</span>Escenario 1 · SAP y pull</button>
     <button role="tab" data-t="e2" aria-selected="false"><span>2</span>Escenario 2 · Departamento común</button>
-    <button role="tab" data-t="e3" aria-selected="false"><span>3</span>Escenario 3 · Departamento + IA</button>
-    <button role="tab" data-t="comp" aria-selected="false"><span>4</span>Comparativa</button>
+    <button role="tab" data-t="comp" aria-selected="false"><span>3</span>Comparativa</button>
   </div>
 </nav>
 
@@ -161,6 +160,11 @@ td.win{background:var(--win)!important;font-weight:600;}
   <div class="card">
     <h2>Situación actual</h2>
     <p class="sub">La coordinación depende de cuatro personas y del correo: no hay dato común ni reglas escritas, y nadie arbitra entre papelera (ciclos largos, camiones completos) y cartonera (poco stock, flexibilidad).</p>
+  </div>
+  <div class="card">
+    <h3>Flujo actual</h3>
+    <div class="flow"><!--FLOW_ASIS--><svg viewBox="0 0 1076 224" role="img" aria-label="Flujo actual entre Ondupack y MGT"><defs><marker id="fa-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6c7a89"/></marker><marker id="fa-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e63946"/></marker></defs><rect x="0" y="0" width="1076" height="112" fill="#ffffff"/><rect x="0" y="0" width="120" height="112" fill="#eef2f6"/><text x="60" y="61" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1b2a">Ondupack</text><rect x="0" y="112" width="1076" height="112" fill="#f8f9fb"/><rect x="0" y="112" width="120" height="112" fill="#eef2f6"/><line x1="0" y1="112" x2="1076" y2="112" stroke="#dee2e6"/><text x="60" y="173" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1b2a">MGT</text><line x1="120" y1="0" x2="120" y2="224" stroke="#dee2e6"/><path d="M304 56H330" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#fa-a)"/><path d="M492 56H518" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#fa-a)"/><path d="M600 85V137" fill="none" stroke="#e63946" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#fa-r)"/><text x="607" y="106" font-size="11" fill="#b02a37">correo · días antes del ciclo</text><path d="M680 168H706" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#fa-a)"/><path d="M868 168H894" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#fa-a)"/><path d="M788 85V137" fill="none" stroke="#e63946" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#fa-r)"/><path d="M976 139V87" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#fa-a)"/><text x="983" y="108" font-size="11" fill="#6c757d">envío</text><rect x="144" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="224" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Ventas</text><text x="224" y="69" text-anchor="middle" font-size="12" fill="#4a5562">Decide qué se fabrica</text><rect x="332" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="412" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Planificación</text><text x="412" y="69" text-anchor="middle" font-size="12" fill="#4a5562">Secuencia la fabricación</text><rect x="520" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="600" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Compras</text><text x="600" y="69" text-anchor="middle" font-size="12" fill="#4a5562">Pasa el pedido a MGT</text><rect x="622.2" y="18" width="51.8" height="18" rx="9" fill="#fde8ea" stroke="#e63946" stroke-width="1"/><text x="648.1" y="30.5" text-anchor="middle" font-size="10" font-weight="700" fill="#b02a37">A MANO</text><rect x="708" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="788" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Urgentes y camiones</text><text x="788" y="69" text-anchor="middle" font-size="12" fill="#4a5562">Se piden por correo</text><rect x="810.2" y="18" width="51.8" height="18" rx="9" fill="#fde8ea" stroke="#e63946" stroke-width="1"/><text x="836.1" y="30.5" text-anchor="middle" font-size="10" font-weight="700" fill="#b02a37">CORREO</text><rect x="896" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="976" y="60" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Recibe el papel</text><rect x="520" y="139" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="600" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Pedido de venta</text><text x="600" y="181" text-anchor="middle" font-size="12" fill="#4a5562">Se vuelve a grabar</text><rect x="622.2" y="130" width="51.8" height="18" rx="9" fill="#fde8ea" stroke="#e63946" stroke-width="1"/><text x="648.1" y="142.5" text-anchor="middle" font-size="10" font-weight="700" fill="#b02a37">A MANO</text><rect x="708" y="139" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="788" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Fabrica en el ciclo</text><text x="788" y="181" text-anchor="middle" font-size="12" fill="#4a5562">y almacena el stock</text><rect x="896" y="139" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="976" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Carga y envía</text><text x="976" y="181" text-anchor="middle" font-size="12" fill="#4a5562">cuando lo pide Ondupack</text></svg><!--/FLOW_ASIS--></div>
+    <p class="note">En rojo, los pasos que se hacen a mano o por correo.</p>
   </div>
   <div class="card">
     <div class="tw"><table>
@@ -195,6 +199,12 @@ td.win{background:var(--win)!important;font-weight:600;}
   <div class="card">
     <h2>Escenario 1 — Integración SAP y sistema pull</h2>
     <p class="sub">Se activa la integración ya diseñada en SAP: Ondupack fija mínimos y máximos por material y el sistema crea los pedidos de compra y venta, con un monitor común de stock y necesidades.</p>
+  </div>
+
+  <div class="card">
+    <h3>Flujo</h3>
+    <div class="flow"><!--FLOW_E1--><svg viewBox="0 0 1076 336" role="img" aria-label="Flujo del escenario 1: integración SAP y sistema pull"><defs><marker id="f1-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6c7a89"/></marker><marker id="f1-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e63946"/></marker></defs><rect x="0" y="0" width="1076" height="112" fill="#ffffff"/><rect x="0" y="0" width="120" height="112" fill="#eef2f6"/><text x="60" y="61" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1b2a">Ondupack</text><rect x="0" y="112" width="1076" height="112" fill="#f8f9fb"/><rect x="0" y="112" width="120" height="112" fill="#eef2f6"/><line x1="0" y1="112" x2="1076" y2="112" stroke="#dee2e6"/><text x="60" y="157" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1b2a">SAP</text><text x="60" y="173" text-anchor="middle" font-size="11" font-weight="400" fill="#6c757d">supervisan los</text><text x="60" y="189" text-anchor="middle" font-size="11" font-weight="400" fill="#6c757d">usuarios clave</text><rect x="0" y="224" width="1076" height="112" fill="#ffffff"/><rect x="0" y="224" width="120" height="112" fill="#eef2f6"/><line x1="0" y1="224" x2="1076" y2="224" stroke="#dee2e6"/><text x="60" y="285" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1b2a">MGT</text><line x1="120" y1="0" x2="120" y2="336" stroke="#dee2e6"/><path d="M224 85V168H330" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f1-a)"/><path d="M412 85V137" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f1-a)"/><text x="419" y="106" font-size="11" fill="#6c757d">consumo</text><path d="M492 168H518" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f1-a)"/><path d="M680 168H706" fill="none" stroke="#6c7a89" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#f1-a)"/><path d="M600 197V249" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f1-a)"/><text x="607" y="218" font-size="11" fill="#6c757d">pedido de venta</text><path d="M680 280H706" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f1-a)"/><path d="M868 280H894" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f1-a)"/><path d="M976 251V87" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f1-a)"/><text x="983" y="172" font-size="11" fill="#6c757d">envío</text><rect x="144" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="224" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Compras</text><text x="224" y="69" text-anchor="middle" font-size="12" fill="#4a5562">Fija mínimos y máximos</text><rect x="332" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="412" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Planificador</text><text x="412" y="69" text-anchor="middle" font-size="12" fill="#4a5562">Planifica y secuencia</text><rect x="896" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="976" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Recibe el papel</text><text x="976" y="69" text-anchor="middle" font-size="12" fill="#4a5562">y repone stock</text><rect x="332" y="139" width="160" height="58" rx="8" fill="#f2f8fc" stroke="#0077b6" stroke-width="1.4" stroke-dasharray="5 3"/><text x="412" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Stock bajo mínimo</text><text x="412" y="181" text-anchor="middle" font-size="12" fill="#4a5562">lo detecta SAP</text><rect x="520" y="139" width="160" height="58" rx="8" fill="#f2f8fc" stroke="#0077b6" stroke-width="1.4" stroke-dasharray="5 3"/><text x="600" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Pedidos automáticos</text><text x="600" y="181" text-anchor="middle" font-size="12" fill="#4a5562">de compra y de venta</text><rect x="634.8" y="130" width="39.2" height="18" rx="9" fill="#e3eef8" stroke="#0077b6" stroke-width="1"/><text x="654.4" y="142.5" text-anchor="middle" font-size="10" font-weight="700" fill="#0077b6">AUTO</text><rect x="708" y="139" width="160" height="58" rx="8" fill="#f2f8fc" stroke="#0077b6" stroke-width="1.4" stroke-dasharray="5 3"/><text x="788" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Monitor común</text><text x="788" y="181" text-anchor="middle" font-size="12" fill="#4a5562">stock y necesidades</text><rect x="520" y="251" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="600" y="275" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Planificador</text><text x="600" y="293" text-anchor="middle" font-size="12" fill="#4a5562">Asigna ciclo y confirma</text><rect x="708" y="251" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="788" y="284" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Fabrica en el ciclo</text><rect x="896" y="251" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="976" y="284" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Envía a Ondupack</text></svg><!--/FLOW_E1--></div>
+    <p class="note">Urgentes: los pide Compras y el Planificador de MGT los acepta si cumplen las reglas.</p>
   </div>
 
   <div class="card">
@@ -269,20 +279,25 @@ td.win{background:var(--win)!important;font-weight:600;}
   </div>
 
   <div class="card">
+    <h3>Flujo</h3>
+    <div class="flow"><!--FLOW_E2--><svg viewBox="0 0 1076 336" role="img" aria-label="Flujo del escenario 2: departamento de planificación común"><defs><marker id="f2-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6c7a89"/></marker><marker id="f2-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e63946"/></marker></defs><rect x="0" y="0" width="1076" height="112" fill="#ffffff"/><rect x="0" y="0" width="120" height="112" fill="#eef2f6"/><text x="60" y="61" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1b2a">Ondupack</text><rect x="0" y="112" width="1076" height="112" fill="#f8f9fb"/><rect x="0" y="112" width="120" height="112" fill="#eef2f6"/><line x1="0" y1="112" x2="1076" y2="112" stroke="#dee2e6"/><text x="60" y="157" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1b2a">Departamento</text><text x="60" y="173" text-anchor="middle" font-size="11" font-weight="400" fill="#6c757d">de planificación</text><text x="60" y="189" text-anchor="middle" font-size="11" font-weight="400" fill="#6c757d">común</text><rect x="0" y="224" width="1076" height="112" fill="#ffffff"/><rect x="0" y="224" width="120" height="112" fill="#eef2f6"/><line x1="0" y1="224" x2="1076" y2="224" stroke="#dee2e6"/><text x="60" y="285" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1b2a">MGT</text><line x1="120" y1="0" x2="120" y2="336" stroke="#dee2e6"/><path d="M224 85V168H330" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f2-a)"/><path d="M492 168H518" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f2-a)"/><path d="M680 168H706" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f2-a)"/><path d="M788 197V249" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f2-a)"/><text x="795" y="218" font-size="11" fill="#6c757d">pedido y ciclo</text><path d="M868 280H894" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f2-a)"/><path d="M976 251V87" fill="none" stroke="#6c7a89" stroke-width="1.6" marker-end="url(#f2-a)"/><text x="983" y="172" font-size="11" fill="#6c757d">envío</text><rect x="144" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="224" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Ventas</text><text x="224" y="69" text-anchor="middle" font-size="12" fill="#4a5562">Demanda de clientes</text><rect x="896" y="27" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="976" y="51" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Recibe el papel</text><text x="976" y="69" text-anchor="middle" font-size="12" fill="#4a5562">y fabrica según plan</text><rect x="332" y="139" width="160" height="58" rx="8" fill="#eef8fc" stroke="#0077b6" stroke-width="1.6"/><text x="412" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Secuenciador cartón</text><text x="412" y="181" text-anchor="middle" font-size="12" fill="#4a5562">Plan y necesidades</text><rect x="520" y="139" width="160" height="58" rx="8" fill="#eef8fc" stroke="#0077b6" stroke-width="1.6"/><text x="600" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Secuenciador papel</text><text x="600" y="181" text-anchor="middle" font-size="12" fill="#4a5562">Encaja en ciclos MGT</text><rect x="708" y="139" width="160" height="58" rx="8" fill="#eef8fc" stroke="#0077b6" stroke-width="1.6"/><text x="788" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Planificador Master</text><text x="788" y="181" text-anchor="middle" font-size="12" fill="#4a5562">Pedidos y camiones</text><rect x="810.2" y="130" width="51.8" height="18" rx="9" fill="#fde8ea" stroke="#e63946" stroke-width="1"/><text x="836.1" y="142.5" text-anchor="middle" font-size="10" font-weight="700" fill="#b02a37">A MANO</text><rect x="708" y="251" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="788" y="275" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Fabrica el ciclo</text><text x="788" y="293" text-anchor="middle" font-size="12" fill="#4a5562">planificado</text><rect x="896" y="251" width="160" height="58" rx="8" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/><text x="976" y="275" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1a1a2e">Carga y envía</text><text x="976" y="293" text-anchor="middle" font-size="12" fill="#4a5562">según la cadencia</text></svg><!--/FLOW_E2--></div>
+    <p class="note">Los secuenciadores acuerdan los mínimos y máximos; si discrepan, decide el Planificador Master, que también lleva urgentes, stock en MGT y camiones.</p>
+  </div>
+
+  <div class="card">
     <h3>Organigrama</h3>
     <div class="org">
       <div class="top">
         <div class="node dir"><h4>Dirección</h4><small>por encima de ambas plantas</small></div>
         <div class="vline"></div>
-        <div class="node nuevo"><span class="tag">Nuevo</span><h4>Responsable de planificación integrada</h4><ul><li>Dueño del plan papel–cartón</li><li>Prioridades y arbitraje entre plantas</li><li>Discrepancias de mínimos y máximos</li><li>Urgentes y KPIs</li><li>Datos maestros</li></ul></div>
+        <div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificador Master</h4><ul><li>Plan integrado, prioridades y arbitraje</li><li>Urgentes, stock en MGT y camiones</li><li>Pedidos de compra y venta</li><li>Datos maestros, KPIs e informes</li></ul></div>
       </div>
-      <div class="branches c3">
-        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificación cartón</h4><ul><li>Plan de fabricación de Ondupack</li><li>Necesidades de papel</li><li>Mínimos y máximos</li></ul></div></div>
-        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificación papel</h4><ul><li>Ciclos de MGT</li><li>Fecha de corte y confirmaciones</li><li>Mínimos y máximos</li></ul></div></div>
-        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Coordinador logístico</h4><ul><li>Stock de Ondupack en MGT</li><li>Cadencia de camiones</li><li>Pedidos de compra y venta</li><li>Informes de visibilidad</li></ul></div></div>
+      <div class="branches c2">
+        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Secuenciador cartón</h4><ul><li>Plan de fabricación de Ondupack</li><li>Necesidades de papel</li><li>Mínimos y máximos</li></ul></div></div>
+        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Secuenciador papel</h4><ul><li>Ciclos de MGT</li><li>Fecha de corte y confirmaciones</li><li>Mínimos y máximos</li></ul></div></div>
       </div>
     </div>
-    <p class="note">Los mínimos y máximos los acuerdan los dos planificadores; si hay diferencias, decide el responsable.</p>
+    <p class="note">Los mínimos y máximos los acuerdan los dos secuenciadores; si hay diferencias, decide el Planificador Master.</p>
   </div>
 
   <div class="pc">
@@ -305,67 +320,9 @@ td.win{background:var(--win)!important;font-weight:600;}
   <div class="sec">
     <h3>Impacto en personas</h3>
     <div class="kg">
-      <div class="kc"><div class="kl">Plantilla</div><div class="kv">Responsable + 3 puestos</div><div class="ks">Reasignados de MGT y Ondupack o nuevas incorporaciones</div></div>
+      <div class="kc"><div class="kl">Plantilla</div><div class="kv">3 puestos</div><div class="ks">Planificador Master y dos secuenciadores, de MGT y Ondupack o nuevas incorporaciones</div></div>
       <div class="kc"><div class="kl">Puestos</div><div class="kv">Nueva dependencia</div><div class="ks">Cambian jerarquía, funciones y quizá ubicación</div></div>
       <div class="kc"><div class="kl">RRHH</div><div class="kv">Proceso formal</div><div class="ks">Cambios de puesto y, si aplica, representación de los trabajadores</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ESCENARIO 3 ============ -->
-<section class="panel" id="p-e3" role="tabpanel" hidden>
-  <div class="card">
-    <h2>Escenario 3 — Departamento común con agentes de IA</h2>
-    <p class="sub">El mismo departamento del escenario 2, apoyado por agentes de IA que proponen automáticamente los pedidos de compra y venta según el % de saturación de cada planta y las necesidades actuales. El equipo valida y decide.</p>
-  </div>
-
-  <div class="card">
-    <h3>Organigrama</h3>
-    <div class="legend">
-      <span><i class="nuevo"></i>Puesto nuevo</span>
-      <span><i class="sistema"></i>Sistema</span>
-      <span><em class="nv">Nueva</em>Cambio respecto al escenario 2</span>
-    </div>
-    <div class="org">
-      <div class="top">
-        <div class="node dir"><h4>Dirección</h4><small>por encima de ambas plantas</small></div>
-        <div class="vline"></div>
-        <div class="node nuevo"><span class="tag">Nuevo</span><h4>Responsable de planificación integrada</h4><ul><li>Dueño del plan papel–cartón</li><li>Prioridades y arbitraje entre plantas</li><li>Urgentes y KPIs</li><li>Datos maestros</li><li>Reglas de los agentes de IA<em class="nv">Nueva</em></li></ul></div>
-      </div>
-      <div class="branches c3">
-        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificación cartón</h4><ul><li>Plan de fabricación de Ondupack</li><li>Necesidades de papel</li></ul></div></div>
-        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Planificación papel</h4><ul><li>Ciclos de MGT</li><li>Fecha de corte y confirmaciones</li></ul></div></div>
-        <div class="br"><div class="node nuevo"><span class="tag">Nuevo</span><h4>Coordinador logístico</h4><ul><li>Stock de Ondupack en MGT</li><li>Cadencia de camiones</li><li>Valida los pedidos que propone la IA<em class="nv">Nueva</em></li><li>Informes de visibilidad</li></ul></div></div>
-      </div>
-      <div class="branches c3 stubs"><div></div><div></div><div></div></div>
-      <div class="node sistema ia"><span class="tag">Sistema · IA</span><h4>Agentes de IA</h4><ul><li>Calculan y proponen pedidos de compra y venta</li><li>Según el % de saturación de cada planta</li><li>Y las necesidades actuales</li></ul></div>
-    </div>
-    <p class="note">No hace falta fijar mínimos y máximos: el agente calcula cada pedido. La IA propone y las personas validan y deciden; para ello necesita datos fiables de stock, pedidos y saturación de cada planta.</p>
-  </div>
-
-  <div class="pc">
-    <div class="pro"><h3>Pros</h3><ul>
-      <li>Mantiene lo del escenario 2: un dueño del plan y arbitraje con criterio de grupo.</li>
-      <li>Pedidos calculados por el agente: sin grabarlos a mano ni fijar mínimos y máximos.</li>
-      <li>Tiene en cuenta la saturación real de cada planta, no solo el stock.</li>
-      <li>El equipo pasa de calcular a validar y decidir.</li>
-      <li>Permite sumar plantas del grupo sin crecer en la misma proporción.</li>
-    </ul></div>
-    <div class="con"><h3>Contras</h3><ul>
-      <li>Coste del escenario 2 más el desarrollo de los agentes.</li>
-      <li>Necesita datos fiables y actualizados de stock, pedidos y saturación.</li>
-      <li>El plazo más largo: equipo, datos y agentes.</li>
-      <li>Riesgo de aceptar propuestas sin revisarlas.</li>
-      <li>Tecnología nueva: piloto, validación y mantenimiento de reglas.</li>
-    </ul></div>
-  </div>
-
-  <div class="sec">
-    <h3>Impacto en personas</h3>
-    <div class="kg">
-      <div class="kc"><div class="kl">Plantilla</div><div class="kv">Responsable + 3 puestos</div><div class="ks">Igual que el escenario 2</div></div>
-      <div class="kc"><div class="kl">Puestos</div><div class="kv">De calcular a validar</div><div class="ks">La IA propone; el equipo revisa y decide</div></div>
-      <div class="kc"><div class="kl">Capacidades</div><div class="kv">Datos e IA</div><div class="ks">Formación del equipo y soporte de IT para mantener los agentes</div></div>
     </div>
   </div>
 </section>
@@ -374,22 +331,21 @@ td.win{background:var(--win)!important;font-weight:600;}
 <section class="panel" id="p-comp" role="tabpanel" hidden>
   <div class="card">
     <h2>Comparativa</h2>
-    <p class="sub">El escenario 1 gana en coste, dependencia de personas e impacto organizativo; el 2, en rapidez de arranque; el 2 y el 3, en urgentes y arbitraje; y solo el 3 tiene en cuenta la saturación de cada planta.</p>
+    <p class="sub">El escenario 1 gana en coste, dependencia de personas e impacto organizativo; el 2, en urgentes, arbitraje y rapidez de arranque.</p>
   </div>
   <div class="card">
     <div class="legend"><span><i style="background:var(--win);border-color:#b9ded7"></i>Escenario con ventaja en ese criterio</span></div>
     <div class="tw"><table>
-      <thead><tr><th>Criterio</th><th>Escenario 1 · SAP y sistema pull</th><th>Escenario 2 · Departamento común</th><th>Escenario 3 · Departamento + IA</th></tr></thead>
+      <thead><tr><th>Criterio</th><th>Escenario 1 · SAP y sistema pull</th><th>Escenario 2 · Departamento común</th></tr></thead>
       <tbody>
-        <tr><td class="k">Coste</td><td class="win">Proyecto SAP; sin plantilla nueva</td><td>Estructura permanente</td><td>Estructura + desarrollo de IA</td></tr>
-        <tr><td class="k">Plazo</td><td>Meses</td><td class="win">Semanas para arrancar</td><td>El más largo: equipo, datos y agentes</td></tr>
-        <tr><td class="k">Dependencia de personas</td><td class="win">Baja: deciden las reglas</td><td>Media: se concentra en el equipo</td><td>Media: la IA propone, el equipo valida</td></tr>
-        <tr><td class="k">Urgentes</td><td>Procedimiento aparte</td><td class="win">Un interlocutor que decide</td><td class="win">Interlocutor + propuesta automática</td></tr>
-        <tr><td class="k">Arbitraje entre plantas</td><td>No hay arbitraje: mandan los parámetros</td><td class="win">Lo resuelve si es neutral</td><td class="win">Lo resuelve, con datos de saturación</td></tr>
-        <tr><td class="k">Saturación de cada planta</td><td>No se tiene en cuenta</td><td>A criterio del equipo</td><td class="win">Automática en cada propuesta</td></tr>
-        <tr><td class="k">Impacto organizativo</td><td class="win">Bajo</td><td>Alto</td><td>Alto</td></tr>
-        <tr><td class="k">Escalabilidad al grupo</td><td>Alta: diseño replicable</td><td>Alta: centro de planificación</td><td>Alta: más plantas sin crecer igual</td></tr>
-        <tr><td class="k">Riesgo principal</td><td>Automatizar el desorden</td><td>Una capa más sin sistema</td><td>Fiarse de la IA sin datos fiables</td></tr>
+        <tr><td class="k">Coste</td><td class="win">Proyecto SAP; sin plantilla nueva</td><td>Estructura permanente</td></tr>
+        <tr><td class="k">Plazo</td><td>Meses</td><td class="win">Semanas para arrancar</td></tr>
+        <tr><td class="k">Dependencia de personas</td><td class="win">Baja: deciden las reglas</td><td>Media: se concentra en el equipo</td></tr>
+        <tr><td class="k">Urgentes</td><td>Procedimiento aparte</td><td class="win">Un interlocutor que decide</td></tr>
+        <tr><td class="k">Arbitraje entre plantas</td><td>No hay arbitraje: mandan los parámetros</td><td class="win">Lo resuelve si es neutral</td></tr>
+        <tr><td class="k">Impacto organizativo</td><td class="win">Bajo</td><td>Alto</td></tr>
+        <tr><td class="k">Escalabilidad al grupo</td><td>Alta: diseño replicable</td><td>Alta: centro de planificación</td></tr>
+        <tr><td class="k">Riesgo principal</td><td>Automatizar el desorden</td><td>Una capa más sin sistema</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -399,10 +355,9 @@ td.win{background:var(--win)!important;font-weight:600;}
       <li><input type="checkbox" id="d1"><label for="d1">Alcance: solo la interfaz papel–cartón o la planificación completa de ambas plantas.</label></li>
       <li><input type="checkbox" id="d2"><label for="d2">Stock de Ondupack en MGT: propiedad, límites y quién paga el almacenaje.</label></li>
       <li><input type="checkbox" id="d3"><label for="d3">Prioridad de Ondupack frente a clientes externos de MGT.</label></li>
-      <li><input type="checkbox" id="d4"><label for="d4">Escenarios 2 y 3: de quién depende el responsable de planificación integrada.</label></li>
+      <li><input type="checkbox" id="d4"><label for="d4">Escenario 2: de quién depende el Planificador Master.</label></li>
       <li><input type="checkbox" id="d5"><label for="d5">Fecha de corte y horizonte congelado del ciclo.</label></li>
       <li><input type="checkbox" id="d6"><label for="d6">Validez actual del diseño SAP original.</label></li>
-      <li><input type="checkbox" id="d7"><label for="d7">Escenario 3: qué datos alimentan a los agentes y quién valida sus propuestas.</label></li>
     </ul>
   </div>
 </section>

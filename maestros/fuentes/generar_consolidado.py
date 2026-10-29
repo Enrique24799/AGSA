@@ -1,6 +1,7 @@
 """Genera el Excel consolidado de P2R con lo que hay dado de alta en la aplicación (DICE Studio).
 
-Primera entrega: fases del esqueleto, personas, dedicación, catálogo de hallazgos y catálogo de palancas.
+Hojas: fases del esqueleto, personas, dedicación, catálogo de hallazgos, catálogo de palancas y una hoja por empresa
+(hallazgos de la celda, palanca que los cura e intervenciones).
 Los datos se transcriben de las capturas de la aplicación; las descripciones de hallazgos y palancas vienen
 del maestro (generar_maestro_p2r.py).
 
@@ -14,6 +15,7 @@ from openpyxl.formatting.rule import FormulaRule
 from openpyxl.styles import Font
 
 from generar_intervenciones_ondupet import F, cabecera, celda, fill, titulo
+from hojas_empresa import hoja_empresa
 
 FECHA = '29/10/2026'
 EMPRESAS = ['Ondupet', 'Ondupack', 'MGT']
@@ -269,6 +271,10 @@ def construir(salida):
             celda(wp, r, j, v, centrada=j in (1, 7, 8, 10, 11, 12, 13))
     wp.freeze_panes = 'C5'
     wp.auto_filter.ref = f'A4:M{p_ult}'
+
+    palancas_cat = {p[0]: (p[1], p[2]) for p in PALANCAS}
+    for empresa in ('Ondupet', 'MGT', 'Ondupack Almendralejo'):
+        hoja_empresa(wb, empresa, palancas_cat)
 
     for ws in wb.worksheets:
         ws.sheet_view.showGridLines = False

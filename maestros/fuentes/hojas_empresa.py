@@ -337,43 +337,43 @@ METRICA_TIPO = {
 }
 # (empresa, id): esfuerzo, impacto y, solo si cambia algo respecto a la aplicación, anclaje, familia, descripción, métrica y nota
 FICHAS = {
-    ('Ondupet', 'INF-10'): dict(esf='Bajo', imp='Alto', desc=(
+    ('Ondupet', 'INF-10'): dict(esf=2, imp=5, desc=(
         'Comercial modifica la previsión a comienzo de mes, incluso con el material ya fabricado, sin comunicación formal ni '
         'cierre ni consenso, y nadie responde del stock fabricado. Además, la reunión de accuracy no genera acciones y los '
         'agotados se registran de forma irregular.'),
         nota='Pegar esta descripción, que ya incluye INF-16.'),
     ('Ondupet', 'INF-16'): dict(esf='—', imp='—', nota='Fusionar en INF-10 y desactivar en Ondupet: es el mismo tipo.'),
-    ('Ondupet', 'INF-11'): dict(esf='Medio', imp='Alto',
+    ('Ondupet', 'INF-11'): dict(esf=3, imp=4,
                                 met='Horas / año de las líneas de extrusión y termoformado no ajustadas a la carga'),
-    ('Ondupet', 'INF-13'): dict(esf='Bajo', imp='Medio'),
-    ('Ondupet', 'OPP-02'): dict(esf='Medio', imp='Alto'),
-    ('Ondupet', 'INF-12'): dict(esf='Alto', imp='Alto', met='Horas de línea / año en cambios de molde y altura evitables'),
-    ('Ondupet', 'INF-14'): dict(esf='Bajo', imp='Medio'),
-    ('Ondupet', 'OPP-03'): dict(esf='Bajo', imp='Medio'),
-    ('Ondupet', 'INF-15'): dict(esf='Bajo', imp='Medio'),
-    ('MGT', 'INF-01'): dict(esf='Medio', imp='Alto', fam='Ineficiencia · Circulante',
+    ('Ondupet', 'INF-13'): dict(esf=2, imp=3),
+    ('Ondupet', 'OPP-02'): dict(esf=3, imp=4),
+    ('Ondupet', 'INF-12'): dict(esf=5, imp=4, met='Horas de línea / año en cambios de molde y altura evitables'),
+    ('Ondupet', 'INF-14'): dict(esf=1, imp=3),
+    ('Ondupet', 'OPP-03'): dict(esf=2, imp=3),
+    ('Ondupet', 'INF-15'): dict(esf=1, imp=2),
+    ('MGT', 'INF-01'): dict(esf=3, imp=4, fam='Ineficiencia · Circulante',
                             nota='Cambiar la familia a Ineficiencia · Circulante, como el tipo.'),
-    ('MGT', 'INF-02'): dict(esf='Medio', imp='Alto', met='Horas / año de máquina a 3 turnos sin cartera que los llene'),
-    ('MGT', 'INF-03'): dict(esf='Medio', imp='Alto', met='€ de stock de Ondupack en MGT por encima de la cobertura objetivo'),
-    ('MGT', 'OPP-02'): dict(esf='Medio', imp='Medio', anc=f'Demanda Externa · {DEM}',
+    ('MGT', 'INF-02'): dict(esf=3, imp=4, met='Horas / año de máquina a 3 turnos sin cartera que los llene'),
+    ('MGT', 'INF-03'): dict(esf=3, imp=5, met='€ de stock de Ondupack en MGT por encima de la cobertura objetivo'),
+    ('MGT', 'OPP-02'): dict(esf=4, imp=3, anc=f'Demanda Externa · {DEM}',
                             nota='Cambiar el anclaje a Demanda Externa: es donde se da (o no) la fecha.'),
-    ('MGT', 'INF-04'): dict(esf='Medio', imp='Medio', anc=f'MRP · {NEC}',
+    ('MGT', 'INF-04'): dict(esf=3, imp=3, anc=f'MRP · {NEC}',
                             met='€ de stock de materias primas y auxiliares por encima de la cobertura objetivo',
                             nota='Cambiar el anclaje a MRP: el problema es el MRP, no la propuesta de PT.'),
-    ('MGT', 'INF-05'): dict(esf='Medio', imp='Alto', met='Horas / año de máquina en cambios de calidad y ancho evitables'),
-    ('MGT', 'INF-06'): dict(esf='Bajo', imp='Medio'),
-    ('MGT', 'INF-08'): dict(esf='Medio', imp='Bajo'),
-    ('MGT', 'OPP-03'): dict(esf='Medio', imp='Medio'),
-    ('MGT', 'INF-07'): dict(esf='Bajo', imp='Medio'),
-    ('Ondupack Almendralejo', 'INF-01'): dict(esf='Medio', imp='Medio'),
-    ('Ondupack Almendralejo', 'INF-06'): dict(esf='Medio', imp='Alto', met='Horas / año de la 924 por encima de su capacidad real'),
-    ('Ondupack Almendralejo', 'INF-02'): dict(esf='Alto', imp='Alto'),
-    ('Ondupack Almendralejo', 'INF-03'): dict(esf='Alto', imp='Medio', met='€ de stock de papel por encima de la cobertura objetivo'),
-    ('Ondupack Almendralejo', 'INF-04'): dict(esf='Alto', imp='Alto',
+    ('MGT', 'INF-05'): dict(esf=3, imp=4, met='Horas / año de máquina en cambios de calidad y ancho evitables'),
+    ('MGT', 'INF-06'): dict(esf=1, imp=3),
+    ('MGT', 'INF-08'): dict(esf=3, imp=2),
+    ('MGT', 'OPP-03'): dict(esf=3, imp=3),
+    ('MGT', 'INF-07'): dict(esf=1, imp=2),
+    ('Ondupack Almendralejo', 'INF-01'): dict(esf=3, imp=3),
+    ('Ondupack Almendralejo', 'INF-06'): dict(esf=2, imp=5, met='Horas / año de la 924 por encima de su capacidad real'),
+    ('Ondupack Almendralejo', 'INF-02'): dict(esf=4, imp=5),
+    ('Ondupack Almendralejo', 'INF-03'): dict(esf=4, imp=3, met='€ de stock de papel por encima de la cobertura objetivo'),
+    ('Ondupack Almendralejo', 'INF-04'): dict(esf=4, imp=4,
                                               met='Horas / año de onduladora y converting en cambios evitables'),
-    ('Ondupack Almendralejo', 'INF-05'): dict(esf='Bajo', imp='Medio', anc=f'Converting · {PRO}',
+    ('Ondupack Almendralejo', 'INF-05'): dict(esf=1, imp=3, anc=f'Converting · {PRO}',
                                               nota='Cambiar el anclaje a Converting: es donde se replanifica.'),
-    ('Ondupack Almendralejo', 'OPP-01'): dict(esf='Bajo', imp='Medio', anc=f'Seguimiento del servicio · {SEG}',
+    ('Ondupack Almendralejo', 'OPP-01'): dict(esf=1, imp=3, anc=f'Seguimiento del servicio · {SEG}',
                                               nota='Cambiar el anclaje a Seguimiento del servicio: es donde falta el KPI.'),
 }
 
@@ -383,7 +383,7 @@ def hoja_fichas(wb):
     ws = wb.create_sheet('Fichas de hallazgo')
     titulo(ws, 'Fichas de hallazgo por empresa · campos del formulario (sin cuantificación)',
            'Detectado en: «aquí mismo» en todos. La métrica sustituye a la que heredaron del tipo antiguo. Esfuerzo e impacto '
-           'en escala Bajo / Medio / Alto. La última columna dice qué hay que cambiar en la aplicación.')
+           'de 1 (bajo) a 5 (alto), como en la aplicación. La última columna dice qué hay que cambiar en la aplicación.')
     cab = ['Empresa', 'ID', 'Tipo de hallazgo', 'Familia', 'Naturaleza', 'Anclaje (bloque)', 'Fase', 'Descripción',
            'Métrica (volumen expuesto)', 'Esfuerzo', 'Impacto', 'Qué cambiar en la aplicación']
     cabecera(ws, 4, cab, [20, 9, 34, 13, 15, 26, 30, 62, 40, 10, 10, 40])

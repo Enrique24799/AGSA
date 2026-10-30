@@ -16,6 +16,7 @@ from openpyxl.styles import Font
 
 from generar_intervenciones_ondupet import F, cabecera, celda, fill, titulo
 from hojas_empresa import hoja_empresa, hoja_fichas
+from fichas_palancas import hojas_fichas
 
 FECHA = '29/10/2026'
 EMPRESAS = ['Ondupet', 'Ondupack', 'MGT']
@@ -298,6 +299,7 @@ def construir(salida):
     for empresa in ('Ondupet', 'MGT', 'Ondupack Almendralejo'):
         hoja_empresa(wb, empresa, palancas_cat)
     hoja_fichas(wb)
+    hojas_fichas(wb)
 
     for ws in wb.worksheets:
         ws.sheet_view.showGridLines = False

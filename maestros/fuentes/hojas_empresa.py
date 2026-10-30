@@ -319,3 +319,95 @@ def hoja_empresa(wb, empresa, palancas_cat):
     ws.freeze_panes = ws.cell(fila_cab + 1, 3)
     ws.sheet_view.showGridLines = False
     return ws
+
+
+# ---------------------------------------------------------------- fichas de hallazgo (formulario «Hallazgo», sin cuantificación)
+METRICA_TIPO = {
+    'HT-P2R-01': '€ de stock medio de producto terminado expuesto al error de previsión',
+    'HT-P2R-03': 'Horas de línea / año de turnos no ajustados a la carga',
+    'HT-P2R-04': '€ de stock de producto terminado por encima de la cobertura objetivo',
+    'HT-P2R-05': '€ de ventas / año en pedidos no entregados en la primera fecha confirmada',
+    'HT-P2R-06': '€ / año de compras y transportes urgentes por faltas',
+    'HT-P2R-07': '€ de stock de materias primas y semielaborado por encima de la cobertura objetivo',
+    'HT-P2R-08': 'Horas de línea / año en cambios evitables',
+    'HT-P2R-09': 'Horas de línea / año en resecuenciaciones',
+    'HT-P2R-10': 'Horas de línea / año perdidas en arranques fallidos',
+    'HT-P2R-11': '€ de ventas / año en pedidos fuera de OTIF',
+    'HT-P2R-12': 'Horas de línea / año perdidas en desviaciones repetidas',
+}
+# (empresa, id): esfuerzo, impacto y, solo si cambia algo respecto a la aplicación, anclaje, familia, descripción, métrica y nota
+FICHAS = {
+    ('Ondupet', 'INF-10'): dict(esf='Bajo', imp='Alto', desc=(
+        'Comercial modifica la previsión a comienzo de mes, incluso con el material ya fabricado, sin comunicación formal ni '
+        'cierre ni consenso, y nadie responde del stock fabricado. Además, la reunión de accuracy no genera acciones y los '
+        'agotados se registran de forma irregular.'),
+        nota='Pegar esta descripción, que ya incluye INF-16.'),
+    ('Ondupet', 'INF-16'): dict(esf='—', imp='—', nota='Fusionar en INF-10 y desactivar en Ondupet: es el mismo tipo.'),
+    ('Ondupet', 'INF-11'): dict(esf='Medio', imp='Alto',
+                                met='Horas / año de las líneas de extrusión y termoformado no ajustadas a la carga'),
+    ('Ondupet', 'INF-13'): dict(esf='Bajo', imp='Medio'),
+    ('Ondupet', 'OPP-02'): dict(esf='Medio', imp='Alto'),
+    ('Ondupet', 'INF-12'): dict(esf='Alto', imp='Alto', met='Horas de línea / año en cambios de molde y altura evitables'),
+    ('Ondupet', 'INF-14'): dict(esf='Bajo', imp='Medio'),
+    ('Ondupet', 'OPP-03'): dict(esf='Bajo', imp='Medio'),
+    ('Ondupet', 'INF-15'): dict(esf='Bajo', imp='Medio'),
+    ('MGT', 'INF-01'): dict(esf='Medio', imp='Alto', fam='Ineficiencia · Circulante',
+                            nota='Cambiar la familia a Ineficiencia · Circulante, como el tipo.'),
+    ('MGT', 'INF-02'): dict(esf='Medio', imp='Alto', met='Horas / año de máquina a 3 turnos sin cartera que los llene'),
+    ('MGT', 'INF-03'): dict(esf='Medio', imp='Alto', met='€ de stock de Ondupack en MGT por encima de la cobertura objetivo'),
+    ('MGT', 'OPP-02'): dict(esf='Medio', imp='Medio', anc=f'Demanda Externa · {DEM}',
+                            nota='Cambiar el anclaje a Demanda Externa: es donde se da (o no) la fecha.'),
+    ('MGT', 'INF-04'): dict(esf='Medio', imp='Medio', anc=f'MRP · {NEC}',
+                            met='€ de stock de materias primas y auxiliares por encima de la cobertura objetivo',
+                            nota='Cambiar el anclaje a MRP: el problema es el MRP, no la propuesta de PT.'),
+    ('MGT', 'INF-05'): dict(esf='Medio', imp='Alto', met='Horas / año de máquina en cambios de calidad y ancho evitables'),
+    ('MGT', 'INF-06'): dict(esf='Bajo', imp='Medio'),
+    ('MGT', 'INF-08'): dict(esf='Medio', imp='Bajo'),
+    ('MGT', 'OPP-03'): dict(esf='Medio', imp='Medio'),
+    ('MGT', 'INF-07'): dict(esf='Bajo', imp='Medio'),
+    ('Ondupack Almendralejo', 'INF-01'): dict(esf='Medio', imp='Medio'),
+    ('Ondupack Almendralejo', 'INF-06'): dict(esf='Medio', imp='Alto', met='Horas / año de la 924 por encima de su capacidad real'),
+    ('Ondupack Almendralejo', 'INF-02'): dict(esf='Alto', imp='Alto'),
+    ('Ondupack Almendralejo', 'INF-03'): dict(esf='Alto', imp='Medio', met='€ de stock de papel por encima de la cobertura objetivo'),
+    ('Ondupack Almendralejo', 'INF-04'): dict(esf='Alto', imp='Alto',
+                                              met='Horas / año de onduladora y converting en cambios evitables'),
+    ('Ondupack Almendralejo', 'INF-05'): dict(esf='Bajo', imp='Medio', anc=f'Converting · {PRO}',
+                                              nota='Cambiar el anclaje a Converting: es donde se replanifica.'),
+    ('Ondupack Almendralejo', 'OPP-01'): dict(esf='Bajo', imp='Medio', anc=f'Seguimiento del servicio · {SEG}',
+                                              nota='Cambiar el anclaje a Seguimiento del servicio: es donde falta el KPI.'),
+}
+
+
+def hoja_fichas(wb):
+    """Una fila por hallazgo dado de alta, con los campos del formulario salvo la cuantificación."""
+    ws = wb.create_sheet('Fichas de hallazgo')
+    titulo(ws, 'Fichas de hallazgo por empresa · campos del formulario (sin cuantificación)',
+           'Detectado en: «aquí mismo» en todos. La métrica sustituye a la que heredaron del tipo antiguo. Esfuerzo e impacto '
+           'en escala Bajo / Medio / Alto. La última columna dice qué hay que cambiar en la aplicación.')
+    cab = ['Empresa', 'ID', 'Tipo de hallazgo', 'Familia', 'Naturaleza', 'Anclaje (bloque)', 'Fase', 'Descripción',
+           'Métrica (volumen expuesto)', 'Esfuerzo', 'Impacto', 'Qué cambiar en la aplicación']
+    cabecera(ws, 4, cab, [20, 9, 34, 13, 15, 26, 30, 62, 40, 10, 10, 40])
+    r = 5
+    for empresa in ('Ondupet', 'MGT', 'Ondupack Almendralejo'):
+        for hid, tipo, famnat, anclaje, desc, _ in HALLAZGOS[empresa]:
+            f = FICHAS[(empresa, hid)]
+            fam, nat = f.get('fam', famnat).split(' · ')
+            act, fase = f.get('anc', anclaje).split(' · ', 1)
+            codigo = tipo.split(' · ')[0]
+            desc = f.get('desc', desc.split(': ', 1)[1] if desc.startswith(('Previsión inestable:', 'Previsión sin')) else desc)
+            fusion = f['esf'] == '—'
+            vals = [empresa, hid, tipo, fam, nat, act, fase, None if fusion else desc,
+                    None if fusion else f.get('met', METRICA_TIPO[codigo]), f['esf'], f['imp'], f.get('nota')]
+            for j, v in enumerate(vals, 1):
+                c = celda(ws, r, j, v, centrada=j in (2, 4, 5, 10, 11))
+                if fusion:
+                    c.font = Font(name=F, size=10, italic=True, color=GRIS)
+            r += 1
+    ultima = r - 1
+    from openpyxl.formatting.rule import FormulaRule
+    ws.conditional_formatting.add(f'L5:L{ultima}', FormulaRule(formula=['LEN($L5)>0'], fill=fill('FCE4E4')))
+    ws.conditional_formatting.add(f'A5:K{ultima}', FormulaRule(formula=['$D5="Oportunidad"'], fill=fill('FFF1D6')))
+    ws.freeze_panes = 'C5'
+    ws.auto_filter.ref = f'A4:L{ultima}'
+    ws.sheet_view.showGridLines = False
+    return ws

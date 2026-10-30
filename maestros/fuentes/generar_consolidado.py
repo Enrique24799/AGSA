@@ -129,38 +129,38 @@ PALANCAS = [
     ('P2R-01', 'Gestión de la demanda',
      'Hay previsión, al menos de la demanda repetitiva; se cierra en fecha, se consensúa cada mes entre Comercial y '
      'Planificación, cubre el horizonte de las decisiones y se mide y corrige.',
-     '€ de previsión mensual cambiada tras el cierre o sin consensuar · Familias fuera de umbral sin acción / mes',
+     '€ de stock medio de producto terminado expuesto al error de previsión',
      DEM, 'HT-P2R-01', 'Precisión y sesgo por familia · cambios tras el cierre', (S, S, S)),
     ('P2R-02', 'S&OP y plan de capacidad',
      'Demanda y capacidad se equilibran cada mes, con datos y con dirección: turnos, reservas de capacidad e intercompany se '
      'deciden con escenarios, no con urgencias.',
-     'Horas de línea y turnos no ajustados a la carga / mes', SOP, 'HT-P2R-03',
+     'Horas de línea / año de turnos no ajustados a la carga', SOP, 'HT-P2R-03',
      'Ocupación real frente a planificada · horas extra no planificadas', (S, S, S)),
     ('P2R-03', 'Política de inventario por segmento',
      'Cada material, de producto terminado y de materia prima, tiene segmento, estrategia y stock objetivo, revisados '
      'periódicamente.',
-     '€ de stock fuera de política (exceso y obsoleto) · € de pedidos / mes entregados tarde o no servidos', SOP,
+     '€ de stock de producto terminado por encima de la cobertura objetivo', SOP,
      'HT-P2R-04, HT-P2R-05 (×2)', '€ de stock fuera de política · roturas', (S, '', S)),
     ('P2R-04', 'Promesa de fecha fiable',
      'La fecha al cliente se confirma con disponibilidad real y se renegocia en cuanto se sabe que no se llega.',
-     '€ de pedidos / mes entregados tarde o no servidos', SOP, 'HT-P2R-05 (×2)', 'OTIF a fecha confirmada', (S, '', S)),
+     '€ de ventas / año en pedidos no entregados en la primera fecha confirmada', SOP, 'HT-P2R-05 (×2)', 'OTIF a fecha confirmada', (S, '', S)),
     ('P2R-05', 'Planificación de materiales por excepción',
      'Las necesidades se calculan a tiempo, con parámetros vigentes y en todos los niveles, y el planificador solo atiende '
      'las excepciones críticas.',
-     '€ de sobrecoste urgente por faltas / mes · € de stock de semielaborado y materia prima por encima de la necesidad', NEC,
+     '€ / año de compras y transportes urgentes por faltas · € de stock de materias primas y semielaborado por encima de la cobertura objetivo', NEC,
      'HT-P2R-06, HT-P2R-07', '€ urgentes por faltas · faltas detectadas a tiempo', ('', S, S)),
     ('P2R-06', 'Programación estable y optimizada',
      'El programa respeta la capacidad, minimiza los cambios y solo se modifica dentro de reglas: zona congelada y '
      'prioridades.',
-     'Horas de cambio y de sobrecarga / semana · Resecuenciaciones / semana', PRO, 'HT-P2R-08, HT-P2R-09',
+     'Horas de línea / año en cambios y resecuenciaciones evitables', PRO, 'HT-P2R-08, HT-P2R-09',
      'Horas de cambio · adherencia al programa', (S, S, S)),
     ('P2R-07', 'Liberación controlada',
      'Una orden solo se libera con material, utillaje y aprovisionamiento a línea confirmados, y dentro de su ventana.',
-     'Arranques fallidos / mes', LIB, 'HT-P2R-10', 'Arranques fallidos', ('', '', S)),
+     'Horas de línea / año perdidas en arranques fallidos', LIB, 'HT-P2R-10', 'Arranques fallidos', ('', '', S)),
     ('P2R-08', 'Control del servicio y mejora continua',
      'Servicio y adherencia se miden solos, los riesgos se avisan antes y cada desviación tiene causa y una acción que vuelve '
      'a la planificación.',
-     '€ de pedidos atrasados sin aviso / mes · Desviaciones repetidas sin causa / mes', SEG, 'HT-P2R-11, HT-P2R-12',
+     '€ de ventas / año en pedidos fuera de OTIF · horas de línea / año perdidas en desviaciones repetidas', SEG, 'HT-P2R-11, HT-P2R-12',
      'OTIF · desviaciones con causa', (S, S, S)),
 ]
 
@@ -280,8 +280,8 @@ def construir(salida):
 
     # --- Palancas ---
     titulo(wp, 'Catálogo de palancas · P2R',
-           f'Transcrito de la aplicación el {FECHA} (8 palancas). €/año de referencia: — · confianza: por cuantificar. '
-           '«Qué cambia» y KPI del maestro.')
+           f'Transcrito de la aplicación el {FECHA} (8 palancas). €/año de referencia: vacío (el € sale de cada empresa) · '
+           'confianza: por cuantificar. «Qué cambia», KPI y base expuesta del maestro.')
     cab = ['Código', 'Palanca', 'Qué cambia', 'KPI', 'Base expuesta', 'Fase as-is', '€/año ref.', 'Confianza', 'Cura tipos',
            *EMPRESAS, 'Aplicada en']
     cabecera(wp, 4, cab, [10, 32, 58, 30, 52, 34, 10, 15, 22, 10, 10, 10, 11])

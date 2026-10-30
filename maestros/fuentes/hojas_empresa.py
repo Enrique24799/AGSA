@@ -377,12 +377,42 @@ FICHAS = {
                                               nota='Cambiar el anclaje a Seguimiento del servicio: es donde falta el KPI.'),
 }
 
+# métrica de cada ficha: el volumen que hoy está expuesto al problema y se puede medir ya (no el € que se pierde)
+METRICA_FICHA = {
+    ('Ondupet', 'INF-10'): '€ / mes de previsión cambiada tras el inicio del mes o sin consensuar',
+    ('Ondupet', 'INF-11'): 'Horas de línea / año de extrusión y termoformado planificadas sin cruzar carga y capacidad',
+    ('Ondupet', 'INF-13'): '€ de stock medio de producto terminado sin ABC ni estrategia',
+    ('Ondupet', 'OPP-02'): '€ de ventas / año en pedidos entregados después de la fecha del cliente',
+    ('Ondupet', 'INF-12'): 'Horas de línea / año en cambios de molde y altura',
+    ('Ondupet', 'INF-14'): 'Cambios de última hora / año dentro del programa',
+    ('Ondupet', 'OPP-03'): '€ de ventas / año en pedidos atrasados (reporte diario de cargas atrasadas)',
+    ('Ondupet', 'INF-15'): 'Atrasos / año sin análisis de causa',
+    ('MGT', 'INF-01'): 't / año de papel (Ondupack y clientes repetitivos) planificadas sin previsión',
+    ('MGT', 'INF-02'): 'Horas / año de máquina a 3 turnos sin cartera que los llene',
+    ('MGT', 'INF-03'): '€ de stock de Ondupack en MGT',
+    ('MGT', 'OPP-02'): '€ de ventas / año en pedidos entregados después de la fecha pedida por el cliente',
+    ('MGT', 'INF-04'): '€ de stock medio de materias primas y auxiliares',
+    ('MGT', 'INF-05'): 'Horas / año de máquina en cambios de calidad y ancho',
+    ('MGT', 'INF-06'): 'Urgencias / año encajadas a mano en el ciclo',
+    ('MGT', 'INF-08'): 'Órdenes / año liberadas con comprobación manual de material',
+    ('MGT', 'OPP-03'): '€ de ventas / año en pedidos entregados tarde (incluido Ondupack)',
+    ('MGT', 'INF-07'): 'Incidencias / año resueltas sin causa registrada',
+    ('Ondupack Almendralejo', 'INF-01'): '€ de ventas / año de clientes y referencias repetitivas planificadas sin previsión',
+    ('Ondupack Almendralejo', 'INF-06'): 'Horas / año de la 924 planificadas por encima de lo que produce',
+    ('Ondupack Almendralejo', 'INF-02'): 'Órdenes / año liberadas con material pendiente',
+    ('Ondupack Almendralejo', 'INF-03'): '€ de stock medio de papel',
+    ('Ondupack Almendralejo', 'INF-04'): 'Horas / año de onduladora y converting en cambios',
+    ('Ondupack Almendralejo', 'INF-05'): 'Cambios del cliente / año aceptados con el pedido ya programado',
+    ('Ondupack Almendralejo', 'OPP-01'): '€ de ventas / año en pedidos entregados después de la fecha propuesta por el CTP',
+}
+
 
 def hoja_fichas(wb):
     """Una fila por hallazgo dado de alta, con los campos del formulario salvo la cuantificación."""
     ws = wb.create_sheet('Fichas de hallazgo')
     titulo(ws, 'Fichas de hallazgo por empresa · campos del formulario (sin cuantificación)',
-           'Detectado en: «aquí mismo» en todos. La métrica sustituye a la que heredaron del tipo antiguo. Esfuerzo e impacto '
+           'Detectado en: «aquí mismo» en todos. La métrica es el volumen expuesto que hoy se puede medir en cada empresa '
+           '(sustituye a la heredada del tipo antiguo). Esfuerzo e impacto '
            'de 1 (bajo) a 5 (alto), como en la aplicación. La última columna dice qué hay que cambiar en la aplicación.')
     cab = ['Empresa', 'ID', 'Tipo de hallazgo', 'Familia', 'Naturaleza', 'Anclaje (bloque)', 'Fase', 'Descripción',
            'Métrica (volumen expuesto)', 'Esfuerzo', 'Impacto', 'Qué cambiar en la aplicación']
@@ -397,7 +427,7 @@ def hoja_fichas(wb):
             desc = f.get('desc', desc.split(': ', 1)[1] if desc.startswith(('Previsión inestable:', 'Previsión sin')) else desc)
             fusion = f['esf'] == '—'
             vals = [empresa, hid, tipo, fam, nat, act, fase, None if fusion else desc,
-                    None if fusion else f.get('met', METRICA_TIPO[codigo]), f['esf'], f['imp'], f.get('nota')]
+                    None if fusion else METRICA_FICHA[(empresa, hid)], f['esf'], f['imp'], f.get('nota')]
             for j, v in enumerate(vals, 1):
                 c = celda(ws, r, j, v, centrada=j in (2, 4, 5, 10, 11))
                 if fusion:

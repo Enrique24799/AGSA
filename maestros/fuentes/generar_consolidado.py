@@ -85,7 +85,8 @@ HALLAZGOS = [
     ('HT-P2R-01', 'Demanda sin previsión fiable', DEM,
      'No hay previsión, o la que hay no se cierra, no se consensúa ni se mide: el plan trabaja con una demanda que cambia o '
      'que no se conoce, y la demanda perdida no se registra.',
-     'Oportunidad', '—', '€ de demanda mensual planificada sin previsión cerrada y consensuada', 'P2R-01', '—', (S, S, S)),
+     'Ineficiencia', 'Circulante', '€ de demanda mensual planificada sin previsión cerrada y consensuada', 'P2R-01', '—',
+     (S, S, S)),
     ('HT-P2R-03', 'Demanda y capacidad sin equilibrar', SOP,
      'Sin S&OP, la capacidad (turnos, reservas, intercompany) se decide por intuición y a mano, y el desequilibrio se arregla '
      'con urgencias.',
@@ -165,6 +166,22 @@ PALANCAS = [
 
 AVISO = 'FCE4E4'
 
+# KPI y fórmula sugeridos por tipo (tokens de la aplicación: valor, obj). Resultado en €/año; las constantes son de
+# ejemplo y se ajustan en cada celda.
+KPI_FORMULA = {
+    'HT-P2R-01': ('Precisión de la previsión (1 − WMAPE, %) ↑', '(obj-valor)/100*2000000*0.08'),
+    'HT-P2R-03': ('Horas de turno no ajustadas a la carga (h/mes) ↓', '(valor-obj)*12*150'),
+    'HT-P2R-04': ('Cobertura de producto terminado (días) ↓', '(valor-obj)*20000*0.08'),
+    'HT-P2R-05': ('Pedidos entregados en la primera fecha confirmada (%) ↑', '(obj-valor)/100*10000000'),
+    'HT-P2R-06': ('Compras y transportes urgentes por faltas (nº/mes) ↓', '(valor-obj)*12*400'),
+    'HT-P2R-07': ('Cobertura de materias primas y semielaborado (días) ↓', '(valor-obj)*8000*0.08'),
+    'HT-P2R-08': ('Horas de cambio (h/semana) ↓', '(valor-obj)*52*150'),
+    'HT-P2R-09': ('Resecuenciaciones dentro de la zona congelada (nº/semana) ↓', '(valor-obj)*52*0.5*150'),
+    'HT-P2R-10': ('Arranques fallidos (nº/mes) ↓', '(valor-obj)*12*2*150'),
+    'HT-P2R-11': ('OTIF a fecha confirmada (%) ↑', '(obj-valor)/100*10000000'),
+    'HT-P2R-12': ('Desviaciones repetidas sin causa (nº/mes) ↓', '(valor-obj)*12*1*150'),
+}
+
 
 def construir(salida):
     wb = Workbook()
@@ -242,19 +259,24 @@ def construir(salida):
 
     # --- Hallazgos ---
     titulo(wh, 'Catálogo de tipos de hallazgo · P2R',
-           f'Transcrito de la aplicación el {FECHA} (11 tipos). Descripción y métrica del maestro. '
+           f'Transcrito de la aplicación el {FECHA} (11 tipos). Descripción, métrica, KPI y fórmula del maestro; en la '
+           'fórmula, valor y obj son los tokens de la aplicación y las constantes son de ejemplo. '
            '«Empresas» se calcula con las columnas de cada empresa.')
-    cab = ['ID', 'Nombre', 'Fase', 'Descripción', 'Familia', 'Naturaleza', 'Métrica (volumen expuesto)', 'Se cura con',
-           *EMPRESAS, 'Empresas', 'Caza inversa']
-    cabecera(wh, 4, cab, [12, 30, 34, 60, 13, 15, 36, 18, 10, 10, 10, 10, 13])
+    cab = ['ID', 'Nombre', 'Fase', 'Descripción', 'Familia', 'Naturaleza', 'Métrica (volumen expuesto)', 'KPI sugerido',
+           'Fórmula sugerida (€/año)', 'Se cura con', *EMPRESAS, 'Empresas', 'Caza inversa']
+    cabecera(wh, 4, cab, [12, 30, 34, 60, 13, 15, 36, 34, 26, 18, 10, 10, 10, 10, 13])
     for k, (hid, nom, fase, desc, fam, nat, met, cura, caza, apl) in enumerate(HALLAZGOS):
         r = 5 + k
-        vals = [hid, nom, fase, desc, fam, nat, met, cura, *[a or None for a in apl], f'=COUNTIF(I{r}:K{r},"{S}")', caza]
+        kpi, formula = KPI_FORMULA[hid]
+        vals = [hid, nom, fase, desc, fam, nat, met, kpi, formula, cura, *[a or None for a in apl],
+                f'=COUNTIF(K{r}:M{r},"{S}")', caza]
         for j, v in enumerate(vals, 1):
-            celda(wh, r, j, v, centrada=j in (1, 5, 6, 9, 10, 11, 12, 13))
-    wh.conditional_formatting.add(f'A5:M{h_ult}', FormulaRule(formula=['$E5="Oportunidad"'], fill=fill('FFF1D6')))
+            c = celda(wh, r, j, v, centrada=j in (1, 5, 6, 11, 12, 13, 14, 15))
+            if j == 9:
+                c.font = Font(name='Consolas', size=10, color='00263A')
+    wh.conditional_formatting.add(f'A5:O{h_ult}', FormulaRule(formula=['$E5="Oportunidad"'], fill=fill('FFF1D6')))
     wh.freeze_panes = 'C5'
-    wh.auto_filter.ref = f'A4:M{h_ult}'
+    wh.auto_filter.ref = f'A4:O{h_ult}'
 
     # --- Palancas ---
     titulo(wp, 'Catálogo de palancas · P2R',

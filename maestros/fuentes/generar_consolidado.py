@@ -171,17 +171,17 @@ AVISO = 'FCE4E4'
 # KPI y fórmula sugeridos por tipo (tokens de la aplicación: valor, obj). Resultado en €/año; las constantes son de
 # ejemplo y se ajustan en cada celda.
 KPI_FORMULA = {
-    'HT-P2R-01': ('Precisión de la previsión (1 − WMAPE, %) ↑', '(obj-valor)/100*2000000*0.08'),
-    'HT-P2R-03': ('Horas de turno no ajustadas a la carga (h/mes) ↓', '(valor-obj)*12*150'),
-    'HT-P2R-04': ('Cobertura de producto terminado (días) ↓', '(valor-obj)*20000*0.08'),
-    'HT-P2R-05': ('Pedidos entregados en la primera fecha confirmada (%) ↑', '(obj-valor)/100*10000000'),
-    'HT-P2R-06': ('Compras y transportes urgentes por faltas (nº/mes) ↓', '(valor-obj)*12*400'),
-    'HT-P2R-07': ('Cobertura de materias primas y semielaborado (días) ↓', '(valor-obj)*8000*0.08'),
-    'HT-P2R-08': ('Horas de cambio (h/semana) ↓', '(valor-obj)*52*150'),
-    'HT-P2R-09': ('Resecuenciaciones dentro de la zona congelada (nº/semana) ↓', '(valor-obj)*52*0.5*150'),
-    'HT-P2R-10': ('Arranques fallidos (nº/mes) ↓', '(valor-obj)*12*2*150'),
-    'HT-P2R-11': ('OTIF a fecha confirmada (%) ↑', '(obj-valor)/100*10000000'),
-    'HT-P2R-12': ('Desviaciones repetidas sin causa (nº/mes) ↓', '(valor-obj)*12*1*150'),
+    'HT-P2R-01': ('Error de previsión (WMAPE) ↓ · sin previsión, valor = 100 %', '(valor-obj)/valor*800000*0.08'),
+    'HT-P2R-03': ('% Saturación ↑', '(obj-valor)/100*6000*150'),
+    'HT-P2R-04': ('Días Stock PT, ST y MMPP ↓ · dimensión PT', '(valor-obj)*20000*0.08'),
+    'HT-P2R-05': ('Roturas Stock PT, ST y MMPP ↓ · dimensión PT', '(valor-obj)*52*3000'),
+    'HT-P2R-06': ('Roturas Stock PT, ST y MMPP ↓ · dimensión ST y MMPP', '(valor-obj)*52*400'),
+    'HT-P2R-07': ('Días Stock PT, ST y MMPP ↓ · dimensión ST y MMPP', '(valor-obj)*8000*0.08'),
+    'HT-P2R-08': ('Nº Cambios / Producción ↓', '(valor-obj)*20000*1.5*150'),
+    'HT-P2R-09': ('Cambios en el programa cerrado ↓ · falta en DICE', '(valor-obj)*52*0.5*150'),
+    'HT-P2R-10': ('% Órdenes liberadas sin material confirmado ↓ · falta en DICE', '(valor-obj)/100*3000*0.5*150'),
+    'HT-P2R-11': ('OTIF ↑', '(obj-valor)/100*10000000'),
+    'HT-P2R-12': ('% Adherencia al programa ↑ · falta en DICE', '(obj-valor)/100*3000*0.5*150'),
 }
 
 

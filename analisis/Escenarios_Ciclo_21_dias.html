@@ -5,338 +5,336 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ciclo de 21 días en Tubos</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
 <style>
-/* Layout: memo de decisión a una columna; la comparación de escenarios se abre a dos columnas y se apila en móvil */
-:root {
-  --bg: #f5f6f8; --surface: #ffffff; --ink: #14202b; --ink-2: #47525e; --muted: #6f7a86; --rule: #dbe0e6; --soft: #eef1f4;
-  --e1: #eb6834; --e2: #2a78d6; --hoy: #8a939d; --zone: rgba(42,120,214,.06);
-  --good: #0a7d0a; --bad: #c23535;
-  --f-display: "Barlow Semi Condensed", "Arial Narrow", Arial, sans-serif;
-  --f-body: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+:root{
+  /* Layout: shell de la aplicación GPB (barra superior + panel lateral con árbol) y contenido en pestañas con paneles de cabecera gris */
+  color-scheme: light;
+  --bar1:#3d516a; --bar2:#506987; --btn:#6482a3; --badge:#617e9f;
+  --side:#f5f6f4; --panel:#ffffff; --bg:#ffffff; --navy:#2a385d; --ink:#1f2937; --ink2:#465263; --muted:#6b7686;
+  --rule:#d8dde4; --rule2:#e8ebef; --thead:#50698a; --soft:#f4f6f9; --hi:#eef3fa; --email:#3a5f9a;
+  --hoy:#9aa5b4; --e1:#eb6834; --e2:#2a78d6; --chg:#3d516a; --prod:#cfd7e1; --open:#7f90a6; --free:#e6eaef; --zone:rgba(42,120,214,.07);
+  --good:#0b7a0b; --bad:#c0392b; --warn:#a86400;
+  --f:Tahoma, Verdana, "Segoe UI", Arial, sans-serif;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #111519; --surface: #191e23; --ink: #e8ecf0; --ink-2: #b4bdc7; --muted: #8b96a1; --rule: #2b333b; --soft: #20262c;
-  --e1: #d95926; --e2: #3987e5; --hoy: #7d8791; --zone: rgba(57,135,229,.10); --good: #3fbf3f; --bad: #e66767; color-scheme: dark; } }
-:root[data-theme="dark"] {
-  --bg: #111519; --surface: #191e23; --ink: #e8ecf0; --ink-2: #b4bdc7; --muted: #8b96a1; --rule: #2b333b; --soft: #20262c;
-  --e1: #d95926; --e2: #3987e5; --hoy: #7d8791; --zone: rgba(57,135,229,.10); --good: #3fbf3f; --bad: #e66767; color-scheme: dark; }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--f-body); }
-.wrap { max-width: 980px; margin: 0 auto; padding-block: 40px 64px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: grid; gap: 44px; }
-h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: .005em; }
-h1 { font-size: clamp(2.1rem, 5vw, 3rem); font-weight: 700; line-height: 1.05; }
-h2 { font-size: 1.6rem; font-weight: 600; line-height: 1.15; }
-h3 { font-size: 1.2rem; font-weight: 600; }
-p { margin: 0; max-width: 68ch; }
-.eyebrow { font: 600 .78rem/1 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-section { display: grid; gap: 18px; min-width: 0; }
-.sec-head { display: grid; gap: 6px; }
-.sec-head p { color: var(--ink-2); }
-header { display: grid; gap: 14px; }
-.lead { font-size: 1.15rem; color: var(--ink-2); max-width: 64ch; }
-.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); margin-top: 10px; }
-.fact { padding: 14px 14px 14px 0; display: grid; gap: 2px; }
-.fact + .fact { padding-left: 14px; border-left: 1px solid var(--rule); }
-.fact b { font: 600 1.55rem/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
-.fact span { font-size: .88rem; color: var(--muted); }
-.num { font-variant-numeric: tabular-nums; }
-.scen { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 22px; display: grid; gap: 16px; align-content: start; min-width: 0; }
-.tag { display: inline-flex; align-items: center; gap: 8px; font: 600 .8rem/1 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
-.tag i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
-.k { display: grid; gap: 0; }
-.k div { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 9px 0; border-top: 1px solid var(--rule); align-items: baseline; }
-.k dt { color: var(--ink-2); font-size: .95rem; }
-.k dd { margin: 0; text-align: right; font: 600 1.25rem/1.2 var(--f-display); font-variant-numeric: tabular-nums; }
-.k dd small { display: block; font: 400 .82rem/1.3 var(--f-body); color: var(--muted); }
-.pc { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-.pc ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
-.pc li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; font-size: .97rem; }
-.pc li::before { font: 700 1rem/1.4 var(--f-display); }
-.pro li::before { content: "+"; color: var(--good); }
-.con li::before { content: "–"; color: var(--bad); }
-.pc h4 { margin: 6px 0 2px; font: 600 .78rem/1 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.common { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
-.common div { display: grid; gap: 4px; align-content: start; padding-top: 12px; border-top: 2px solid var(--ink); }
-.common b { font: 600 1.3rem/1.15 var(--f-display); font-variant-numeric: tabular-nums; }
-.common span { color: var(--ink-2); font-size: .95rem; }
-.verdict { background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--e2); border-radius: 0 6px 6px 0; padding: 20px 22px; display: grid; gap: 10px; }
-.verdict p { font-size: 1.05rem; }
-.chart { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 18px 10px; display: grid; gap: 10px; position: relative; min-width: 0; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .88rem; color: var(--ink-2); }
-.legend span { display: inline-flex; align-items: center; gap: 7px; }
-.legend i { width: 18px; height: 0; border-top: 2px solid; display: inline-block; }
-svg { width: 100%; height: auto; display: block; overflow: visible; }
-.grid { stroke: var(--rule); stroke-width: 1; }
-.axis { stroke: var(--muted); stroke-width: 1; }
-.tick { fill: var(--muted); font: 400 12px var(--f-body); font-variant-numeric: tabular-nums; }
-.axt { fill: var(--ink-2); font: 400 12px var(--f-body); }
-.zone2 { fill: var(--zone); }
-.zlab { fill: var(--muted); font: 600 11px var(--f-body); letter-spacing: .04em; }
-.l-hoy { stroke: var(--hoy); stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
-.l-e1 { stroke: var(--e1); stroke-width: 2; fill: none; }
-.l-e2 { stroke: var(--e2); stroke-width: 2; fill: none; }
-.drop { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 2 3; }
-.pt { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
-.pt2 { fill: var(--e2); stroke: var(--surface); stroke-width: 2; }
-.hl { stroke: var(--muted); stroke-width: 1; }
-.blab { fill: var(--ink); font: 600 13px var(--f-body); }
-.dl { fill: var(--ink); font: 600 12px var(--f-body); font-variant-numeric: tabular-nums; }
-.dl.mut { fill: var(--ink-2); font-weight: 400; }
-.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: .82rem; line-height: 1.4; padding: 7px 10px; border-radius: 4px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.vals { font-size: .82rem; color: var(--muted); }
-.tw { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
-table { width: 100%; border-collapse: collapse; font-size: .93rem; font-variant-numeric: tabular-nums; }
-thead th { font: 600 .74rem/1.25 var(--f-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); text-align: right; padding: 12px 12px 10px; border-bottom: 1px solid var(--rule); vertical-align: bottom; }
-thead tr.grp th { border-bottom: 0; padding-bottom: 0; color: var(--ink-2); }
-td, tbody th { padding: 10px 12px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
-tbody th { font-weight: 600; }
-thead th:first-child, tbody th { text-align: left; }
-td.txt { text-align: left; white-space: normal; color: var(--ink-2); min-width: 220px; }
-tr.tot th, tr.tot td { font-weight: 700; border-bottom: 0; background: var(--soft); }
-tr.sel th, tr.sel td { background: var(--zone); font-weight: 700; }
-tr.base th, tr.base td { color: var(--muted); }
-.delta { color: var(--bad); font-weight: 600; }
-.note { font-size: .88rem; color: var(--muted); max-width: 80ch; }
-.todo { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px 28px; }
-.todo div { display: grid; gap: 4px; align-content: start; }
-.todo b { font-weight: 700; }
-.todo span { color: var(--ink-2); font-size: .95rem; }
-.method { border-top: 1px solid var(--rule); padding-top: 18px; display: grid; gap: 10px; }
-.method ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; color: var(--ink-2); font-size: .9rem; max-width: 90ch; }
-footer { font-size: .82rem; color: var(--muted); }
-@media (max-width: 760px) {
-  .scen, .pc, .common, .todo { grid-template-columns: 1fr; }
-  .facts { grid-template-columns: 1fr 1fr; }
-  .fact:nth-child(3) { padding-left: 0; border-left: 0; }
-  .fact:nth-child(n+3) { border-top: 1px solid var(--rule); }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bar1)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;height:42px;display:flex;align-items:center;gap:10px;
+  padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  background:linear-gradient(90deg,var(--bar1) 0%,var(--bar2) 50%,#42566f 100%);box-shadow:0 2px 3px rgba(0,0,0,.12);color:#fff}
+.menu-btn{width:30px;height:28px;border:0;border-radius:6px;background:var(--btn);display:grid;place-items:center;cursor:pointer;padding:0}
+.menu-btn span{display:block;width:12px;height:2px;background:#fff;box-shadow:0 -4px 0 #fff,0 4px 0 #fff}
+.menu-btn:focus-visible,.tab:focus-visible,.tree a:focus-visible{outline:2px solid #ffd27a;outline-offset:2px}
+.badge{font:700 14px/1 Georgia,"Times New Roman",serif;background:var(--badge);padding:5px 8px 4px;border-radius:7px;letter-spacing:.02em}
+.app{font-weight:700;font-size:13px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app small{font-weight:400;opacity:.8}
+.tb-right{margin-left:auto;font-size:12px;opacity:.85;white-space:nowrap}
+.shell{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:calc(100vh - 42px)}
+.side{background:var(--side);border-right:3px solid var(--navy);padding:12px 8px 20px 6px;display:grid;gap:10px;align-content:start}
+.user{border-left:3px solid #425469;border-radius:6px 0 0 6px;padding:4px 6px 8px;border-bottom:1px solid var(--rule)}
+.user b{display:block;color:var(--navy);font-size:11.5px;line-height:1.35}
+.user span{display:block;color:var(--email);font-size:11px;font-weight:700}
+.tree{background:#fff;border-radius:6px;padding:10px 8px 12px 10px}
+.tree ul{list-style:none;margin:0;padding:0}
+.tree ul ul{margin-left:9px;padding-left:12px;border-left:1px dotted #b7bec8}
+.tree li{position:relative;padding:3px 0 3px 14px;font-size:11.5px}
+.tree li::before{content:"";position:absolute;left:0;top:11px;width:9px;border-top:1px dotted #b7bec8}
+.tree .node>span{font-weight:700;color:var(--navy)}
+.tree .node>span::before{content:"⊟";font-weight:400;color:#8a929d;margin-right:5px;font-size:11px}
+.tree a{color:var(--ink);text-decoration:none;border-radius:3px;padding:1px 4px;cursor:pointer;display:inline-block}
+.tree a:hover{background:#e9eef5}
+.tree a[aria-current="page"]{background:var(--navy);color:#fff}
+.tree .off{color:#9aa1ab}
+.content{min-width:0;padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:1180px;display:grid;gap:16px}
+.crumb{font-size:11px;color:var(--muted)}
+.crumb b{color:var(--navy)}
+h1{margin:0;font-size:20px;color:var(--navy);text-wrap:balance}
+.sub{margin:2px 0 0;color:var(--ink2);font-size:12.5px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--rule);border-radius:4px;background:var(--soft)}
+.fact{padding:9px 12px;display:grid;gap:1px}
+.fact+.fact{border-left:1px solid var(--rule)}
+.fact b{font-size:16px;color:var(--navy);font-variant-numeric:tabular-nums}
+.fact span{font-size:11.5px;color:var(--muted)}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--navy);overflow-x:auto}
+.tab{font:700 12.5px/1 var(--f);color:var(--ink2);background:#e9ecf0;border:1px solid var(--rule);border-bottom:0;border-radius:5px 5px 0 0;padding:10px 16px 9px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.tab:hover{background:#dfe4ea}
+.tab[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tabpanel{display:grid;gap:16px}
+.tabpanel[hidden]{display:none}
+.lede{margin:0;color:var(--ink2);max-width:110ch}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--rule);border-top:3px solid var(--navy);border-radius:4px;padding:10px 12px;display:grid;gap:2px;align-content:start}
+.kpi.e1{border-top-color:var(--e1)}.kpi.e2{border-top-color:var(--e2)}
+.kl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.kpi b{font-size:21px;color:var(--navy);font-variant-numeric:tabular-nums;line-height:1.2}
+.ks{font-size:11.5px;color:var(--ink2)}
+.ks .up{color:var(--bad);font-weight:700}.ks .eq{color:var(--good);font-weight:700}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;min-width:0;display:grid;align-content:start}
+.ph{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:8px 12px;background:linear-gradient(#f8f9fb,#eef1f5);border-bottom:1px solid var(--rule);border-radius:4px 4px 0 0}
+.ph h3{margin:0;font-size:12.5px;color:var(--navy);text-transform:uppercase;letter-spacing:.04em}
+.ph span{font-size:11.5px;color:var(--muted)}
+.pb{padding:12px;display:grid;gap:10px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11.5px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:2px;display:inline-block}
+.legend i.ln{height:0;border-top:2px solid;width:16px;border-radius:0}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:var(--rule2);stroke-width:1}
+.axis{stroke:#9aa3ae;stroke-width:1}
+.tick{fill:var(--muted);font:11px var(--f);font-variant-numeric:tabular-nums}
+.xl{fill:var(--ink2);font:700 11px var(--f)}
+.vl{fill:var(--ink);font:700 11px var(--f);font-variant-numeric:tabular-nums}
+.vl.mut{fill:var(--ink2);font-weight:400}
+.axt{fill:var(--ink2);font:11px var(--f)}
+.zone{fill:var(--zone)}
+.zl{fill:var(--muted);font:700 10.5px var(--f);letter-spacing:.03em}
+[data-tip]{cursor:default}
+[data-tip]:hover{opacity:.85}
+.tip{position:fixed;z-index:80;pointer-events:none;background:var(--navy);color:#fff;font:12px/1.4 var(--f);padding:6px 9px;border-radius:3px;max-width:280px;box-shadow:0 2px 6px rgba(0,0,0,.2);font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+thead th{background:var(--thead);color:#fff;font-weight:700;padding:7px 10px;text-align:right;white-space:normal;vertical-align:bottom;border-right:1px solid rgba(255,255,255,.15)}
+thead th:first-child,thead th.l{text-align:left}
+tbody th{text-align:left;font-weight:700;color:var(--ink);padding:6px 10px;white-space:nowrap}
+td{padding:6px 10px;text-align:right;white-space:nowrap;border-left:1px solid var(--rule2)}
+tbody tr{border-bottom:1px solid var(--rule2)}
+tbody tr:nth-child(even){background:#fafbfc}
+tr.grp th{background:#e9edf2;color:var(--navy);font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:5px 10px}
+tr.hi{background:var(--hi)!important}
+tr.hi th,tr.hi td{font-weight:700}
+tr.bad td{color:var(--bad)}
+tr.tot{background:#e9edf2!important}
+tr.tot th,tr.tot td{font-weight:700}
+tr.base th,tr.base td{color:var(--muted)}
+td.note{color:var(--muted);text-align:left;white-space:normal;min-width:200px;font-size:11.5px}
+td.txt{text-align:left;white-space:normal;min-width:140px;color:var(--ink2)}
+.cmp td{text-align:left;white-space:normal}
+.cmp td:nth-child(2){color:var(--ink2)}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px;border:1px solid}
+.chip::before{margin-right:4px}
+.chip.good{color:var(--good);border-color:var(--good)}.chip.good::before{content:"✔"}
+.chip.warn{color:var(--warn);border-color:var(--warn)}.chip.warn::before{content:"!"}
+.chip.bad{color:var(--bad);border-color:var(--bad)}.chip.bad::before{content:"▼"}
+.pc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.pc h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.pro-h{color:var(--good)}.con-h{color:var(--bad)}
+.pc ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.pc li{display:grid;grid-template-columns:16px 1fr;gap:6px}
+.pro li::before{content:"+";color:var(--good);font-weight:700}
+.con li::before{content:"−";color:var(--bad);font-weight:700}
+.verdict{border:1px solid var(--rule);border-left:4px solid var(--navy);background:var(--soft);border-radius:0 4px 4px 0;padding:12px 14px;display:grid;gap:6px}
+.verdict p{margin:0;max-width:120ch}
+.verdict .big{font-size:14px;color:var(--navy)}
+.todo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 22px}
+.todo div{display:grid;gap:2px;align-content:start}
+.todo b{color:var(--navy)}
+.todo span{color:var(--ink2)}
+.method ul{margin:0;padding-left:18px;display:grid;gap:4px;color:var(--ink2);max-width:130ch}
+.foot{font-size:11px;color:var(--muted)}
+.scrim{display:none}
+@media (max-width:1100px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;z-index:70;top:calc(42px + env(safe-area-inset-top,0px));bottom:0;left:0;width:260px;overflow-y:auto;transform:translateX(-105%);transition:transform .2s;padding-left:max(6px,env(safe-area-inset-left,0px))}
+  body.nav-open .side{transform:none}
+  body.nav-open .scrim{display:block;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.25)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fact:nth-child(3){border-left:0}.fact:nth-child(n+3){border-top:1px solid var(--rule)}
+  .pc,.todo{grid-template-columns:1fr}
+  .tb-right{display:none}
+}
+@media (max-width:480px){.kpis{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.side{transition:none}}
+@media print{
+  .topbar,.side,.tabs,.scrim{display:none!important}
+  .shell{display:block}.tabpanel[hidden]{display:grid!important}
+  .tabpanel{break-before:page}.panel{break-inside:avoid}
 }
 </style>
 </head>
 <body>
-<main class="wrap">
-
-<header>
-  <span class="eyebrow">Tubos · Planificación de la producción · Noviembre 2026</span>
-  <h1>Ciclo de 21 días en Tubos</h1>
-  <p class="lead">Pasar el ciclo de fabricación de 30 a 21 días baja el stock y acorta la espera de cada medida, pero obliga a hacer un 43% más de cambios en las máquinas. Comparamos dos formas de hacerlo: con los equipos de hoy o reforzando turnos para no perder producción.</p>
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Mostrar u ocultar el menú" aria-expanded="false" aria-controls="side"><span></span></button>
+  <span class="badge">GPB</span>
+  <span class="app">AGSA <small>· Planificación · Análisis de ciclos</small></span>
+  <span class="tb-right">Noviembre 2026 · Documento para Dirección</span>
+</header>
+<div class="scrim" id="scrim"></div>
+<div class="shell">
+<aside class="side" id="side">
+  <div class="user"><b>Planificador AGSA</b><b>Enrique Tejada Fornieles</b><span>etejada@clgrupoindustrial.com</span></div>
+  <nav class="tree" aria-label="Análisis">
+    <ul><li class="node"><span>Análisis de ciclos · Tubos</span>
+      <ul>
+        <li class="node"><span>Costes de transformación</span>
+          <ul>
+            <li><a data-tab="escenario-1" href="#escenario-1">Escenario 1 · Equipos actuales</a></li>
+            <li><a data-tab="escenario-2" href="#escenario-2">Escenario 2 · Refuerzo de turnos</a></li>
+            <li><a data-tab="comparativa" href="#comparativa">Comparativa</a></li>
+          </ul></li>
+        <li><span class="off">Capacidad (pendiente)</span></li>
+        <li><span class="off">Mínimos de fabricación (pendiente)</span></li>
+      </ul></li></ul>
+  </nav>
+</aside>
+<main class="content"><div class="inner">
+  <div>
+    <div class="crumb">Análisis de ciclos › <b>Costes de transformación</b></div>
+    <h1>Paso del ciclo de fabricación de 30 a 21 días en Tubos</h1>
+    <p class="sub">Máquinas M8, M16, M17 y M20 · Base: calendario de turnos y costes de transformación 2026 · Cifras anuales</p>
+  </div>
   <div class="facts">
     <div class="fact"><b>12 → 17,1</b><span>ciclos al año</span></div>
-    <div class="fact"><b>+43%</b><span>cambios de familia y de calibrador</span></div>
-    <div class="fact"><b>+868 h</b><span>de máquina en cambios al año (de 2.026 a 2.894 h)</span></div>
-    <div class="fact"><b>−30%</b><span>stock medio de ciclo (−771 Tn)</span></div>
+    <div class="fact"><b>448 → 640</b><span>cambios al año (+43%)</span></div>
+    <div class="fact"><b>2.026 → 2.894 h</b><span>horas de cambio al año (+868 h)</span></div>
+    <div class="fact"><b>2.570 → 1.799 Tn</b><span>stock medio de ciclo (−30%)</span></div>
   </div>
-</header>
 
-<section>
-  <div class="sec-head"><h2>Los dos escenarios</h2>
-  <p>M8, M16, M17 y M20, con el calendario y los costes de 2026. Las cifras son anuales.</p></div>
-  <div class="scen">
-    <article class="card">
-      <span class="tag"><i style="background:var(--e1)"></i>Escenario 1</span>
-      <h3>Con los 8 equipos actuales</h3>
-      <dl class="k">
-        <div><dt>Producción</dt><dd>47.243 Tn<small>−3.868 Tn (-7,6%)</small></dd></div>
-        <div><dt>Coste de transformación</dt><dd>77,15 €/t<small>hoy 71,31 €/t · +5,84 €/t (+8,2%)</small></dd></div>
-        <div><dt>Coste fijo sin absorber</dt><dd>275.419 €<small>el mismo coste repartido entre menos Tn</small></dd></div>
-        <div><dt>Equipos</dt><dd>8<small>sin cambios</small></dd></div>
-      </dl>
-    </article>
-    <article class="card">
-      <span class="tag"><i style="background:var(--e2)"></i>Escenario 2</span>
-      <h3>Reforzando turnos para mantener la producción</h3>
-      <dl class="k">
-        <div><dt>Producción</dt><dd>51.110 Tn<small>igual que hoy</small></dd></div>
-        <div><dt>Refuerzo necesario</dt><dd>868 h<small>≈ 109 turnos de 8 h</small></dd></div>
-        <div><dt>Equipos</dt><dd>+0,5 equipos<small>1 equipo más (9) o turnos de sábado</small></dd></div>
-        <div><dt>Coste de transformación</dt><dd>71,31 €/t + refuerzo<small>+1,96 €/t por cada 100.000 € de refuerzo</small></dd></div>
-      </dl>
-    </article>
+  <div class="tabs" role="tablist" aria-label="Escenarios">
+    <button class="tab" role="tab" id="t-e1" aria-controls="escenario-1"><i style="background:var(--e1)"></i>Escenario 1 · Equipos actuales</button>
+    <button class="tab" role="tab" id="t-e2" aria-controls="escenario-2"><i style="background:var(--e2)"></i>Escenario 2 · Refuerzo de turnos</button>
+    <button class="tab" role="tab" id="t-c" aria-controls="comparativa"><i style="background:var(--navy)"></i>Comparativa</button>
   </div>
-</section>
 
-<section>
-  <div class="sec-head"><h2>Lo que se gana con 21 días en los dos escenarios</h2></div>
-  <div class="common">
-    <div><b>2.570 → 1.799 Tn</b><span>Stock medio de ciclo (medio lote por medida). Menos capital inmovilizado y menos espacio en almacén.</span></div>
-    <div><b>30 → 21 días</b><span>Tiempo entre dos fabricaciones de una misma medida. Las que van cada 2 ciclos pasan de 60 a 42 días y las de cada 3, de 90 a 63.</span></div>
-    <div><b>Hueco MTO cada 21 días</b><span>Los pedidos MTO entran en el hueco de su familia, así que esperan como máximo 21 días en lugar de 30.</span></div>
-  </div>
-</section>
-
-<section>
-  <div class="sec-head"><h2>A favor y en contra</h2></div>
-  <div class="pc">
-    <article class="card">
-      <span class="tag"><i style="background:var(--e1)"></i>Escenario 1 · Equipos actuales</span>
-      <div><h4>A favor</h4><ul class="pro">
-        <li>No hay que contratar ni cambiar turnos: se puede aplicar ya.</li>
-        <li>Se consigue la bajada de stock y la respuesta más rápida.</li>
-        <li>No aumenta el gasto total de la planta.</li>
-      </ul></div>
-      <div><h4>En contra</h4><ul class="con">
-        <li>Se pierden 3.868 Tn al año de capacidad (-7,6%), porque las máquinas pasan 868 h más paradas en cambios.</li>
-        <li>El coste de transformación sube de 71,31 a 77,15 €/t (+8,2%).</li>
-        <li>M16 ya va justa de capacidad: con menos horas productivas aumenta el riesgo de retrasos.</li>
-        <li>M17 es la más castigada (+20,1% €/t): tiene pocas horas al año y sus cambios completos son de 9 h.</li>
-        <li>Más cambios significan más merma de arranque y más carga para ajustadores y mecánicos (sin cuantificar).</li>
-      </ul></div>
-    </article>
-    <article class="card">
-      <span class="tag"><i style="background:var(--e2)"></i>Escenario 2 · Refuerzo de turnos</span>
-      <div><h4>A favor</h4><ul class="pro">
-        <li>Mantiene la producción actual de 51.110 Tn al año con el ciclo de 21 días.</li>
-        <li>Se consigue la misma bajada de stock y la misma respuesta que en el escenario 1.</li>
-        <li>El refuerzo es pequeño: medio equipo, unos 109 turnos al año.</li>
-        <li>Hay hueco en el calendario: M8 y M16 tienen los sábados cerrados y M20 trabaja 1 o 2 turnos entre semana.</li>
-        <li>Con un equipo completo sobran unas 897 h al año que pueden aliviar la falta de capacidad de M16.</li>
-      </ul></div>
-      <div><h4>En contra</h4><ul class="con">
-        <li>Tiene un coste de personal: un equipo nuevo, o turnos de sábado con sus pluses u horas extra.</li>
-        <li>Trabajar en sábado requiere acuerdo con la plantilla y organizar la rotación.</li>
-        <li>Solo sale más barato por tonelada que el escenario 1 si el refuerzo cuesta menos de 298.000 € al año.</li>
-        <li>Los cambios suben igual (+43%): misma merma de arranque y misma carga de ajustadores que en el escenario 1.</li>
-        <li>Un equipo nuevo necesita un tiempo de formación hasta rendir como los actuales.</li>
-      </ul></div>
-    </article>
-  </div>
-</section>
-
-<section>
-  <div class="sec-head"><h2>¿Cuándo compensa el refuerzo?</h2>
-  <p>En el escenario 2 el coste por tonelada depende de lo que cueste el refuerzo, y ese dato todavía no lo tenemos. El gráfico muestra hasta dónde puede costar para seguir siendo mejor opción que el escenario 1.</p></div>
-  <div class="chart" id="chartBox">
-    <div class="legend" aria-hidden="true">
-      <span><i style="border-color:var(--e2)"></i>Escenario 2 · refuerzo de turnos</span>
-      <span><i style="border-color:var(--e1)"></i>Escenario 1 · equipos actuales</span>
-      <span><i style="border-color:var(--hoy);border-top-style:dashed"></i>Hoy · ciclo de 30 días</span>
+  <section class="tabpanel" role="tabpanel" id="escenario-1" aria-labelledby="t-e1">
+    <p class="lede">Se pasa a ciclos de 21 días con los <b>8 equipos actuales</b> y el mismo calendario de turnos. Las horas de cambio adicionales se restan a las horas productivas, se fabrica menos y el mismo coste fijo se reparte entre menos toneladas.</p>
+    <div class="kpis">
+      <div class="kpi e1"><span class="kl">Producción anual</span><b>47.243 Tn</b><span class="ks"><span class="up">−3.868 Tn</span> (−7,6%) frente a hoy</span></div>
+      <div class="kpi e1"><span class="kl">Coste de transformación</span><b>77,15 €/t</b><span class="ks"><span class="up">▲ +8,2%</span> · hoy 71,31 €/t</span></div>
+      <div class="kpi e1"><span class="kl">Coste fijo sin absorber</span><b>275.419 €</b><span class="ks">al año, por las Tn que se dejan de fabricar</span></div>
+      <div class="kpi e1"><span class="kl">Horas de cambio</span><b>2.894 h</b><span class="ks">+868 h al año · equipos: 8</span></div>
     </div>
-    <div style="overflow-x:auto"><svg viewBox="0 0 640 302" role="img" aria-labelledby="chT chD" id="beChart">
-<title id="chT">Coste de transformación por tonelada según el coste anual del refuerzo</title>
-<desc id="chD">El escenario 2 parte de 71,31 €/t y sube 1,96 €/t por cada 100.000 € de refuerzo. Cruza el escenario 1 (77,15 €/t) con un refuerzo de 298.419 € al año.</desc>
-<rect x="58" y="22" width="411.8" height="230" class="zone2"/>
-<line x1="58" x2="610" y1="252.0" y2="252.0" class="grid"/><text x="50" y="256.0" class="tick" text-anchor="end">68</text><line x1="58" x2="610" y1="213.7" y2="213.7" class="grid"/><text x="50" y="217.7" class="tick" text-anchor="end">70</text><line x1="58" x2="610" y1="175.3" y2="175.3" class="grid"/><text x="50" y="179.3" class="tick" text-anchor="end">72</text><line x1="58" x2="610" y1="137.0" y2="137.0" class="grid"/><text x="50" y="141.0" class="tick" text-anchor="end">74</text><line x1="58" x2="610" y1="98.7" y2="98.7" class="grid"/><text x="50" y="102.7" class="tick" text-anchor="end">76</text><line x1="58" x2="610" y1="60.3" y2="60.3" class="grid"/><text x="50" y="64.3" class="tick" text-anchor="end">78</text><line x1="58" x2="610" y1="22.0" y2="22.0" class="grid"/><text x="50" y="26.0" class="tick" text-anchor="end">80</text>
-<line x1="58" x2="610" y1="252" y2="252" class="axis"/>
-<text x="58.0" y="272" class="tick" text-anchor="middle">0 €</text><text x="196.0" y="272" class="tick" text-anchor="middle">100 k€</text><text x="334.0" y="272" class="tick" text-anchor="middle">200 k€</text><text x="472.0" y="272" class="tick" text-anchor="middle">300 k€</text><text x="610.0" y="272" class="tick" text-anchor="middle">400 k€</text>
-<text x="334" y="294" class="axt" text-anchor="middle">Coste anual del refuerzo de turnos</text>
-<text x="14" y="137" class="axt" text-anchor="middle" transform="rotate(-90 14 137)">€/t</text>
-<text x="68" y="242" class="zlab">Escenario 2 más barato por tonelada</text>
-<text x="602" y="242" class="zlab" text-anchor="end">Escenario 1 más barato</text>
-<line x1="58" x2="610" y1="188.5" y2="188.5" class="l-hoy"/>
-<line x1="58" x2="610" y1="76.6" y2="76.6" class="l-e1"/>
-<line x1="58.0" x2="610.0" y1="188.5" y2="38.5" class="l-e2"/>
-<line x1="469.8" x2="469.8" y1="76.6" y2="252" class="drop"/>
-<circle cx="469.8" cy="76.6" r="5" class="pt"/>
-<text x="477.8" y="98.6" class="blab">298 k€/año</text>
-<text x="66" y="68.6" class="dl">Escenario 1 · 77,15</text>
-<text x="606" y="30.5" class="dl" text-anchor="end">Escenario 2</text>
-<text x="66" y="206.5" class="dl mut">Hoy, ciclo de 30 días · 71,31</text>
-<g id="hov" visibility="hidden"><line id="hovL" y1="22" y2="252" class="hl"/><circle id="hovP" r="5" class="pt2"/></g>
-<rect id="hit" x="58" y="22" width="552" height="230" fill="transparent"/>
-</svg></div>
-    <div class="tip" id="tip" hidden></div>
-    <p class="vals">Escenario 2 según el coste anual del refuerzo: 0 € → 71,31 €/t · 100.000 € → 73,27 €/t · 200.000 € → 75,23 €/t · 300.000 € → 77,18 €/t · 400.000 € → 79,14 €/t.</p>
-  </div>
-  <div class="verdict">
-    <p><strong>El escenario 2 tiene un coste por tonelada más bajo mientras el refuerzo cueste menos de 298.000 € al año</strong>, unos 344 € por hora de turno. Además fabrica 3.868 Tn más al año que el escenario 1.</p>
-    <p class="note">Para cerrar la comparación falta el coste real de medio equipo o de unos 109 turnos de sábado al año.</p>
-  </div>
-</section>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Coste de transformación por máquina</h3><span>€/t · subida sobre cada máquina</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--hoy)"></i>Hoy · ciclo de 30 días</span><span><i style="background:var(--e1)"></i>Escenario 1 · ciclo de 21 días</span></div><svg viewBox="0 0 540 270" role="img" aria-label="Coste de transformación por máquina, hoy y en el escenario 1"><line x1="52" x2="530" y1="236.0" y2="236.0" class="grid"/><text x="44" y="240.0" class="tick" text-anchor="end">0</text><line x1="52" x2="530" y1="201.0" y2="201.0" class="grid"/><text x="44" y="205.0" class="tick" text-anchor="end">20</text><line x1="52" x2="530" y1="166.0" y2="166.0" class="grid"/><text x="44" y="170.0" class="tick" text-anchor="end">40</text><line x1="52" x2="530" y1="131.0" y2="131.0" class="grid"/><text x="44" y="135.0" class="tick" text-anchor="end">60</text><line x1="52" x2="530" y1="96.0" y2="96.0" class="grid"/><text x="44" y="100.0" class="tick" text-anchor="end">80</text><line x1="52" x2="530" y1="61.0" y2="61.0" class="grid"/><text x="44" y="65.0" class="tick" text-anchor="end">100</text><line x1="52" x2="530" y1="26.0" y2="26.0" class="grid"/><text x="44" y="30.0" class="tick" text-anchor="end">120</text><path d="M68.8,236.0V125.2Q68.8,122.2 71.8,122.2H95.8Q98.8,122.2 98.8,125.2V236.0Z" fill="var(--hoy)" data-tip="M8 · Hoy, 30 días: 65 €/t"/><path d="M100.8,236.0V115.1Q100.8,112.1 103.8,112.1H127.8Q130.8,112.1 130.8,115.1V236.0Z" fill="var(--e1)" data-tip="M8 · Escenario 1, 21 días: 70,79 €/t"/><text x="99.8" y="258" class="xl" text-anchor="middle">M8</text><text x="99.8" y="105.1" class="vl" text-anchor="middle">+8,9%</text><path d="M164.4,236.0V116.5Q164.4,113.5 167.4,113.5H191.4Q194.4,113.5 194.4,116.5V236.0Z" fill="var(--hoy)" data-tip="M16 · Hoy, 30 días: 70 €/t"/><path d="M196.4,236.0V108.5Q196.4,105.5 199.4,105.5H223.4Q226.4,105.5 226.4,108.5V236.0Z" fill="var(--e1)" data-tip="M16 · Escenario 1, 21 días: 74,59 €/t"/><text x="195.4" y="258" class="xl" text-anchor="middle">M16</text><text x="195.4" y="98.5" class="vl" text-anchor="middle">+6,6%</text><path d="M260.0,236.0V104.2Q260.0,101.2 263.0,101.2H287.0Q290.0,101.2 290.0,104.2V236.0Z" fill="var(--hoy)" data-tip="M17 · Hoy, 30 días: 77 €/t"/><path d="M292.0,236.0V77.1Q292.0,74.1 295.0,74.1H319.0Q322.0,74.1 322.0,77.1V236.0Z" fill="var(--e1)" data-tip="M17 · Escenario 1, 21 días: 92,51 €/t"/><text x="291.0" y="258" class="xl" text-anchor="middle">M17</text><text x="291.0" y="67.1" class="vl" text-anchor="middle">+20,1%</text><path d="M355.6,236.0V55.2Q355.6,52.2 358.6,52.2H382.6Q385.6,52.2 385.6,55.2V236.0Z" fill="var(--hoy)" data-tip="M20 · Hoy, 30 días: 105 €/t"/><path d="M387.6,236.0V41.1Q387.6,38.1 390.6,38.1H414.6Q417.6,38.1 417.6,41.1V236.0Z" fill="var(--e1)" data-tip="M20 · Escenario 1, 21 días: 113,07 €/t"/><text x="386.6" y="258" class="xl" text-anchor="middle">M20</text><text x="386.6" y="31.1" class="vl" text-anchor="middle">+7,7%</text><path d="M451.2,236.0V114.2Q451.2,111.2 454.2,111.2H478.2Q481.2,111.2 481.2,114.2V236.0Z" fill="var(--hoy)" data-tip="Total · Hoy, 30 días: 71,31 €/t"/><path d="M483.2,236.0V104.0Q483.2,101.0 486.2,101.0H510.2Q513.2,101.0 513.2,104.0V236.0Z" fill="var(--e1)" data-tip="Total · Escenario 1, 21 días: 77,15 €/t"/><text x="482.2" y="258" class="xl" text-anchor="middle">Total</text><text x="482.2" y="94.0" class="vl" text-anchor="middle">+8,2%</text><line x1="52" x2="530" y1="236.0" y2="236.0" class="axis"/></svg></div></div>
+      <div class="panel"><div class="ph"><h3>Horas de calendario dedicadas a cambios</h3><span>% de las horas de turno</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--chg)"></i>Horas de cambio</span><span><i style="background:var(--prod)"></i>Horas sin cambio</span></div><svg viewBox="0 0 540 228" role="img" aria-label="Porcentaje de las horas de calendario dedicado a cambios, con ciclo de 30 y de 21 días"><line x1="96.0" x2="96.0" y1="8" y2="206" class="grid"/><text x="96.0" y="222" class="tick" text-anchor="middle">0%</text><line x1="193.0" x2="193.0" y1="8" y2="206" class="grid"/><text x="193.0" y="222" class="tick" text-anchor="middle">25%</text><line x1="290.0" x2="290.0" y1="8" y2="206" class="grid"/><text x="290.0" y="222" class="tick" text-anchor="middle">50%</text><line x1="387.0" x2="387.0" y1="8" y2="206" class="grid"/><text x="387.0" y="222" class="tick" text-anchor="middle">75%</text><line x1="484.0" x2="484.0" y1="8" y2="206" class="grid"/><text x="484.0" y="222" class="tick" text-anchor="middle">100%</text><text x="86" y="22.0" class="xl" text-anchor="end">M8 · 30 d</text><rect x="96.0" y="10" width="60.2" height="16" rx="2" fill="var(--chg)" data-tip="M8 · 30 d: 849 h de cambio (16,0% del calendario)"/><rect x="158.2" y="10" width="325.8" height="16" rx="2" fill="var(--prod)" data-tip="M8 · 30 d: 4.447 h sin cambio"/><text x="492" y="22.0" class="vl">16,0%</text><text x="86" y="46.0" class="xl" text-anchor="end">M8 · 21 d</text><rect x="96.0" y="34" width="86.9" height="16" rx="2" fill="var(--chg)" data-tip="M8 · 21 d: 1.213 h de cambio (22,9% del calendario)"/><rect x="184.9" y="34" width="299.1" height="16" rx="2" fill="var(--prod)" data-tip="M8 · 21 d: 4.083 h sin cambio"/><text x="492" y="46.0" class="vl">22,9%</text><text x="86" y="70.0" class="xl" text-anchor="end">M16 · 30 d</text><rect x="96.0" y="58" width="46.7" height="16" rx="2" fill="var(--chg)" data-tip="M16 · 30 d: 672 h de cambio (12,6% del calendario)"/><rect x="144.7" y="58" width="339.3" height="16" rx="2" fill="var(--prod)" data-tip="M16 · 30 d: 4.680 h sin cambio"/><text x="492" y="70.0" class="vl">12,6%</text><text x="86" y="94.0" class="xl" text-anchor="end">M16 · 21 d</text><rect x="96.0" y="82" width="67.6" height="16" rx="2" fill="var(--chg)" data-tip="M16 · 21 d: 960 h de cambio (17,9% del calendario)"/><rect x="165.6" y="82" width="318.4" height="16" rx="2" fill="var(--prod)" data-tip="M16 · 21 d: 4.392 h sin cambio"/><text x="492" y="94.0" class="vl">17,9%</text><text x="86" y="118.0" class="xl" text-anchor="end">M17 · 30 d</text><rect x="96.0" y="106" width="107.1" height="16" rx="2" fill="var(--chg)" data-tip="M17 · 30 d: 126 h de cambio (28,1% del calendario)"/><rect x="205.1" y="106" width="278.9" height="16" rx="2" fill="var(--prod)" data-tip="M17 · 30 d: 322 h sin cambio"/><text x="492" y="118.0" class="vl">28,1%</text><text x="86" y="142.0" class="xl" text-anchor="end">M17 · 21 d</text><rect x="96.0" y="130" width="153.9" height="16" rx="2" fill="var(--chg)" data-tip="M17 · 21 d: 180 h de cambio (40,2% del calendario)"/><rect x="251.9" y="130" width="232.1" height="16" rx="2" fill="var(--prod)" data-tip="M17 · 21 d: 268 h sin cambio"/><text x="492" y="142.0" class="vl">40,2%</text><text x="86" y="166.0" class="xl" text-anchor="end">M20 · 30 d</text><rect x="96.0" y="154" width="53.4" height="16" rx="2" fill="var(--chg)" data-tip="M20 · 30 d: 379 h de cambio (14,3% del calendario)"/><rect x="151.4" y="154" width="332.6" height="16" rx="2" fill="var(--prod)" data-tip="M20 · 30 d: 2.277 h sin cambio"/><text x="492" y="166.0" class="vl">14,3%</text><text x="86" y="190.0" class="xl" text-anchor="end">M20 · 21 d</text><rect x="96.0" y="178" width="77.1" height="16" rx="2" fill="var(--chg)" data-tip="M20 · 21 d: 541 h de cambio (20,4% del calendario)"/><rect x="175.1" y="178" width="308.9" height="16" rx="2" fill="var(--prod)" data-tip="M20 · 21 d: 2.115 h sin cambio"/><text x="492" y="190.0" class="vl">20,4%</text></svg></div></div>
+    </div>
+    <div class="panel"><div class="ph"><h3>Cálculo por máquina</h3><span>Secuencia perfecta por familia y medida · plantilla fija</span></div>
+      <div class="pb"><div class="tw"><table><thead><tr><th>Concepto</th><th>M8</th><th>M16</th><th>M17</th><th>M20</th><th>Total</th><th class="l">Cálculo</th></tr></thead><tbody><tr class="grp"><th colspan="7">Cambios por ciclo</th></tr><tr class=""><th scope="row">Cambios completos por ciclo</th><td>8,50</td><td>7,00</td><td>1,17</td><td>5,17</td><td>21,83</td><td class="note">Familias (Ø) que entran en el ciclo</td></tr><tr class=""><th scope="row">Cambios de calibrador por ciclo</th><td>5,17</td><td>7,00</td><td>0,00</td><td>3,33</td><td>15,50</td><td class="note">Medidas adicionales dentro de cada familia</td></tr><tr class=""><th scope="row">Horas de cambio por ciclo</th><td>70,8</td><td>56,0</td><td>10,5</td><td>31,6</td><td>168,8</td><td class="note">Completos × h completo + calibrador × h calibrador</td></tr><tr class="grp"><th colspan="7">Horas al año</th></tr><tr class=""><th scope="row">Horas de calendario</th><td>5.296</td><td>5.352</td><td>448</td><td>2.656</td><td>13.752</td><td class="note">Turnos abiertos 2026, sin cambios</td></tr><tr class=""><th scope="row">Horas de cambio · 30 días</th><td>849</td><td>672</td><td>126</td><td>379</td><td>2.026</td><td class="note">× 12 ciclos al año</td></tr><tr class=""><th scope="row">Horas de cambio · 21 días</th><td>1.213</td><td>960</td><td>180</td><td>541</td><td>2.894</td><td class="note">× 17,1 ciclos al año</td></tr><tr class="hi"><th scope="row">Horas de cambio extra</th><td>364</td><td>288</td><td>54</td><td>162</td><td>868</td><td class="note">Diferencia</td></tr><tr class="grp"><th colspan="7">Producción</th></tr><tr class=""><th scope="row">Tn al año · 30 días</th><td>24.283</td><td>20.079</td><td>1.702</td><td>5.046</td><td>51.110</td><td class="note">Horas de calendario × Tn/h máquina real</td></tr><tr class=""><th scope="row">Tn/h en las horas sin cambio</th><td>5,46</td><td>4,29</td><td>5,29</td><td>2,22</td><td>4,45</td><td class="note">Ritmo al que se pierden las horas extra</td></tr><tr class="hi"><th scope="row">Tn perdidas al año</th><td>1.987</td><td>1.236</td><td>285</td><td>360</td><td>3.868</td><td class="note">Horas extra × Tn/h sin cambio</td></tr><tr class=""><th scope="row">Tn al año · 21 días</th><td>22.297</td><td>18.843</td><td>1.417</td><td>4.686</td><td>47.243</td><td class="note"></td></tr><tr class="grp"><th colspan="7">Coste de transformación</th></tr><tr class=""><th scope="row">€/t · 30 días</th><td>65,00</td><td>70,00</td><td>77,00</td><td>105,00</td><td>71,31</td><td class="note">Coste medio 2026</td></tr><tr class="hi"><th scope="row">€/t · 21 días</th><td>70,79</td><td>74,59</td><td>92,51</td><td>113,07</td><td>77,15</td><td class="note">Mismo coste fijo entre menos Tn</td></tr><tr class="hi bad"><th scope="row">Subida</th><td>+8,9%</td><td>+6,6%</td><td>+20,1%</td><td>+7,7%</td><td>+8,2%</td><td class="note"></td></tr><tr class="hi"><th scope="row">Coste fijo sin absorber (€/año)</th><td>129.148</td><td>86.492</td><td>21.982</td><td>37.797</td><td>275.419</td><td class="note">Tn perdidas × €/t actual</td></tr></tbody></table></div></div></div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Coste medio según la duración del ciclo</h3><span>€/t con los equipos actuales</span></div>
+        <div class="pb"><svg viewBox="0 0 540 270" role="img" aria-label="Coste de transformación medio según la duración del ciclo"><line x1="52" x2="524" y1="226.0" y2="226.0" class="grid"/><text x="44" y="230.0" class="tick" text-anchor="end">60</text><line x1="52" x2="524" y1="196.6" y2="196.6" class="grid"/><text x="44" y="200.6" class="tick" text-anchor="end">65</text><line x1="52" x2="524" y1="167.1" y2="167.1" class="grid"/><text x="44" y="171.1" class="tick" text-anchor="end">70</text><line x1="52" x2="524" y1="137.7" y2="137.7" class="grid"/><text x="44" y="141.7" class="tick" text-anchor="end">75</text><line x1="52" x2="524" y1="108.3" y2="108.3" class="grid"/><text x="44" y="112.3" class="tick" text-anchor="end">80</text><line x1="52" x2="524" y1="78.9" y2="78.9" class="grid"/><text x="44" y="82.9" class="tick" text-anchor="end">85</text><line x1="52" x2="524" y1="49.4" y2="49.4" class="grid"/><text x="44" y="53.4" class="tick" text-anchor="end">90</text><line x1="52" x2="524" y1="20.0" y2="20.0" class="grid"/><text x="44" y="24.0" class="tick" text-anchor="end">95</text><text x="52.0" y="244" class="tick" text-anchor="middle">14</text><text x="170.0" y="244" class="tick" text-anchor="middle">21</text><text x="288.0" y="244" class="tick" text-anchor="middle">28</text><text x="406.0" y="244" class="tick" text-anchor="middle">35</text><text x="524.0" y="244" class="tick" text-anchor="middle">42</text><text x="288" y="264" class="axt" text-anchor="middle">Días de ciclo</text><line x1="52" x2="524" y1="226" y2="226" class="axis"/><path d="M52.0,53.3 L85.7,82.7 L119.4,103.4 L170.0,125.0 L220.6,140.0 L288.0,154.1 L321.7,159.4 L406.0,169.7 L524.0,179.6" fill="none" stroke="var(--navy)" stroke-width="2"/><circle cx="52.0" cy="53.3" r="4" fill="var(--navy)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 14 días: 89,34 €/t de media (+25,3%)"/><circle cx="85.7" cy="82.7" r="4" fill="var(--navy)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 16 días: 84,35 €/t de media (+18,3%)"/><circle cx="119.4" cy="103.4" r="4" fill="var(--navy)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 18 días: 80,83 €/t de media (+13,3%)"/><circle cx="170.0" cy="125.0" r="6" fill="var(--e1)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 21 días: 77,15 €/t de media (+8,2%)"/><circle cx="220.6" cy="140.0" r="4" fill="var(--navy)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 24 días: 74,61 €/t de media (+4,6%)"/><circle cx="288.0" cy="154.1" r="4" fill="var(--navy)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 28 días: 72,22 €/t de media (+1,3%)"/><circle cx="321.7" cy="159.4" r="6" fill="var(--hoy)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 30 días: 71,31 €/t de media (0,0%)"/><circle cx="406.0" cy="169.7" r="4" fill="var(--navy)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 35 días: 69,56 €/t de media (−2,5%)"/><circle cx="524.0" cy="179.6" r="4" fill="var(--navy)" stroke="var(--panel)" stroke-width="2" data-tip="Ciclo de 42 días: 67,89 €/t de media (−4,8%)"/><text x="180.0" y="117.0" class="vl">21 días · 77,15 €/t</text><text x="329.7" y="149.4" class="vl mut">Hoy · 71,31 €/t</text></svg><p class="foot">Por debajo de 21 días el coste se acelera: a 18 días sube un 13,3% y a 14 días, un 25,3%.</p></div></div>
+      <div class="panel"><div class="ph"><h3>A favor y en contra</h3><span>Escenario 1</span></div><div class="pb"><div class="pc"><div><h4 class="pro-h">A favor</h4><ul class="pro"><li>No hay que contratar ni cambiar turnos: se puede aplicar de inmediato.</li><li>El stock medio de ciclo baja de 2.570 a 1.799 Tn.</li><li>Cada medida se fabrica cada 21 días: mejor respuesta a la demanda y menos espera del MTO.</li><li>No aumenta el gasto total de la planta.</li></ul></div><div><h4 class="con-h">En contra</h4><ul class="con"><li>Se pierden 3.868 Tn al año de capacidad (−7,6%): las máquinas pasan 868 h más paradas en cambios.</li><li>El coste de transformación sube de 71,31 a 77,15 €/t (+8,2%).</li><li>275.419 € al año de coste fijo sin absorber.</li><li>M16 ya va justa de capacidad: con menos horas productivas aumenta el riesgo de retrasos.</li><li>M17 es la más afectada (+20,1%): tiene 448 h de calendario al año y cambios completos de 9 h.</li><li>Un 43% más de cambios supone más merma de arranque y más carga para ajustadores y mecánicos (no cuantificado).</li></ul></div></div></div></div>
+    </div>
+  </section>
 
-<section>
-  <div class="sec-head"><h2>Escenario 2: dónde entran los turnos</h2>
-  <p>Las horas de refuerzo son las horas de cambio que se añaden con el ciclo de 21 días. Así la máquina mantiene sus horas productivas y su producción.</p></div>
-  <div class="tw"><table>
-    <thead><tr><th>Máquina</th><th>Horas extra al año</th><th>Turnos de 8 h al año</th><th>Equipos equivalentes</th><th style="text-align:left">Dónde caben en el calendario</th></tr></thead>
-    <tbody><tr><th scope="row">M8</th><td>364</td><td>45</td><td>0,21</td><td class="txt">Sábados (hoy cerrados): ≈ 4 turnos al mes</td></tr><tr><th scope="row">M16</th><td>288</td><td>36</td><td>0,16</td><td class="txt">Sábados (hoy cerrados): ≈ 3 turnos al mes</td></tr><tr><th scope="row">M20</th><td>162</td><td>20</td><td>0,10</td><td class="txt">Turno adicional entre semana (hoy trabaja 1 o 2 turnos)</td></tr><tr><th scope="row">M17</th><td>54</td><td>7</td><td>0,03</td><td class="txt">Comparte los 2 equipos con M20</td></tr><tr class="tot"><th scope="row">Total</th><td>868</td><td>109</td><td>0,51</td><td class="txt">≈ 9 turnos al mes entre todas las máquinas</td></tr></tbody>
-  </table></div>
-  <p class="note">1 equipo = 1 turno. Equipos equivalentes = horas extra ÷ horas que hace hoy un equipo al año (≈ 1.770 h en M8 y M16; ≈ 1.550 h en los 2 equipos que comparten M17 y M20). Dos formas de cubrirlo: un equipo nuevo polivalente (9 en total) o turnos de sábado con los equipos actuales.</p>
-</section>
+  <section class="tabpanel" role="tabpanel" id="escenario-2" aria-labelledby="t-e2" hidden>
+    <p class="lede">Se pasa a ciclos de 21 días <b>añadiendo turnos</b> para cubrir exactamente las horas de cambio adicionales. Las máquinas conservan sus horas productivas y la producción anual se mantiene. El coste por tonelada depende de lo que cueste ese refuerzo.</p>
+    <div class="kpis">
+      <div class="kpi e2"><span class="kl">Producción anual</span><b>51.110 Tn</b><span class="ks"><span class="eq">= igual que hoy</span></span></div>
+      <div class="kpi e2"><span class="kl">Refuerzo necesario</span><b>868 h</b><span class="ks">≈ 109 turnos de 8 h al año (≈ 9 al mes)</span></div>
+      <div class="kpi e2"><span class="kl">Equipos</span><b>8 + 0,5</b><span class="ks">1 equipo nuevo (9 en total) o turnos de sábado</span></div>
+      <div class="kpi e2"><span class="kl">Coste de transformación</span><b>71,31 €/t + refuerzo</b><span class="ks">+1,96 €/t por cada 100.000 € de refuerzo</span></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Horas de refuerzo por máquina</h3><span>Horas de cambio extra que hay que cubrir con turnos</span></div>
+        <div class="pb"><svg viewBox="0 0 540 180" role="img" aria-label="Horas de refuerzo al año por máquina"><line x1="96.0" x2="96.0" y1="8" y2="158" class="grid"/><text x="96.0" y="174" class="tick" text-anchor="middle">0 h</text><line x1="174.5" x2="174.5" y1="8" y2="158" class="grid"/><text x="174.5" y="174" class="tick" text-anchor="middle">100 h</text><line x1="253.0" x2="253.0" y1="8" y2="158" class="grid"/><text x="253.0" y="174" class="tick" text-anchor="middle">200 h</text><line x1="331.5" x2="331.5" y1="8" y2="158" class="grid"/><text x="331.5" y="174" class="tick" text-anchor="middle">300 h</text><line x1="410.0" x2="410.0" y1="8" y2="158" class="grid"/><text x="410.0" y="174" class="tick" text-anchor="middle">400 h</text><text x="86" y="25.0" class="xl" text-anchor="end">M8</text><rect x="96.0" y="10" width="285.6" height="22" rx="2" fill="var(--e2)" data-tip="M8: 364 h de refuerzo al año (45 turnos de 8 h)"/><text x="418" y="25.0" class="vl">364 h · 45 turnos</text><text x="86" y="61.0" class="xl" text-anchor="end">M16</text><rect x="96.0" y="46" width="226.1" height="22" rx="2" fill="var(--e2)" data-tip="M16: 288 h de refuerzo al año (36 turnos de 8 h)"/><text x="418" y="61.0" class="vl">288 h · 36 turnos</text><text x="86" y="97.0" class="xl" text-anchor="end">M20</text><rect x="96.0" y="82" width="127.5" height="22" rx="2" fill="var(--e2)" data-tip="M20: 162 h de refuerzo al año (20 turnos de 8 h)"/><text x="418" y="97.0" class="vl">162 h · 20 turnos</text><text x="86" y="133.0" class="xl" text-anchor="end">M17</text><rect x="96.0" y="118" width="42.4" height="22" rx="2" fill="var(--e2)" data-tip="M17: 54 h de refuerzo al año (7 turnos de 8 h)"/><text x="418" y="133.0" class="vl">54 h · 7 turnos</text></svg></div></div>
+      <div class="panel"><div class="ph"><h3>Turnos del año por máquina</h3><span>Máximo 1.095 (365 días × 3 turnos)</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--open)"></i>Abiertos hoy</span><span><i style="background:var(--e2)"></i>Refuerzo</span><span><i style="background:var(--free)"></i>Libres</span></div><svg viewBox="0 0 540 180" role="img" aria-label="Turnos del año por máquina: abiertos hoy, refuerzo y libres"><line x1="96.0" x2="96.0" y1="8" y2="158" class="grid"/><text x="96.0" y="174" class="tick" text-anchor="middle">0</text><line x1="212.0" x2="212.0" y1="8" y2="158" class="grid"/><text x="212.0" y="174" class="tick" text-anchor="middle">365</text><line x1="328.0" x2="328.0" y1="8" y2="158" class="grid"/><text x="328.0" y="174" class="tick" text-anchor="middle">730</text><line x1="444.0" x2="444.0" y1="8" y2="158" class="grid"/><text x="444.0" y="174" class="tick" text-anchor="middle">1.095</text><text x="86" y="25.0" class="xl" text-anchor="end">M8</text><rect x="96.0" y="10" width="208.4" height="22" rx="2" fill="var(--open)" data-tip="M8: 662 turnos abiertos hoy"/><rect x="306.4" y="10" width="12.5" height="22" rx="2" fill="var(--e2)" data-tip="M8: 45 turnos de refuerzo"/><rect x="320.8" y="10" width="123.2" height="22" rx="2" fill="var(--free)" data-tip="M8: 388 turnos siguen libres"/><text x="452" y="25.0" class="vl">388 libres</text><text x="86" y="61.0" class="xl" text-anchor="end">M16</text><rect x="96.0" y="46" width="210.6" height="22" rx="2" fill="var(--open)" data-tip="M16: 669 turnos abiertos hoy"/><rect x="308.6" y="46" width="9.4" height="22" rx="2" fill="var(--e2)" data-tip="M16: 36 turnos de refuerzo"/><rect x="320.1" y="46" width="123.9" height="22" rx="2" fill="var(--free)" data-tip="M16: 390 turnos siguen libres"/><text x="452" y="61.0" class="vl">390 libres</text><text x="86" y="97.0" class="xl" text-anchor="end">M20</text><rect x="96.0" y="82" width="103.5" height="22" rx="2" fill="var(--open)" data-tip="M20: 332 turnos abiertos hoy"/><rect x="201.5" y="82" width="4.5" height="22" rx="2" fill="var(--e2)" data-tip="M20: 20 turnos de refuerzo"/><rect x="208.0" y="82" width="236.0" height="22" rx="2" fill="var(--free)" data-tip="M20: 743 turnos siguen libres"/><text x="452" y="97.0" class="vl">743 libres</text><text x="86" y="133.0" class="xl" text-anchor="end">M17</text><rect x="96.0" y="118" width="15.8" height="22" rx="2" fill="var(--open)" data-tip="M17: 56 turnos abiertos hoy"/><rect x="113.8" y="118" width="0.8" height="22" rx="2" fill="var(--e2)" data-tip="M17: 7 turnos de refuerzo"/><rect x="115.9" y="118" width="328.1" height="22" rx="2" fill="var(--free)" data-tip="M17: 1.032 turnos siguen libres"/><text x="452" y="133.0" class="vl">1.032 libres</text></svg>
+        <p class="foot">El refuerzo cabe en los turnos libres de todas las máquinas. M17 y M20 comparten 2 equipos, así que sus turnos libres dependen de esos equipos.</p></div></div>
+    </div>
+    <div class="panel"><div class="ph"><h3>Cálculo de equipos por máquina</h3><span>1 equipo = 1 turno</span></div>
+      <div class="pb"><div class="tw"><table><thead><tr><th>Máquina</th><th>Horas extra al año</th><th>Turnos de 8 h al año</th><th>Turnos al mes</th><th>Horas por equipo al año (hoy)</th><th>Equipos equivalentes</th><th>Turnos abiertos hoy</th><th>Turnos libres</th><th class="l">Dónde caben</th></tr></thead>
+      <tbody><tr><th scope="row">M8</th><td>364</td><td>45</td><td>3,8</td><td>1.765</td><td>0,21</td><td>662</td><td>433</td><td class="txt">Sábados (hoy cerrados)</td></tr><tr><th scope="row">M16</th><td>288</td><td>36</td><td>3,0</td><td>1.784</td><td>0,16</td><td>669</td><td>426</td><td class="txt">Sábados (hoy cerrados)</td></tr><tr><th scope="row">M20</th><td>162</td><td>20</td><td>1,7</td><td>1.552</td><td>0,10</td><td>332</td><td>763</td><td class="txt">Turno adicional entre semana</td></tr><tr><th scope="row">M17</th><td>54</td><td>7</td><td>0,6</td><td>1.552</td><td>0,03</td><td>56</td><td>1.039</td><td class="txt">Comparte los 2 equipos con M20</td></tr><tr class="tot"><th scope="row">Total</th><td>868</td><td>109</td><td>9,0</td><td></td><td>0,51</td><td>1.719</td><td>2.661</td><td class="txt">≈ 2 turnos por semana</td></tr></tbody></table></div>
+      <p class="foot">Equipos equivalentes = horas extra ÷ horas que hace hoy un equipo al año. Hay dos formas de cubrirlo: un equipo nuevo polivalente que reparta sus turnos entre máquinas, o turnos de sábado con los equipos actuales.</p></div></div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Coste por tonelada según el coste del refuerzo</h3><span>Producción constante de 51.110 Tn</span></div>
+        <div class="pb"><div class="tw"><table><thead><tr><th>Coste anual del refuerzo</th><th>Por hora de turno</th><th>€/t</th><th>Frente a hoy</th><th class="l">Frente al escenario 1 (77,15 €/t)</th></tr></thead>
+        <tbody><tr><th scope="row">0 €</th><td>0 €/h</td><td>71,31</td><td>–</td><td class="txt">Más barato</td></tr><tr><th scope="row">50.000 €</th><td>58 €/h</td><td>72,29</td><td>+1,4%</td><td class="txt">Más barato</td></tr><tr><th scope="row">100.000 €</th><td>115 €/h</td><td>73,27</td><td>+2,7%</td><td class="txt">Más barato</td></tr><tr><th scope="row">150.000 €</th><td>173 €/h</td><td>74,25</td><td>+4,1%</td><td class="txt">Más barato</td></tr><tr><th scope="row">200.000 €</th><td>230 €/h</td><td>75,23</td><td>+5,5%</td><td class="txt">Más barato</td></tr><tr><th scope="row">250.000 €</th><td>288 €/h</td><td>76,20</td><td>+6,9%</td><td class="txt">Más barato</td></tr><tr class="hi"><th scope="row">298.000 €</th><td>343 €/h</td><td>77,14</td><td>+8,2%</td><td class="txt">Igual</td></tr><tr><th scope="row">350.000 €</th><td>403 €/h</td><td>78,16</td><td>+9,6%</td><td class="txt">Más caro</td></tr></tbody></table></div></div></div>
+      <div class="panel"><div class="ph"><h3>A favor y en contra</h3><span>Escenario 2</span></div><div class="pb"><div class="pc"><div><h4 class="pro-h">A favor</h4><ul class="pro"><li>Mantiene la producción actual de 51.110 Tn al año.</li><li>Consigue la misma bajada de stock y la misma respuesta que el escenario 1.</li><li>El refuerzo es pequeño: 868 h al año, unos 109 turnos de 8 h (medio equipo).</li><li>Cabe en el calendario: M8 y M16 tienen los sábados cerrados y M20 trabaja 1 o 2 turnos entre semana.</li><li>Con un equipo nuevo completo sobran unas 897 h al año para aliviar la falta de capacidad de M16.</li></ul></div><div><h4 class="con-h">En contra</h4><ul class="con"><li>Tiene un coste de personal: un equipo nuevo, o turnos de sábado con sus pluses u horas extra.</li><li>Trabajar en sábado requiere acuerdo con la plantilla y organizar la rotación.</li><li>Solo es más barato por tonelada que el escenario 1 si el refuerzo cuesta menos de 298.000 € al año.</li><li>Los cambios suben igual (+43%): misma merma de arranque y misma carga de ajustadores.</li><li>Un equipo nuevo necesita formación hasta rendir como los actuales.</li></ul></div></div></div></div>
+    </div>
+  </section>
 
-<section>
-  <div class="sec-head"><h2>Detalle por máquina</h2></div>
-  <div class="tw"><table>
-    <thead>
-      <tr class="grp"><th></th><th colspan="2" style="text-align:center">Hoy · 30 días</th><th colspan="3" style="text-align:center">Escenario 1 · 21 días</th><th colspan="2" style="text-align:center">Escenario 2 · 21 días</th></tr>
-      <tr><th>Máquina</th><th>Tn/año</th><th>€/t</th><th>Tn/año</th><th>€/t</th><th>Subida</th><th>Horas de refuerzo</th><th>Equipos</th></tr>
-    </thead>
-    <tbody><tr><th scope="row">M8</th><td>24.283</td><td>65,00</td>
-<td>22.297</td><td>70,79</td><td><span class="delta">+8,9%</span></td>
-<td>364</td><td>0,21</td></tr><tr><th scope="row">M16</th><td>20.079</td><td>70,00</td>
-<td>18.843</td><td>74,59</td><td><span class="delta">+6,6%</span></td>
-<td>288</td><td>0,16</td></tr><tr><th scope="row">M17</th><td>1.702</td><td>77,00</td>
-<td>1.417</td><td>92,51</td><td><span class="delta">+20,1%</span></td>
-<td>54</td><td>0,03</td></tr><tr><th scope="row">M20</th><td>5.046</td><td>105,00</td>
-<td>4.686</td><td>113,07</td><td><span class="delta">+7,7%</span></td>
-<td>162</td><td>0,10</td></tr><tr class="tot"><th scope="row">Total</th><td>51.110</td><td>71,31</td>
-<td>47.243</td><td>77,15</td><td><span class="delta">+8,2%</span></td>
-<td>868</td><td>0,51</td></tr></tbody>
-  </table></div>
-</section>
-
-<section>
-  <div class="sec-head"><h2>¿Y con otra duración de ciclo?</h2>
-  <p>El impacto crece rápido por debajo de 21 días. Un ciclo intermedio de 24 días deja la subida de coste en algo más de la mitad.</p></div>
-  <div class="tw"><table>
-    <thead>
-      <tr class="grp"><th></th><th></th><th colspan="3" style="text-align:center">Escenario 1 · equipos actuales</th><th colspan="2" style="text-align:center">Escenario 2 · refuerzo</th></tr>
-      <tr><th>Ciclo</th><th>Ciclos al año</th><th>€/t</th><th>Subida</th><th>Tn perdidas al año</th><th>Horas de refuerzo</th><th>Equipos</th></tr>
-    </thead>
-    <tbody><tr class="base"><th scope="row">30 días</th><td>12,0</td><td>71,31</td><td>–</td><td>–</td><td>–</td><td>–</td></tr><tr><th scope="row">28 días</th><td>12,9</td><td>72,22</td><td>+1,3%</td><td>645</td><td>145</td><td>0,08</td></tr><tr><th scope="row">24 días</th><td>15,0</td><td>74,61</td><td>+4,6%</td><td>2.256</td><td>506</td><td>0,30</td></tr><tr class="sel"><th scope="row">21 días</th><td>17,1</td><td>77,15</td><td>+8,2%</td><td>3.868</td><td>868</td><td>0,51</td></tr><tr><th scope="row">18 días</th><td>20,0</td><td>80,83</td><td>+13,3%</td><td>6.017</td><td>1.351</td><td>0,79</td></tr><tr><th scope="row">14 días</th><td>25,7</td><td>89,34</td><td>+25,3%</td><td>10.314</td><td>2.315</td><td>1,35</td></tr></tbody>
-  </table></div>
-</section>
-
-<section>
-  <div class="sec-head"><h2>Antes de decidir</h2></div>
-  <div class="todo">
-    <div><b>Mínimos de fabricación</b><span>Con 21 días, 26 de las 59 medidas del ciclo quedarían por debajo de su lote mínimo. La mayoría pasan de 30 a 21 Tn y en M17 bajan de 100 a 70 Tn. Hay que decidir si se fabrica el mínimo (menos bajada de stock) o se alarga su periodicidad (menos cambios).</span></div>
-    <div><b>Capacidad de M16</b><span>El temporal actual ya pide unas 1.784 Tn al mes y M16 produce unas 1.673 con sus 3 equipos. El escenario 1 agranda ese hueco y el escenario 2 lo mantiene. Se cerrará en el análisis de capacidad.</span></div>
-    <div><b>Coste del refuerzo</b><span>Falta el coste por equipo, o por turno de sábado, para dar el €/t final del escenario 2.</span></div>
-    <div><b>Merma de arranque</b><span>Con un 43% más de cambios habrá más merma. No está incluida porque no tenemos la merma de arranque por máquina.</span></div>
-  </div>
-</section>
-
-<section class="method">
-  <h3>Cómo se ha calculado</h3>
-  <ul>
-    <li>Base: calendario de turnos 2026 de cada máquina, Tn/h máquina real 2026 y coste de transformación medio 2026 (€/t). M28 queda fuera.</li>
-    <li>Cambios por ciclo según el maestro de familias, con secuencia perfecta por familia y medida. Cada familia (Ø) que entra en el ciclo es un cambio completo y cada medida adicional de esa familia, un cambio de calibrador. Se usan los tiempos objetivo: cambio completo de 4,5 a 9 h y de calibrador de 2,5 a 4,5 h, según la máquina.</li>
-    <li>Cada medida mantiene su periodicidad (cada 1, 2 o 3 ciclos). Hoy hay 12 ciclos al año y con 21 días habría 17,1. Los lotes y las previsiones bajan en la misma proporción y el MTO entra en el hueco del temporal sin añadir cambios.</li>
-    <li>Plantilla fija: todo el coste de transformación se considera fijo, así que si se fabrica menos sube el €/t.</li>
-    <li>Las horas de cambio extra se pierden al ritmo que produce hoy cada máquina en las horas sin cambio. Si todas fueran horas de marcha a plena velocidad, la subida del escenario 1 llegaría al +11,1%.</li>
-    <li>No se incluyen los cambios de espesor (5–10 min) ni la merma de arranque.</li>
-  </ul>
-  <footer>Datos: Analisis_ciclos_AGSA.xlsx. Modelo de cálculo con fórmulas: Analisis_Coste_Transformacion_21d.xlsx.</footer>
-</section>
-
-</main>
+  <section class="tabpanel" role="tabpanel" id="comparativa" aria-labelledby="t-c" hidden>
+    <div class="verdict">
+      <p class="big"><b>El escenario 2 mantiene la producción y tiene menor coste por tonelada que el escenario 1 mientras el refuerzo cueste menos de 298.000 € al año</b> (unos 344 € por hora de turno).</p>
+      <p>El escenario 1 no requiere gasto adicional, pero fabrica 3.868 Tn menos al año y sube el coste de transformación un 8,2%. Para cerrar la decisión falta valorar el coste de 868 h de refuerzo y resolver los puntos pendientes de abajo.</p>
+    </div>
+    <div class="panel"><div class="ph"><h3>Comparativa de escenarios</h3><span>Cifras anuales</span></div>
+      <div class="pb"><div class="tw"><table class="cmp"><thead><tr><th>Concepto</th><th class="l">Hoy · 30 días</th><th class="l">Escenario 1 · Equipos actuales</th><th class="l">Escenario 2 · Refuerzo de turnos</th><th class="l">Observaciones</th></tr></thead>
+      <tbody><tr><th scope="row">Duración del ciclo</th><td>30 días</td><td>21 días</td><td>21 días</td><td class="note"></td></tr><tr><th scope="row">Ciclos al año</th><td>12</td><td>17,1</td><td>17,1</td><td class="note"></td></tr><tr><th scope="row">Cambios al año (completos + calibrador)</th><td>448</td><td>640</td><td>640</td><td class="note">Mismos cambios en los dos escenarios</td></tr><tr><th scope="row">Horas de cambio al año</th><td>2.026</td><td>2.894</td><td>2.894</td><td class="note"></td></tr><tr><th scope="row">Horas de máquina al año</th><td>13.752</td><td>13.752</td><td>14.620</td><td class="note">El escenario 2 añade las horas de refuerzo</td></tr><tr><th scope="row">Equipos</th><td>8</td><td>8</td><td>8 + 0,5 (9 con un equipo nuevo)</td><td class="note"></td></tr><tr><th scope="row">Producción anual</th><td>51.110 Tn</td><td>47.243 Tn</td><td>51.110 Tn</td><td class="note"></td></tr><tr><th scope="row">Coste de transformación</th><td>71,31 €/t</td><td>77,15 €/t</td><td>71,31 €/t + refuerzo</td><td class="note">+1,96 €/t por cada 100.000 € de refuerzo</td></tr><tr><th scope="row">Coste fijo sin absorber</th><td>–</td><td>275.419 €/año</td><td>–</td><td class="note"></td></tr><tr><th scope="row">Coste de personal adicional</th><td>–</td><td>–</td><td>868 h/año</td><td class="note">Pendiente de valorar</td></tr><tr><th scope="row">Stock medio de ciclo</th><td>2.570 Tn</td><td>1.799 Tn</td><td>1.799 Tn</td><td class="note">Medio lote por medida</td></tr><tr><th scope="row">Tiempo entre fabricaciones de una medida</th><td>30 días</td><td>21 días</td><td>21 días</td><td class="note">Cada 2 ciclos: 60 → 42 días; cada 3: 90 → 63</td></tr><tr><th scope="row">Capacidad de M16</th><td><span class="chip warn">Justa</span></td><td><span class="chip bad">Empeora</span></td><td><span class="chip warn">Como hoy</span></td><td class="note">El temporal ya pide más de lo que produce</td></tr><tr><th scope="row">Implantación</th><td>–</td><td><span class="chip good">Inmediata</span></td><td><span class="chip warn">Acuerdo con plantilla</span></td><td class="note"></td></tr></tbody></table></div></div></div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Horas de máquina al año</h3><span>Sin cambio y en cambios</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--prod)"></i>Horas sin cambio</span><span><i style="background:var(--chg)"></i>Horas de cambio</span></div><svg viewBox="0 0 540 280" role="img" aria-label="Horas de máquina al año: sin cambio y en cambios"><line x1="58" x2="530" y1="246.0" y2="246.0" class="grid"/><text x="50" y="250.0" class="tick" text-anchor="end">0</text><line x1="58" x2="530" y1="191.0" y2="191.0" class="grid"/><text x="50" y="195.0" class="tick" text-anchor="end">4.000</text><line x1="58" x2="530" y1="136.0" y2="136.0" class="grid"/><text x="50" y="140.0" class="tick" text-anchor="end">8.000</text><line x1="58" x2="530" y1="81.0" y2="81.0" class="grid"/><text x="50" y="85.0" class="tick" text-anchor="end">12.000</text><line x1="58" x2="530" y1="26.0" y2="26.0" class="grid"/><text x="50" y="30.0" class="tick" text-anchor="end">16.000</text><rect x="104.7" y="84.8" width="64.0" height="159.2" fill="var(--prod)" data-tip="Hoy: 11.726 h sin cambio"/><path d="M104.7,84.8V59.9Q104.7,56.9 107.7,56.9H165.7Q168.7,56.9 168.7,59.9V84.8Z" fill="var(--chg)" data-tip="Hoy: 2.026 h de cambio"/><text x="136.7" y="268" class="xl" text-anchor="middle">Hoy · 30 días</text><text x="136.7" y="48.9" class="vl" text-anchor="middle">13.752 h</text><rect x="262.0" y="96.7" width="64.0" height="147.3" fill="var(--prod)" data-tip="Escenario 1: 10.858 h sin cambio"/><path d="M262.0,96.7V59.9Q262.0,56.9 265.0,56.9H323.0Q326.0,56.9 326.0,59.9V96.7Z" fill="var(--chg)" data-tip="Escenario 1: 2.894 h de cambio"/><text x="294.0" y="268" class="xl" text-anchor="middle">Escenario 1</text><text x="294.0" y="48.9" class="vl" text-anchor="middle">13.752 h</text><rect x="419.3" y="84.8" width="64.0" height="159.2" fill="var(--prod)" data-tip="Escenario 2: 11.726 h sin cambio"/><path d="M419.3,84.8V48.0Q419.3,45.0 422.3,45.0H480.3Q483.3,45.0 483.3,48.0V84.8Z" fill="var(--chg)" data-tip="Escenario 2: 2.894 h de cambio"/><text x="451.3" y="268" class="xl" text-anchor="middle">Escenario 2</text><text x="451.3" y="37.0" class="vl" text-anchor="middle">14.620 h</text><line x1="58" x2="530" y1="246.0" y2="246.0" class="axis"/></svg>
+        <p class="foot">En el escenario 1 los cambios extra salen de las horas productivas; en el escenario 2 se añaden horas de turno para cubrirlos.</p></div></div>
+      <div class="panel"><div class="ph"><h3>Producción anual</h3><span>Tn</span></div>
+        <div class="pb"><svg viewBox="0 0 540 270" role="img" aria-label="Producción anual por escenario"><line x1="52" x2="530" y1="236.0" y2="236.0" class="grid"/><text x="44" y="240.0" class="tick" text-anchor="end">0</text><line x1="52" x2="530" y1="201.0" y2="201.0" class="grid"/><text x="44" y="205.0" class="tick" text-anchor="end">10.000</text><line x1="52" x2="530" y1="166.0" y2="166.0" class="grid"/><text x="44" y="170.0" class="tick" text-anchor="end">20.000</text><line x1="52" x2="530" y1="131.0" y2="131.0" class="grid"/><text x="44" y="135.0" class="tick" text-anchor="end">30.000</text><line x1="52" x2="530" y1="96.0" y2="96.0" class="grid"/><text x="44" y="100.0" class="tick" text-anchor="end">40.000</text><line x1="52" x2="530" y1="61.0" y2="61.0" class="grid"/><text x="44" y="65.0" class="tick" text-anchor="end">50.000</text><line x1="52" x2="530" y1="26.0" y2="26.0" class="grid"/><text x="44" y="30.0" class="tick" text-anchor="end">60.000</text><path d="M116.7,236.0V60.1Q116.7,57.1 119.7,57.1H143.7Q146.7,57.1 146.7,60.1V236.0Z" fill="var(--hoy)" data-tip="Hoy · 30 días · Producción: 51.110 Tn"/><text x="131.7" y="258" class="xl" text-anchor="middle">Hoy · 30 días</text><text x="131.7" y="50.1" class="vl" text-anchor="middle">51.110 Tn</text><path d="M276.0,236.0V73.7Q276.0,70.7 279.0,70.7H303.0Q306.0,70.7 306.0,73.7V236.0Z" fill="var(--e1)" data-tip="Escenario 1 · Producción: 47.243 Tn"/><text x="291.0" y="258" class="xl" text-anchor="middle">Escenario 1</text><text x="291.0" y="63.7" class="vl" text-anchor="middle">47.243 Tn</text><path d="M435.3,236.0V60.1Q435.3,57.1 438.3,57.1H462.3Q465.3,57.1 465.3,60.1V236.0Z" fill="var(--e2)" data-tip="Escenario 2 · Producción: 51.110 Tn"/><text x="450.3" y="258" class="xl" text-anchor="middle">Escenario 2</text><text x="450.3" y="50.1" class="vl" text-anchor="middle">51.110 Tn</text><line x1="52" x2="530" y1="236.0" y2="236.0" class="axis"/></svg></div></div>
+    </div>
+    <div class="panel"><div class="ph"><h3>¿Cuándo compensa el refuerzo?</h3><span>€/t según el coste anual del refuerzo de turnos</span></div>
+      <div class="pb"><div class="legend"><span><i class="ln" style="border-color:var(--e2)"></i>Escenario 2 · refuerzo de turnos</span><span><i class="ln" style="border-color:var(--e1)"></i>Escenario 1 · equipos actuales</span><span><i class="ln" style="border-color:var(--hoy);border-top-style:dashed"></i>Hoy · ciclo de 30 días</span></div>
+      <svg viewBox="0 0 1000 330" role="img" aria-label="Coste por tonelada del escenario 2 según el coste anual del refuerzo, frente al escenario 1" id="beChart"><rect x="64" y="22" width="683.4" height="250" class="zone"/><line x1="64" x2="980" y1="272.0" y2="272.0" class="grid"/><text x="56" y="276.0" class="tick" text-anchor="end">68</text><line x1="64" x2="980" y1="230.3" y2="230.3" class="grid"/><text x="56" y="234.3" class="tick" text-anchor="end">70</text><line x1="64" x2="980" y1="188.7" y2="188.7" class="grid"/><text x="56" y="192.7" class="tick" text-anchor="end">72</text><line x1="64" x2="980" y1="147.0" y2="147.0" class="grid"/><text x="56" y="151.0" class="tick" text-anchor="end">74</text><line x1="64" x2="980" y1="105.3" y2="105.3" class="grid"/><text x="56" y="109.3" class="tick" text-anchor="end">76</text><line x1="64" x2="980" y1="63.7" y2="63.7" class="grid"/><text x="56" y="67.7" class="tick" text-anchor="end">78</text><line x1="64" x2="980" y1="22.0" y2="22.0" class="grid"/><text x="56" y="26.0" class="tick" text-anchor="end">80</text><text x="64.0" y="292" class="tick" text-anchor="middle">0 k€</text><text x="178.5" y="292" class="tick" text-anchor="middle">50 k€</text><text x="293.0" y="292" class="tick" text-anchor="middle">100 k€</text><text x="407.5" y="292" class="tick" text-anchor="middle">150 k€</text><text x="522.0" y="292" class="tick" text-anchor="middle">200 k€</text><text x="636.5" y="292" class="tick" text-anchor="middle">250 k€</text><text x="751.0" y="292" class="tick" text-anchor="middle">300 k€</text><text x="865.5" y="292" class="tick" text-anchor="middle">350 k€</text><text x="980.0" y="292" class="tick" text-anchor="middle">400 k€</text><line x1="64" x2="980" y1="272" y2="272" class="axis"/><text x="522" y="316" class="axt" text-anchor="middle">Coste anual del refuerzo de turnos (escenario 2)</text><text x="18" y="147" class="axt" text-anchor="middle" transform="rotate(-90 18 147)">€/t</text><text x="74" y="262" class="zl">Escenario 2 más barato por tonelada</text><text x="972" y="262" class="zl" text-anchor="end">Escenario 1 más barato</text><line x1="64" x2="980" y1="203.0" y2="203.0" stroke="var(--hoy)" stroke-width="2" stroke-dasharray="6 4"/><line x1="64" x2="980" y1="81.3" y2="81.3" stroke="var(--e1)" stroke-width="2"/><line x1="64.0" x2="980.0" y1="203.0" y2="39.9" stroke="var(--e2)" stroke-width="2"/><line x1="747.4" x2="747.4" y1="81.3" y2="272" stroke="var(--ink2)" stroke-dasharray="2 3"/><circle cx="747.4" cy="81.3" r="6" fill="var(--panel)" stroke="var(--navy)" stroke-width="2"/><text x="757.4" y="105.3" class="vl">Equilibrio: 298.000 €/año</text><text x="72" y="73.3" class="vl">Escenario 1 · 77,15 €/t</text><text x="72" y="221.0" class="vl mut">Hoy · 71,31 €/t</text><text x="974" y="29.9" class="vl" text-anchor="end">Escenario 2</text><g id="hov" visibility="hidden"><line id="hovL" y1="22" y2="272" stroke="var(--muted)"/><circle id="hovP" r="5" fill="var(--e2)" stroke="var(--panel)" stroke-width="2"/></g><rect id="hit" x="64" y="22" width="916" height="250" fill="transparent"/></svg></div></div>
+    <div class="panel"><div class="ph"><h3>Otras duraciones de ciclo</h3><span>Mismas hipótesis</span></div>
+      <div class="pb"><div class="tw"><table><thead><tr><th>Ciclo</th><th>Ciclos al año</th><th>€/t escenario 1</th><th>Subida escenario 1</th><th>Tn perdidas escenario 1</th><th>Horas de refuerzo escenario 2</th><th>Equipos escenario 2</th></tr></thead>
+      <tbody><tr class="base"><th scope="row">30 días</th><td>12,0</td><td>71,31</td><td>–</td><td>–</td><td>–</td><td>–</td></tr><tr><th scope="row">28 días</th><td>12,9</td><td>72,22</td><td>+1,3%</td><td>645</td><td>145</td><td>0,08</td></tr><tr><th scope="row">24 días</th><td>15,0</td><td>74,61</td><td>+4,6%</td><td>2.256</td><td>506</td><td>0,30</td></tr><tr class="hi"><th scope="row">21 días</th><td>17,1</td><td>77,15</td><td>+8,2%</td><td>3.868</td><td>868</td><td>0,51</td></tr><tr><th scope="row">18 días</th><td>20,0</td><td>80,83</td><td>+13,3%</td><td>6.017</td><td>1.351</td><td>0,79</td></tr><tr><th scope="row">14 días</th><td>25,7</td><td>89,34</td><td>+25,3%</td><td>10.314</td><td>2.315</td><td>1,35</td></tr></tbody></table></div>
+      <p class="foot">Un ciclo intermedio de 24 días deja la subida del escenario 1 en un 4,6% y el refuerzo del escenario 2 en 0,3 equipos.</p></div></div>
+    <div class="panel"><div class="ph"><h3>Antes de decidir</h3></div>
+      <div class="pb"><div class="todo">
+        <div><b>Mínimos de fabricación</b><span>Con 21 días, 26 de las 59 medidas del ciclo quedarían por debajo de su lote mínimo (la mayoría de 30 a 21 Tn; en M17, de 100 a 70 Tn). Hay que decidir si se fabrica el mínimo o se alarga su periodicidad.</span></div>
+        <div><b>Capacidad de M16</b><span>El temporal actual ya pide unas 1.784 Tn al mes y M16 produce unas 1.673. El escenario 1 agranda ese hueco y el escenario 2 lo mantiene. Se cerrará en el análisis de capacidad.</span></div>
+        <div><b>Coste del refuerzo</b><span>Falta el coste de un equipo o de un turno de sábado para dar el €/t final del escenario 2.</span></div>
+        <div><b>Merma de arranque</b><span>Con un 43% más de cambios habrá más merma en los dos escenarios. No está incluida porque no hay datos de merma de arranque por máquina.</span></div>
+      </div></div></div>
+    <div class="panel"><div class="ph"><h3>Datos de partida</h3><span>Fuente: hoja Maquinas y calendario 2026</span></div>
+      <div class="pb"><div class="tw"><table><thead><tr><th>Máquina</th><th>Cambio completo (h)</th><th>Cambio de calibrador (h)</th><th>Tn/h marcha</th><th>Tn/h máquina</th><th>Coste transf. (€/t)</th><th>Horas de calendario</th><th class="l">Equipos</th></tr></thead>
+      <tbody><tr><th scope="row">M8</th><td>6,5</td><td>3,0</td><td>7,54</td><td>4,59</td><td>65,00</td><td>5.296</td><td class="txt">3</td></tr><tr><th scope="row">M16</th><td>5,5</td><td>2,5</td><td>4,88</td><td>3,75</td><td>70,00</td><td>5.352</td><td class="txt">3</td></tr><tr><th scope="row">M17</th><td>9,0</td><td>4,5</td><td>8,23</td><td>3,80</td><td>77,00</td><td>448</td><td class="txt">2 (compartidos con M20)</td></tr><tr><th scope="row">M20</th><td>4,5</td><td>2,5</td><td>3,15</td><td>1,90</td><td>105,00</td><td>2.656</td><td class="txt">(los de M17)</td></tr></tbody></table></div></div></div>
+    <div class="panel method"><div class="ph"><h3>Hipótesis y método</h3></div>
+      <div class="pb"><ul>
+        <li>Cambios por ciclo según el maestro de familias, con secuencia perfecta por familia y medida: cada familia (Ø) que entra es un cambio completo y cada medida adicional de esa familia, un cambio de calibrador. Tiempos objetivo de la hoja Maquinas.</li>
+        <li>Cada medida mantiene su periodicidad (cada 1, 2 o 3 ciclos). Hoy hay 12 ciclos al año y con 21 días habría 17,1. Lotes y previsiones bajan en proporción. El MTO entra en el hueco del temporal y no añade cambios.</li>
+        <li>Plantilla fija: todo el coste de transformación se considera fijo, así que si se fabrica menos sube el €/t.</li>
+        <li>Producción de hoy = horas de calendario × Tn/h máquina real 2026. Las horas de cambio extra se pierden al ritmo que produce cada máquina en las horas sin cambio. Si fueran todas horas de marcha a plena velocidad, la subida del escenario 1 llegaría al +11,1%.</li>
+        <li>Escenario 2: las horas de refuerzo son iguales a las horas de cambio extra, con lo que la producción anual no cambia.</li>
+        <li>No se incluyen los cambios de espesor (5–10 min) ni la merma de arranque. M28 queda fuera del análisis.</li>
+      </ul><p class="foot">Datos: Analisis_ciclos_AGSA.xlsx · Modelo con fórmulas: Analisis_Coste_Transformacion_21d.xlsx</p></div></div>
+  </section>
+</div></main>
+</div>
+<div class="tip" id="tip" hidden></div>
 <script>
-(function () {
-  var svg = document.getElementById('beChart'), hit = document.getElementById('hit'), tip = document.getElementById('tip'),
-      box = document.getElementById('chartBox'), hov = document.getElementById('hov'), L = document.getElementById('hovL'), P = document.getElementById('hovP');
-  if (!svg || !hit) return;
-  var x0 = 58, x1 = 610, y0 = 22, y1 = 252, xmax = 400000, ymin = 68, ymax = 80, base = 71.313209, tn = 51110.456055, e1 = 77.151910;
-  function fmt(v, d) { return v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d }); }
-  function move(ev) {
-    var pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
-    var p = pt.matrixTransform(svg.getScreenCTM().inverse());
-    var x = Math.max(x0, Math.min(x1, p.x)), c = (x - x0) / (x1 - x0) * xmax, v = base + c / tn;
-    var y = y1 - (y1 - y0) * (v - ymin) / (ymax - ymin);
-    L.setAttribute('x1', x); L.setAttribute('x2', x); P.setAttribute('cx', x); P.setAttribute('cy', y);
-    hov.setAttribute('visibility', 'visible');
-    tip.innerHTML = 'Refuerzo: <b>' + fmt(Math.round(c / 1000) * 1000, 0) + ' €/año</b><br>Escenario 2: ' + fmt(v, 2) + ' €/t<br>Escenario 1: ' + fmt(e1, 2) + ' €/t';
-    tip.hidden = false;
-    var r = box.getBoundingClientRect(), left = ev.clientX - r.left + 14;
-    if (left + tip.offsetWidth > r.width - 8) left = ev.clientX - r.left - tip.offsetWidth - 14;
-    tip.style.left = left + 'px'; tip.style.top = (ev.clientY - r.top - 20) + 'px';
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
+  var links=[].slice.call(document.querySelectorAll('.tree a[data-tab]'));
+  function show(id,focus){
+    var ok=false;
+    tabs.forEach(function(t){var on=t.getAttribute('aria-controls')===id;if(on)ok=true;
+      t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden=!on;if(on&&focus)t.focus();});
+    if(!ok)return show('escenario-1',focus);
+    links.forEach(function(a){if(a.getAttribute('data-tab')===id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+    document.body.classList.remove('nav-open');
   }
-  function out() { hov.setAttribute('visibility', 'hidden'); tip.hidden = true; }
-  hit.addEventListener('pointermove', move); hit.addEventListener('pointerleave', out);
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){var id=t.getAttribute('aria-controls');if(location.hash!=='#'+id)location.hash=id;else show(id);});
+    t.addEventListener('keydown',function(e){var k=e.key,j=-1;if(k==='ArrowRight')j=(i+1)%tabs.length;if(k==='ArrowLeft')j=(i-1+tabs.length)%tabs.length;
+      if(j>=0){e.preventDefault();var id=tabs[j].getAttribute('aria-controls');location.hash=id;show(id,true);}});
+  });
+  links.forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var id=a.getAttribute('data-tab');if(location.hash!=='#'+id)location.hash=id;else show(id);window.scrollTo(0,0);});});
+  window.addEventListener('hashchange',function(){show(location.hash.slice(1));});
+  show(location.hash.slice(1)||'escenario-1');
+  var btn=document.getElementById('menuBtn');
+  btn.addEventListener('click',function(){var o=document.body.classList.toggle('nav-open');btn.setAttribute('aria-expanded',o?'true':'false');});
+  document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('nav-open');btn.setAttribute('aria-expanded','false');});
+  // tooltips
+  var tip=document.getElementById('tip');
+  function place(x,y){var w=tip.offsetWidth,h=tip.offsetHeight,l=x+14,t=y-h-10;if(l+w>innerWidth-8)l=x-w-14;if(t<50)t=y+16;tip.style.left=l+'px';tip.style.top=t+'px';}
+  document.addEventListener('pointermove',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');
+    if(el){tip.textContent=el.getAttribute('data-tip');tip.hidden=false;place(e.clientX,e.clientY);}else if(!e.target.closest||!e.target.closest('#hit'))tip.hidden=true;});
+  // break-even crosshair
+  var svg=document.getElementById('beChart'),hit=document.getElementById('hit'),hov=document.getElementById('hov'),L=document.getElementById('hovL'),P=document.getElementById('hovP');
+  if(svg&&hit){
+    var G={"x0": 64, "x1": 980, "y0": 22, "y1": 272, "xmax": 400000, "ymin": 68, "ymax": 80, "base": 71.3132087204461, "tn": 51110.4560545435, "e1": 77.1519103393377};
+    function f(v,d){return v.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
+    hit.addEventListener('pointermove',function(ev){var pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;var p=pt.matrixTransform(svg.getScreenCTM().inverse());
+      var x=Math.max(G.x0,Math.min(G.x1,p.x)),c=(x-G.x0)/(G.x1-G.x0)*G.xmax,v=G.base+c/G.tn,y=G.y1-(G.y1-G.y0)*(v-G.ymin)/(G.ymax-G.ymin);
+      L.setAttribute('x1',x);L.setAttribute('x2',x);P.setAttribute('cx',x);P.setAttribute('cy',y);hov.setAttribute('visibility','visible');
+      tip.innerHTML='Refuerzo: <b>'+f(Math.round(c/1000)*1000,0)+' €/año</b><br>Escenario 2: '+f(v,2)+' €/t<br>Escenario 1: '+f(G.e1,2)+' €/t';tip.hidden=false;place(ev.clientX,ev.clientY);});
+    hit.addEventListener('pointerleave',function(){hov.setAttribute('visibility','hidden');tip.hidden=true;});
+  }
 })();
 </script>
 </body>

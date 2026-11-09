@@ -2,14 +2,12 @@
 """Presentación para dirección: Plan to Release en MGT y Ondupack Almendralejo (situación actual, to-be y equipo).
 
 Usa la plantilla corporativa de Planificacion_Packaging_CL.pptx: clona su portada y su separador y monta el contenido
-sobre su diseño con cabecera. Las fechas de la hoja de ruta salen de las intervenciones de los maestros de P2R.
+sobre su diseño con cabecera. Los recuentos de intervenciones salen de los maestros de P2R.
 
 Uso: python3 presentaciones/fuentes/generar_p2r_direccion.py
 """
-import calendar
 import copy
 import sys
-from datetime import date, timedelta
 from pathlib import Path
 
 from pptx import Presentation
@@ -22,7 +20,6 @@ from pptx.util import Inches, Pt
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent
 sys.path.insert(0, str(RAIZ / 'maestros' / 'fuentes'))
-from fichas_palancas import AGENTES, NEG, _fechas  # noqa: E402
 from hojas_empresa import INTERVENCIONES  # noqa: E402
 
 PLANTILLA = RAIZ / 'presentaciones' / 'Planificacion_Packaging_CL.pptx'
@@ -89,6 +86,9 @@ def rellenar(tf, parrafos, tam=11, color=NAVY, negrita=False, cursiva=False, ali
             f.color.rgb = o.get('color', color)
             if o.get('espaciado'):
                 r._r.get_or_add_rPr().set('spc', str(o['espaciado']))
+            if o.get('simbolo'):  # flecha de Wingdings, como en la versión revisada
+                rpr = r._r.get_or_add_rPr()
+                rpr.append(rpr.makeelement(qn('a:sym'), {'typeface': 'Wingdings', 'pitchFamily': '2', 'charset': '2'}))
     return tf
 
 
@@ -204,100 +204,70 @@ ASIS = {
     'MGT': dict(
         stats=[('0 %', 'de la demanda tiene previsión, ni la externa ni la de Ondupack'),
                ('3 turnos', 'fijos a velocidad máxima, cargando a capacidad infinita'),
-               ('16', 'correos al día, aprox., para coordinar stock y cargas con Ondupack'),
+               ('Numerosos', 'correos al día para coordinar stock y cargas con Ondupack'),
                ('4 de 13', 'indicadores de Plan to Release se pueden medir hoy')],
-        fases=[('Pedidos por O2C; Ondupack pide 10 días antes del ciclo. Sin previsión ni fecha propuesta.', 'alto'),
-               ('Ciclo de 4 calidades con la cartera, a capacidad infinita. Lo sobrante queda en stock.', 'alto'),
-               ('MRP de materias primas en Excel; el de auxiliares, en SAP, se descuadra por la báscula.', 'medio'),
-               ('Combinación sin lo ya fabricado; calidad y ancho a mano; urgencias encajadas a mano.', 'alto'),
+        fases=[('Coordinación con Ondupack, que pide 10 días antes del inicio del ciclo. Sin previsión ni fecha '
+                'propuesta.', 'alto'),
+               ('Ciclo de 4 calidades con la cartera, a capacidad infinita, duración fija de los temporales de cada '
+                'calidad.', 'alto'),
+               ('MRP de materias primas en Excel; el de auxiliares, en SAP, se descuadra debido a stock no fiable.',
+                'medio'),
+               ('Algoritmo de combinación sin lo ya planificado; urgencias encajadas a mano.', 'alto'),
                ('El material se comprueba a mano en varios sitios y la orden se entrega en papel.', 'bajo'),
                ('Sin KPI de servicio: incidencias por llamada y Ondupack decide qué se carga.', 'medio')],
         funciona='planificación en SIGPA (web) y algoritmo de combinación por ciclos, en pruebas.'),
     'Ondupack': dict(
-        stats=[('0 %', 'de la demanda repetitiva tiene previsión'),
-               ('924', 'es el cuello de botella: no alcanza los metros planificados'),
+        stats=[('0 %', 'de la demanda repetitiva tiene previsión integrada en el sistema'),
                ('Nº 1', 'problema: la falta de materia prima; el papel se pide por consumo pasado'),
+               ('Sin KPI', 'oficial de servicio: falta decidir cuál y contra qué fecha'),
                ('7 de 12', 'indicadores de Plan to Release se pueden medir hoy')],
-        fases=[('Alta en GIO y fecha con CTP. Sin previsión ni registro de la demanda perdida.', 'medio'),
-               ('Escenarios de turnos y alerta de saturación, pero con una velocidad que la 924 no alcanza.', 'alto'),
+        fases=[('Alta en GIO y fecha con CTP. Previsión fuera del sistema y sin registro de la demanda perdida.',
+                'medio'),
+               ('Carga-capacidad con escenarios de turnos y alerta de saturación, pero la sobrecarga se detecta tarde.',
+                'alto'),
                ('Papel por consumo histórico, sustituciones a mano y consumos por inventario mensual.', 'alto'),
                ('Combinación de onduladora y converting sin optimizar; cambios del cliente por email.', 'alto'),
                ('Se libera con material pendiente y Compras persigue la falta.', 'sin'),
                ('Cierre automático y reunión semanal, pero sin KPI oficial de servicio.', 'medio')],
-        funciona='fecha con CTP, alertas de saturación, OEE por máquina, escenarios SMED y bloqueos con responsable y SLA.'),
+        funciona='fecha con CTP, carga-capacidad con alertas de saturación, OEE por máquina, escenarios SMED y '
+                 'bloqueos con responsable y SLA.'),
 }
 
-# (código, palanca, qué cambia, responsable, tiene agente)
+# (código, palanca, qué cambia, tiene agente)
 TOBE = {
     'MGT': [
         ('P2R-01', 'Gestión de la demanda',
-         'Previsión de papel de Ondupack por ciclo, calidad y ancho, y de los clientes externos repetitivos.',
-         'Albert Fontanet', False),
+         'Previsión de papel de Ondupack por ciclo, calidad y ancho, y de los clientes externos repetitivos.', False),
         ('P2R-02', 'S&OP y plan de capacidad',
-         'Política de llenado y revisión mensual: turnos y ciclo ajustados a la cartera, con escenarios.',
-         'Joan Carles Girones', True),
+         'Política de llenado y revisión mensual: turnos y ciclo ajustados a la cartera, con escenarios.', True),
         ('P2R-03', 'Política de inventario',
-         'Reposición pull con Ondupack, con mínimo y máximo por referencia, y control del stock intercompany.',
-         'Joan Carles Girones', True),
+         'Reposición pull con Ondupack, con mínimo y máximo por referencia, y control del stock intercompany.', True),
         ('P2R-04', 'Promesa de fecha fiable',
-         'Fecha propuesta al entrar el pedido, con un copiloto de plazos para Comercial.', 'Albert Fontanet', True),
+         'Fecha propuesta al entrar el pedido, con un copiloto de plazos para Comercial.', True),
         ('P2R-05', 'Materiales por excepción',
-         'MRP de materias primas en SAP, fuera del Excel, y propuestas de compra automáticas.', 'Marta Boyo', True),
+         'MRP de materias primas en SAP, fuera del Excel, y propuestas de compra automáticas.', True),
         ('P2R-06', 'Programación estable',
-         'Algoritmo que tiene en cuenta lo ya fabricado y una fecha límite de cartera; urgencias con reglas.',
-         'Joan Carles Girones', True),
+         'Algoritmo que tiene en cuenta lo ya planificado y una fecha límite de cartera; urgencias con reglas.', True),
         ('P2R-07', 'Liberación controlada',
-         'Disponibilidad de material por orden en el sistema, sin comprobaciones a mano.', 'Joan Carles Girones', False),
+         'Disponibilidad de material por orden en el sistema, sin comprobaciones a mano.', False),
         ('P2R-08', 'Control del servicio',
-         'KPI y pilar de servicio semanal; Ondupack ve el stock y las cargas sin correos.', 'Albert Fontanet', True),
+         'KPI y pilar de servicio semanal; Ondupack ve el stock y las cargas sin correos.', True),
     ],
     'Ondupack Almendralejo': [
         ('P2R-01', 'Gestión de la demanda',
          'Previsión no vinculante de los clientes y referencias repetitivos, cargada en GIO para la carga y el CTP, '
-         'y demanda perdida registrada.', 'Miguel Ángel Rosado', False),
+         'y demanda perdida registrada.', False),
         ('P2R-02', 'S&OP y plan de capacidad',
-         'Revisión mensual de capacidad y cuellos de botella con la velocidad real de la 924, con escenarios.',
-         'José María Baquero', True),
+         'Revisión mensual de capacidad y cuellos de botella con análisis de escenarios.', True),
         ('P2R-05', 'Materiales por excepción',
          'Necesidad de papel calculada desde el plan, stock fiable sin esperar al inventario y previsión de papel '
-         'compartida con MGT, PDA y Papresa.', 'Angélica Lemus', True),
+         'compartida con MGT, PDA y Papresa.', True),
         ('P2R-06', 'Programación estable',
-         'Algoritmo de combinación de onduladora; urgencias y cambios gestionados con reglas.', 'Miguel Ángel Rosado',
-         True),
+         'Algoritmo de combinación de onduladora; urgencias y cambios gestionados con reglas.', True),
         ('P2R-08', 'Control del servicio',
-         'KPI oficial de servicio y reunión semanal con causas; estado de pedidos y causa raíz automáticos.',
-         'Mª Teresa Espinosa', True),
+         'KPI oficial de servicio y reunión semanal con causas; estado de pedidos y causa raíz automáticos.', True),
     ],
 }
-
-MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
-
-
-def tramos(empresa):
-    """Por palanca: tramos (inicio, fin) de negocio y software y de agentes, uniendo los que se solapan."""
-    res = {}
-    for cod, _, tipo, pal, *_ in INTERVENCIONES[empresa]:
-        base = (NEG.get((empresa, cod)) or AGENTES[(empresa, cod)])[0]
-        ini, fin = _fechas(empresa, base)
-        res.setdefault(pal, {'neg': [], 'agente': []})['agente' if tipo == 'agente' else 'neg'].append((ini, fin))
-    for pal, d in res.items():
-        for k, v in d.items():
-            unidos = []
-            for ini, fin in sorted(v):
-                if unidos and ini <= unidos[-1][1] + timedelta(days=1):
-                    unidos[-1] = (unidos[-1][0], max(unidos[-1][1], fin))
-                else:
-                    unidos.append((ini, fin))
-            d[k] = unidos
-    return res
-
-
-def ventana(empresa, pal):
-    t = tramos(empresa)[pal]
-    todos = t['neg'] + t['agente']
-    a, b = min(x[0] for x in todos), max(x[1] for x in todos)
-    return f'{MESES[a.month - 1]} {a.year % 100} – {MESES[b.month - 1]} {b.year % 100}'
-
 
 def contar(empresa):
     tipos = [it[2] for it in INTERVENCIONES[empresa]]
@@ -305,33 +275,38 @@ def contar(empresa):
 
 
 # ------------------------------------------------------------------ diapositivas
+FLECHA = ''  # flecha de Wingdings (se dibuja con a:sym), como en la versión revisada
+JUST = PP_ALIGN.JUSTIFY
+
+
+def personas_resumen(lista):
+    return [[(nombre + ' ', {}), (f'{FLECHA} {rol}', {'simbolo': True})] for nombre, rol in lista]
+
+
 def resumen(d):
-    n_mgt, a_mgt = contar('MGT')
-    n_op, a_op = contar('Ondupack Almendralejo')
+    n = contar('MGT')[0] + contar('Ondupack Almendralejo')[0]
     sl = d.contenido_('Resumen ejecutivo', 'Plan to Release', notas=(
         'Mensaje: las dos plantas planifican hoy con la cartera y a mano. El to-be no cambia de sistema: añade previsión, '
         'capacidad real y medición del servicio. Lo que más pesa es el equipo: pocas personas y muy concentradas.'))
     b = caja(sl, L, 1.45, W, 0.78, relleno=NAVY)
     rellenar(b.text_frame, [[('En resumen:  ', {'color': AZUL}),
                              ('las dos plantas planifican solo con la cartera y a mano. El to-be planifica con previsión, '
-                              f'capacidad real y servicio medido: 13 palancas y {n_mgt + n_op} intervenciones entre 2027 y 2028.',
-                              {'color': BLANCO})]], tam=12.5, negrita=True, ancla=MSO_ANCHOR.MIDDLE, margen=0.3,
-             interlineado=1.1)
+                              f'capacidad real y servicio medido: 13 palancas y {n} intervenciones.', {'color': BLANCO})]],
+             tam=12.5, negrita=True, ancla=MSO_ANCHOR.MIDDLE, margen=0.3, interlineado=1.1)
     cols = [
         ('industria', 'MGT', 'Papelera · suministra papel a Ondupack y a clientes externos', [
             ('Hoy', 'Sin previsión. Carga a capacidad infinita con 3 turnos fijos, stock de Ondupack acumulado en MGT '
-                    'y coordinación por correo, unos 16 al día.'),
-            ('To-be', f'Previsión de Ondupack y de clientes repetitivos, ciclo ajustado a la cartera, reposición pull '
-                      f'con mínimo y máximo y servicio medido. 8 palancas y {n_mgt} intervenciones ({a_mgt} agentes).'),
-            ('Equipo', '3 personas. Joan Carles, único planificador, está en las 8 palancas y lidera 4. '
-                       'Falta nombrar el process owner.')]),
+                    'y coordinación por correo.'),
+            ('To-be', 'Previsión de Ondupack y de clientes repetitivos, ciclo ajustado a la cartera, reposición pull '
+                      'con mínimo y máximo y servicio medido.'),
+            ('Equipo', personas_resumen(EQUIPO_MGT))]),
         ('caja', 'Ondupack Almendralejo', 'Cartonera · onduladora y converting', [
-            ('Hoy', 'La planta más madura (CTP, OEE, escenarios SMED), pero sin previsión, con la 924 saturada y con '
-                    'la falta de papel como problema nº 1.'),
-            ('To-be', f'Previsión de la demanda repetitiva, capacidad con la velocidad real de la 924, papel calculado '
-                      f'desde el plan y KPI oficial de servicio. 5 palancas y {n_op} intervenciones ({a_op} agentes).'),
-            ('Equipo', '5 personas, 2 en Planificación. Miguel Ángel está en las 5 palancas y lidera 2. '
-                       'Process owner: Enrique Tejada.')]),
+            ('Hoy', 'Planta madura (CTP, OEE, escenarios SMED, carga capacidad), pero sin previsión, con la falta de '
+                    'papel como problema nº 1. Algunos materiales tienen previsión, pero no está integrada en el '
+                    'sistema.'),
+            ('To-be', 'Previsión de la demanda repetitiva, análisis de escenarios de capacidad, papel calculado desde '
+                      'el plan y KPI oficial de servicio.'),
+            ('Equipo', personas_resumen(EQUIPO_ONDUPACK))]),
     ]
     cw, gap, y0, h = (W - 0.3) / 2, 0.3, 2.45, 3.95
     for k, (ic, nom, sub, filas) in enumerate(cols):
@@ -345,7 +320,7 @@ def resumen(d):
             if i:
                 linea(sl, x + 0.25, yy - 0.12, x + cw - 0.25, yy - 0.12)
             rotulo(sl, x + 0.25, yy + 0.02, 0.9, lab)
-            texto(sl, x + 1.2, yy, cw - 1.45, 0.82, txt, tam=10.5, interlineado=1.05)
+            texto(sl, x + 1.2, yy, cw - 1.45, 0.82, txt, tam=10.5, interlineado=1.05, alin=JUST)
 
 
 def asis(d, empresa, titulo):
@@ -369,7 +344,7 @@ def asis(d, empresa, titulo):
         icono(sl, ic, x + 0.15, y0 + 0.15, d=0.42)
         texto(sl, x + 0.67, y0 + 0.2, 0.4, 0.3, str(i + 1), tam=9, color=GRIS, negrita=True)
         texto(sl, x + 0.15, y0 + 0.66, fw - 0.3, 0.42, fase, tam=10, negrita=True, interlineado=1.0)
-        texto(sl, x + 0.15, y0 + 1.13, fw - 0.3, 1.2, txt, tam=10, color=TEAL, interlineado=1.05)
+        texto(sl, x + 0.15, y0 + 1.13, fw - 0.3, 1.2, txt, tam=10, color=TEAL, interlineado=1.05, alin=JUST)
         lab, rel, col, bor = estilos[imp]
         pastilla(sl, x + 0.15, y0 + fh - 0.4, fw - 0.3, 0.26, lab, relleno=rel, color=col, tam=7.5, borde=bor)
     yb = y0 + fh + 0.14
@@ -383,25 +358,25 @@ def tobe(d, empresa, titulo, alto_fila, empezar=None):
     filas = TOBE[empresa]
     n, ag = contar(empresa)
     sl = d.contenido_(titulo, f'To-be · {len(filas)} palancas', notas=(
-        'Cada palanca es un cambio en la forma de planificar, con un responsable y una ventana de fechas. El icono marca '
-        'las palancas que incluyen un agente (automatización con IA que propone y la persona aprueba).'))
+        'Cada palanca es un cambio en la forma de planificar. El icono marca las palancas que incluyen un agente '
+        '(automatización con IA que propone y la persona aprueba).'))
     texto(sl, L, 1.38, W, 0.3, [[(f'{n} intervenciones', {'negrita': True}),
                                  (f':  {n - ag} de negocio y software y {ag} agentes', {})]], tam=11)
-    cols = [('Palanca', L + 0.15), ('Qué cambia', 3.35), ('Agente', 8.9), ('Responsable', 9.6), ('Cuándo', 11.45)]
-    for lab, x in cols:
-        rotulo(sl, x, 1.8, 1.6, lab, color=MUTED)
+    x_que, x_ag = 3.35, 11.75
+    rotulo(sl, L + 0.15, 1.8, 1.6, 'Palanca', color=MUTED)
+    rotulo(sl, x_que, 1.8, 1.6, 'Qué cambia', color=MUTED)
+    rotulo(sl, x_ag, 1.8, 0.9, 'Agente', color=MUTED, alin=PP_ALIGN.CENTER)
     gap = 0.07
-    for i, (cod, nom, que, resp, agente) in enumerate(filas):
+    for i, (cod, nom, que, agente) in enumerate(filas):
         y = 2.08 + i * (alto_fila + gap)
         caja(sl, L, y, W, alto_fila, relleno=CARD)
         pastilla(sl, L + 0.15, y + (alto_fila - 0.24) / 2, 0.72, 0.24, cod, relleno=NAVY, color=BLANCO, tam=7.5)
         texto(sl, L + 0.98, y, 1.65, alto_fila, nom, tam=10, negrita=True, ancla=MSO_ANCHOR.MIDDLE, interlineado=1.0)
-        texto(sl, 3.35, y, 5.35, alto_fila, que, tam=10, color=TEAL, ancla=MSO_ANCHOR.MIDDLE, interlineado=1.0)
+        texto(sl, x_que, y, x_ag - x_que - 0.25, alto_fila, que, tam=10.5, color=TEAL, ancla=MSO_ANCHOR.MIDDLE,
+              interlineado=1.0)
         if agente:
-            sl.shapes.add_picture(str(ICONOS / 'robot_n.png'), Inches(9.05), Inches(y + (alto_fila - 0.24) / 2),
-                                  Inches(0.24), Inches(0.24))
-        texto(sl, 9.6, y, 1.8, alto_fila, resp, tam=10, ancla=MSO_ANCHOR.MIDDLE, interlineado=1.0)
-        texto(sl, 11.45, y, 1.2, alto_fila, ventana(empresa, cod), tam=9.5, color=MUTED, ancla=MSO_ANCHOR.MIDDLE)
+            sl.shapes.add_picture(str(ICONOS / 'robot_n.png'), Inches(x_ag + 0.45 - 0.13),
+                                  Inches(y + (alto_fila - 0.26) / 2), Inches(0.26), Inches(0.26))
     if empezar:
         yb = 2.08 + len(filas) * (alto_fila + gap) + 0.12
         rotulo(sl, L, yb, 4, 'Por dónde empezar')
@@ -468,24 +443,21 @@ def intercompany(d):
     sl = d.contenido_('MGT y Ondupack · Intercompany', 'Papel intercompany', notas=(
         'Ondupack es el principal cliente de MGT. Hoy la relación se gestiona por correo y con pedidos firmes; el to-be '
         'añade previsión y reposición pull, y encaja con la integración intercompany en SAP que ya está en marcha.'))
-    texto(sl, L, 1.38, W, 0.3, [[('Responsables: ', {'negrita': True}),
-                                 ('Albert Fontanet y Joan Carles Girones en MGT · Angélica Lemus en Ondupack', {})]],
-          tam=10.5, color=TEAL)
     xh, wh, xa, xt, wt = 2.95, 4.4, 7.5, 8.05, 4.68
-    rotulo(sl, xh + 0.2, 1.82, 3, 'Hoy', color=MUTED)
-    rotulo(sl, xt + 0.2, 1.82, 3, 'To-be', color=TEAL)
+    rotulo(sl, xh + 0.2, 1.5, 3, 'Hoy', color=MUTED)
+    rotulo(sl, xt + 0.2, 1.5, 3, 'To-be', color=TEAL)
     filas = [
         ('demanda', 'Demanda', 'Solo el pedido firme, 10 días antes del ciclo; las fechas cambian después.',
          'Previsión de papel por ciclo, calidad y ancho, más el pedido firme 10 días antes.'),
         ('almacen', 'Stock', 'Lo fabricado de más se queda en MGT y Ondupack lo retira poco a poco.',
          'Reposición pull con mínimo y máximo por referencia.'),
-        ('correo', 'Coordinación', 'Unos 16 correos al día; Ondupack decide qué se carga al día siguiente.',
+        ('correo', 'Coordinación', 'Numerosos correos al día; Ondupack decide qué se carga al día siguiente.',
          'Ondupack ve el stock y las cargas en el sistema y un agente propone la carga.'),
         ('panel', 'Medición', 'Sin KPI de servicio a Ondupack y con restos de pedidos antiguos sin cerrar.',
          'OTIF a Ondupack y stock intercompany, revisados cada semana.'),
     ]
     for i, (ic, cat, hoy, tb) in enumerate(filas):
-        y = 2.1 + i * 0.98
+        y = 1.8 + i * 1.0
         icono(sl, ic, L, y + 0.17, d=0.5)
         texto(sl, L + 0.65, y, 1.6, 0.84, cat, tam=12, negrita=True, ancla=MSO_ANCHOR.MIDDLE)
         c = caja(sl, xh, y, wh, 0.84, relleno=CARD)
@@ -495,60 +467,9 @@ def intercompany(d):
         c = caja(sl, xt, y, wt, 0.84, relleno=NAVY)
         rellenar(c.text_frame, tb, tam=10.5, color=BLANCO, negrita=True, ancla=MSO_ANCHOR.MIDDLE, margen=0.2,
                  interlineado=1.05)
-    texto(sl, L, 6.06, W, 0.3, [[('Nota: ', {'negrita': True}),
+    texto(sl, L, 5.95, W, 0.3, [[('Nota: ', {'negrita': True}),
                                  ('encaja con la integración intercompany en SAP (mínimos y máximos y pedidos automáticos) '
                                   'que ya está en marcha con MGT, PDA y Papresa.', {})]], tam=9, cursiva=True, color=MUTED)
-
-
-def hoja_de_ruta(d):
-    n = sum(contar(e)[0] for e in TOBE)
-    sl = d.contenido_('Hoja de ruta 2027-2028', f'{n} intervenciones', notas=(
-        'Fechas de las intervenciones dadas de alta. Primero lo de negocio y software, que ordena el proceso y los datos; '
-        'los agentes llegan en 2028, cuando el proceso ya está estable.'))
-    x0, x1 = 3.55, R
-    mes = (x1 - x0) / 24
-
-    def px(dt):
-        dias = calendar.monthrange(dt.year, dt.month)[1]
-        return x0 + ((dt.year - 2027) * 12 + dt.month - 1 + (dt.day - 1) / dias) * mes
-
-    # cabecera de tiempo
-    for k, anio in enumerate((2027, 2028)):
-        xa = x0 + k * 12 * mes
-        caja(sl, xa + 0.02, 1.4, 12 * mes - 0.04, 0.26, relleno=NAVY, radio=0.05)
-        texto(sl, xa, 1.4, 12 * mes, 0.26, str(anio), tam=9, negrita=True, color=BLANCO, alin=PP_ALIGN.CENTER,
-              ancla=MSO_ANCHOR.MIDDLE)
-        for q in range(4):
-            texto(sl, xa + q * 3 * mes, 1.7, 3 * mes, 0.2, f'T{q + 1}', tam=8.5, color=MUTED, alin=PP_ALIGN.CENTER)
-    y_ini, fila = 2.0, 0.26
-    grupos = [('Ondupack Almendralejo', 'Ondupack Almendralejo'), ('MGT', 'MGT')]
-    filas_tot = sum(len(TOBE[e]) for e, _ in grupos) * fila + len(grupos) * 0.3
-    for q in range(9):
-        xq = x0 + q * 3 * mes
-        linea(sl, xq, 1.92, xq, y_ini + filas_tot + 0.05, color=LINEA, grosor=0.5)
-    y = y_ini
-    for emp, lab in grupos:
-        rotulo(sl, L, y + 0.04, 3, lab)
-        y += 0.3
-        t = tramos(emp)
-        for cod, nom, *_ in TOBE[emp]:
-            caja(sl, L, y + 0.02, x1 - L, fila - 0.04, relleno=CARD, forma=MSO_SHAPE.RECTANGLE)
-            texto(sl, L + 0.1, y, 2.85, fila, [[(cod + '  ', {'negrita': True}), (nom, {})]], tam=8.5,
-                  ancla=MSO_ANCHOR.MIDDLE)
-            for tipo, col in (('neg', NAVY), ('agente', AZUL)):
-                for a, b in t[cod][tipo]:
-                    xa, xb = px(a), px(b + timedelta(days=1))
-                    caja(sl, xa, y + 0.06, xb - xa, fila - 0.12, relleno=col, radio=0.04)
-            y += fila
-    # hito de agentes
-    xm = px(date(2028, 4, 1))
-    linea(sl, xm, 1.92, xm, y + 0.05, color=TEAL, grosor=1, discontinua=True)
-    yl = y + 0.15
-    for k, (col, lab) in enumerate(((NAVY, 'Negocio y software'), (AZUL, 'Agentes'))):
-        caja(sl, L + k * 2.1, yl + 0.045, 0.3, 0.13, relleno=col, radio=0.03)
-        texto(sl, L + k * 2.1 + 0.38, yl, 1.7, 0.22, lab, tam=9, color=MUTED, ancla=MSO_ANCHOR.MIDDLE)
-    texto(sl, xm - 4.2, yl, 4.1, 0.22, 'Abril 2028: primeros agentes, en Ondupack', tam=9, color=TEAL, negrita=True,
-          alin=PP_ALIGN.RIGHT, ancla=MSO_ANCHOR.MIDDLE)
 
 
 def decisiones(d):
@@ -557,28 +478,32 @@ def decisiones(d):
         'se puede dimensionar ni medir.'))
     items = [
         ('usuario', 'Nombrar el process owner de P2R en MGT',
-         'La celda de MGT está sin activar: sin responsable no arranca el despliegue.', 'Antes de oct 27'),
+         'La celda de MGT está sin activar: sin responsable no arranca el despliegue.'),
         ('reloj', 'Asignar la dedicación de cada persona a P2R',
-         'Falta en MGT y en Ondupack: sin ella no se dimensiona el equipo ni el ahorro de los agentes.', 'Ahora'),
+         'Falta en MGT y en Ondupack: sin ella no se dimensiona el equipo ni el ahorro de los agentes.'),
         ('equipo', 'Reforzar la planificación de MGT',
-         'Joan Carles es el único planificador y está en las 8 palancas: necesita respaldo o liberar tiempo.',
-         'Antes de oct 27'),
+         'Joan Carles es el único planificador y está en las 8 palancas: necesita respaldo o liberar tiempo.'),
         ('diana', 'Decidir el KPI oficial de servicio de Ondupack',
-         'Dirección y Comercial: qué OTIF usar y contra qué fecha (la del CTP).', 'Jun – jul 27'),
+         'Dirección y Comercial: qué OTIF usar y contra qué fecha (la del CTP).'),
         ('euro', 'Validar la siguiente fase: cuantificar en euros',
-         'Valorar cada hallazgo y el compromiso de valor de cada palanca para priorizar con números.', 'Siguiente paso'),
+         'Valorar cada hallazgo y el compromiso de valor de cada palanca para priorizar con números.'),
     ]
-    rotulo(sl, 10.6, 1.4, 2.1, 'Cuándo', color=MUTED)
-    for i, (ic, tit, txt, cuando) in enumerate(items):
-        y = 1.7 + i * 0.92
+    for i, (ic, tit, txt) in enumerate(items):
+        y = 1.5 + i * 0.95
         caja(sl, L, y, W, 0.8, relleno=CARD)
         caja(sl, L + 0.18, y + 0.17, 0.46, 0.46, relleno=NAVY, forma=MSO_SHAPE.OVAL)
         texto(sl, L + 0.18, y + 0.17, 0.46, 0.46, str(i + 1), tam=13, negrita=True, color=AZUL, alin=PP_ALIGN.CENTER,
               ancla=MSO_ANCHOR.MIDDLE)
-        texto(sl, L + 0.85, y + 0.1, 8.5, 0.6, [[(tit, {'negrita': True, 'tam': 12.5})], [(txt, {'color': TEAL})]],
+        texto(sl, L + 0.85, y + 0.1, 10.3, 0.6, [[(tit, {'negrita': True, 'tam': 12.5})], [(txt, {'color': TEAL})]],
               tam=10.5, interlineado=1.0, espacio=2, ancla=MSO_ANCHOR.MIDDLE)
-        sl.shapes.add_picture(str(ICONOS / f'{ic}_n.png'), Inches(10.05), Inches(y + 0.26), Inches(0.28), Inches(0.28))
-        pastilla(sl, 10.6, y + 0.24, 1.95, 0.32, cuando, relleno=BLANCO, color=NAVY, tam=8.5, borde=LINEA)
+        icono(sl, ic, R - 0.68, y + 0.17, d=0.46, fondo=HIELO, variante='n')
+
+
+# personas (nombre, función) tal como figuran en la versión revisada
+EQUIPO_MGT = [('Joan Carles Girones', 'Planificador + Aprovisionamiento Auxiliares'),
+              ('Marta Boyo', 'Aprovisionamiento MMPP'), ('Albert Fontanet', 'Comercial')]
+EQUIPO_ONDUPACK = [('María Teresa Espinosa', 'Carga Capacidad + Planificación'),
+                   ('Miguel Ángel Rosado', 'Secuenciador'), ('Angélica Lemus', 'Aprovisionamiento MMPP')]
 
 
 def main():
@@ -586,6 +511,7 @@ def main():
     d.portada('Plan to Release', 'MGT y Ondupack Almendralejo · hoy, to-be y equipo',
               'Comité de dirección  |  Noviembre 2026')
     resumen(d)
+    rol = dict(EQUIPO_MGT + EQUIPO_ONDUPACK)
 
     d.separador('01', 'MGT', 'Papelera · suministra papel a Ondupack y a clientes externos')
     asis(d, 'MGT', 'MGT · Situación actual')
@@ -593,10 +519,10 @@ def main():
     pal_mgt = [('P2R-01', 'Demanda'), ('P2R-02', 'Capacidad'), ('P2R-03', 'Inventario'), ('P2R-04', 'Fecha'),
                ('P2R-05', 'Materiales'), ('P2R-06', 'Programación'), ('P2R-07', 'Liberación'), ('P2R-08', 'Servicio')]
     equipo(d, 'MGT', 'MGT · Equipo disponible', [
-        ('JC', 'Joan Carles Girones', 'Planificador de la producción; atiende también al cliente',
+        ('JC', 'Joan Carles Girones', rol['Joan Carles Girones'],
          {'P2R-02', 'P2R-03', 'P2R-06', 'P2R-07'}, {'P2R-01', 'P2R-04', 'P2R-05', 'P2R-08'}),
-        ('AF', 'Albert Fontanet', 'Responsable comercial', {'P2R-01', 'P2R-04', 'P2R-08'}, {'P2R-02', 'P2R-03'}),
-        ('MB', 'Marta Boyo', 'Compras · Category Manager', {'P2R-05'}, {'P2R-07'}),
+        ('MB', 'Marta Boyo', rol['Marta Boyo'], {'P2R-05'}, {'P2R-07'}),
+        ('AF', 'Albert Fontanet', rol['Albert Fontanet'], {'P2R-01', 'P2R-04', 'P2R-08'}, {'P2R-02', 'P2R-03'}),
     ], pal_mgt,
         'Ramón, en el algoritmo de combinación · Sistemas / IT en MRP, liberación y visibilidad de stock · Angélica '
         'Lemus (Compras de Ondupack) en lo intercompany.',
@@ -606,29 +532,26 @@ def main():
     d.separador('02', 'Ondupack Almendralejo', 'Cartonera · onduladora y converting', tam_titulo=28)
     asis(d, 'Ondupack', 'Ondupack · Situación actual')
     tobe(d, 'Ondupack Almendralejo', 'Ondupack · To-be', 0.5, empezar=[
-        ('Capacidad real de la 924', 'Velocidad real y algoritmo de combinación en 2027: son la base de la carga y la '
-                                     'secuencia.'),
-        ('Bloque de materiales', 'Desde sep 27: ataca la falta de papel, su problema nº 1.'),
-        ('Agentes desde abril de 2028', 'Cuando Ondupack ya trabaje en GIO web.'),
+        ('Capacidad y combinación', 'Escenarios de capacidad y algoritmo de combinación: son la base de la carga y la '
+                                    'secuencia.'),
+        ('Bloque de materiales', 'Ataca la falta de papel, su problema nº 1.'),
+        ('Agentes, al final', 'Cuando el proceso esté estable y Ondupack trabaje en GIO web.'),
     ])
     pal_op = [('P2R-01', 'Demanda'), ('P2R-02', 'Capacidad'), ('P2R-05', 'Materiales'), ('P2R-06', 'Programación'),
               ('P2R-08', 'Servicio')]
     equipo(d, 'Ondupack', 'Ondupack · Equipo disponible', [
-        ('MA', 'Miguel Ángel Rosado', 'Planificación y Expediciones', {'P2R-01', 'P2R-06'},
+        ('MT', 'María Teresa Espinosa', rol['María Teresa Espinosa'], {'P2R-08'}, {'P2R-01'}),
+        ('MA', 'Miguel Ángel Rosado', rol['Miguel Ángel Rosado'], {'P2R-01', 'P2R-06'},
          {'P2R-02', 'P2R-05', 'P2R-08'}),
-        ('TB', 'Tomás Buenavida', 'Planificación', set(), {'P2R-01', 'P2R-02', 'P2R-05', 'P2R-06'}),
-        ('JB', 'José María Baquero', 'Responsable de Producción', {'P2R-02'}, {'P2R-06'}),
-        ('AL', 'Angélica Lemus', 'Compras · Category Manager', {'P2R-05'}, set()),
-        ('TE', 'Mª Teresa Espinosa', 'Comercial', {'P2R-08'}, {'P2R-01'}),
+        ('AL', 'Angélica Lemus', rol['Angélica Lemus'], {'P2R-05'}, set()),
     ], pal_op,
         'Karim Karach (Producción, Navalmoral) en capacidad · Sistemas / IT en el algoritmo de combinación. '
         'Angélica apoya además a MGT en lo intercompany.',
-        'Planificación son 2 personas y Miguel Ángel está en las 5 palancas. Solo Mª Teresa tiene dedicación cargada '
-        '(10 %). Process owner: Enrique Tejada.')
+        'Miguel Ángel está en las 5 palancas. Solo María Teresa tiene dedicación cargada (10 %). '
+        'Process owner: Enrique Tejada.')
 
-    d.separador('03', 'Siguientes pasos', 'Intercompany, hoja de ruta y decisiones')
+    d.separador('03', 'Siguientes pasos', 'Intercompany y decisiones')
     intercompany(d)
-    hoja_de_ruta(d)
     decisiones(d)
     d.guardar()
     print(SALIDA)

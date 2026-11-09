@@ -439,64 +439,76 @@ def equipo(d, empresa, titulo, personas, palancas, apoyo, atencion):
           tam=10, color=BLANCO, interlineado=1.05, espacio=3)
 
 
-def intercompany(d):
-    sl = d.contenido_('MGT y Ondupack · Intercompany', 'Papel intercompany', notas=(
-        'Ondupack es el principal cliente de MGT. Hoy la relación se gestiona por correo y con pedidos firmes; el to-be '
-        'añade previsión y reposición pull, y encaja con la integración intercompany en SAP que ya está en marcha.'))
-    xh, wh, xa, xt, wt = 2.95, 4.4, 7.5, 8.05, 4.68
-    rotulo(sl, xh + 0.2, 1.5, 3, 'Hoy', color=MUTED)
-    rotulo(sl, xt + 0.2, 1.5, 3, 'To-be', color=TEAL)
-    filas = [
-        ('demanda', 'Demanda', 'Solo el pedido firme, 10 días antes del ciclo; las fechas cambian después.',
-         'Previsión de papel por ciclo, calidad y ancho, más el pedido firme 10 días antes.'),
-        ('almacen', 'Stock', 'Lo fabricado de más se queda en MGT y Ondupack lo retira poco a poco.',
-         'Reposición pull con mínimo y máximo por referencia.'),
-        ('correo', 'Coordinación', 'Numerosos correos al día; Ondupack decide qué se carga al día siguiente.',
-         'Ondupack ve el stock y las cargas en el sistema y un agente propone la carga.'),
-        ('panel', 'Medición', 'Sin KPI de servicio a Ondupack y con restos de pedidos antiguos sin cerrar.',
-         'OTIF a Ondupack y stock intercompany, revisados cada semana.'),
-    ]
-    for i, (ic, cat, hoy, tb) in enumerate(filas):
-        y = 1.8 + i * 1.0
-        icono(sl, ic, L, y + 0.17, d=0.5)
-        texto(sl, L + 0.65, y, 1.6, 0.84, cat, tam=12, negrita=True, ancla=MSO_ANCHOR.MIDDLE)
-        c = caja(sl, xh, y, wh, 0.84, relleno=CARD)
-        rellenar(c.text_frame, hoy, tam=10.5, color=TEAL, ancla=MSO_ANCHOR.MIDDLE, margen=0.2, interlineado=1.05)
-        f = caja(sl, xa, y + 0.27, 0.4, 0.3, relleno=AZUL, forma=MSO_SHAPE.CHEVRON)
-        f.adjustments[0] = 0.5
-        c = caja(sl, xt, y, wt, 0.84, relleno=NAVY)
-        rellenar(c.text_frame, tb, tam=10.5, color=BLANCO, negrita=True, ancla=MSO_ANCHOR.MIDDLE, margen=0.2,
-                 interlineado=1.05)
-    texto(sl, L, 5.95, W, 0.3, [[('Nota: ', {'negrita': True}),
-                                 ('encaja con la integración intercompany en SAP (mínimos y máximos y pedidos automáticos) '
-                                  'que ya está en marcha con MGT, PDA y Papresa.', {})]], tam=9, cursiva=True, color=MUTED)
+# agentes dados de alta por empresa: (nombre, palanca, hoy, qué hará, quién decide)
+AGENTES_EMPRESA = {
+    'MGT': [
+        ('Agente de escenarios de ciclo', 'P2R-02 · S&OP y plan de capacidad',
+         'El ciclo se fija a mano, a capacidad infinita y con 3 turnos fijos.',
+         'Simula la duración y el orden de las calidades, las paradas y el stock, y propone el ciclo con su coste.',
+         'Decide: Planificación'),
+        ('Agente de stock intercompany', 'P2R-03 · Política de inventario',
+         'Stock de Ondupack acumulado en MGT, sin límite ni revisión.',
+         'Revisa cada mes la cobertura de las referencias de Ondupack, propone mínimos y máximos y avisa del stock '
+         'sin salida.', 'Decide: Planificación'),
+        ('Copiloto de plazos para Comercial', 'P2R-04 · Promesa de fecha fiable',
+         'No se propone fecha: Planificación revisa la capacidad a mano.',
+         'Comercial le pregunta cuándo sale la próxima tirada de una calidad y ancho y responde sin pasar por '
+         'Planificación.', 'Responde: Comercial'),
+        ('Agente de compras de materiales', 'P2R-05 · Materiales por excepción',
+         'MRP de materias primas en Excel y solicitudes de compra a mano.',
+         'Revisa cada día los mensajes del MRP, propone las solicitudes de compra y avisa de los consumos que se '
+         'separan del plan.', 'Deciden: Compras y Planificación'),
+        ('Agente de urgencias', 'P2R-06 · Programación estable',
+         'Las urgencias se encajan a mano, sin alertas ni reglas.',
+         'Comprueba si la urgencia cabe en el ciclo, qué pedidos y combinaciones afecta, y propone la decisión según '
+         'las reglas.', 'Decide: Planificación'),
+        ('Agente de coordinación de cargas con Ondupack', 'P2R-08 · Control del servicio',
+         'Numerosos correos al día para acordar la carga con Ondupack.',
+         'Lee las peticiones de Ondupack, comprueba stock y plan y propone la carga del día dentro del mínimo y '
+         'máximo.', 'Decide: Planificación'),
+    ],
+    'Ondupack': [
+        ('Agente de escenarios de capacidad', 'P2R-02 · S&OP y plan de capacidad',
+         'Los escenarios de turnos se comparan a mano y la sobrecarga se ve tarde.',
+         'Simula turnos, rutas alternativas y agrupaciones para descargar el cuello de botella, y propone el plan con '
+         'su impacto.', 'Decide: Planificación'),
+        ('Agente de faltas de materia prima', 'P2R-05 · Materiales por excepción',
+         'Las faltas de papel aparecen al liberar y se resuelven a mano entre Planificación y Compras.',
+         'Revisa cada día las faltas por orden y propone la acción: adelantar el pedido a MGT, usar un sustituto '
+         'aprobado o mover la orden.', 'Deciden: Planificación y Compras'),
+        ('Agente de urgencias y cambios', 'P2R-06 · Programación estable',
+         'Los cambios del cliente llegan por email y las urgencias se resuelven llamando, sin registrar la causa.',
+         'Calcula el impacto de cada cambio o urgencia (pedidos desplazados, cambios extra, saturación del intermedio) '
+         'y propone la decisión.', 'Decide: Planificación'),
+        ('Agente de causa raíz', 'P2R-08 · Control del servicio',
+         'Los atrasos se revisan en la reunión semanal sin clasificar la causa, así que se repiten.',
+         'Clasifica cada atraso por causa (velocidad, OEE, falta de papel, cambio del cliente o saturación) y propone '
+         'la acción.', 'Decide: Planificación'),
+    ],
+}
 
 
-def decisiones(d):
-    sl = d.contenido_('Qué necesitamos de dirección', 'Decisiones', notas=(
-        'Cinco decisiones para arrancar. Las tres primeras son de personas: sin owner ni dedicación el despliegue no '
-        'se puede dimensionar ni medir.'))
-    items = [
-        ('usuario', 'Nombrar el process owner de P2R en MGT',
-         'La celda de MGT está sin activar: sin responsable no arranca el despliegue.'),
-        ('reloj', 'Asignar la dedicación de cada persona a P2R',
-         'Falta en MGT y en Ondupack: sin ella no se dimensiona el equipo ni el ahorro de los agentes.'),
-        ('equipo', 'Reforzar la planificación de MGT',
-         'Joan Carles es el único planificador y está en las 8 palancas: necesita respaldo o liberar tiempo.'),
-        ('diana', 'Decidir el KPI oficial de servicio de Ondupack',
-         'Dirección y Comercial: qué OTIF usar y contra qué fecha (la del CTP).'),
-        ('euro', 'Validar la siguiente fase: cuantificar en euros',
-         'Valorar cada hallazgo y el compromiso de valor de cada palanca para priorizar con números.'),
-    ]
-    for i, (ic, tit, txt) in enumerate(items):
-        y = 1.5 + i * 0.95
-        caja(sl, L, y, W, 0.8, relleno=CARD)
-        caja(sl, L + 0.18, y + 0.17, 0.46, 0.46, relleno=NAVY, forma=MSO_SHAPE.OVAL)
-        texto(sl, L + 0.18, y + 0.17, 0.46, 0.46, str(i + 1), tam=13, negrita=True, color=AZUL, alin=PP_ALIGN.CENTER,
-              ancla=MSO_ANCHOR.MIDDLE)
-        texto(sl, L + 0.85, y + 0.1, 10.3, 0.6, [[(tit, {'negrita': True, 'tam': 12.5})], [(txt, {'color': TEAL})]],
-              tam=10.5, interlineado=1.0, espacio=2, ancla=MSO_ANCHOR.MIDDLE)
-        icono(sl, ic, R - 0.68, y + 0.17, d=0.46, fondo=HIELO, variante='n')
+def agentes(d, empresa, titulo, por_fila):
+    lista = AGENTES_EMPRESA[empresa]
+    sl = d.contenido_(titulo, f'{len(lista)} agentes', notas=(
+        'Agentes dados de alta en la aplicación. Todos siguen la misma regla: el agente prepara y propone, y la '
+        'persona decide; no sustituyen a nadie, quitan trabajo manual.'))
+    gap, h = 0.2, 2.4
+    cw = (W - (por_fila - 1) * gap) / por_fila
+    for i, (nom, pal, hoy, hace, decide) in enumerate(lista):
+        x = L + (i % por_fila) * (cw + gap)
+        y = 1.45 + (i // por_fila) * (h + gap)
+        caja(sl, x, y, cw, h, relleno=CARD)
+        icono(sl, 'robot', x + 0.2, y + 0.2, d=0.46)
+        texto(sl, x + 0.8, y + 0.17, cw - 1.0, 0.42, nom, tam=11, negrita=True, ancla=MSO_ANCHOR.MIDDLE,
+              interlineado=1.0)
+        texto(sl, x + 0.8, y + 0.6, cw - 1.0, 0.22, pal, tam=8.5, color=MUTED, negrita=True)
+        texto(sl, x + 0.2, y + 0.95, cw - 0.4, 0.36, [[('Hoy: ', {'negrita': True, 'cursiva': False}), (hoy, {})]],
+              tam=9.5, color=MUTED, cursiva=True, interlineado=1.0)
+        texto(sl, x + 0.2, y + 1.36, cw - 0.4, 0.55, [[('Agente: ', {'negrita': True}), (hace, {})]], tam=10,
+              color=NAVY, interlineado=1.0)
+        pastilla(sl, x + 0.2, y + h - 0.42, 0.35 + 0.068 * len(decide), 0.26, decide, relleno=AZUL, color=NAVY,
+                 tam=7.5)
 
 
 # personas (nombre, función) tal como figuran en la versión revisada
@@ -516,6 +528,7 @@ def main():
     d.separador('01', 'MGT', 'Papelera · suministra papel a Ondupack y a clientes externos')
     asis(d, 'MGT', 'MGT · Situación actual')
     tobe(d, 'MGT', 'MGT · To-be', 0.46)
+    agentes(d, 'MGT', 'MGT · Agentes planteados', 3)
     pal_mgt = [('P2R-01', 'Demanda'), ('P2R-02', 'Capacidad'), ('P2R-03', 'Inventario'), ('P2R-04', 'Fecha'),
                ('P2R-05', 'Materiales'), ('P2R-06', 'Programación'), ('P2R-07', 'Liberación'), ('P2R-08', 'Servicio')]
     equipo(d, 'MGT', 'MGT · Equipo disponible', [
@@ -537,6 +550,7 @@ def main():
         ('Bloque de materiales', 'Ataca la falta de papel, su problema nº 1.'),
         ('Agentes, al final', 'Cuando el proceso esté estable y Ondupack trabaje en GIO web.'),
     ])
+    agentes(d, 'Ondupack', 'Ondupack · Agentes planteados', 2)
     pal_op = [('P2R-01', 'Demanda'), ('P2R-02', 'Capacidad'), ('P2R-05', 'Materiales'), ('P2R-06', 'Programación'),
               ('P2R-08', 'Servicio')]
     equipo(d, 'Ondupack', 'Ondupack · Equipo disponible', [
@@ -550,9 +564,6 @@ def main():
         'Miguel Ángel está en las 5 palancas. Solo María Teresa tiene dedicación cargada (10 %). '
         'Process owner: Enrique Tejada.')
 
-    d.separador('03', 'Siguientes pasos', 'Intercompany y decisiones')
-    intercompany(d)
-    decisiones(d)
     d.guardar()
     print(SALIDA)
 

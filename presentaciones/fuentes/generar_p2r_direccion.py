@@ -187,12 +187,12 @@ class Deck:
             sl.notes_slide.notes_text_frame.text = notas
         return sl
 
-    def guardar(self):
+    def guardar(self, salida=SALIDA):
         lst = self.prs.slides._sldIdLst
         for sid in list(lst)[:self.originales]:
             self.prs.part.drop_rel(sid.rId)
             lst.remove(sid)
-        self.prs.save(str(SALIDA))
+        self.prs.save(str(salida))
 
 
 # ------------------------------------------------------------------ contenido

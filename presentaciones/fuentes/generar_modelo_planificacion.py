@@ -2,41 +2,37 @@
 """Presentación para dirección: nuevo modelo de planificación de Packaging (Celeste, organigrama y acciones).
 
 Portada y tres diapositivas con la plantilla corporativa (las utilidades de dibujo vienen de generar_p2r_direccion):
-  1. Celeste (DICE), portal único de planificación; deja un hueco para las capturas.
+  1. Celeste (DICE), portal único de planificación, con la captura del dashboard de integración papel-cartón.
   2. Organigrama de planificación: as-is por planta y to-be con Planificador Máster.
   3. Acciones para el nuevo organigrama, por planta, sacadas del análisis de P2R.
 
 Uso: python3 presentaciones/fuentes/generar_modelo_planificacion.py
 """
+from PIL import Image
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
-from pptx.oxml.ns import qn
-from pptx.util import Inches
+from pptx.util import Inches, Pt
 
-from generar_p2r_direccion import (AZUL, BLANCO, CARD, GRIS, HIELO, ICONOS, L, LINEA, MUTED, NAVY, R, RAIZ, TEAL, W, Deck,
+from generar_p2r_direccion import (AZUL, BLANCO, CARD, HIELO, ICONOS, L, LINEA, MUTED, NAVY, R, RAIZ, TEAL, W, Deck,
                                    caja, icono, linea, pastilla, rellenar, rotulo, texto)
 
 SALIDA = RAIZ / 'presentaciones' / 'Nuevo_Modelo_Planificacion.pptx'
+CAPTURA = ICONOS.parent / 'capturas' / 'celeste_integracion_papel_carton.png'
 PLANTAS = ('MGT', 'PDA', 'Ondupack Almendralejo', 'Ondupack Navalmoral')
-
-
-def discontinua(shape):
-    ln = shape.line._get_or_add_ln()
-    ln.append(ln.makeelement(qn('a:prstDash'), {'val': 'dash'}))
 
 
 # ------------------------------------------------------------------ 1. Celeste
 def celeste(d):
-    sl = d.contenido_('Celeste · Portal único de planificación', 'DICE', notas=(
+    sl = d.contenido_('Celeste · Portal único de planificación', notas=(
         'Celeste (DICE) reúne en un solo portal todo lo que hoy se consulta en correos, Excel y varios sistemas: '
         'necesidades, stock, urgencias e intercompany. Es la herramienta común del nuevo organigrama.'))
     b = caja(sl, L, 1.45, W, 0.62, relleno=NAVY)
-    rellenar(b.text_frame, [[('Celeste (DICE):  ', {'color': AZUL}),
+    rellenar(b.text_frame, [[('Celeste :  ', {'color': AZUL}),
                              ('una sola pantalla para planificar papel y cartón: necesidades, stock, urgencias e '
                               'intercompany.', {'color': BLANCO})]],
              tam=12.5, negrita=True, ancla=MSO_ANCHOR.MIDDLE, margen=0.3)
     modulos = [
-        ('cubos', 'Necesidades', 'Faltas de material por orden y propuestas de compra.'),
+        ('cubos', 'Necesidades', 'Faltas de material y propuestas de compra.'),
         ('almacen', 'Stock', 'Propio y de las otras plantas, con mínimos y máximos.'),
         ('reloj', 'Urgencias', 'Si caben, qué pedidos mueven y quién decide.'),
         ('intercambio', 'Intercompany', 'Previsión, pedidos y cargas entre papeleras y cartoneras.'),
@@ -52,16 +48,20 @@ def celeste(d):
         texto(sl, x + 0.68, y + 0.13, tw - 0.8, 0.5, tit, tam=10.5, negrita=True, ancla=MSO_ANCHOR.MIDDLE,
               interlineado=1.0)
         texto(sl, x + 0.15, y + 0.64, tw - 0.3, 0.36, txt, tam=9, color=TEAL, interlineado=1.0)
-    # hueco para las capturas
+    # captura de Celeste, centrada en el hueco de la derecha con su pie
     fx, fw = L + 2 * tw + gap + 0.3, R - (L + 2 * tw + gap + 0.3)
     fh = 3 * th + 2 * gap
-    marco = caja(sl, fx, y0, fw, fh, relleno=HIELO, borde=GRIS, radio=0.08)
-    discontinua(marco)
-    icono(sl, 'panel', fx + fw / 2 - 0.3, y0 + fh / 2 - 0.55, d=0.6, fondo=AZUL, variante='n')
-    texto(sl, fx, y0 + fh / 2 + 0.15, fw, 0.3, 'Captura de Celeste', tam=11, negrita=True, color=TEAL,
-          alin=PP_ALIGN.CENTER)
-    texto(sl, fx, y0 + fh / 2 + 0.45, fw, 0.25, 'Pendiente: se incorpora con las fotos', tam=9, cursiva=True,
-          color=MUTED, alin=PP_ALIGN.CENTER)
+    with Image.open(CAPTURA) as im:
+        ih = fw * im.height / im.width
+    pie = 0.25
+    yi = y0 + (fh - (ih + 0.08 + pie)) / 2
+    pic = sl.shapes.add_picture(str(CAPTURA), Inches(fx), Inches(yi), Inches(fw), Inches(ih))
+    pic.name = 'Captura de Celeste'
+    pic._element.nvPicPr.cNvPr.set('descr', 'Captura de Celeste: dashboard de integración papel-cartón')
+    pic.line.color.rgb = LINEA
+    pic.line.width = Pt(0.75)
+    texto(sl, fx, yi + ih + 0.08, fw, pie, 'Integración papel-cartón: entregas, proveedores, plazos y estado de los '
+          'pedidos intercompany.', tam=9, cursiva=True, color=MUTED, alin=PP_ALIGN.CENTER)
     yb = y0 + fh + 0.18
     caja(sl, L, yb, W, 0.45, relleno=HIELO)
     icono(sl, 'check', L + 0.12, yb + 0.075, d=0.3)
@@ -86,7 +86,7 @@ def organigrama(d):
         gw = 2 * cw + cg
         texto(sl, gx, 1.78, gw, 0.22, grupo.upper(), tam=8.5, negrita=True, color=TEAL, alin=PP_ALIGN.CENTER)
         linea(sl, gx + 0.05, 2.03, gx + gw - 0.05, 2.03, color=AZUL, grosor=1.5)
-    roles = ('Secuenciador', 'Coordinador de cargas', 'Comercial', 'Aprovisionamiento')
+    roles = ('Secuenciador', 'Logística', 'Comercial', 'Aprovisionamiento')
     for k, planta in enumerate(PLANTAS):
         x = ax + k * (cw + cg)
         c = caja(sl, x, 2.15, cw, 0.6, relleno=NAVY)
@@ -117,11 +117,10 @@ def organigrama(d):
              color=BLANCO, alin=PP_ALIGN.CENTER, ancla=MSO_ANCHOR.MIDDLE, interlineado=1.05)
     cx, cwid = R - 1.95, 1.95
     c = caja(sl, cx, ny, cwid, nh, relleno=AZUL)
-    rellenar(c.text_frame, [[('Comerciales', {'negrita': True, 'tam': 12})],
-                            [('al mismo nivel', {'tam': 8.5, 'color': TEAL})]],
+    rellenar(c.text_frame, [[('Comercial', {'negrita': True, 'tam': 12})], [('', {'tam': 8.5})]],
              color=NAVY, alin=PP_ALIGN.CENTER, ancla=MSO_ANCHOR.MIDDLE, interlineado=1.05)
     linea(sl, mx + mw, ny + nh / 2, cx, ny + nh / 2, color=TEAL, grosor=1.25, discontinua=True)
-    hijos = [('Planificador de papel', 'MGT · PDA'), ('Planificador de cartón', 'Almendralejo · Navalmoral'),
+    hijos = [('Planificador de papel', 'MGT · PDA · Papresa'), ('Planificador de cartón', 'Almendralejo · Navalmoral'),
              ('Aprovisionamiento', 'de cada planta')]
     hy, hh, hg = 3.3, 0.9, 0.15
     hw = (tw - 2 * hg) / 3
@@ -140,7 +139,7 @@ def organigrama(d):
     puntos = [
         ('Se planifica por material, ', 'no por planta: papel (MGT y PDA) y cartón (Almendralejo y Navalmoral).'),
         ('La secuenciación y la coordinación de cargas ', 'pasan a los planificadores, con el algoritmo y los agentes.'),
-        ('Comercial y Planificador Máster ', 'acuerdan juntos fechas y prioridades.'),
+        ('Comercial y Planificador Máster ', 'acuerdan juntos prioridades y estrategias.'),
         ('Todos trabajan sobre Celeste, ', 'con la misma información.'),
     ]
     texto(sl, tx + 0.2, cy + 0.15, tw - 0.4, 6.35 - cy - 0.3,
@@ -232,8 +231,7 @@ def acciones(d):
 
 def main():
     d = Deck()
-    d.portada('Nuevo modelo de planificación', 'Celeste, organigrama y acciones por planta',
-              'Comité de dirección  |  Noviembre 2026')
+    d.portada('Planificación Packaging', 'Celeste, organigrama y acciones por planta', ' Noviembre 2026')
     celeste(d)
     organigrama(d)
     acciones(d)

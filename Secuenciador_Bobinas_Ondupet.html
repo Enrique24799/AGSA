@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ONDUPET — Secuenciador de Bobinas</title>
+<style>
+:root{
+  color-scheme:light;
+  --plane:#f1f3f5; --surface:#fcfcfb; --surface-2:#f2f2ef; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --hair:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
+  --brand:#0d1b2a; --brand-2:#1b2838; --accent:#0077b6; --accent-ink:#fff; --accent-soft:rgba(0,119,182,.10);
+  --s-AZUL:#2a78d6; --s-OPACO:#eb6834; --s-CLEAR:#1baf7a; --s-BLANCO:#eda100; --s-NEGRO:#e87ba4; --s-GRANZA:#008300;
+  --serie-1:#2a78d6; --serie-2:#eb6834; --gris-serie:#898781; --lbl-blanco:#0b0b0b; --cambio:#b9b8ad;
+  --good:#0ca30c; --warn:#fab219; --crit:#d03b3b; --good-text:#006300; --crit-text:#b32b2b; --warn-text:#7a5200;
+  --crit-wash:rgba(208,59,59,.09); --warn-wash:rgba(250,178,25,.16); --good-wash:rgba(12,163,12,.10);
+  --sombra:0 1px 3px rgba(13,27,42,.06),0 1px 2px rgba(13,27,42,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#242422; --ink:#f0efec; --ink-2:#c3c2b7; --muted:#898781;
+    --hair:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+    --brand:#0d1b2a; --brand-2:#14202e; --accent:#3987e5; --accent-ink:#fff; --accent-soft:rgba(57,135,229,.16);
+    --s-AZUL:#3987e5; --s-OPACO:#d95926; --s-CLEAR:#199e70; --s-BLANCO:#c98500; --s-NEGRO:#d55181; --s-GRANZA:#008300;
+    --serie-1:#3987e5; --serie-2:#d95926; --gris-serie:#898781; --lbl-blanco:#fff; --cambio:#6b6a64;
+    --good-text:#0ca30c; --crit-text:#e66767; --warn-text:#fab219;
+    --crit-wash:rgba(208,59,59,.18); --warn-wash:rgba(250,178,25,.14); --good-wash:rgba(12,163,12,.14);
+    --sombra:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#242422; --ink:#f0efec; --ink-2:#c3c2b7; --muted:#898781;
+  --hair:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --brand:#0d1b2a; --brand-2:#14202e; --accent:#3987e5; --accent-ink:#fff; --accent-soft:rgba(57,135,229,.16);
+  --s-AZUL:#3987e5; --s-OPACO:#d95926; --s-CLEAR:#199e70; --s-BLANCO:#c98500; --s-NEGRO:#d55181; --s-GRANZA:#008300;
+  --serie-1:#3987e5; --serie-2:#d95926; --gris-serie:#898781; --lbl-blanco:#fff; --cambio:#6b6a64;
+  --good-text:#0ca30c; --crit-text:#e66767; --warn-text:#fab219;
+  --crit-wash:rgba(208,59,59,.18); --warn-wash:rgba(250,178,25,.14); --good-wash:rgba(12,163,12,.14);
+  --sombra:none;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--plane);color:var(--ink);font-size:14px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+.top{background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.top .marca{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7fd3ea;font-weight:600}
+.top h1{font-size:19px;font-weight:650;letter-spacing:.2px}
+.top .sub{font-size:12.5px;color:rgba(255,255,255,.68)}
+.top .esp{flex:1}
+.top button{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12.5px}
+.top button:hover{background:rgba(255,255,255,.18)}
+main{max-width:1500px;margin:0 auto;padding:18px 16px 60px;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;box-shadow:var(--sombra)}
+.card>h2,summary.h2{font-size:15.5px;font-weight:650;margin-bottom:4px}
+.card .nota{color:var(--ink-2);font-size:13px}
+.paso{display:inline-flex;flex:none;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;align-items:center;justify-content:center;margin-right:8px;vertical-align:1px}
+/* carga */
+.zona{margin-top:14px;border:1.5px dashed var(--axis);border-radius:10px;padding:18px;text-align:center;cursor:pointer;color:var(--ink-2);transition:background .15s,border-color .15s}
+.zona:hover,.zona.sobre{background:var(--accent-soft);border-color:var(--accent)}
+.zona strong{color:var(--ink)}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.slot{border:1px solid var(--border);border-radius:8px;padding:12px 14px;background:var(--surface-2);cursor:pointer;min-width:0;text-align:left;display:block;width:100%}
+.slot:hover{border-color:var(--accent)}
+.slot .t{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px}
+.slot .d{font-size:12px;color:var(--ink-2);margin-top:3px;overflow-wrap:anywhere}
+.slot .cols{font-size:11.5px;color:var(--muted);margin-top:3px}
+.pt{width:9px;height:9px;border-radius:50%;background:var(--axis);flex:none}
+.slot.ok .pt{background:var(--good)} .slot.err .pt{background:var(--crit)}
+.slot.err .d{color:var(--crit-text)}
+.acciones{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.btn{border:none;border-radius:7px;padding:9px 18px;font-weight:600;cursor:pointer;font-size:13.5px}
+.btn.pri{background:var(--accent);color:var(--accent-ink)} .btn.pri:hover{filter:brightness(1.08)}
+.btn.sec{background:transparent;border:1px solid var(--axis);color:var(--ink)} .btn.sec:hover{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.prog{flex:1;min-width:180px;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;border:1px solid var(--border)}
+.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+.progtxt{font-size:12.5px;color:var(--ink-2);min-width:150px}
+/* parámetros */
+details.card>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"▸";margin-left:auto;color:var(--muted);transition:transform .15s}
+details.card[open]>summary::after{transform:rotate(90deg)}
+details.card>summary .resumen{font-size:12.5px;color:var(--ink-2);font-weight:400;margin-left:10px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px 16px;margin-top:14px}
+.campo label{display:block;font-size:12px;color:var(--ink-2);margin-bottom:4px}
+.campo input,.campo select{width:100%;padding:7px 9px;border:1px solid var(--axis);border-radius:6px;background:var(--surface)}
+.campo .ay{font-size:11.5px;color:var(--muted);margin-top:3px}
+h3{font-size:13.5px;font-weight:650;margin:20px 0 6px}
+.dosc{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px}
+@media(max-width:1000px){.dosc{grid-template-columns:1fr}.slots{grid-template-columns:1fr}}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th{background:var(--surface-2);color:var(--ink-2);font-weight:600;text-align:left;padding:7px 9px;border-bottom:1px solid var(--hair);white-space:nowrap;position:sticky;top:0;z-index:1}
+td{padding:6px 9px;border-bottom:1px solid var(--hair);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.c,th.c{text-align:center}
+.matriz input{width:54px;padding:4px 5px;border:1px solid var(--axis);border-radius:5px;text-align:right;background:var(--surface);font-variant-numeric:tabular-nums}
+.matriz td.diag{color:var(--muted);text-align:center}
+.matriz th.fila{position:static}
+.clasif select{padding:4px 6px;border:1px solid var(--axis);border-radius:5px;background:var(--surface)}
+.expl{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:10px 12px;margin-top:10px}
+.expl b{color:var(--ink)}
+/* resultados */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;box-shadow:var(--sombra)}
+.kpi .l{font-size:12px;color:var(--ink-2)}
+.kpi .v{font-size:27px;font-weight:650;margin-top:2px;letter-spacing:-.3px}
+.kpi .v small{font-size:14px;font-weight:500;color:var(--ink-2);margin-left:3px}
+.kpi .dl{font-size:12.5px;margin-top:2px;color:var(--ink-2)}
+.dl .mej{color:var(--good-text);font-weight:600} .dl .peo{color:var(--crit-text);font-weight:600}
+.avisos{display:flex;flex-direction:column;gap:8px}
+.aviso{border-radius:8px;padding:10px 12px 10px 38px;font-size:13px;position:relative;border:1px solid var(--border)}
+.aviso::before{position:absolute;left:12px;top:9px;font-weight:700;font-size:14px}
+.aviso.crit{background:var(--crit-wash)} .aviso.crit::before{content:"✕";color:var(--crit-text)}
+.aviso.warn{background:var(--warn-wash)} .aviso.warn::before{content:"!";color:var(--warn-text);left:15px}
+.aviso.ok{background:var(--good-wash)} .aviso.ok::before{content:"✓";color:var(--good-text)}
+.aviso b{font-weight:650}
+.aviso ul{margin:4px 0 0 16px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--hair);margin:-4px -4px 14px;flex-wrap:wrap}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:9px 14px;cursor:pointer;font-weight:600;color:var(--ink-2);font-size:13.5px}
+.tab:hover{color:var(--ink)} .tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+.barra{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.seg{display:inline-flex;border:1px solid var(--axis);border-radius:7px;overflow:hidden}
+.seg button{background:var(--surface);border:none;padding:6px 12px;cursor:pointer;font-size:12.5px;color:var(--ink-2);border-right:1px solid var(--axis)}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.barra .et{font-size:12px;color:var(--ink-2)}
+.barra .esp{flex:1}
+.barra input[type=search],.barra select{padding:6px 9px;border:1px solid var(--axis);border-radius:6px;background:var(--surface)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:1px 7px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap;border:1px solid var(--border)}
+.chip i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.chip.crit{background:var(--crit-wash);color:var(--crit-text);border-color:transparent}
+.chip.good{background:var(--good-wash);color:var(--good-text);border-color:transparent}
+.chip.warn{background:var(--warn-wash);color:var(--warn-text);border-color:transparent}
+.mov-up{color:var(--good-text);font-weight:600} .mov-dn{color:var(--ink-2)}
+tr.cong td{background:var(--surface-2)}
+tr.sel td{background:var(--accent-soft)}
+tr.clic{cursor:pointer} tr.clic:hover td{background:var(--accent-soft)}
+.tabla-alta{max-height:560px;overflow:auto}
+.key{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sec{color:var(--ink-2)} .mut{color:var(--muted)}
+.neg{color:var(--crit-text);font-weight:600}
+/* gantt */
+.gantt{display:grid;grid-template-columns:132px minmax(0,1fr);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.gantt .izq{border-right:1px solid var(--hair);background:var(--surface-2);position:relative}
+.gantt .izq div{position:absolute;left:10px;right:6px;font-size:12px;line-height:1.2}
+.gantt .izq .mq{font-weight:650}
+.gantt .der{overflow-x:auto}
+.gantt svg{display:block}
+.gantt .lote{cursor:default}
+.gantt .lote.hl{stroke:var(--ink);stroke-width:2}
+.gantt text{font-size:10.5px;pointer-events:none}
+.gantt .eje text{fill:var(--muted);font-size:11px}
+.leyenda{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:10px;align-items:center}
+.leyenda span{display:inline-flex;align-items:center;gap:6px}
+.leyenda i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.leyenda i.linea{height:0;width:16px;border-top:2px solid;border-radius:0}
+/* gráficos de líneas */
+.fig{border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-width:0}
+.fig h4{font-size:13.5px;font-weight:650}
+.fig .st{font-size:12px;color:var(--ink-2);margin-bottom:6px}
+.fig svg{display:block;width:100%;height:auto;overflow:visible}
+.fig svg text{font-size:11px;fill:var(--muted)}
+.multi{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px}
+.stockgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start}
+@media(max-width:1100px){.stockgrid{grid-template-columns:1fr}}
+.linkbtn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:12.5px;padding:0;text-decoration:underline}
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.18);max-width:340px;display:none}
+#tip .tt{font-weight:650;margin-bottom:3px}
+#tip .fila{display:flex;justify-content:space-between;gap:14px}
+#tip .fila span:first-child{color:var(--ink-2);display:inline-flex;align-items:center;gap:6px}
+#tip .fila b{font-variant-numeric:tabular-nums}
+#tip i.k{width:12px;height:0;border-top:2px solid;display:inline-block}
+.vacio{color:var(--ink-2);padding:26px;text-align:center}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <div class="marca">Ondupet · Planificación de extrusión</div>
+    <h1>Secuenciador de bobinas</h1>
+    <div class="sub">Propuesta de secuencia por extrusora: primero evitar stock negativo, después perder el mínimo tiempo en cambios</div>
+  </div>
+  <div class="esp"></div>
+  <button id="btnTema" type="button" title="Cambiar entre tema claro y oscuro">Tema claro / oscuro</button>
+</header>
+
+<main>
+  <!-- 1 · CARGA -->
+  <section class="card" id="secCarga">
+    <h2><span class="paso">1</span>Carga de ficheros</h2>
+    <p class="nota">Carga los tres Excel (.xlsx): calidades, necesidades/stocks diarios y secuenciación actual. Puedes soltarlos todos a la vez; la herramienta reconoce cada uno por sus columnas. Los datos no salen de tu ordenador.</p>
+    <div class="zona" id="zona" tabindex="0" role="button" aria-label="Seleccionar los ficheros Excel">
+      <strong>Arrastra aquí los tres Excel</strong> o haz clic para seleccionarlos
+    </div>
+    <input type="file" id="inpTodos" multiple accept=".xlsx,.xlsm,.csv" hidden>
+    <div class="slots">
+      <button type="button" class="slot" data-tipo="calidades"><div class="t"><span class="pt"></span>Calidades</div><div class="d">Pendiente</div><div class="cols">Columnas: Key_Bobina · Calidad_MP</div></button>
+      <button type="button" class="slot" data-tipo="necesidades"><div class="t"><span class="pt"></span>Necesidades / stocks diarios</div><div class="d">Pendiente</div><div class="cols">Columnas: Key_Bobina · Calidad_MP · Fecha · Necesidad · Stocks</div></button>
+      <button type="button" class="slot" data-tipo="secuencia"><div class="t"><span class="pt"></span>Secuenciación actual</div><div class="d">Pendiente</div><div class="cols">Columnas: Key_Bobina · Máquina · Cantidad · Fecha Inicio · Fecha_Fin</div></button>
+    </div>
+    <input type="file" id="inpUno" accept=".xlsx,.xlsm,.csv" hidden>
+    <div class="acciones">
+      <button class="btn pri" id="btnCalc" type="button" disabled>Calcular propuesta</button>
+      <div class="prog" id="prog" hidden><i></i></div>
+      <span class="progtxt" id="progTxt"></span>
+    </div>
+  </section>
+
+  <!-- 2 · REGLAS -->
+  <details class="card" id="secReglas">
+    <summary class="h2"><span class="paso">2</span>Reglas y parámetros <span class="resumen" id="resReglas"></span></summary>
+    <div class="pgrid">
+      <div class="campo"><label for="pCal">Cambio de calidad (min)</label><input type="number" id="pCal" min="0" step="5"><div class="ay">Cada vez que cambia la descripción de calidad</div></div>
+      <div class="campo"><label for="pAncho">Cambio de ancho (min)</label><input type="number" id="pAncho" min="0" step="5"><div class="ay">Si el ancho cambia más que la tolerancia</div></div>
+      <div class="campo"><label for="pTol">Tolerancia de ancho (± mm)</label><input type="number" id="pTol" min="0" step="1"><div class="ay">Diferencias hasta este valor no paran la máquina</div></div>
+      <div class="campo"><label for="pMic">Cambio de micraje (min)</label><input type="number" id="pMic" min="0" step="5"><div class="ay">Cada vez que cambian las micras</div></div>
+      <div class="campo"><label for="pCong">Lotes en curso que no se mueven</label><input type="number" id="pCong" min="0" step="1"><div class="ay">Primeros lotes de cada máquina que se quedan donde están</div></div>
+      <div class="campo"><label for="pDisp">La producción cuenta como stock…</label><select id="pDisp"><option value="fin">Al terminar el lote</option><option value="progresiva">Según se fabrica</option></select><div class="ay">El stock se comprueba al cierre de cada día</div></div>
+      <div class="campo"><label for="pAnt">Antelación mínima (horas)</label><input type="number" id="pAnt" min="0" step="1"><div class="ay">Horas antes del cierre del día de la necesidad en que el lote debe estar listo</div></div>
+      <div class="campo"><label for="pCli">Bobinas sin necesidades (bobina cliente…)</label><select id="pCli"><option value="flexible">Flexibles</option><option value="estricto">No retrasar</option><option value="libre">Libres</option></select><div class="ay">Flexibles: mantienen la fecha del plan actual salvo que retrasarlas evite roturas. Libres: pueden ir en cualquier posición</div></div>
+      <div class="campo"><label for="pPri">Si hay roturas inevitables, priorizar…</label><select id="pPri"><option value="15000|0.1">Equilibrado</option><option value="20000|0">Menos bobinas afectadas</option><option value="0|0">Menos kilos en negativo</option></select><div class="ay">Equilibrado: pocas bobinas en rotura y sin roturas largas. Menos bobinas afectadas admite que alguna rotura dure más</div></div>
+      <div class="campo"><label for="pEsf">Profundidad de búsqueda</label><select id="pEsf"><option value="1">Rápida</option><option value="2">Normal</option><option value="5">Exhaustiva</option></select><div class="ay">Más profundidad prueba más secuencias y tarda más</div></div>
+    </div>
+    <div class="dosc">
+      <div>
+        <h3>Matriz de cambio entre familias (minutos)</h3>
+        <div class="tw"><table class="matriz" id="tblMatriz"></table></div>
+        <div class="expl">
+          <b>Cómo se calcula un cambio.</b> Entre dos lotes consecutivos de una extrusora se suman:
+          el <b>cambio de calidad</b> si la descripción es distinta; la <b>matriz</b> según el color base de origen y destino,
+          más la columna/fila CON_PE si se añade o se quita PE y CON_AB si se añade o se quita AB;
+          el <b>cambio de ancho</b> si la diferencia supera la tolerancia; y el <b>cambio de micraje</b> si las micras son distintas.
+          Micras y ancho salen de la key (<i>micras-ancho-…</i>).
+        </div>
+      </div>
+      <div>
+        <h3>Familia de cada calidad</h3>
+        <div class="tw tabla-alta" style="max-height:330px"><table class="clasif" id="tblClasif"><tbody><tr><td class="vacio">Carga el fichero de calidades para ver y corregir la familia asignada a cada una.</td></tr></tbody></table></div>
+        <div class="expl">La familia se deduce de la descripción (OPACO/OPACA, NEGRO, CLEAR, GRANZA, AZUL, BLANCO, PE, AB). Si alguna no es correcta, cámbiala aquí antes de calcular.</div>
+      </div>
+    </div>
+    <div class="acciones"><button class="btn sec" id="btnReset" type="button">Restaurar valores del documento</button></div>
+  </details>
+
+  <!-- 3 · RESULTADOS -->
+  <div id="resultados" hidden>
+    <div class="kpis" id="kpis"></div>
+  </div>
+  <section class="card" id="secAvisos" hidden>
+    <h2>Diagnóstico</h2>
+    <div class="avisos" id="avisos" style="margin-top:10px"></div>
+  </section>
+  <section class="card" id="secResumen" hidden>
+    <h2>Resumen por extrusora</h2>
+    <div class="tw" style="margin-top:10px"><table id="tblResumen"></table></div>
+  </section>
+  <section class="card" id="secDetalle" hidden>
+    <div class="tabs" role="tablist">
+      <button class="tab on" data-tab="sec" type="button">Secuencia propuesta</button>
+      <button class="tab" data-tab="gantt" type="button">Gantt</button>
+      <button class="tab" data-tab="stock" type="button">Stock por bobina</button>
+      <button class="tab" data-tab="cap" type="button">Capacidad</button>
+      <span style="flex:1"></span>
+      <button class="btn pri" id="btnExport" type="button" style="align-self:center;margin-bottom:6px">Descargar propuesta (Excel)</button>
+    </div>
+
+    <div data-panel="sec">
+      <div class="barra">
+        <span class="et">Extrusora</span><div class="seg" id="segMaq"></div>
+        <span class="et">Ver</span><div class="seg" id="segEsc"><button type="button" data-v="propuesta" class="on">Propuesta</button><button type="button" data-v="actual">Actual (recalculada)</button></div>
+        <span class="esp"></span><span class="et" id="infoSec"></span>
+      </div>
+      <div class="tw tabla-alta"><table id="tblSec"></table></div>
+    </div>
+
+    <div data-panel="gantt" hidden>
+      <div class="barra">
+        <span class="et">Escala</span><div class="seg" id="segZoom"><button type="button" data-v="16">Todo</button><button type="button" data-v="44" class="on">Media</button><button type="button" data-v="110">Detalle</button></div>
+        <span class="esp"></span><span class="et">Pasa el cursor por un lote para ver el detalle y dónde estaba en la secuencia actual</span>
+      </div>
+      <div class="gantt"><div class="izq" id="ganttIzq"></div><div class="der" id="ganttDer"></div></div>
+      <div class="leyenda" id="ganttLey"></div>
+    </div>
+
+    <div data-panel="stock" hidden>
+      <div class="barra">
+        <span class="et">Mostrar</span>
+        <select id="selFiltro"><option value="neg">Con rotura (actual o propuesta)</option><option value="todas">Todas las bobinas</option><option value="cli">Sin necesidades (bobina cliente)</option></select>
+        <select id="selMaqStock"></select>
+        <input type="search" id="busca" placeholder="Buscar key…" aria-label="Buscar key">
+        <span class="esp"></span><span class="et" id="infoStock"></span>
+      </div>
+      <div class="stockgrid">
+        <div class="tw tabla-alta"><table id="tblStock"></table></div>
+        <div class="fig" id="figStock"></div>
+      </div>
+    </div>
+
+    <div data-panel="cap" hidden>
+      <p class="nota" style="margin-bottom:12px">Horas de producción imprescindibles para cubrir las necesidades acumuladas hasta cada día (sin contar ningún cambio y aunque los lotes se pudieran partir) frente a las horas de máquina disponibles. Cuando la línea de horas necesarias va por encima, la rotura no se puede evitar cambiando el orden.</p>
+      <div class="multi" id="capMulti"></div>
+    </div>
+  </section>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+/* ==========================================================================
+   MOTOR DE SECUENCIACIÓN DE BOBINAS
+   - Tiempos de cambio (calidad, matriz de familias, ancho, micraje)
+   - Simulación de stock diario por bobina
+   - Optimizador: 1º evitar stock negativo, 2º minimizar tiempo perdido en cambios
+   Sin dependencias; funciona en navegador y en Node (para pruebas).
+   ========================================================================== */
+const Motor = (function () {
+  'use strict';
+
+  const HORA = 3600000, DIA = 86400000;
+  const COLORES = ['OPACO', 'NEGRO', 'CLEAR', 'GRANZA', 'AZUL', 'BLANCO'];
+  const FAMILIAS = COLORES.concat(['CON_PE', 'CON_AB']);
+
+  // Matriz de cambio del documento (minutos). Fila = origen, columna = destino.
+  const MATRIZ_DEF = {
+    OPACO:  { OPACO: 0,   NEGRO: 30, CLEAR: 120, GRANZA: 120, AZUL: 30, BLANCO: 30,  CON_PE: 20, CON_AB: 0 },
+    NEGRO:  { OPACO: 150, NEGRO: 0,  CLEAR: 150, GRANZA: 150, AZUL: 60, BLANCO: 100, CON_PE: 20, CON_AB: 0 },
+    CLEAR:  { OPACO: 30,  NEGRO: 30, CLEAR: 0,   GRANZA: 30,  AZUL: 30, BLANCO: 30,  CON_PE: 20, CON_AB: 0 },
+    GRANZA: { OPACO: 30,  NEGRO: 30, CLEAR: 30,  GRANZA: 0,   AZUL: 30, BLANCO: 30,  CON_PE: 20, CON_AB: 0 },
+    AZUL:   { OPACO: 120, NEGRO: 30, CLEAR: 120, GRANZA: 120, AZUL: 0,  BLANCO: 30,  CON_PE: 20, CON_AB: 0 },
+    BLANCO: { OPACO: 60,  NEGRO: 30, CLEAR: 120, GRANZA: 120, AZUL: 30, BLANCO: 0,   CON_PE: 20, CON_AB: 0 },
+    CON_PE: { OPACO: 20,  NEGRO: 20, CLEAR: 20,  GRANZA: 20,  AZUL: 20, BLANCO: 20,  CON_PE: 0,  CON_AB: 0 },
+    CON_AB: { OPACO: 0,   NEGRO: 0,  CLEAR: 0,   GRANZA: 0,   AZUL: 0,  BLANCO: 0,   CON_PE: 0,  CON_AB: 0 },
+  };
+
+  const PARAMS_DEF = {
+    tCalidad: 90,          // min por cambio de calidad (descripción distinta)
+    tAncho: 90,            // min por cambio de ancho superior a la tolerancia
+    tolAncho: 20,          // mm de tolerancia de ancho sin parada
+    tMicras: 30,           // min por cambio de micraje
+    congelados: 1,         // lotes iniciales de cada máquina que no se mueven (en curso)
+    disponibilidad: 'fin', // 'fin' = el lote cuenta al terminar | 'progresiva' = según se fabrica
+    antelacionH: 0,        // horas de antelación exigidas antes del cierre del día de la necesidad
+    sinNecesidad: 'flexible', // bobinas sin necesidad (bobina cliente…): 'flexible' | 'estricto' | 'libre'
+    tolRetrasoDias: 0,     // días de retraso admitidos en esas bobinas respecto a la secuencia actual
+    penalDiaKg: 15000,     // kg equivalentes que suma cada día que una bobina está en negativo
+    pesoRacha: 0.1,        // cada día consecutivo en negativo pesa (1 + pesoRacha·(n-1)) veces: castiga las roturas largas
+    esfuerzo: 2,           // multiplicador de iteraciones del optimizador
+    semilla: 20261111,
+  };
+
+  function copiaMatriz(m) {
+    const o = {};
+    for (const a of FAMILIAS) { o[a] = {}; for (const b of FAMILIAS) o[a][b] = Number((m[a] || {})[b]) || 0; }
+    return o;
+  }
+
+  function sinAcentos(s) {
+    return String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+  }
+
+  // Familia de la matriz a partir de la descripción de la calidad.
+  // Color base (fila/columna de la matriz) + atributos "con PE" y "con AB".
+  function clasificar(desc) {
+    const s = sinAcentos(desc);
+    let color = 'CLEAR', reconocida = true;
+    if (/(^|[^A-Z])NEGR[OA]([^A-Z]|$)/.test(s)) color = 'NEGRO';
+    else if (/(^|[^A-Z])AZUL([^A-Z]|$)/.test(s)) color = 'AZUL';
+    else if (/(^|[^A-Z])BLANC[OA]([^A-Z]|$)/.test(s)) color = 'BLANCO';
+    else if (/(^|[^A-Z])OPAC[OA]([^A-Z]|$)/.test(s)) color = 'OPACO';
+    else if (/(^|[^A-Z])GRANZA([^A-Z]|$)/.test(s)) color = 'GRANZA';
+    else if (/(^|[^A-Z])CLEAR([^A-Z]|$)/.test(s)) color = 'CLEAR';
+    else reconocida = false;
+    const pe = /(^|[^A-Z0-9])PE([^A-Z0-9]|$)/.test(s);
+    const ab = /(^|[^A-Z])AB([^A-Z]|$)/.test(s);
+    return { color, pe, ab, reconocida };
+  }
+
+  function partesKey(key) {
+    const p = String(key == null ? '' : key).trim().split('-');
+    return { micras: parseFloat(p[0]), ancho: parseFloat(p[1]) };
+  }
+
+  // Tiempo de cambio (min) al pasar del lote a al lote b en la misma máquina.
+  function cambio(a, b, P) {
+    const M = P.matriz;
+    let cal = 0, mat = 0, an = 0, mic = 0;
+    if (a.calidad !== b.calidad) cal = P.tCalidad;
+    if (a.color !== b.color) mat += M[a.color][b.color];
+    if (a.pe !== b.pe) mat += a.pe ? M.CON_PE[b.color] : M[a.color].CON_PE;
+    if (a.ab !== b.ab) mat += a.ab ? M.CON_AB[b.color] : M[a.color].CON_AB;
+    if (Math.abs(a.ancho - b.ancho) > P.tolAncho) an = P.tAncho;
+    if (a.micras !== b.micras) mic = P.tMicras;
+    return { cal, mat, an, mic, total: cal + mat + an + mic };
+  }
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ----------------------------------------------------------------------
+     MODELO
+     datos = { calidades:[{key,calidad}], necesidades:[{key,calidad,fecha,necesidad,stock}],
+               secuencia:[{key,maquina,cantidad,inicio,fin}] }   (fechas en ms "de reloj")
+     ---------------------------------------------------------------------- */
+  function construirModelo(datos, paramsUsuario, clasifUsuario) {
+    const P = Object.assign({}, PARAMS_DEF, paramsUsuario || {});
+    P.matriz = copiaMatriz((paramsUsuario && paramsUsuario.matriz) || MATRIZ_DEF);
+    const clasifOv = clasifUsuario || {};
+    const avisos = [];
+
+    // --- calidad por key
+    const calDe = new Map();
+    for (const r of datos.calidades || []) if (r.key) calDe.set(r.key, r.calidad || '');
+    for (const r of datos.necesidades || []) if (r.key && !calDe.get(r.key) && r.calidad) calDe.set(r.key, r.calidad);
+
+    const clasifCache = new Map();
+    function clasifDe(calidad) {
+      if (!clasifCache.has(calidad)) {
+        const auto = clasificar(calidad);
+        const ov = clasifOv[calidad];
+        clasifCache.set(calidad, ov ? { color: ov.color, pe: !!ov.pe, ab: !!ov.ab, reconocida: true, manual: true } : auto);
+      }
+      return clasifCache.get(calidad);
+    }
+
+    // --- lotes
+    const lotes = [];
+    const maqMap = new Map();
+    const sinCalidad = new Set(), keyRara = new Set();
+    (datos.secuencia || []).forEach((r, i) => {
+      if (!r.key || !r.maquina) return;
+      const pk = partesKey(r.key);
+      if (!isFinite(pk.micras) || !isFinite(pk.ancho)) keyRara.add(r.key);
+      let calidad = calDe.get(r.key);
+      if (!calidad) { sinCalidad.add(r.key); calidad = ''; }
+      const c = clasifDe(calidad);
+      const L = {
+        id: lotes.length, fila: i + 2, key: r.key, maquina: r.maquina,
+        cantidad: Number(r.cantidad) || 0, inicio0: r.inicio, fin0: r.fin,
+        micras: isFinite(pk.micras) ? pk.micras : 0, ancho: isFinite(pk.ancho) ? pk.ancho : 0,
+        calidad, color: c.color, pe: c.pe, ab: c.ab, durH: NaN,
+      };
+      lotes.push(L);
+      if (!maqMap.has(r.maquina)) maqMap.set(r.maquina, []);
+      maqMap.get(r.maquina).push(L);
+    });
+    if (!lotes.length) throw new Error('La secuenciación actual no contiene lotes válidos.');
+    if (sinCalidad.size) avisos.push({ tipo: 'aviso', texto: 'Bobinas sin calidad en el fichero de calidades (se tratan como CLEAR): ' + [...sinCalidad].join(', ') });
+    if (keyRara.size) avisos.push({ tipo: 'aviso', texto: 'Keys de las que no se ha podido leer micras/ancho: ' + [...keyRara].join(', ') });
+
+    // --- máquinas: orden actual por fecha de inicio (estable)
+    const maquinas = [];
+    for (const [nombre, arr] of maqMap) {
+      const conFecha = arr.filter(l => isFinite(l.inicio0));
+      const orden = arr.slice().sort((a, b) => {
+        const ai = isFinite(a.inicio0) ? a.inicio0 : Infinity, bi = isFinite(b.inicio0) ? b.inicio0 : Infinity;
+        return ai - bi || a.id - b.id;
+      });
+      // duración de cada lote = la del plan actual; si falta, ritmo medio de la máquina
+      let sq = 0, sh = 0;
+      for (const l of arr) {
+        const d = (l.fin0 - l.inicio0) / HORA;
+        if (isFinite(d) && d > 0) { l.durH = d; sq += l.cantidad; sh += d; }
+      }
+      const ritmo = sh > 0 ? sq / sh : 1000;
+      let estimados = 0;
+      for (const l of arr) if (!(l.durH > 0)) { l.durH = Math.max(0.25, l.cantidad / ritmo); estimados++; }
+      if (estimados) avisos.push({ tipo: 'aviso', texto: nombre + ': ' + estimados + ' lote(s) sin fechas válidas; duración estimada con el ritmo medio (' + Math.round(ritmo) + ' kg/h).' });
+      const t0 = conFecha.length ? Math.min(...conFecha.map(l => l.inicio0)) : NaN;
+      maquinas.push({ nombre, ids: orden.map(l => l.id), t0, ritmo, kg: sq });
+    }
+    maquinas.sort((a, b) => a.nombre < b.nombre ? -1 : 1);
+
+    // --- origen de tiempos
+    let T0 = Infinity;
+    for (const m of maquinas) if (isFinite(m.t0)) T0 = Math.min(T0, m.t0);
+    for (const r of datos.necesidades || []) if (isFinite(r.fecha)) T0 = Math.min(T0, r.fecha);
+    if (!isFinite(T0)) throw new Error('No se han encontrado fechas válidas en los ficheros.');
+    for (const m of maquinas) { if (!isFinite(m.t0)) m.t0 = T0; m.t0h = (m.t0 - T0) / HORA; }
+    const dia0 = Math.floor(T0 / DIA) * DIA;
+    const off0 = (T0 - dia0) / HORA; // horas desde las 00:00 del primer día hasta T0
+
+    // --- claves (bobinas) con necesidades y stock
+    const claves = [], idxClave = new Map();
+    function clave(key) {
+      if (!idxClave.has(key)) {
+        idxClave.set(key, claves.length);
+        const cal = calDe.get(key) || '';
+        claves.push({ k: claves.length, key, calidad: cal, filas: [], lotes: [], stock0: 0, necTotal: 0, prodTotal: 0, maquinas: [] });
+      }
+      return claves[idxClave.get(key)];
+    }
+    let ultimoDiaNec = 0;
+    const tsMin = new Map();
+    for (const r of datos.necesidades || []) {
+      if (!r.key || !isFinite(r.fecha)) continue;
+      const K = clave(r.key);
+      const d = Math.floor((r.fecha - dia0) / DIA);
+      const nec = Math.max(0, Number(r.necesidad) || 0);
+      K.filas.push({ d, nec });
+      K.necTotal += nec;
+      if (nec > 0 && d > ultimoDiaNec) ultimoDiaNec = d;
+      const st = Number(r.stock) || 0;
+      if (!tsMin.has(r.key) || r.fecha < tsMin.get(r.key).ts) tsMin.set(r.key, { ts: r.fecha, st });
+      else if (r.fecha === tsMin.get(r.key).ts) tsMin.get(r.key).st += st;
+    }
+    for (const [key, v] of tsMin) clave(key).stock0 = v.st;
+    for (const l of lotes) {
+      const K = clave(l.key);
+      l.k = K.k; K.lotes.push(l.id); K.prodTotal += l.cantidad;
+      if (K.maquinas.indexOf(l.maquina) < 0) K.maquinas.push(l.maquina);
+    }
+
+    // --- matrices de cambio por máquina (índices locales = posición en la secuencia actual)
+    let peorCambio = 0;
+    for (const m of maquinas) {
+      const n = m.ids.length;
+      m.n = n;
+      m.S = new Float64Array(n * n);
+      m.dur = new Float64Array(n);
+      for (let a = 0; a < n; a++) {
+        m.dur[a] = lotes[m.ids[a]].durH;
+        for (let b = 0; b < n; b++) {
+          if (a === b) continue;
+          const c = cambio(lotes[m.ids[a]], lotes[m.ids[b]], P).total;
+          m.S[a * n + b] = c;
+          if (c > peorCambio) peorCambio = c;
+        }
+      }
+      m.congelados = Math.max(0, Math.min(n, Math.round(P.congelados)));
+      m.claves = [...new Set(m.ids.map(id => lotes[id].k))];
+    }
+
+    // --- horizonte en días (suficiente para cualquier secuencia posible)
+    let finPeor = 0;
+    for (const m of maquinas) {
+      let h = m.t0h; for (let a = 0; a < m.n; a++) h += m.dur[a];
+      h += m.n * peorCambio / 60;
+      if (h > finPeor) finPeor = h;
+    }
+    const ND = Math.max(ultimoDiaNec, Math.ceil((off0 + finPeor + P.antelacionH) / 24)) + Math.ceil(P.tolRetrasoDias) + 3;
+
+    // --- demanda acumulada diaria
+    for (const K of claves) {
+      const D = new Float64Array(ND);
+      for (const f of K.filas) if (f.d >= 0 && f.d < ND) D[f.d] += f.nec; else if (f.d < 0) D[0] += f.nec;
+      for (let d = 1; d < ND; d++) D[d] += D[d - 1];
+      K.Dreal = D;
+      // lo que la secuencia no puede cubrir (falta cantidad planificada) no se penaliza: no depende del orden
+      const tope = K.stock0 + K.prodTotal;
+      K.faltaPlan = Math.max(0, D[ND - 1] - tope);
+      if (K.faltaPlan > 1e-6) { const Dc = new Float64Array(ND); for (let d = 0; d < ND; d++) Dc[d] = Math.min(D[d], tope); K.D = Dc; }
+      else K.D = D;
+      K.sintetica = false;
+      K.s0 = K.stock0;
+      K.peso = 1;
+    }
+
+    const modelo = { P, lotes, maquinas, claves, idxClave, T0, dia0, off0, ND, avisos, HORA, DIA, clasifCache };
+    prepararEvaluacion(modelo);
+
+    // --- secuencia actual recalculada con los tiempos de cambio
+    for (const m of maquinas) {
+      m.seqActual = Int32Array.from({ length: m.n }, (_, i) => i);
+      escribirTiempos(modelo, m, m.seqActual, modelo.curIni, modelo.curFin);
+    }
+
+    // --- bobinas sin necesidad: "demanda" ficticia = entregas del plan actual (para no retrasarlas)
+    if (P.sinNecesidad !== 'libre') {
+      for (const K of claves) {
+        if (K.necTotal > 0 || !K.lotes.length) continue;
+        K.sintetica = true;
+        K.peso = P.sinNecesidad === 'estricto' ? 5 : 0.2;
+        K.s0 = 0;
+        const D = new Float64Array(ND);
+        for (const id of K.lotes) {
+          let d = diaDisponible(modelo, modelo.curFin[id] + P.antelacionH) + Math.round(P.tolRetrasoDias);
+          d = Math.min(ND - 1, Math.max(0, d));
+          D[d] += lotes[id].cantidad;
+        }
+        for (let d = 1; d < ND; d++) D[d] += D[d - 1];
+        K.D = D; K.Dreal = D;
+      }
+    }
+    for (const K of claves) {
+      const D = K.D;
+      K.Dtot = D[ND - 1];
+      K.activa = K.Dtot > K.s0 + 1e-6;       // puede llegar a faltar
+      let dIni = 0; while (dIni < ND && D[dIni] <= K.s0 + 1e-6) dIni++;
+      K.dIni = dIni;
+      let dUlt = ND - 1; while (dUlt > 0 && D[dUlt - 1] >= K.Dtot - 1e-9) dUlt--;
+      K.dUlt = dUlt;                          // último día en que crece la demanda
+    }
+    return modelo;
+  }
+
+  function diaDisponible(mod, h) { // día cuyo cierre ya incluye una producción disponible en la hora h (desde T0)
+    return Math.ceil((mod.off0 + h) / 24 - 1e-9) - 1;
+  }
+
+  function prepararEvaluacion(mod) {
+    const nL = mod.lotes.length;
+    mod.curIni = new Float64Array(nL); mod.curFin = new Float64Array(nL); mod.curDia = new Int32Array(nL);
+    mod.canIni = new Float64Array(nL); mod.canFin = new Float64Array(nL); mod.canDia = new Int32Array(nL);
+    mod.curArea = new Float64Array(mod.claves.length);
+    mod.canArea = new Float64Array(mod.claves.length);
+    mod.qLote = Float64Array.from(mod.lotes.map(l => l.cantidad));
+    mod._dd = new Int32Array(64); mod._qq = new Float64Array(64);
+  }
+
+  // Tiempos (horas desde T0) de una secuencia en una máquina. Devuelve minutos de cambio.
+  function escribirTiempos(mod, m, seq, ini, fin) {
+    const n = m.n, S = m.S, dur = m.dur, ids = m.ids;
+    let t = m.t0h, setup = 0, prev = -1;
+    for (let p = 0; p < n; p++) {
+      const j = seq[p];
+      if (p) { const s = S[prev * n + j]; setup += s; t += s / 60; }
+      const g = ids[j];
+      ini[g] = t; t += dur[j]; fin[g] = t; prev = j;
+    }
+    return setup;
+  }
+
+  // Coste de rotura de una bobina (kg·día en negativo + penalización fija por día), dadas las fechas de sus lotes.
+  // Si se pasa "diario", lo rellena con el stock al cierre de cada día.
+  function evaluarClave(mod, K, ini, fin, diaArr, diario) {
+    const P = mod.P, ND = mod.ND, D = K.D, ls = K.lotes, m = ls.length;
+    const q = mod.qLote, F = P.penalDiaKg, B = P.pesoRacha;
+    let area = 0, racha = 0;
+    if (P.disponibilidad === 'progresiva') {
+      const d0 = diario ? 0 : K.dIni;
+      let dFin = K.dUlt;
+      if (!diario) for (let i = 0; i < m; i++) { const dd = diaDisponible(mod, fin[ls[i]] + P.antelacionH); if (dd > dFin) dFin = dd; }
+      else dFin = ND - 1;
+      if (dFin > ND - 1) dFin = ND - 1;
+      for (let d = d0; d <= dFin; d++) {
+        const cierre = (d + 1) * 24 - mod.off0 - P.antelacionH;
+        let nivel = K.s0;
+        for (let i = 0; i < m; i++) {
+          const g = ls[i], a = ini[g], b = fin[g];
+          if (cierre >= b) nivel += q[g];
+          else if (cierre > a) nivel += q[g] * (cierre - a) / (b - a);
+        }
+        const f = D[d] - nivel;
+        if (f > 1e-6) { area += (f + F) * (1 + B * racha); racha++; } else racha = 0;
+        if (diario) diario[d] = nivel - D[d];
+      }
+      return area * K.peso;
+    }
+    // disponibilidad al terminar el lote
+    let dd = mod._dd, qq = mod._qq;
+    if (m > dd.length) { dd = mod._dd = new Int32Array(m * 2); qq = mod._qq = new Float64Array(m * 2); }
+    for (let i = 0; i < m; i++) { // inserción ordenada por día de disponibilidad
+      const g = ls[i];
+      const dia = diaArr ? diaArr[g] : diaDisponible(mod, fin[g] + P.antelacionH);
+      let p = i;
+      while (p > 0 && dd[p - 1] > dia) { dd[p] = dd[p - 1]; qq[p] = qq[p - 1]; p--; }
+      dd[p] = dia; qq[p] = q[g];
+    }
+    let nivel = K.s0, p = 0;
+    if (diario) {
+      for (let d = 0; d < ND; d++) {
+        while (p < m && dd[p] <= d) nivel += qq[p++];
+        diario[d] = nivel - D[d];
+        if (D[d] - nivel > 1e-6) { area += (D[d] - nivel + F) * (1 + B * racha); racha++; } else racha = 0;
+      }
+      return area * K.peso;
+    }
+    let dFin = K.dUlt;
+    if (m && dd[m - 1] > dFin) dFin = dd[m - 1];
+    if (dFin > ND - 1) dFin = ND - 1;
+    const Dtot = K.Dtot;
+    for (let d = K.dIni; d <= dFin; d++) {
+      while (p < m && dd[p] <= d) nivel += qq[p++];
+      const f = D[d] - nivel;
+      if (f > 1e-6) { area += (f + F) * (1 + B * racha); racha++; }
+      else { racha = 0; if (nivel >= Dtot) break; }
+    }
+    return area * K.peso;
+  }
+
+  function fijarEstado(mod) { // recalcula curDia y curArea a partir de curIni/curFin
+    const P = mod.P;
+    for (let g = 0; g < mod.lotes.length; g++) mod.curDia[g] = diaDisponible(mod, mod.curFin[g] + P.antelacionH);
+    mod.canIni.set(mod.curIni); mod.canFin.set(mod.curFin); mod.canDia.set(mod.curDia);
+    for (const K of mod.claves) mod.curArea[K.k] = K.activa ? evaluarClave(mod, K, mod.curIni, mod.curFin, mod.curDia, null) : 0;
+  }
+
+  /* ----------------------------------------------------------------------
+     OPTIMIZADOR (por máquina): recocido simulado + búsqueda local
+     ---------------------------------------------------------------------- */
+  const W_AREA = 100; // 1 kg·día en negativo pesa como 100 min de cambio (prioridad casi absoluta)
+
+  function crearOptimizador(mod, m, rnd) {
+    const P = mod.P, n = m.n, f = m.congelados, ids = m.ids;
+    const prog = P.disponibilidad === 'progresiva';
+    const clavesM = m.claves.map(k => mod.claves[k]).filter(K => K.activa);
+    const lotesClaveM = clavesM.map(K => K.lotes.filter(id => mod.lotes[id].maquina === m.nombre));
+    const cambiadas = new Int32Array(clavesM.length); let nCamb = 0;
+    const res = { area: 0, setup: 0 };
+    let areaOtras = 0; // claves activas de la máquina: suma actual
+    function areaActual() { let a = 0; for (const K of clavesM) a += mod.curArea[K.k]; return a; }
+
+    function evaluar(seq) {
+      const setup = escribirTiempos(mod, m, seq, mod.canIni, mod.canFin);
+      const ant = P.antelacionH;
+      if (!prog) for (let a = 0; a < n; a++) { const g = ids[a]; mod.canDia[g] = Math.ceil((mod.off0 + mod.canFin[g] + ant) / 24 - 1e-9) - 1; }
+      let area = 0; nCamb = 0;
+      for (let c = 0; c < clavesM.length; c++) {
+        const K = clavesM[c], ls = lotesClaveM[c];
+        let cambia = false;
+        if (prog) { for (let i = 0; i < ls.length; i++) if (Math.abs(mod.canFin[ls[i]] - mod.curFin[ls[i]]) > 1e-9) { cambia = true; break; } }
+        else { for (let i = 0; i < ls.length; i++) if (mod.canDia[ls[i]] !== mod.curDia[ls[i]]) { cambia = true; break; } }
+        if (cambia) {
+          const a = evaluarClave(mod, K, mod.canIni, mod.canFin, prog ? null : mod.canDia, null);
+          mod.canArea[K.k] = a; cambiadas[nCamb++] = c; area += a;
+        } else area += mod.curArea[K.k];
+      }
+      res.area = area; res.setup = setup;
+      return res;
+    }
+    function confirmar() {
+      for (let a = 0; a < n; a++) { const g = ids[a]; mod.curIni[g] = mod.canIni[g]; mod.curFin[g] = mod.canFin[g]; mod.curDia[g] = mod.canDia[g]; }
+      for (let i = 0; i < nCamb; i++) { const K = clavesM[cambiadas[i]]; mod.curArea[K.k] = mod.canArea[K.k]; }
+    }
+    function fijar(seq) { // deja el estado "actual" del modelo en esta secuencia
+      escribirTiempos(mod, m, seq, mod.curIni, mod.curFin);
+      for (let a = 0; a < n; a++) { const g = ids[a]; mod.curDia[g] = diaDisponible(mod, mod.curFin[g] + P.antelacionH); mod.canIni[g] = mod.curIni[g]; mod.canFin[g] = mod.curFin[g]; mod.canDia[g] = mod.curDia[g]; }
+      for (const K of clavesM) mod.curArea[K.k] = evaluarClave(mod, K, mod.curIni, mod.curFin, prog ? null : mod.curDia, null);
+      const r = evaluar(seq);
+      return { area: r.area, setup: r.setup };
+    }
+
+    // ---- movimientos (escriben en "dst" a partir de "src")
+    const gruposCal = new Map();
+    for (let a = 0; a < n; a++) { const c = mod.lotes[ids[a]].calidad; if (!gruposCal.has(c)) gruposCal.set(c, []); gruposCal.get(c).push(a); }
+    const grupoDe = new Array(n); for (let a = 0; a < n; a++) grupoDe[a] = gruposCal.get(mod.lotes[ids[a]].calidad);
+
+    function moverBloque(src, dst, i, L, p) { // saca [i,i+L) y lo inserta en la posición p del resto
+      let w = 0, r = 0;
+      const resto = n - L;
+      for (let x = 0; x <= resto; x++) {
+        if (x === p) for (let y = 0; y < L; y++) dst[w++] = src[i + y];
+        if (x === resto) break;
+        if (r === i) r += L;
+        dst[w++] = src[r++];
+      }
+    }
+    function vecino(src, dst) {
+      const libres = n - f;
+      const u = rnd();
+      if (u < 0.30) { // recolocar un lote
+        const i = f + (rnd() * libres) | 0;
+        let p = f + (rnd() * (libres - 1)) | 0; if (p >= i) p++;
+        moverBloque(src, dst, i, 1, p > i ? p : p);
+      } else if (u < 0.48) { // intercambiar dos lotes
+        const i = f + (rnd() * libres) | 0; let j = f + (rnd() * (libres - 1)) | 0; if (j >= i) j++;
+        dst.set(src); const t = dst[i]; dst[i] = dst[j]; dst[j] = t;
+      } else if (u < 0.68) { // recolocar un bloque
+        const L = 2 + (rnd() * Math.min(7, libres - 2)) | 0;
+        const i = f + (rnd() * (libres - L + 1)) | 0;
+        const p = f + (rnd() * (libres - L + 1)) | 0;
+        if (p === i) { dst.set(src); const a = f + (rnd() * libres) | 0, b = f + (rnd() * libres) | 0; const t = dst[a]; dst[a] = dst[b]; dst[b] = t; }
+        else moverBloque(src, dst, i, L, p);
+      } else if (u < 0.92) { // llevar un lote junto a otro de su misma calidad
+        const i = f + (rnd() * libres) | 0;
+        const g = grupoDe[src[i]];
+        if (g.length < 2) { let p = f + (rnd() * (libres - 1)) | 0; if (p >= i) p++; moverBloque(src, dst, i, 1, p); return; }
+        let otro = g[(rnd() * g.length) | 0]; if (otro === src[i]) otro = g[(g.indexOf(otro) + 1) % g.length];
+        let pos = -1; for (let x = 0; x < n; x++) if (src[x] === otro) { pos = x; break; }
+        if (pos < f) pos = f - 1;
+        let p = pos + (rnd() < 0.5 ? 0 : 1);      // antes o después (en coordenadas originales)
+        if (p < f) p = f;
+        if (p > i) p--;                            // coordenadas tras quitar i
+        if (p === i) { p = Math.min(n - 1, Math.max(f, p + (rnd() < 0.5 ? -1 : 1))); }
+        moverBloque(src, dst, i, 1, p);
+      } else { // invertir un tramo
+        let i = f + (rnd() * libres) | 0, j = f + (rnd() * libres) | 0;
+        if (i > j) { const t = i; i = j; j = t; }
+        if (j - i > 12) j = i + 12;
+        dst.set(src);
+        for (let a = i, b = j; a < b; a++, b--) { const t = dst[a]; dst[a] = dst[b]; dst[b] = t; }
+      }
+    }
+
+    return { evaluar, confirmar, fijar, vecino, moverBloque, n, f, areaActual };
+  }
+
+  // Orden inicial por urgencia: fecha en que la bobina se queda sin stock si no llega el lote.
+  function ordenUrgencia(mod, m) {
+    const n = m.n, f = m.congelados, ids = m.ids;
+    const limite = new Float64Array(n).fill(Infinity);
+    const acumPrevio = new Map();
+    for (let a = 0; a < n; a++) {
+      const l = mod.lotes[ids[a]], K = mod.claves[l.k];
+      const antes = acumPrevio.get(l.k) || 0;
+      acumPrevio.set(l.k, antes + l.cantidad);
+      const nivel = K.s0 + antes;
+      if (nivel >= K.Dtot - 1e-6) continue;
+      let d = 0; while (d < mod.ND && K.D[d] <= nivel + 1e-6) d++;
+      limite[a] = d;
+    }
+    const libres = []; for (let a = f; a < n; a++) libres.push(a);
+    libres.sort((a, b) => (limite[a] - limite[b]) || (a - b));
+    const seq = new Int32Array(n);
+    for (let a = 0; a < f; a++) seq[a] = a;
+    libres.forEach((a, i) => { seq[f + i] = a; });
+    return seq;
+  }
+
+  // Generador: optimiza una máquina cediendo el control periódicamente (para barra de progreso).
+  // Hace varias pasadas independientes (según el esfuerzo) y se queda con la mejor.
+  function* optimizarMaquina(mod, m) {
+    const n = m.n, f = m.congelados;
+    // azar reproducible e independiente por máquina y pasada: mismos datos -> misma propuesta
+    const azar = { f: mulberry32(mod.P.semilla) };
+    const rnd = () => azar.f();
+    const indiceMaq = mod.maquinas.indexOf(m);
+    const opt = crearOptimizador(mod, m, rnd);
+    const libres = n - f;
+    const base = opt.fijar(m.seqActual);
+    const baseArea = base.area, baseSetup = base.setup;
+    if (libres < 2) { m.seqPropuesta = Int32Array.from(m.seqActual); return; }
+
+    const coste = (r) => W_AREA * r.area + r.setup;
+    const esf = Math.max(0.5, mod.P.esfuerzo);
+    const pasadas = esf <= 1 ? 1 : esf <= 2 ? 2 : Math.round(esf);
+    const NA = Math.round(60000 * Math.max(1, n / 40));
+    const NB = Math.round(90000 * Math.max(1, n / 40));
+    const total = (NA + NB) * pasadas;
+    const urg = ordenUrgencia(mod, m);
+    let global = Int32Array.from(m.seqActual), aGlobal = baseArea, sGlobal = baseSetup;
+    const mejorQue = (a, s, a2, s2) => a < a2 - 1e-6 || (a <= a2 + 1e-6 && s < s2 - 1e-9);
+
+    for (let pas = 0; pas < pasadas; pas++) {
+      const hecho0 = (NA + NB) * pas;
+      azar.f = mulberry32(mod.P.semilla + 7919 * indiceMaq + 104729 * pas);
+      // arranque: el mejor entre la secuencia actual y el orden por urgencia
+      let cur = Int32Array.from(m.seqActual), can = new Int32Array(n);
+      let rc = opt.fijar(cur), cCur = coste(rc), aCur = rc.area, sCur = rc.setup;
+      const ru = opt.fijar(urg);
+      if (coste(ru) < cCur) { cur = Int32Array.from(urg); cCur = coste(ru); aCur = ru.area; sCur = ru.setup; }
+      else opt.fijar(cur);
+      const mejor = Int32Array.from(cur); let aMejor = aCur, sMejor = sCur;
+
+      // ---- Fase A: coste ponderado (roturas ≫ cambios)
+      const muestras = [];
+      for (let i = 0; i < 150; i++) { opt.vecino(cur, can); const d = coste(opt.evaluar(can)) - cCur; if (d > 1e-9) muestras.push(d); }
+      muestras.sort((a, b) => a - b);
+      const Tini = Math.max(200, muestras.length ? muestras[(muestras.length * 0.5) | 0] : 100);
+      const kA = Math.log(2 / Tini) / NA;
+      for (let it = 0; it < NA; it++) {
+        const T = Tini * Math.exp(kA * it);
+        opt.vecino(cur, can);
+        const r = opt.evaluar(can);
+        const c = W_AREA * r.area + r.setup, d = c - cCur;
+        if (d <= 0 || rnd() < Math.exp(-d / T)) {
+          opt.confirmar(); const t = cur; cur = can; can = t; cCur = c; aCur = r.area; sCur = r.setup;
+          if (mejorQue(aCur, sCur, aMejor, sMejor)) { mejor.set(cur); aMejor = aCur; sMejor = sCur; }
+        }
+        if ((it & 2047) === 2047) yield (hecho0 + it) / total;
+      }
+
+      // ---- Fase B: minimizar cambios sin empeorar las roturas alcanzadas
+      cur.set(mejor); rc = opt.fijar(cur); aCur = rc.area; sCur = rc.setup;
+      const kB = Math.log(0.5 / 120) / NB;
+      for (let it = 0; it < NB; it++) {
+        const T = 120 * Math.exp(kB * it);
+        opt.vecino(cur, can);
+        const r = opt.evaluar(can);
+        if (r.area > aMejor + 1e-6) continue;
+        const d = r.setup - sCur;
+        if (d <= 0 || r.area < aCur - 1e-6 || rnd() < Math.exp(-d / T)) {
+          opt.confirmar(); const t = cur; cur = can; can = t; aCur = r.area; sCur = r.setup;
+          if (mejorQue(aCur, sCur, aMejor, sMejor)) { mejor.set(cur); aMejor = aCur; sMejor = sCur; }
+        }
+        if ((it & 2047) === 2047) yield (hecho0 + NA + it) / total;
+      }
+
+      // ---- Búsqueda local determinista (recolocar bloques cortos e intercambiar)
+      cur.set(mejor); rc = opt.fijar(cur); aCur = rc.area; sCur = rc.setup;
+      let hubo = true, vueltas = 0;
+      const acepta = (r) => r.area < aCur - 1e-6 || (r.area <= aCur + 1e-6 && r.setup < sCur - 1e-9);
+      while (hubo && vueltas < 12) {
+        hubo = false; vueltas++;
+        for (let L = 1; L <= 3; L++) {
+          for (let i = f; i + L <= n; i++) {
+            for (let p = f; p <= n - L; p++) {
+              if (p === i) continue;
+              opt.moverBloque(cur, can, i, L, p);
+              const r = opt.evaluar(can);
+              if (acepta(r)) { opt.confirmar(); const t = cur; cur = can; can = t; aCur = r.area; sCur = r.setup; hubo = true; }
+            }
+          }
+          yield (hecho0 + NA + NB) / total;
+        }
+        for (let i = f; i < n; i++) for (let j = i + 1; j < n; j++) {
+          can.set(cur); const t0 = can[i]; can[i] = can[j]; can[j] = t0;
+          const r = opt.evaluar(can);
+          if (acepta(r)) { opt.confirmar(); const t = cur; cur = can; can = t; aCur = r.area; sCur = r.setup; hubo = true; }
+        }
+        yield (hecho0 + NA + NB) / total;
+      }
+      if (mejorQue(aCur, sCur, aGlobal, sGlobal)) { global = Int32Array.from(cur); aGlobal = aCur; sGlobal = sCur; }
+    }
+    opt.fijar(global);   // nunca peor que la secuencia actual: "global" parte de ella
+    m.seqPropuesta = Int32Array.from(global);
+  }
+
+  /* ----------------------------------------------------------------------
+     RESULTADOS
+     ---------------------------------------------------------------------- */
+  function detalleSecuencia(mod, m, seq) {
+    const P = mod.P, ids = m.ids, n = m.n;
+    const ini = new Float64Array(mod.lotes.length), fin = new Float64Array(mod.lotes.length);
+    const setup = escribirTiempos(mod, m, seq, ini, fin);
+    const filas = [];
+    let nCal = 0, nAn = 0, nMic = 0, nMat = 0, minCal = 0, minMat = 0, minAn = 0, minMic = 0;
+    for (let p = 0; p < n; p++) {
+      const l = mod.lotes[ids[seq[p]]];
+      let c = { cal: 0, mat: 0, an: 0, mic: 0, total: 0 };
+      if (p) c = cambio(mod.lotes[ids[seq[p - 1]]], l, P);
+      if (c.cal) { nCal++; minCal += c.cal; } if (c.mat) { nMat++; minMat += c.mat; }
+      if (c.an) { nAn++; minAn += c.an; } if (c.mic) { nMic++; minMic += c.mic; }
+      filas.push({ pos: p, lote: l, posActual: seq[p], cambio: c, iniH: ini[l.id], finH: fin[l.id],
+        ini: mod.T0 + ini[l.id] * HORA, fin: mod.T0 + fin[l.id] * HORA, congelado: p < m.congelados });
+    }
+    const finH = n ? filas[n - 1].finH : m.t0h;
+    return { filas, setupMin: setup, nCal, nAn, nMic, nMat, minCal, minMat, minAn, minMic, finH, fin: mod.T0 + finH * HORA, ini, finArr: fin };
+  }
+
+  function resultados(mod) {
+    const P = mod.P, nL = mod.lotes.length, ND = mod.ND;
+    const out = { maquinas: [], claves: [], T0: mod.T0, dia0: mod.dia0, ND, avisos: mod.avisos.slice() };
+    const iniA = new Float64Array(nL), finA = new Float64Array(nL), iniP = new Float64Array(nL), finP = new Float64Array(nL);
+    for (const m of mod.maquinas) {
+      const a = detalleSecuencia(mod, m, m.seqActual), p = detalleSecuencia(mod, m, m.seqPropuesta || m.seqActual);
+      for (const id of m.ids) { iniA[id] = a.ini[id]; finA[id] = a.finArr[id]; iniP[id] = p.ini[id]; finP[id] = p.finArr[id]; }
+      // posición nueva de cada lote
+      const posNueva = new Int32Array(m.n); p.filas.forEach((f, i) => { posNueva[f.posActual] = i; });
+      a.filas.forEach((f, i) => { f.posNueva = posNueva[i]; });
+      const finActualDe = new Map(a.filas.map(f => [f.lote.id, f.fin]));
+      p.filas.forEach(f => { f.finActual = finActualDe.get(f.lote.id); });
+      out.maquinas.push({ nombre: m.nombre, n: m.n, kg: m.kg, t0: m.t0, actual: a, propuesta: p });
+    }
+    let ultimoDia = 0;
+    for (const K of mod.claves) {
+      const dA = new Float64Array(ND), dP = new Float64Array(ND);
+      const costeA = evaluarClave(mod, K, iniA, finA, null, dA);
+      const costeP = evaluarClave(mod, K, iniP, finP, null, dP);
+      const resumen = (d) => {
+        let min = Infinity, dMin = -1, prim = -1, dias = 0, area = 0, racha = 0, rachaMax = 0;
+        for (let i = 0; i < ND; i++) {
+          if (d[i] < min) { min = d[i]; dMin = i; }
+          if (d[i] < -1e-6) { dias++; area -= d[i]; if (prim < 0) prim = i; racha++; if (racha > rachaMax) rachaMax = racha; } else racha = 0;
+        }
+        return { min, dMin, primerDia: prim, diasNeg: dias, area, rachaMax };
+      };
+      let dUltProd = 0;
+      for (const id of K.lotes) { dUltProd = Math.max(dUltProd, diaDisponible(mod, Math.max(finA[id], finP[id]))); }
+      ultimoDia = Math.max(ultimoDia, K.dUlt, dUltProd);
+      const rA = resumen(dA), rP = resumen(dP);
+      // stock real (incluye la parte de necesidad que ningún lote planificado cubre)
+      const real = (d) => { const o = new Float64Array(ND); for (let i = 0; i < ND; i++) o[i] = d[i] - (K.Dreal[i] - K.D[i]); return o; };
+      let diaFalta = -1;
+      if (K.faltaPlan > 1e-6) for (let i = 0; i < ND; i++) if (K.Dreal[i] - K.D[i] > 1e-6) { diaFalta = i; break; }
+      out.claves.push({
+        key: K.key, calidad: K.calidad, stock0: K.stock0, necTotal: K.necTotal, prodTotal: K.prodTotal,
+        sintetica: K.sintetica, maquinas: K.maquinas, nLotes: K.lotes.length, D: K.Dreal,
+        faltaPlan: K.faltaPlan, diaFalta,
+        actual: Object.assign({ coste: costeA, diario: real(dA) }, rA),
+        propuesta: Object.assign({ coste: costeP, diario: real(dP) }, rP),
+      });
+    }
+    out.ultimoDia = Math.min(ND - 1, ultimoDia + 1);
+    // Diagnóstico de capacidad: horas de producción imprescindibles (sin cambios y aunque se partieran lotes)
+    // frente a horas disponibles, acumuladas por día.
+    for (const mo of out.maquinas) {
+      const m = mod.maquinas.find(x => x.nombre === mo.nombre);
+      const req = new Float64Array(ND), disp = new Float64Array(ND);
+      for (const k of m.claves) {
+        const K = mod.claves[k];
+        if (K.sintetica) continue;
+        let kgM = 0, hM = 0;
+        for (const id of K.lotes) { const l = mod.lotes[id]; if (l.maquina === m.nombre) { kgM += l.cantidad; hM += l.durH; } }
+        if (!(kgM > 0) || !(hM > 0)) continue;
+        const cuota = kgM / K.prodTotal, ritmo = kgM / hM;
+        for (let d = 0; d < ND; d++) { const f = K.D[d] - K.s0; if (f > 1e-6) req[d] += cuota * Math.min(f, K.prodTotal) / ritmo; }
+      }
+      let peor = 0, dPeor = -1, dPrim = -1;
+      for (let d = 0; d < ND; d++) {
+        disp[d] = Math.max(0, (d + 1) * 24 - mod.off0 - m.t0h);
+        const f = req[d] - disp[d];
+        if (f > 1e-6) { if (dPrim < 0) dPrim = d; if (f > peor) { peor = f; dPeor = d; } }
+      }
+      mo.capacidad = { req, disp, faltaMaxH: peor, diaPeor: dPeor, primerDia: dPrim };
+    }
+    // KPIs globales
+    const k = { actual: {}, propuesta: {} };
+    for (const esc of ['actual', 'propuesta']) {
+      const o = k[esc];
+      o.setupMin = 0; o.nCal = 0; o.nAn = 0; o.nMic = 0; o.nMat = 0;
+      for (const m of out.maquinas) { const s = m[esc]; o.setupMin += s.setupMin; o.nCal += s.nCal; o.nAn += s.nAn; o.nMic += s.nMic; o.nMat += s.nMat; }
+      o.clavesNeg = 0; o.kgDia = 0; o.diasNeg = 0; o.peor = 0; o.retrasadas = 0; o.diasRetraso = 0; o.coste = 0; o.rachaMax = 0; o.largas = 0;
+      for (const c of out.claves) {
+        const r = c[esc];
+        o.coste += r.coste;
+        if (c.sintetica) { if (r.diasNeg > 0) { o.retrasadas++; o.diasRetraso += r.diasNeg; } continue; }
+        if (r.diasNeg > 0) { o.clavesNeg++; o.kgDia += r.area; o.diasNeg += r.diasNeg; if (r.min < o.peor) o.peor = r.min; if (r.rachaMax > o.rachaMax) o.rachaMax = r.rachaMax; if (r.rachaMax > 7) o.largas++; }
+      }
+    }
+    out.kpi = k;
+    return out;
+  }
+
+  // Ejecución síncrona completa (Node / pruebas)
+  function optimizarTodo(mod, alProgresar) {
+    fijarEstado(mod);
+    for (let i = 0; i < mod.maquinas.length; i++) {
+      const it = optimizarMaquina(mod, mod.maquinas[i]);
+      let r = it.next();
+      while (!r.done) { if (alProgresar) alProgresar(i, r.value); r = it.next(); }
+    }
+    return resultados(mod);
+  }
+
+  return { HORA, DIA, COLORES, FAMILIAS, MATRIZ_DEF, PARAMS_DEF, copiaMatriz, clasificar, partesKey, cambio, mulberry32,
+    construirModelo, fijarEstado, optimizarMaquina, optimizarTodo, resultados, diaDisponible };
+})();
+if (typeof module !== 'undefined' && module.exports) module.exports = Motor;
+</script>
+<script>
+/* ==========================================================================
+   LECTOR / ESCRITOR DE EXCEL (.xlsx) MÍNIMO — sin librerías externas
+   Lee la primera hoja de un .xlsx (o un .csv) como matriz de celdas y
+   escribe libros sencillos con varias hojas.
+   ========================================================================== */
+const XlsxLite = (function () {
+  'use strict';
+
+  /* ---------- ZIP: lectura ---------- */
+  async function inflar(bytes) {
+    if (typeof DecompressionStream === 'undefined') throw new Error('Este navegador no puede descomprimir .xlsx. Usa una versión reciente de Chrome, Edge o Firefox.');
+    const ds = new DecompressionStream('deflate-raw');
+    const flujo = new Blob([bytes]).stream().pipeThrough(ds);
+    return new Uint8Array(await new Response(flujo).arrayBuffer());
+  }
+
+  function listarZip(buf) {
+    const u8 = new Uint8Array(buf), dv = new DataView(buf);
+    let p = -1;
+    for (let i = u8.length - 22; i >= Math.max(0, u8.length - 22 - 65557); i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { p = i; break; }
+    }
+    if (p < 0) throw new Error('El fichero no es un Excel .xlsx válido.');
+    const n = dv.getUint16(p + 10, true);
+    let off = dv.getUint32(p + 16, true);
+    const td = new TextDecoder('utf-8');
+    const ent = new Map();
+    for (let i = 0; i < n; i++) {
+      if (dv.getUint32(off, true) !== 0x02014b50) break;
+      const metodo = dv.getUint16(off + 10, true);
+      const tamC = dv.getUint32(off + 20, true);
+      const nl = dv.getUint16(off + 28, true), el = dv.getUint16(off + 30, true), cl = dv.getUint16(off + 32, true);
+      const local = dv.getUint32(off + 42, true);
+      const nombre = td.decode(u8.subarray(off + 46, off + 46 + nl));
+      ent.set(nombre, { metodo, tamC, local });
+      off += 46 + nl + el + cl;
+    }
+    return {
+      nombres: [...ent.keys()],
+      async leer(nombre) {
+        const e = ent.get(nombre);
+        if (!e) return null;
+        const nl = dv.getUint16(e.local + 26, true), el = dv.getUint16(e.local + 28, true);
+        const ini = e.local + 30 + nl + el;
+        const datos = u8.subarray(ini, ini + e.tamC);
+        if (e.metodo === 0) return datos;
+        if (e.metodo === 8) return inflar(datos);
+        throw new Error('Compresión no soportada en el .xlsx.');
+      },
+      async texto(nombre) { const b = await this.leer(nombre); return b ? td.decode(b) : null; },
+    };
+  }
+
+  function xml(texto) { return new DOMParser().parseFromString(texto, 'application/xml'); }
+  function hijos(nodo, nombre) { const o = []; for (const c of nodo.children) if (c.localName === nombre) o.push(c); return o; }
+  function todos(nodo, nombre) { return Array.from(nodo.getElementsByTagNameNS('*', nombre)); }
+
+  function colDeRef(ref) {
+    let c = 0;
+    for (let i = 0; i < ref.length; i++) {
+      const ch = ref.charCodeAt(i);
+      if (ch >= 65 && ch <= 90) c = c * 26 + (ch - 64); else if (ch >= 97 && ch <= 122) c = c * 26 + (ch - 96); else break;
+    }
+    return c - 1;
+  }
+  function textoSi(si) { // texto de un <si> o <is>, ignorando guías fonéticas
+    let s = '';
+    for (const t of todos(si, 't')) { if (t.parentNode && t.parentNode.localName === 'rPh') continue; s += t.textContent; }
+    return s;
+  }
+
+  async function leerXlsx(buf) {
+    const zip = listarZip(buf);
+    // ruta de la primera hoja
+    let ruta = null;
+    const wb = await zip.texto('xl/workbook.xml'), rels = await zip.texto('xl/_rels/workbook.xml.rels');
+    if (wb && rels) {
+      const hoja = todos(xml(wb), 'sheet')[0];
+      if (hoja) {
+        let rid = null;
+        for (const a of hoja.attributes) if (a.localName === 'id' && a.name !== 'sheetId') rid = a.value;
+        for (const r of todos(xml(rels), 'Relationship')) {
+          if (r.getAttribute('Id') === rid) {
+            let t = r.getAttribute('Target') || '';
+            ruta = t.charAt(0) === '/' ? t.slice(1) : 'xl/' + t.replace(/^\.\//, '');
+          }
+        }
+      }
+    }
+    if (!ruta || zip.nombres.indexOf(ruta) < 0) ruta = zip.nombres.filter(n => /^xl\/worksheets\/[^/]+\.xml$/.test(n)).sort()[0];
+    if (!ruta) throw new Error('No se ha encontrado ninguna hoja en el Excel.');
+    // cadenas compartidas
+    const cadenas = [];
+    const sst = await zip.texto('xl/sharedStrings.xml');
+    if (sst) for (const si of todos(xml(sst), 'si')) cadenas.push(textoSi(si));
+    // celdas
+    const doc = xml(await zip.texto(ruta));
+    const filas = [];
+    for (const row of todos(doc, 'row')) {
+      const r = parseInt(row.getAttribute('r'), 10);
+      const idx = isFinite(r) ? r - 1 : filas.length;
+      const fila = [];
+      let cAuto = 0;
+      for (const c of hijos(row, 'c')) {
+        const ref = c.getAttribute('r');
+        const col = ref ? colDeRef(ref) : cAuto;
+        cAuto = col + 1;
+        const t = c.getAttribute('t');
+        const v = hijos(c, 'v')[0];
+        let val;
+        if (t === 'inlineStr') { const is = hijos(c, 'is')[0]; val = is ? textoSi(is) : ''; }
+        else if (!v) val = undefined;
+        else if (t === 's') val = cadenas[parseInt(v.textContent, 10)];
+        else if (t === 'str' || t === 'd') val = v.textContent;
+        else if (t === 'b') val = v.textContent === '1';
+        else if (t === 'e') val = undefined;
+        else { const num = Number(v.textContent); val = isFinite(num) ? num : v.textContent; }
+        fila[col] = val;
+      }
+      filas[idx] = fila;
+    }
+    for (let i = 0; i < filas.length; i++) if (!filas[i]) filas[i] = [];
+    return filas;
+  }
+
+  /* ---------- CSV ---------- */
+  function leerCsv(buf) {
+    let texto = new TextDecoder('utf-8').decode(buf);
+    if (texto.indexOf('�') >= 0) texto = new TextDecoder('windows-1252').decode(buf);
+    if (texto.charCodeAt(0) === 0xFEFF) texto = texto.slice(1);
+    const primera = texto.split(/\r?\n/, 1)[0] || '';
+    const cuenta = (ch) => primera.split(ch).length - 1;
+    const sep = cuenta(';') >= cuenta(',') && cuenta(';') >= cuenta('\t') ? ';' : (cuenta('\t') > cuenta(',') ? '\t' : ',');
+    const filas = [];
+    let fila = [], campo = '', enComillas = false;
+    for (let i = 0; i < texto.length; i++) {
+      const ch = texto[i];
+      if (enComillas) {
+        if (ch === '"') { if (texto[i + 1] === '"') { campo += '"'; i++; } else enComillas = false; }
+        else campo += ch;
+      } else if (ch === '"') enComillas = true;
+      else if (ch === sep) { fila.push(campo); campo = ''; }
+      else if (ch === '\n') { fila.push(campo); filas.push(fila); fila = []; campo = ''; }
+      else if (ch !== '\r') campo += ch;
+    }
+    if (campo !== '' || fila.length) { fila.push(campo); filas.push(fila); }
+    return filas;
+  }
+
+  async function leer(file) {
+    const buf = await file.arrayBuffer();
+    const u8 = new Uint8Array(buf, 0, Math.min(4, buf.byteLength));
+    const esZip = u8[0] === 0x50 && u8[1] === 0x4B;
+    if (esZip) return leerXlsx(buf);
+    if (u8[0] === 0xD0 && u8[1] === 0xCF) throw new Error('Formato .xls antiguo: guarda el fichero como .xlsx y vuelve a cargarlo.');
+    return leerCsv(buf);
+  }
+
+  /* ---------- ZIP + XLSX: escritura ---------- */
+  let tablaCrc = null;
+  function crc32(u8) {
+    if (!tablaCrc) {
+      tablaCrc = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; tablaCrc[n] = c >>> 0; }
+    }
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < u8.length; i++) c = tablaCrc[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function zipSinComprimir(ficheros) { // [{nombre, datos:Uint8Array}]
+    const te = new TextEncoder();
+    const partes = [], central = [];
+    let off = 0;
+    for (const f of ficheros) {
+      const nom = te.encode(f.nombre), crc = crc32(f.datos), tam = f.datos.length;
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+      lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true);
+      lh.setUint32(14, crc, true); lh.setUint32(18, tam, true); lh.setUint32(22, tam, true); lh.setUint16(26, nom.length, true); lh.setUint16(28, 0, true);
+      partes.push(new Uint8Array(lh.buffer), nom, f.datos);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+      ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true);
+      ch.setUint32(16, crc, true); ch.setUint32(20, tam, true); ch.setUint32(24, tam, true); ch.setUint16(28, nom.length, true);
+      ch.setUint32(42, off, true);
+      central.push(new Uint8Array(ch.buffer), nom);
+      off += 30 + nom.length + tam;
+    }
+    let tamCentral = 0; for (const c of central) tamCentral += c.length;
+    const fin = new DataView(new ArrayBuffer(22));
+    fin.setUint32(0, 0x06054b50, true); fin.setUint16(8, ficheros.length, true); fin.setUint16(10, ficheros.length, true);
+    fin.setUint32(12, tamCentral, true); fin.setUint32(16, off, true);
+    return new Blob([...partes, ...central, new Uint8Array(fin.buffer)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+
+  function esc(s) {
+    return String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function letraCol(i) { let s = ''; i++; while (i > 0) { const r = (i - 1) % 26; s = String.fromCharCode(65 + r) + s; i = (i - 1 - r) / 26; } return s; }
+
+  // hojas = [{nombre, anchos:[..], filas:[[celda,...],...]}]; celda = string | number | {fecha: ms} | null. La 1ª fila es cabecera.
+  function escribir(hojas) {
+    const te = new TextEncoder();
+    const fs = [];
+    const add = (nombre, texto) => fs.push({ nombre, datos: te.encode(texto) });
+    const cab = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+    add('[Content_Types].xml', cab + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      hojas.map((h, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('') + '</Types>');
+    add('_rels/.rels', cab + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+    add('xl/workbook.xml', cab + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
+      hojas.map((h, i) => '<sheet name="' + esc(h.nombre.slice(0, 31)) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>').join('') + '</sheets></workbook>');
+    add('xl/_rels/workbook.xml.rels', cab + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      hojas.map((h, i) => '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>').join('') +
+      '<Relationship Id="rId' + (hojas.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>');
+    add('xl/styles.xml', cab + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="dd/mm/yyyy\\ hh:mm"/></numFmts>' +
+      '<fonts count="2"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font></fonts>' +
+      '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE8EEF4"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+      '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+      '<cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>');
+    hojas.forEach((h, i) => {
+      let x = cab + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>';
+      if (h.anchos) x += '<cols>' + h.anchos.map((a, c) => '<col min="' + (c + 1) + '" max="' + (c + 1) + '" width="' + a + '" customWidth="1"/>').join('') + '</cols>';
+      x += '<sheetData>';
+      h.filas.forEach((fila, r) => {
+        x += '<row r="' + (r + 1) + '">';
+        fila.forEach((v, c) => {
+          if (v === null || v === undefined || v === '') return;
+          const ref = letraCol(c) + (r + 1);
+          if (typeof v === 'number') { if (isFinite(v)) x += '<c r="' + ref + '"' + (r === 0 ? ' s="2"' : '') + '><v>' + v + '</v></c>'; }
+          else if (typeof v === 'object' && isFinite(v.fecha)) x += '<c r="' + ref + '" s="1"><v>' + (v.fecha / 86400000 + 25569) + '</v></c>';
+          else x += '<c r="' + ref + '" t="inlineStr"' + (r === 0 ? ' s="2"' : '') + '><is><t xml:space="preserve">' + esc(v) + '</t></is></c>';
+        });
+        x += '</row>';
+      });
+      x += '</sheetData></worksheet>';
+      add('xl/worksheets/sheet' + (i + 1) + '.xml', x);
+    });
+    return zipSinComprimir(fs);
+  }
+
+  return { leer, escribir };
+})();
+</script>
+<script>
+/* ==========================================================================
+   INTERFAZ
+   ========================================================================== */
+(function () {
+  'use strict';
+  const HORA = Motor.HORA, DIA = Motor.DIA;
+  const FAM_ORDEN = ['AZUL', 'OPACO', 'CLEAR', 'BLANCO', 'NEGRO', 'GRANZA'];
+  const FAM_TXT = { AZUL: 'Azul', OPACO: 'Opaco', CLEAR: 'Clear', BLANCO: 'Blanco', NEGRO: 'Negro', GRANZA: 'Granza' };
+  const TIPOS = { calidades: 'Calidades', necesidades: 'Necesidades / stocks diarios', secuencia: 'Secuenciación actual' };
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
+  const E = {
+    datos: { calidades: null, necesidades: null, secuencia: null },
+    clasifUsuario: {}, matriz: Motor.copiaMatriz(Motor.MATRIZ_DEF),
+    res: null, P: null, maq: 0, esc: 'propuesta', zoom: 44, clave: null, tab: 'sec', calculando: false, tipoSlot: null,
+  };
+
+  /* ---------- utilidades ---------- */
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  function h(tag, attrs) {
+    const e = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      const v = attrs[k];
+      if (v === null || v === undefined || v === false) continue;
+      if (k === 'class') e.className = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v);
+      else if (k === 'style') e.style.cssText = v;
+      else e.setAttribute(k, v === true ? '' : v);
+    }
+    for (let i = 2; i < arguments.length; i++) {
+      const c = arguments[i];
+      if (c === null || c === undefined || c === false) continue;
+      if (Array.isArray(c)) c.forEach(x => x && e.appendChild(typeof x === 'string' ? document.createTextNode(x) : x));
+      else e.appendChild(typeof c === 'object' ? c : document.createTextNode(String(c)));
+    }
+    return e;
+  }
+  function s(tag, attrs) {
+    const e = document.createElementNS(SVGNS, tag);
+    if (attrs) for (const k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) { if (k === 'text') e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    for (let i = 2; i < arguments.length; i++) if (arguments[i]) e.appendChild(arguments[i]);
+    return e;
+  }
+  function vaciar(e) { while (e.firstChild) e.removeChild(e.firstChild); return e; }
+  const p2 = (n) => String(n).padStart(2, '0');
+  function miles(n, dec) {
+    if (!isFinite(n)) return '—';
+    const neg = n < 0 && Math.abs(n) >= 0.5 * Math.pow(10, -(dec || 0));
+    const partes = Math.abs(n).toFixed(dec || 0).split('.');
+    partes[0] = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return (neg ? '−' : '') + partes[0] + (partes[1] ? ',' + partes[1] : '');
+  }
+  function compacto(n) {
+    const a = Math.abs(n);
+    if (a >= 1e6) return miles(n / 1e6, a >= 1e7 ? 1 : 2) + ' M';
+    if (a >= 1e4) return miles(n / 1e3, 0) + ' k';
+    return miles(n, 0);
+  }
+  function fFecha(ms) { const d = new Date(ms); return p2(d.getUTCDate()) + '/' + p2(d.getUTCMonth() + 1) + ' ' + p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes()); }
+  function fFechaLarga(ms) { const d = new Date(ms); return p2(d.getUTCDate()) + '/' + p2(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear() + ' ' + p2(d.getUTCHours()) + ':' + p2(d.getUTCMinutes()); }
+  function fDia(ms) { const d = new Date(ms); return p2(d.getUTCDate()) + '/' + p2(d.getUTCMonth() + 1); }
+  const DSEM = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+  function fDiaSem(ms) { const d = new Date(ms); return DSEM[d.getUTCDay()] + ' ' + fDia(ms); }
+  const fDiaIdx = (d) => fDia(E.res.dia0 + d * DIA);
+  const horas = (min) => miles(min / 60, 1) + ' h';
+  function norm(x) { return String(x === null || x === undefined ? '' : x).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+  /* ---------- tooltip ---------- */
+  const tip = $('#tip');
+  function tipMostrar(ev, titulo, filas) {
+    vaciar(tip);
+    if (titulo) tip.appendChild(h('div', { class: 'tt', text: titulo }));
+    for (const f of filas) {
+      if (!f) continue;
+      const etq = h('span', null, f.color ? h('i', { class: 'k', style: 'border-color:' + f.color }) : null, f[0]);
+      tip.appendChild(h('div', { class: 'fila' }, etq, h('b', { text: f[1] })));
+    }
+    tip.style.display = 'block';
+    const r = tip.getBoundingClientRect();
+    let x = ev.clientX + 14, y = ev.clientY + 14;
+    if (x + r.width > window.innerWidth - 8) x = ev.clientX - r.width - 14;
+    if (y + r.height > window.innerHeight - 8) y = ev.clientY - r.height - 14;
+    tip.style.left = Math.max(4, x) + 'px'; tip.style.top = Math.max(4, y) + 'px';
+  }
+  function tipOcultar() { tip.style.display = 'none'; }
+
+  /* ---------- lectura e interpretación de ficheros ---------- */
+  function aNumero(v) {
+    if (typeof v === 'number') return v;
+    if (v === null || v === undefined) return NaN;
+    let t = String(v).trim().replace(/\s/g, '');
+    if (!t) return NaN;
+    const coma = t.indexOf(',') >= 0, punto = t.indexOf('.') >= 0;
+    if (coma && punto) { if (t.lastIndexOf(',') > t.lastIndexOf('.')) t = t.replace(/\./g, '').replace(',', '.'); else t = t.replace(/,/g, ''); }
+    else if (coma) t = t.replace(',', '.');
+    else if (punto && /^-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, '');
+    return Number(t);
+  }
+  function aFecha(v) { // devuelve ms "de reloj" (la hora tal cual aparece en el Excel)
+    if (v === null || v === undefined || v === '') return NaN;
+    if (typeof v === 'number') return v > 10000 && v < 120000 ? Math.round((v - 25569) * 86400000) : NaN;
+    const t = String(v).trim();
+    let m = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(t);
+    if (m) return Date.UTC(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+    m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(t);
+    if (m) { let y = +m[3]; if (y < 100) y += 2000; return Date.UTC(y, +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0)); }
+    const num = Number(t);
+    return isFinite(num) ? aFecha(num) : NaN;
+  }
+  function interpretar(filas, tipoForzado) {
+    let ic = -1;
+    for (let i = 0; i < Math.min(filas.length, 20) && ic < 0; i++) if ((filas[i] || []).some(c => norm(c).indexOf('key') === 0)) ic = i;
+    if (ic < 0) throw new Error('No se encuentra la cabecera (falta la columna Key_Bobina).');
+    const cab = filas[ic].map(norm);
+    const col = (cands) => {
+      for (const c of cands) { const i = cab.indexOf(c); if (i >= 0) return i; }
+      for (const c of cands) { const i = cab.findIndex(x => x && x.indexOf(c) >= 0); if (i >= 0) return i; }
+      return -1;
+    };
+    const cKey = col(['keybobina', 'key']);
+    const cMaq = col(['maquina', 'extrusora']), cCant = col(['cantidad', 'kilos', 'kg']), cIni = col(['fechainicio', 'inicio']), cFin = col(['fechafin', 'fin']);
+    const cNec = col(['necesidad']), cStk = col(['stocks', 'stock']), cCal = col(['calidadmp', 'calidad']);
+    const cFecha = cab.indexOf('fecha');
+    const tipo = tipoForzado || (cMaq >= 0 && cCant >= 0 ? 'secuencia' : cNec >= 0 ? 'necesidades' : cCal >= 0 ? 'calidades' : null);
+    if (!tipo) throw new Error('No se reconoce el tipo de fichero por sus columnas.');
+    const falta = (nombres) => { throw new Error('Faltan columnas para «' + TIPOS[tipo] + '»: ' + nombres); };
+    const cuerpo = filas.slice(ic + 1).filter(f => f && f[cKey] !== undefined && f[cKey] !== null && String(f[cKey]).trim() !== '');
+    const key = (f) => String(f[cKey]).trim();
+    const reg = [];
+    let descartadas = 0, resumen = '';
+    if (tipo === 'calidades') {
+      if (cCal < 0) falta('Calidad_MP');
+      for (const f of cuerpo) reg.push({ key: key(f), calidad: String(f[cCal] === undefined || f[cCal] === null ? '' : f[cCal]).trim() });
+      resumen = miles(reg.length) + ' bobinas · ' + new Set(reg.map(r => r.calidad)).size + ' calidades';
+    } else if (tipo === 'necesidades') {
+      if (cNec < 0 || cFecha < 0) falta('Fecha, Necesidad');
+      let min = Infinity, max = -Infinity;
+      for (const f of cuerpo) {
+        const fecha = aFecha(f[cFecha]);
+        if (!isFinite(fecha)) { descartadas++; continue; }
+        const nec = aNumero(f[cNec]), st = cStk >= 0 ? aNumero(f[cStk]) : 0;
+        reg.push({ key: key(f), calidad: cCal >= 0 && f[cCal] ? String(f[cCal]).trim() : '', fecha, necesidad: isFinite(nec) ? nec : 0, stock: isFinite(st) ? st : 0 });
+        if (fecha < min) min = fecha; if (fecha > max) max = fecha;
+      }
+      resumen = miles(reg.length) + ' filas · ' + new Set(reg.map(r => r.key)).size + ' bobinas' + (reg.length ? ' · del ' + fDia(min) + ' al ' + fDia(max) : '');
+    } else {
+      if (cMaq < 0 || cCant < 0 || cIni < 0 || cFin < 0) falta('Máquina, Cantidad, Fecha Inicio, Fecha_Fin');
+      for (const f of cuerpo) {
+        const maquina = String(f[cMaq] === undefined || f[cMaq] === null ? '' : f[cMaq]).trim();
+        const cantidad = aNumero(f[cCant]);
+        if (!maquina || !(cantidad > 0)) { descartadas++; continue; }
+        reg.push({ key: key(f), maquina, cantidad, inicio: aFecha(f[cIni]), fin: aFecha(f[cFin]) });
+      }
+      resumen = miles(reg.length) + ' lotes · ' + new Set(reg.map(r => r.maquina)).size + ' extrusoras · ' + miles(reg.reduce((a, r) => a + r.cantidad, 0)) + ' kg';
+    }
+    if (!reg.length) throw new Error('El fichero no contiene filas de datos válidas.');
+    if (descartadas) resumen += ' · ' + descartadas + ' filas descartadas';
+    return { tipo, reg, resumen };
+  }
+
+  async function cargarFicheros(lista, tipoForzado) {
+    for (const file of lista) {
+      let tipo = tipoForzado;
+      try {
+        const filas = await XlsxLite.leer(file);
+        const r = interpretar(filas, tipoForzado);
+        tipo = r.tipo;
+        E.datos[tipo] = r.reg;
+        pintarSlot(tipo, 'ok', file.name + ' — ' + r.resumen);
+      } catch (err) {
+        if (tipo) { E.datos[tipo] = null; pintarSlot(tipo, 'err', file.name + ': ' + err.message); }
+        else $('#progTxt').textContent = file.name + ': ' + err.message;
+      }
+    }
+    pintarClasif();
+    actualizarBoton(true);
+  }
+  function pintarSlot(tipo, estado, texto) {
+    const sl = $('.slot[data-tipo="' + tipo + '"]');
+    sl.classList.remove('ok', 'err'); if (estado) sl.classList.add(estado);
+    $('.d', sl).textContent = texto;
+  }
+  function actualizarBoton(cambio) {
+    const listo = E.datos.calidades && E.datos.necesidades && E.datos.secuencia;
+    const b = $('#btnCalc');
+    b.disabled = !listo || E.calculando;
+    b.textContent = E.res ? 'Recalcular propuesta' : 'Calcular propuesta';
+    if (cambio && !E.calculando) {
+      const faltan = Object.keys(TIPOS).filter(t => !E.datos[t]).map(t => TIPOS[t]);
+      $('#progTxt').textContent = !listo ? 'Faltan: ' + faltan.join(', ') : (E.res ? 'Datos o parámetros modificados: pulsa «Recalcular propuesta».' : 'Todo listo para calcular.');
+    }
+  }
+
+  /* ---------- parámetros ---------- */
+  function ponerParams(P) {
+    $('#pCal').value = P.tCalidad; $('#pAncho').value = P.tAncho; $('#pTol').value = P.tolAncho; $('#pMic').value = P.tMicras;
+    $('#pCong').value = P.congelados; $('#pDisp').value = P.disponibilidad; $('#pAnt').value = P.antelacionH;
+    $('#pCli').value = P.sinNecesidad; $('#pPri').value = P.penalDiaKg + '|' + P.pesoRacha; $('#pEsf').value = String(P.esfuerzo);
+    resumenReglas();
+  }
+  function leerParams() {
+    const num = (id, def) => { const v = parseFloat($(id).value); return isFinite(v) && v >= 0 ? v : def; };
+    const D = Motor.PARAMS_DEF;
+    return {
+      tCalidad: num('#pCal', D.tCalidad), tAncho: num('#pAncho', D.tAncho), tolAncho: num('#pTol', D.tolAncho), tMicras: num('#pMic', D.tMicras),
+      congelados: Math.round(num('#pCong', D.congelados)), disponibilidad: $('#pDisp').value, antelacionH: num('#pAnt', 0),
+      sinNecesidad: $('#pCli').value, penalDiaKg: parseFloat($('#pPri').value.split('|')[0]), pesoRacha: parseFloat($('#pPri').value.split('|')[1]), esfuerzo: parseFloat($('#pEsf').value),
+      matriz: E.matriz,
+    };
+  }
+  function resumenReglas() {
+    const P = leerParams();
+    $('#resReglas').textContent = 'Calidad ' + P.tCalidad + ' min · Ancho ' + P.tAncho + ' min (±' + P.tolAncho + ' mm) · Micraje ' + P.tMicras + ' min · matriz de familias';
+  }
+  function pintarMatriz() {
+    const t = vaciar($('#tblMatriz'));
+    const F = Motor.FAMILIAS;
+    t.appendChild(h('thead', null, h('tr', null, h('th', { text: 'Origen \\ Destino' }), F.map(f => h('th', { class: 'n', text: f })))));
+    const tb = h('tbody');
+    for (const a of F) {
+      const tr = h('tr', null, h('th', { class: 'fila', text: a }));
+      for (const b of F) {
+        if (a === b) { tr.appendChild(h('td', { class: 'diag', text: '—' })); continue; }
+        const inp = h('input', { type: 'number', min: '0', step: '5', value: E.matriz[a][b], 'aria-label': a + ' a ' + b,
+          onchange: (ev) => { const v = parseFloat(ev.target.value); E.matriz[a][b] = isFinite(v) && v >= 0 ? v : 0; ev.target.value = E.matriz[a][b]; actualizarBoton(true); } });
+        tr.appendChild(h('td', { class: 'n' }, inp));
+      }
+      tb.appendChild(tr);
+    }
+    t.appendChild(tb);
+  }
+  function pintarClasif() {
+    const t = vaciar($('#tblClasif'));
+    const cuenta = new Map();
+    const enSecuencia = new Set((E.datos.secuencia || []).map(r => r.key));
+    const calDe = new Map();
+    for (const r of E.datos.calidades || []) calDe.set(r.key, r.calidad);
+    for (const r of E.datos.necesidades || []) if (!calDe.get(r.key) && r.calidad) calDe.set(r.key, r.calidad);
+    for (const [k, c] of calDe) { if (!c) continue; if (!cuenta.has(c)) cuenta.set(c, { n: 0, sec: 0 }); const o = cuenta.get(c); o.n++; if (enSecuencia.has(k)) o.sec++; }
+    if (!cuenta.size) { t.appendChild(h('tbody', null, h('tr', null, h('td', { class: 'vacio', text: 'Carga el fichero de calidades para ver y corregir la familia asignada a cada una.' })))); return; }
+    t.appendChild(h('thead', null, h('tr', null, h('th', { text: 'Calidad' }), h('th', { text: 'Color base' }), h('th', { class: 'c', text: 'PE' }), h('th', { class: 'c', text: 'AB' }), h('th', { class: 'n', text: 'Bobinas' }))));
+    const tb = h('tbody');
+    const lista = [...cuenta.keys()].sort((a, b) => (cuenta.get(b).sec > 0) - (cuenta.get(a).sec > 0) || a.localeCompare(b));
+    for (const cal of lista) {
+      const auto = Motor.clasificar(cal), act = E.clasifUsuario[cal] || auto;
+      const guardar = () => { E.clasifUsuario[cal] = { color: sel.value, pe: cPe.checked, ab: cAb.checked }; actualizarBoton(true); };
+      const sel = h('select', { 'aria-label': 'Color base de ' + cal, onchange: guardar }, Motor.COLORES.map(c => h('option', { value: c, text: c, selected: c === act.color })));
+      const cPe = h('input', { type: 'checkbox', checked: act.pe, 'aria-label': 'Con PE', onchange: guardar });
+      const cAb = h('input', { type: 'checkbox', checked: act.ab, 'aria-label': 'Con AB', onchange: guardar });
+      tb.appendChild(h('tr', null,
+        h('td', null, cal, !auto.reconocida && !E.clasifUsuario[cal] ? h('span', { class: 'chip warn', style: 'margin-left:6px', text: 'revisar' }) : null),
+        h('td', null, sel), h('td', { class: 'c' }, cPe), h('td', { class: 'c' }, cAb),
+        h('td', { class: 'n', text: cuenta.get(cal).n + (cuenta.get(cal).sec ? '' : ' (sin lotes)') })));
+    }
+    t.appendChild(tb);
+  }
+
+  /* ---------- cálculo ---------- */
+  const pausa = () => new Promise(r => setTimeout(r, 0));
+  async function calcular() {
+    if (E.calculando) return;
+    E.calculando = true; actualizarBoton(false);
+    const barra = $('#prog'), txt = $('#progTxt');
+    barra.hidden = false; $('i', barra).style.width = '0%'; txt.textContent = 'Preparando datos…';
+    await pausa();
+    try {
+      const P = leerParams();
+      const mod = Motor.construirModelo(E.datos, P, E.clasifUsuario);
+      Motor.fijarEstado(mod);
+      const nM = mod.maquinas.length;
+      for (let i = 0; i < nM; i++) {
+        const it = Motor.optimizarMaquina(mod, mod.maquinas[i]);
+        let t = performance.now(), frac = 0;
+        for (let r = it.next(); !r.done; r = it.next()) {
+          if (typeof r.value === 'number') frac = Math.min(1, r.value);
+          if (performance.now() - t > 60) {
+            $('i', barra).style.width = (100 * (i + frac) / nM).toFixed(1) + '%';
+            txt.textContent = 'Optimizando ' + mod.maquinas[i].nombre + '… ' + Math.round(100 * (i + frac) / nM) + ' %';
+            await pausa(); t = performance.now();
+          }
+        }
+      }
+      E.res = Motor.resultados(mod);
+      E.P = mod.P; E.off0 = mod.off0;
+      E.lotesTotal = mod.lotes.length;
+      $('i', barra).style.width = '100%';
+      txt.textContent = 'Propuesta calculada (' + mod.lotes.length + ' lotes, ' + nM + ' extrusoras).';
+      E.maq = Math.min(E.maq, nM - 1); E.clave = null;
+      pintarResultados();
+      $('#resultados').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      txt.textContent = 'Error: ' + err.message;
+      console.error(err);
+    }
+    barra.hidden = true;
+    E.calculando = false; actualizarBoton(false);
+  }
+
+  /* ---------- resultados ---------- */
+  const diaDisp = (finH) => Math.ceil((E.off0 + finH + E.P.antelacionH) / 24 - 1e-9) - 1;
+  function delta(act, prop, fmt, unidad) { // menor es mejor
+    const d = prop - act;
+    if (Math.abs(d) < 1e-9) return h('span', null, 'Igual que la actual (' + fmt(act) + (unidad || '') + ')');
+    const pct = act ? ' (' + (d < 0 ? '−' : '+') + miles(Math.abs(d) / Math.abs(act) * 100, 0) + ' %)' : '';
+    return h('span', null, h('span', { class: d < 0 ? 'mej' : 'peo', text: (d < 0 ? '▼ ' : '▲ ') + fmt(Math.abs(d)) + (unidad || '') + pct }), ' frente a la actual (' + fmt(act) + (unidad || '') + ')');
+  }
+  function kpi(etq, valor, unidad, pie) {
+    return h('div', { class: 'kpi' }, h('div', { class: 'l', text: etq }), h('div', { class: 'v' }, valor, unidad ? h('small', { text: unidad }) : null), h('div', { class: 'dl' }, pie));
+  }
+  function pintarResultados() {
+    const R = E.res, A = R.kpi.actual, Pk = R.kpi.propuesta;
+    ['#resultados', '#secAvisos', '#secResumen', '#secDetalle'].forEach(q => { $(q).hidden = false; });
+    // KPIs
+    const k = vaciar($('#kpis'));
+    k.appendChild(kpi('Tiempo perdido en cambios', miles(Pk.setupMin / 60, 0), 'h', delta(A.setupMin / 60, Pk.setupMin / 60, (v) => miles(v, 0), ' h')));
+    k.appendChild(kpi('Bobinas con stock negativo', miles(Pk.clavesNeg), null, delta(A.clavesNeg, Pk.clavesNeg, miles)));
+    k.appendChild(kpi('Días-bobina en negativo', miles(Pk.diasNeg), null, delta(A.diasNeg, Pk.diasNeg, miles)));
+    k.appendChild(kpi('Rotura más larga', miles(Pk.rachaMax), 'días', delta(A.rachaMax, Pk.rachaMax, miles, ' d')));
+    k.appendChild(kpi('Kg·día en negativo', compacto(Pk.kgDia), null, delta(A.kgDia, Pk.kgDia, compacto)));
+    if (R.claves.some(c => c.sintetica)) k.appendChild(kpi('Bobinas sin necesidad retrasadas', miles(Pk.retrasadas), null,
+      h('span', { text: Pk.retrasadas ? miles(Pk.diasRetraso) + ' días-bobina de retraso frente al plan actual' : 'Ninguna termina más tarde que en el plan actual' })));
+    pintarAvisos(); pintarResumen();
+    // selector de máquinas
+    const seg = vaciar($('#segMaq'));
+    R.maquinas.forEach((m, i) => seg.appendChild(h('button', { type: 'button', class: i === E.maq ? 'on' : null, text: m.nombre, onclick: () => { E.maq = i; $$('button', seg).forEach((b, j) => b.classList.toggle('on', j === i)); pintarSecuencia(); } })));
+    const sm = vaciar($('#selMaqStock'));
+    sm.appendChild(h('option', { value: '', text: 'Todas las extrusoras' }));
+    R.maquinas.forEach(m => sm.appendChild(h('option', { value: m.nombre, text: m.nombre })));
+    pintarSecuencia(); pintarGantt(); pintarStock(); pintarCapacidad();
+  }
+
+  function porMaquina(nombre, esc) {
+    let claves = 0, dias = 0;
+    for (const c of E.res.claves) if (!c.sintetica && c.maquinas.indexOf(nombre) >= 0 && c[esc].diasNeg > 0) { claves++; dias += c[esc].diasNeg; }
+    return { claves, dias };
+  }
+  function pintarResumen() {
+    const t = vaciar($('#tblResumen')), R = E.res;
+    t.appendChild(h('thead', null, h('tr', null, ['Extrusora', 'Lotes', 'Kg', 'Cambios actual', 'Propuesta', 'Ahorro', 'Nº calidad', 'Nº ancho', 'Nº micraje', 'Fin actual', 'Fin propuesta', 'Bobinas neg.', 'Días neg.']
+      .map((x, i) => h('th', { class: i ? 'n' : null, text: x })))));
+    const tb = h('tbody');
+    const fl = (a, b) => a + ' → ' + b;
+    for (const m of R.maquinas) {
+      const a = m.actual, p = m.propuesta, na = porMaquina(m.nombre, 'actual'), np = porMaquina(m.nombre, 'propuesta');
+      const ah = (a.setupMin - p.setupMin) / 60;
+      tb.appendChild(h('tr', null, h('td', { class: 'key', text: m.nombre }), h('td', { class: 'n', text: m.n }), h('td', { class: 'n', text: miles(m.kg) }),
+        h('td', { class: 'n', text: horas(a.setupMin) }), h('td', { class: 'n', text: horas(p.setupMin) }),
+        h('td', { class: 'n' }, h('span', { class: ah > 0.05 ? 'mov-up' : 'sec', text: (ah > 0.05 ? '−' : '') + miles(Math.abs(ah), 1) + ' h' })),
+        h('td', { class: 'n', text: fl(a.nCal, p.nCal) }), h('td', { class: 'n', text: fl(a.nAn, p.nAn) }), h('td', { class: 'n', text: fl(a.nMic, p.nMic) }),
+        h('td', { class: 'n', text: fFecha(a.fin) }), h('td', { class: 'n', text: fFecha(p.fin) }),
+        h('td', { class: 'n', text: fl(na.claves, np.claves) }), h('td', { class: 'n', text: fl(na.dias, np.dias) })));
+    }
+    t.appendChild(tb);
+  }
+
+  function pintarAvisos() {
+    const R = E.res, cont = vaciar($('#avisos'));
+    const add = (clase, nodos) => cont.appendChild(h('div', { class: 'aviso ' + clase }, nodos));
+    const A = R.kpi.actual, Pk = R.kpi.propuesta;
+    if (Pk.clavesNeg === 0) add('ok', [h('b', { text: 'La propuesta no deja ninguna bobina en negativo. ' }), A.clavesNeg ? 'La secuencia actual dejaba ' + A.clavesNeg + '.' : '']);
+    else add('warn', [h('b', { text: 'La propuesta reduce las roturas pero no las elimina: ' }),
+      Pk.clavesNeg + ' bobinas pasan algún día en negativo (' + A.clavesNeg + ' con la secuencia actual), ' + miles(Pk.diasNeg) + ' días-bobina frente a ' + miles(A.diasNeg) + '. El detalle está en la pestaña «Stock por bobina».']);
+    for (const m of R.maquinas) {
+      const c = m.capacidad;
+      if (c.faltaMaxH > 0.5) {
+        let ult = c.primerDia; for (let d = 0; d < R.ND; d++) if (c.req[d] - c.disp[d] > 1e-6) ult = d;
+        add('crit', [h('b', { text: m.nombre + ': falta capacidad, no solo orden. ' }),
+          'Aunque no hubiera ningún cambio y los lotes se pudieran partir, las necesidades acumuladas superan las horas de máquina disponibles entre el ' + fDiaIdx(c.primerDia) + ' y el ' + fDiaIdx(ult) +
+          ' (pico: faltan ' + miles(c.faltaMaxH, 0) + ' h el ' + fDiaIdx(c.diaPeor) + '). Esas roturas no se pueden evitar resecuenciando: harían falta más horas, pasar carga a otra extrusora o mover necesidades.']);
+      }
+    }
+    const sinPlan = R.claves.filter(c => !c.sintetica && c.faltaPlan > 1e-6 && c.nLotes > 0);
+    if (sinPlan.length) add('warn', [h('b', { text: 'Cantidad planificada insuficiente en ' + sinPlan.length + ' bobina(s): ' }),
+      sinPlan.map(c => c.key + ' (faltan ' + miles(c.faltaPlan) + ' kg' + (c.diaFalta >= 0 ? ' desde el ' + fDiaIdx(c.diaFalta) : '') + ')').join(', ') + '. Ningún orden lo resuelve; no se cuenta como rotura de la secuencia.']);
+    const sinLotes = R.claves.filter(c => c.nLotes === 0 && c.faltaPlan > 1e-6);
+    if (sinLotes.length) add('warn', [h('b', { text: 'Bobinas con necesidad mayor que su stock y sin ningún lote en la secuencia: ' }), sinLotes.map(c => c.key + ' (faltan ' + miles(c.faltaPlan) + ' kg)').join(', ') + '.']);
+    for (const a of R.avisos) add('warn', [a.texto]);
+  }
+
+  function chipFam(l) {
+    return h('span', { class: 'chip' }, h('i', { style: 'background:var(--s-' + l.color + ')' }), FAM_TXT[l.color] + (l.pe ? ' + PE' : '') + (l.ab ? ' + AB' : ''));
+  }
+  function textoCambio(c) {
+    const p = [];
+    if (c.cal) p.push('calidad ' + c.cal); if (c.mat) p.push('matriz ' + c.mat); if (c.an) p.push('ancho ' + c.an); if (c.mic) p.push('micraje ' + c.mic);
+    return p.join(' + ');
+  }
+  function retrasoLote(f, esc) { // días que la bobina llevaba en negativo cuando termina el lote
+    const c = E.claveDe.get(f.lote.key); if (!c) return { n: 0, sintetica: false };
+    const d = diaDisp(f.finH), dia = c[esc].diario;
+    let n = 0; for (let x = d - 1; x >= 0 && dia[x] < -1e-6; x--) n++;
+    return { n, sintetica: c.sintetica };
+  }
+  function pintarSecuencia() {
+    const R = E.res, m = R.maquinas[E.maq], esc = E.esc, S = m[esc];
+    E.claveDe = new Map(R.claves.map(c => [c.key, c]));
+    const t = vaciar($('#tblSec'));
+    const cols = ['#', 'Key', 'Calidad', 'Familia', 'Micras', 'Ancho', 'Kg', 'Cambio previo', 'Inicio', 'Fin', esc === 'propuesta' ? 'Posición actual' : 'Posición propuesta', 'Stock'];
+    const num = { 0: 1, 4: 1, 5: 1, 6: 1, 8: 1, 9: 1, 10: 1 };
+    t.appendChild(h('thead', null, h('tr', null, cols.map((c, i) => h('th', { class: num[i] ? 'n' : null, text: c })))));
+    const tb = h('tbody');
+    S.filas.forEach((f, i) => {
+      const l = f.lote, otra = esc === 'propuesta' ? f.posActual : f.posNueva, mov = otra - i;
+      const tdMov = h('td', { class: 'n' }, '#' + (otra + 1) + ' ');
+      if (f.congelado) tdMov.appendChild(h('span', { class: 'chip', text: 'en curso' }));
+      else if (mov !== 0 && esc === 'propuesta') tdMov.appendChild(h('span', { class: mov > 0 ? 'mov-up' : 'mov-dn', text: mov > 0 ? '▲ adelanta ' + mov : '▼ retrasa ' + (-mov) }));
+      const r = retrasoLote(f, esc);
+      const tdSt = h('td');
+      if (r.n > 0) tdSt.appendChild(h('span', { class: 'chip ' + (r.sintetica ? 'warn' : 'crit'), title: r.sintetica ? 'Termina más tarde que en el plan actual' : 'La bobina ya estaba en negativo cuando termina este lote', text: (r.sintetica ? 'Retrasado ' : 'Llega tarde ') + r.n + ' d' }));
+      else tdSt.appendChild(h('span', { class: 'mut', text: '—' }));
+      const tdC = h('td');
+      if (f.cambio.total > 0) { tdC.appendChild(h('b', { text: f.cambio.total + ' min' })); tdC.appendChild(h('span', { class: 'sec', text: ' · ' + textoCambio(f.cambio) })); }
+      else tdC.appendChild(h('span', { class: 'mut', text: i === 0 ? '—' : 'sin parada' }));
+      tb.appendChild(h('tr', { class: f.congelado ? 'cong' : null },
+        h('td', { class: 'n', text: i + 1 }), h('td', { class: 'key', text: l.key }), h('td', { text: l.calidad || '(sin calidad)' }), h('td', null, chipFam(l)),
+        h('td', { class: 'n', text: l.micras }), h('td', { class: 'n', text: l.ancho }), h('td', { class: 'n', text: miles(l.cantidad) }), tdC,
+        h('td', { class: 'n', text: fFecha(f.ini) }), h('td', { class: 'n', text: fFecha(f.fin) }), tdMov, tdSt));
+    });
+    t.appendChild(tb);
+    $('#infoSec').textContent = m.n + ' lotes · ' + horas(S.setupMin) + ' en cambios · termina el ' + fFecha(S.fin);
+  }
+
+  /* ---------- Gantt ---------- */
+  function pintarGantt() {
+    const R = E.res, px = E.zoom, off0 = E.off0;
+    let maxFin = 0; for (const m of R.maquinas) maxFin = Math.max(maxFin, m.actual.finH, m.propuesta.finH);
+    const nDias = Math.ceil((off0 + maxFin) / 24) + 1;
+    const MI = 8, EJE = 24, ALTO = 22;
+    const W = MI + nDias * px + 12;
+    const X = (hh) => MI + (off0 + hh) / 24 * px;
+    const carriles = []; let y = EJE + 4;
+    R.maquinas.forEach((m) => { y += 22; ['actual', 'propuesta'].forEach((e, ei) => { carriles.push({ m, e, y, primero: ei === 0 }); y += ALTO + 8; }); y += 6; });
+    const H = y + 4;
+    const svg = s('svg', { width: W, height: H, viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Gantt de la secuencia actual y la propuesta por extrusora' });
+    // rejilla y eje de días
+    let paso = Math.ceil(46 / px); if (paso > 2 && paso <= 7) paso = 7; else if (paso > 7) paso = 14;
+    const gEje = s('g', { class: 'eje' });
+    for (let d = 0; d <= nDias; d++) {
+      const x = MI + d * px, fecha = new Date(R.dia0 + d * DIA), lunes = fecha.getUTCDay() === 1;
+      if (px >= 30 || lunes) gEje.appendChild(s('line', { x1: x, x2: x, y1: EJE, y2: H - 2, stroke: lunes ? 'var(--axis)' : 'var(--hair)', 'stroke-width': 1 }));
+      const etiqueta = paso >= 7 ? lunes && (paso === 7 || Math.floor(d / 7) % 2 === 0) : d % paso === 0;
+      if (etiqueta && d < nDias) gEje.appendChild(s('text', { x: x + 3, y: 15, text: (px >= 60 ? DSEM[fecha.getUTCDay()] + ' ' : '') + fDia(R.dia0 + d * DIA) }));
+    }
+    svg.appendChild(gEje);
+    const info = new Map();
+    for (const c of carriles) {
+      for (const f of c.m[c.e].filas) {
+        const l = f.lote, x1 = X(f.iniH), x2 = X(f.finH), w = Math.max(1.5, x2 - x1 - 2);
+        if (f.cambio.total > 0) {
+          const xs = X(f.iniH - f.cambio.total / 60);
+          svg.appendChild(s('rect', { x: xs, y: c.y + 7, width: Math.max(0.8, x1 - xs - 1), height: ALTO - 14, fill: 'var(--cambio)', rx: 1.5 }));
+        }
+        const id = c.e + ':' + l.id;
+        info.set(id, { f, c });
+        svg.appendChild(s('rect', { class: 'lote', x: x1, y: c.y, width: w, height: ALTO, rx: 3, fill: 'var(--s-' + l.color + ')', 'data-id': id, 'data-lote': l.id }));
+        if (l.pe) svg.appendChild(s('rect', { x: x1, y: c.y + ALTO - 4, width: w, height: 4, fill: 'rgba(0,0,0,.4)', 'pointer-events': 'none' }));
+        if (w >= 52) svg.appendChild(s('text', { x: x1 + 5, y: c.y + 14.5, fill: l.color === 'BLANCO' ? 'var(--lbl-blanco,#0b0b0b)' : '#fff', 'font-weight': 600, text: l.micras + '·' + l.ancho }));
+      }
+    }
+    svg.addEventListener('pointermove', (ev) => {
+      const t = ev.target.closest ? ev.target.closest('[data-id]') : null;
+      if (!t) { tipOcultar(); $$('.hl', svg).forEach(e => e.classList.remove('hl')); return; }
+      const { f, c } = info.get(t.getAttribute('data-id')), l = f.lote;
+      if (!t.classList.contains('hl')) { $$('.hl', svg).forEach(e => e.classList.remove('hl')); $$('[data-lote="' + l.id + '"]', svg).forEach(e => e.classList.add('hl')); }
+      const posA = c.e === 'actual' ? f.pos : f.posActual, posP = c.e === 'actual' ? f.posNueva : f.pos;
+      tipMostrar(ev, l.key + ' · ' + c.m.nombre + ' · ' + (c.e === 'actual' ? 'actual' : 'propuesta'), [
+        ['Calidad', l.calidad || '—'], ['Familia', FAM_TXT[l.color] + (l.pe ? ' + PE' : '') + (l.ab ? ' + AB' : '')],
+        ['Cantidad', miles(l.cantidad) + ' kg'], ['Inicio', fFecha(f.ini)], ['Fin', fFecha(f.fin)], ['Duración', miles(f.finH - f.iniH, 1) + ' h'],
+        ['Cambio previo', f.cambio.total ? f.cambio.total + ' min (' + textoCambio(f.cambio) + ')' : 'sin parada'],
+        ['Posición', 'actual #' + (posA + 1) + ' → propuesta #' + (posP + 1)]]);
+    });
+    svg.addEventListener('pointerleave', () => { tipOcultar(); $$('.hl', svg).forEach(e => e.classList.remove('hl')); });
+    vaciar($('#ganttDer')).appendChild(svg);
+    const izq = vaciar($('#ganttIzq')); izq.style.height = H + 'px';
+    for (const c of carriles) {
+      if (c.primero) izq.appendChild(h('div', { class: 'mq', style: 'top:' + (c.y - 19) + 'px', text: c.m.nombre }));
+      izq.appendChild(h('div', { class: 'sec', style: 'top:' + (c.y + 4) + 'px', text: c.e === 'actual' ? 'Actual' : 'Propuesta' }));
+    }
+    const ley = vaciar($('#ganttLey'));
+    const usados = new Set(); let hayPE = false;
+    for (const m of R.maquinas) for (const f of m.actual.filas) { usados.add(f.lote.color); if (f.lote.pe) hayPE = true; }
+    for (const c of FAM_ORDEN) if (usados.has(c)) ley.appendChild(h('span', null, h('i', { style: 'background:var(--s-' + c + ')' }), FAM_TXT[c]));
+    if (hayPE) ley.appendChild(h('span', null, h('i', { style: 'background:linear-gradient(var(--surface-2) 60%,rgba(0,0,0,.55) 60%);border:1px solid var(--axis)' }), 'Franja inferior oscura: con PE'));
+    ley.appendChild(h('span', null, h('i', { style: 'background:var(--cambio);height:8px' }), 'Cambio (máquina parada)'));
+  }
+
+  /* ---------- gráfico de líneas genérico (con cursor, tooltip y vista de tabla) ---------- */
+  // cfg: {titulo, sub, n, series:[{nombre,color,valores}], unidad, zonaNeg, extra:[{nombre,valores}]}
+  function figLineas(cont, cfg) {
+    vaciar(cont);
+    cont.appendChild(h('h4', { text: cfg.titulo }));
+    if (cfg.sub) cont.appendChild(h('div', { class: 'st', text: cfg.sub }));
+    const W = 640, H = 250, ML = 54, MR = 14, MT = 10, MB = 24, n = cfg.n;
+    let lo = 0, hi = 0;
+    for (const se of cfg.series) for (let i = 0; i < n; i++) { const v = se.valores[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+    if (hi - lo < 1e-9) hi = lo + 1;
+    const bruto = (hi - lo) / 4, pot = Math.pow(10, Math.floor(Math.log10(bruto))), frac = bruto / pot;
+    const paso = (frac <= 1 ? 1 : frac <= 2 ? 2 : frac <= 5 ? 5 : 10) * pot;
+    lo = Math.floor(lo / paso) * paso; hi = Math.ceil(hi / paso) * paso;
+    const X = (i) => ML + (n > 1 ? i / (n - 1) : 0.5) * (W - ML - MR), Y = (v) => MT + (hi - v) / (hi - lo) * (H - MT - MB);
+    const svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': cfg.titulo });
+    const fy = (v) => Math.abs(hi) >= 10000 || Math.abs(lo) >= 10000 ? miles(v / 1000, 0) + 'k' : miles(v, 0);
+    for (let v = lo; v <= hi + 1e-9; v += paso) {
+      svg.appendChild(s('line', { x1: ML, x2: W - MR, y1: Y(v), y2: Y(v), stroke: Math.abs(v) < 1e-9 ? 'var(--axis)' : 'var(--hair)', 'stroke-width': 1 }));
+      svg.appendChild(s('text', { x: ML - 6, y: Y(v) + 4, 'text-anchor': 'end', text: fy(v) }));
+    }
+    if (cfg.zonaNeg && lo < 0) svg.appendChild(s('rect', { x: ML, y: Y(0), width: W - ML - MR, height: Y(lo) - Y(0), fill: 'var(--crit-wash)' }));
+    const pasoX = Math.max(1, Math.ceil(n / 8));
+    for (let i = 0; i < n; i += pasoX) svg.appendChild(s('text', { x: X(i), y: H - 6, 'text-anchor': i === 0 ? 'start' : 'middle', text: fDiaIdx(i) }));
+    for (const se of cfg.series) {
+      let d = ''; for (let i = 0; i < n; i++) d += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(se.valores[i]).toFixed(1);
+      svg.appendChild(s('path', { d, fill: 'none', stroke: se.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    }
+    const cursor = s('line', { y1: MT, y2: H - MB, stroke: 'var(--muted)', 'stroke-width': 1, visibility: 'hidden' });
+    svg.appendChild(cursor);
+    const puntos = cfg.series.map(se => { const c = s('circle', { r: 4, fill: se.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }); svg.appendChild(c); return c; });
+    const capa = s('rect', { x: ML, y: MT, width: W - ML - MR, height: H - MT - MB, fill: 'transparent' });
+    svg.appendChild(capa);
+    const mover = (ev) => {
+      const r = svg.getBoundingClientRect();
+      const xv = (ev.clientX - r.left) / r.width * W;
+      const i = Math.max(0, Math.min(n - 1, Math.round((xv - ML) / (W - ML - MR) * (n - 1))));
+      cursor.setAttribute('x1', X(i)); cursor.setAttribute('x2', X(i)); cursor.setAttribute('visibility', 'visible');
+      cfg.series.forEach((se, k) => { puntos[k].setAttribute('cx', X(i)); puntos[k].setAttribute('cy', Y(se.valores[i])); puntos[k].setAttribute('visibility', 'visible'); });
+      const filas = cfg.series.map(se => { const f = [se.nombre, miles(se.valores[i], 0) + (cfg.unidad || '')]; f.color = se.color; return f; });
+      for (const ex of cfg.extra || []) filas.push([ex.nombre, miles(ex.valores[i], 0) + (cfg.unidad || '')]);
+      tipMostrar(ev, fDiaSem(E.res.dia0 + i * DIA), filas);
+    };
+    capa.addEventListener('pointermove', mover); capa.addEventListener('pointerdown', mover);
+    capa.addEventListener('pointerleave', () => { tipOcultar(); cursor.setAttribute('visibility', 'hidden'); puntos.forEach(p => p.setAttribute('visibility', 'hidden')); });
+    cont.appendChild(svg);
+    const ley = h('div', { class: 'leyenda' });
+    for (const se of cfg.series) ley.appendChild(h('span', null, h('i', { class: 'linea', style: 'border-color:' + se.color }), se.nombre));
+    const tabla = h('div', { class: 'tw tabla-alta', style: 'max-height:260px;margin-top:10px', hidden: true });
+    const btn = h('button', { class: 'linkbtn', type: 'button', text: 'Ver tabla de datos', onclick: () => {
+      if (!tabla.firstChild) {
+        const cols = (cfg.extra || []).concat(cfg.series);
+        const t = h('table', null, h('thead', null, h('tr', null, h('th', { text: 'Día' }), cols.map(c => h('th', { class: 'n', text: c.nombre })))));
+        const tb = h('tbody');
+        for (let i = 0; i < n; i++) tb.appendChild(h('tr', null, h('td', { text: fDiaSem(E.res.dia0 + i * DIA) }), cols.map(c => h('td', { class: 'n' + (c.valores[i] < -1e-6 ? ' neg' : ''), text: miles(c.valores[i], 0) }))));
+        t.appendChild(tb); tabla.appendChild(t);
+      }
+      tabla.hidden = !tabla.hidden; btn.textContent = tabla.hidden ? 'Ver tabla de datos' : 'Ocultar tabla de datos';
+    } });
+    ley.appendChild(h('span', { style: 'flex:1' })); ley.appendChild(btn);
+    cont.appendChild(ley); cont.appendChild(tabla);
+  }
+
+  /* ---------- stock por bobina ---------- */
+  function estadoClave(c) {
+    const a = c.actual.diasNeg, p = c.propuesta.diasNeg;
+    if (c.sintetica) return p > 0 ? ['warn', 'Retrasada ' + p + ' d'] : ['', 'En fecha'];
+    if (p === 0) return a > 0 ? ['good', 'Resuelta'] : ['', 'Sin rotura'];
+    if (p < a) return ['warn', 'Mejora'];
+    if (p === a) return ['crit', 'Igual'];
+    return ['crit', a === 0 ? 'Nueva rotura' : 'Empeora'];
+  }
+  function pintarStock() {
+    const R = E.res, filtro = $('#selFiltro').value, maq = $('#selMaqStock').value, q = norm($('#busca').value);
+    let lista = R.claves.filter(c => {
+      if (maq && c.maquinas.indexOf(maq) < 0) return false;
+      if (q && norm(c.key).indexOf(q) < 0) return false;
+      if (filtro === 'neg') return c.actual.diasNeg > 0 || c.propuesta.diasNeg > 0;
+      if (filtro === 'cli') return c.sintetica;
+      return true;
+    });
+    lista.sort((a, b) => (a.sintetica - b.sintetica) || (b.propuesta.diasNeg - a.propuesta.diasNeg) || (b.actual.diasNeg - a.actual.diasNeg) || a.key.localeCompare(b.key));
+    const t = vaciar($('#tblStock'));
+    t.appendChild(h('thead', null, h('tr', null, ['Key', 'Días en negativo', 'Rotura más larga', 'Stock mínimo (kg)', 'Estado'].map((x, i) => h('th', { class: i && i < 4 ? 'n' : null, text: x })))));
+    const tb = h('tbody');
+    if (!lista.length) tb.appendChild(h('tr', null, h('td', { colspan: 5, class: 'vacio', text: 'Ninguna bobina con este filtro.' })));
+    if (lista.length && (!E.clave || !lista.some(c => c.key === E.clave))) E.clave = lista[0].key;
+    for (const c of lista) {
+      const [cl, tx] = estadoClave(c);
+      const tr = h('tr', { class: 'clic' + (c.key === E.clave ? ' sel' : ''), tabindex: 0, title: c.calidad,
+        onclick: () => { E.clave = c.key; $$('tr.sel', tb).forEach(x => x.classList.remove('sel')); tr.classList.add('sel'); pintarGraficoStock(); },
+        onkeydown: (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tr.click(); } } },
+        h('td', null, h('div', { class: 'key', text: c.key }), h('div', { class: 'mut', style: 'font-size:11px', text: (c.maquinas[0] || 'sin lotes') + (c.faltaPlan > 1e-6 && !c.sintetica ? ' · faltan ' + miles(c.faltaPlan) + ' kg por planificar' : '') })),
+        h('td', { class: 'n', text: c.actual.diasNeg + ' → ' + c.propuesta.diasNeg }),
+        h('td', { class: 'n', text: c.actual.rachaMax + ' → ' + c.propuesta.rachaMax + ' d' }),
+        h('td', { class: 'n' }, h('span', { class: c.actual.min < -1e-6 ? 'neg' : null, text: miles(c.actual.min) }), ' → ', h('span', { class: c.propuesta.min < -1e-6 ? 'neg' : null, text: miles(c.propuesta.min) })),
+        h('td', null, h('span', { class: 'chip ' + cl, text: tx })));
+      tb.appendChild(tr);
+    }
+    t.appendChild(tb);
+    $('#infoStock').textContent = lista.length + ' bobinas · actual → propuesta';
+    pintarGraficoStock();
+  }
+  function pintarGraficoStock() {
+    const R = E.res, cont = $('#figStock');
+    const c = R.claves.find(x => x.key === E.clave);
+    if (!c) { vaciar(cont).appendChild(h('div', { class: 'vacio', text: 'Selecciona una bobina de la tabla para ver la evolución de su stock.' })); return; }
+    const n = R.ultimoDia + 1;
+    const nec = new Float64Array(n); for (let i = 0; i < n; i++) nec[i] = c.D[i] - (i ? c.D[i - 1] : 0);
+    figLineas(cont, {
+      titulo: c.key + (c.calidad ? ' · ' + c.calidad : ''),
+      sub: (c.sintetica ? 'Sin necesidades en el fichero: kg fabricados frente a lo que el plan actual tenía terminado cada día (negativo = retraso).' : 'Stock previsto al cierre de cada día (kg); por debajo de cero hay rotura.') +
+        ' Stock inicial ' + miles(c.stock0) + ' kg · ' + (c.sintetica ? '' : 'necesidad ' + miles(c.necTotal) + ' kg · ') + 'producción planificada ' + miles(c.prodTotal) + ' kg en ' + c.nLotes + ' lote' + (c.nLotes === 1 ? '' : 's') + '.',
+      n, unidad: ' kg', zonaNeg: true,
+      series: [{ nombre: 'Secuencia actual', color: 'var(--gris-serie)', valores: c.actual.diario }, { nombre: 'Propuesta', color: 'var(--serie-1)', valores: c.propuesta.diario }],
+      extra: [{ nombre: c.sintetica ? 'Entrega en plan actual' : 'Necesidad del día', valores: nec }],
+    });
+  }
+
+  /* ---------- capacidad ---------- */
+  function pintarCapacidad() {
+    const R = E.res, cont = vaciar($('#capMulti'));
+    const n = R.ultimoDia + 1;
+    for (const m of R.maquinas) {
+      const c = m.capacidad, fig = h('div', { class: 'fig' });
+      cont.appendChild(fig);
+      figLineas(fig, {
+        titulo: m.nombre,
+        sub: c.faltaMaxH > 0.5 ? 'Capacidad insuficiente desde el ' + fDiaIdx(c.primerDia) + ': llegan a faltar ' + miles(c.faltaMaxH, 0) + ' h el ' + fDiaIdx(c.diaPeor) : 'Capacidad suficiente para cubrir las necesidades (horas acumuladas)',
+        n, unidad: ' h',
+        series: [{ nombre: 'Horas necesarias (acumulado)', color: 'var(--serie-2)', valores: c.req }, { nombre: 'Horas disponibles (acumulado)', color: 'var(--serie-1)', valores: c.disp }],
+      });
+    }
+  }
+
+  /* ---------- exportación ---------- */
+  function exportar() {
+    const R = E.res; if (!R) return;
+    const hojaSec = (esc) => {
+      const filas = [['Key_Bobina', 'Máquina', 'Cantidad', 'Fecha Inicio', 'Fecha_Fin', 'Orden', 'Calidad_MP', 'Familia', 'Micras', 'Ancho', 'Cambio previo (min)', 'Detalle del cambio', esc === 'propuesta' ? 'Orden actual' : 'Orden propuesto', 'Días que llega tarde']];
+      for (const m of R.maquinas) m[esc].filas.forEach((f, i) => {
+        const l = f.lote, r = retrasoLote(f, esc);
+        filas.push([l.key, l.maquina, l.cantidad, { fecha: f.ini }, { fecha: f.fin }, i + 1, l.calidad, l.color + (l.pe ? ' + PE' : '') + (l.ab ? ' + AB' : ''), l.micras, l.ancho,
+          f.cambio.total, textoCambio(f.cambio), (esc === 'propuesta' ? f.posActual : f.posNueva) + 1, r.n || 0]);
+      });
+      return filas;
+    };
+    const anchosSec = [16, 16, 10, 17, 17, 7, 40, 14, 8, 8, 12, 34, 10, 10];
+    const stock = [['Key_Bobina', 'Calidad_MP', 'Máquina', 'Tipo', 'Stock inicial', 'Necesidad total', 'Producción total', 'Días en negativo (actual)', 'Días en negativo (propuesta)', 'Rotura más larga en días (actual)', 'Rotura más larga en días (propuesta)', 'Stock mínimo (actual)', 'Stock mínimo (propuesta)', 'Primera rotura (actual)', 'Primera rotura (propuesta)', 'Kg sin planificar', 'Estado']];
+    for (const c of R.claves) stock.push([c.key, c.calidad, c.maquinas.join(', '), c.sintetica ? 'Sin necesidades' : 'Con necesidades', c.stock0, c.necTotal, c.prodTotal,
+      c.actual.diasNeg, c.propuesta.diasNeg, c.actual.rachaMax, c.propuesta.rachaMax, Math.round(c.actual.min), Math.round(c.propuesta.min),
+      c.actual.primerDia >= 0 ? { fecha: R.dia0 + c.actual.primerDia * DIA } : '', c.propuesta.primerDia >= 0 ? { fecha: R.dia0 + c.propuesta.primerDia * DIA } : '', Math.round(c.faltaPlan), estadoClave(c)[1]]);
+    const A = R.kpi.actual, Pk = R.kpi.propuesta, P = E.P;
+    const res = [['Indicador', 'Actual (recalculada)', 'Propuesta'],
+      ['Tiempo perdido en cambios (h)', +(A.setupMin / 60).toFixed(1), +(Pk.setupMin / 60).toFixed(1)],
+      ['Cambios de calidad', A.nCal, Pk.nCal], ['Cambios de ancho', A.nAn, Pk.nAn], ['Cambios de micraje', A.nMic, Pk.nMic],
+      ['Bobinas con stock negativo', A.clavesNeg, Pk.clavesNeg], ['Días-bobina en negativo', A.diasNeg, Pk.diasNeg], ['Rotura más larga (días)', A.rachaMax, Pk.rachaMax], ['Kg·día en negativo', Math.round(A.kgDia), Math.round(Pk.kgDia)],
+      ['Bobinas sin necesidad retrasadas', A.retrasadas, Pk.retrasadas]];
+    for (const m of R.maquinas) {
+      res.push([m.nombre + ' — cambios (h)', +(m.actual.setupMin / 60).toFixed(1), +(m.propuesta.setupMin / 60).toFixed(1)]);
+      res.push([m.nombre + ' — fin de secuencia', { fecha: m.actual.fin }, { fecha: m.propuesta.fin }]);
+    }
+    res.push([], ['Parámetros utilizados', '', ''], ['Cambio de calidad (min)', P.tCalidad], ['Cambio de ancho (min)', P.tAncho], ['Tolerancia de ancho (mm)', P.tolAncho], ['Cambio de micraje (min)', P.tMicras],
+      ['Lotes en curso fijos por máquina', P.congelados], ['Producción cuenta como stock', P.disponibilidad === 'fin' ? 'Al terminar el lote' : 'Según se fabrica'], ['Antelación mínima (h)', P.antelacionH],
+      ['Bobinas sin necesidades', P.sinNecesidad], ['Penalización por día de rotura (kg)', P.penalDiaKg], ['Peso creciente de roturas largas', P.pesoRacha]);
+    const blob = XlsxLite.escribir([
+      { nombre: 'Secuencia propuesta', anchos: anchosSec, filas: hojaSec('propuesta') },
+      { nombre: 'Secuencia actual recalculada', anchos: anchosSec, filas: hojaSec('actual') },
+      { nombre: 'Stock por bobina', anchos: [16, 40, 16, 16, 12, 14, 14, 14, 14, 14, 14, 14, 14, 17, 17, 12, 14], filas: stock },
+      { nombre: 'Resumen', anchos: [38, 20, 20], filas: res },
+    ]);
+    const d = new Date();
+    const a = h('a', { href: URL.createObjectURL(blob), download: 'Secuencia_propuesta_' + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + '_' + p2(d.getHours()) + p2(d.getMinutes()) + '.xlsx' });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  /* ---------- eventos ---------- */
+  function iniciar() {
+    ponerParams(Motor.PARAMS_DEF);
+    pintarMatriz();
+    const zona = $('#zona'), inpTodos = $('#inpTodos'), inpUno = $('#inpUno');
+    zona.addEventListener('click', () => inpTodos.click());
+    zona.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); inpTodos.click(); } });
+    ['dragenter', 'dragover'].forEach(n => zona.addEventListener(n, (ev) => { ev.preventDefault(); zona.classList.add('sobre'); }));
+    ['dragleave', 'drop'].forEach(n => zona.addEventListener(n, (ev) => { ev.preventDefault(); zona.classList.remove('sobre'); }));
+    zona.addEventListener('drop', (ev) => { if (ev.dataTransfer && ev.dataTransfer.files.length) cargarFicheros(Array.from(ev.dataTransfer.files)); });
+    window.addEventListener('dragover', (ev) => ev.preventDefault());
+    window.addEventListener('drop', (ev) => ev.preventDefault());
+    inpTodos.addEventListener('change', () => { cargarFicheros(Array.from(inpTodos.files)); inpTodos.value = ''; });
+    $$('.slot').forEach(sl => sl.addEventListener('click', () => { E.tipoSlot = sl.getAttribute('data-tipo'); inpUno.click(); }));
+    inpUno.addEventListener('change', () => { if (inpUno.files.length) cargarFicheros([inpUno.files[0]], E.tipoSlot); inpUno.value = ''; });
+    $('#btnCalc').addEventListener('click', calcular);
+    $$('#secReglas input, #secReglas select').forEach(e => e.addEventListener('change', () => { resumenReglas(); actualizarBoton(true); }));
+    $('#btnReset').addEventListener('click', () => { E.matriz = Motor.copiaMatriz(Motor.MATRIZ_DEF); E.clasifUsuario = {}; ponerParams(Motor.PARAMS_DEF); pintarMatriz(); pintarClasif(); actualizarBoton(true); });
+    $$('.tab').forEach(b => b.addEventListener('click', () => {
+      E.tab = b.getAttribute('data-tab');
+      $$('.tab').forEach(x => x.classList.toggle('on', x === b));
+      $$('[data-panel]').forEach(p => { p.hidden = p.getAttribute('data-panel') !== E.tab; });
+    }));
+    const seg = (id, fn) => $$('#' + id + ' button').forEach(b => b.addEventListener('click', () => { $$('#' + id + ' button').forEach(x => x.classList.toggle('on', x === b)); fn(b.getAttribute('data-v')); }));
+    seg('segEsc', (v) => { E.esc = v; pintarSecuencia(); });
+    seg('segZoom', (v) => { E.zoom = +v; pintarGantt(); });
+    $('#selFiltro').addEventListener('change', pintarStock); $('#selMaqStock').addEventListener('change', pintarStock); $('#busca').addEventListener('input', pintarStock);
+    $('#btnExport').addEventListener('click', exportar);
+    $('#btnTema').addEventListener('click', () => {
+      const raiz = document.documentElement;
+      const oscuro = raiz.getAttribute('data-theme') ? raiz.getAttribute('data-theme') === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      raiz.setAttribute('data-theme', oscuro ? 'light' : 'dark');
+      try { localStorage.setItem('seq-tema', oscuro ? 'light' : 'dark'); } catch (e) { /* sin almacenamiento */ }
+    });
+    try { const t = localStorage.getItem('seq-tema'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) { /* sin almacenamiento */ }
+    actualizarBoton(true);
+  }
+  iniciar();
+})();
+</script>
+</body>
+</html>

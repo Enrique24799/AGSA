@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ciclo de 21 días en Tubos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{
+  /* Layout: shell de la aplicación GPB (barra superior + panel lateral con árbol) y contenido en pestañas con paneles de cabecera gris */
+  color-scheme: light;
+  --bar1:#3d516a; --bar2:#506987; --btn:#6482a3; --badge:#617e9f;
+  --side:#f5f6f4; --panel:#ffffff; --bg:#ffffff; --navy:#2a385d; --ink:#1f2937; --ink2:#465263; --muted:#6b7686;
+  --rule:#d8dde4; --rule2:#e8ebef; --thead:#50698a; --soft:#f4f6f9; --hi:#eef3fa; --email:#3a5f9a;
+  --hoy:#9aa5b4; --e1:#eb6834; --e2:#2a78d6; --chg:#3d516a; --prod:#cfd7e1; --open:#7f90a6; --free:#e6eaef; --zone:rgba(42,120,214,.07);
+  --good:#0b7a0b; --bad:#c0392b; --warn:#a86400;
+  --f:Tahoma, Verdana, "Segoe UI", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bar1)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;height:42px;display:flex;align-items:center;gap:10px;
+  padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  background:linear-gradient(90deg,var(--bar1) 0%,var(--bar2) 50%,#42566f 100%);box-shadow:0 2px 3px rgba(0,0,0,.12);color:#fff}
+.menu-btn{width:30px;height:28px;border:0;border-radius:6px;background:var(--btn);display:grid;place-items:center;cursor:pointer;padding:0}
+.menu-btn span{display:block;width:12px;height:2px;background:#fff;box-shadow:0 -4px 0 #fff,0 4px 0 #fff}
+.menu-btn:focus-visible,.tab:focus-visible,.tree a:focus-visible{outline:2px solid #ffd27a;outline-offset:2px}
+.badge{font:700 14px/1 Georgia,"Times New Roman",serif;background:var(--badge);padding:5px 8px 4px;border-radius:7px;letter-spacing:.02em}
+.app{font-weight:700;font-size:13px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app small{font-weight:400;opacity:.8}
+.tb-right{margin-left:auto;font-size:12px;opacity:.85;white-space:nowrap}
+.shell{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:calc(100vh - 42px)}
+.side{background:var(--side);border-right:3px solid var(--navy);padding:12px 8px 20px 6px;display:grid;gap:10px;align-content:start}
+.user{border-left:3px solid #425469;border-radius:6px 0 0 6px;padding:4px 6px 8px;border-bottom:1px solid var(--rule)}
+.user b{display:block;color:var(--navy);font-size:11.5px;line-height:1.35}
+.user span{display:block;color:var(--email);font-size:11px;font-weight:700}
+.tree{background:#fff;border-radius:6px;padding:10px 8px 12px 10px}
+.tree ul{list-style:none;margin:0;padding:0}
+.tree ul ul{margin-left:9px;padding-left:12px;border-left:1px dotted #b7bec8}
+.tree li{position:relative;padding:3px 0 3px 14px;font-size:11.5px}
+.tree li::before{content:"";position:absolute;left:0;top:11px;width:9px;border-top:1px dotted #b7bec8}
+.tree .node>span{font-weight:700;color:var(--navy)}
+.tree .node>span::before{content:"⊟";font-weight:400;color:#8a929d;margin-right:5px;font-size:11px}
+.tree a{color:var(--ink);text-decoration:none;border-radius:3px;padding:1px 4px;cursor:pointer;display:inline-block}
+.tree a:hover{background:#e9eef5}
+.tree a[aria-current="page"]{background:var(--navy);color:#fff}
+.tree .off{color:#9aa1ab}
+.content{min-width:0;padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:1180px;display:grid;gap:16px}
+.crumb{font-size:11px;color:var(--muted)}
+.crumb b{color:var(--navy)}
+h1{margin:0;font-size:20px;color:var(--navy);text-wrap:balance}
+.sub{margin:2px 0 0;color:var(--ink2);font-size:12.5px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--rule);border-radius:4px;background:var(--soft)}
+.fact{padding:9px 12px;display:grid;gap:1px}
+.fact+.fact{border-left:1px solid var(--rule)}
+.fact b{font-size:16px;color:var(--navy);font-variant-numeric:tabular-nums}
+.fact span{font-size:11.5px;color:var(--muted)}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--navy);overflow-x:auto}
+.tab{font:700 12.5px/1 var(--f);color:var(--ink2);background:#e9ecf0;border:1px solid var(--rule);border-bottom:0;border-radius:5px 5px 0 0;padding:10px 16px 9px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.tab:hover{background:#dfe4ea}
+.tab[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tabpanel{display:grid;gap:16px}
+.tabpanel[hidden]{display:none}
+.lede{margin:0;color:var(--ink2);max-width:110ch}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--rule);border-top:3px solid var(--navy);border-radius:4px;padding:10px 12px;display:grid;gap:2px;align-content:start}
+.kpi.e1{border-top-color:var(--e1)}.kpi.e2{border-top-color:var(--e2)}
+.kl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.kpi b{font-size:21px;color:var(--navy);font-variant-numeric:tabular-nums;line-height:1.2}
+.ks{font-size:11.5px;color:var(--ink2)}
+.ks .up{color:var(--bad);font-weight:700}.ks .eq{color:var(--good);font-weight:700}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;min-width:0;display:grid;align-content:start}
+.ph{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:8px 12px;background:linear-gradient(#f8f9fb,#eef1f5);border-bottom:1px solid var(--rule);border-radius:4px 4px 0 0}
+.ph h3{margin:0;font-size:12.5px;color:var(--navy);text-transform:uppercase;letter-spacing:.04em}
+.ph span{font-size:11.5px;color:var(--muted)}
+.pb{padding:12px;display:grid;gap:10px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11.5px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:2px;display:inline-block}
+.legend i.ln{height:0;border-top:2px solid;width:16px;border-radius:0}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:var(--rule2);stroke-width:1}
+.axis{stroke:#9aa3ae;stroke-width:1}
+.tick{fill:var(--muted);font:11px var(--f);font-variant-numeric:tabular-nums}
+.xl{fill:var(--ink2);font:700 11px var(--f)}
+.vl{fill:var(--ink);font:700 11px var(--f);font-variant-numeric:tabular-nums}
+.vl.mut{fill:var(--ink2);font-weight:400}
+.vl.over{fill:var(--bad)}
+.axt{fill:var(--ink2);font:11px var(--f)}
+.zone{fill:var(--zone)}
+.zl{fill:var(--muted);font:700 10.5px var(--f);letter-spacing:.03em}
+[data-tip]{cursor:default}
+[data-tip]:hover{opacity:.85}
+.tip{position:fixed;z-index:80;pointer-events:none;background:var(--navy);color:#fff;font:12px/1.4 var(--f);padding:6px 9px;border-radius:3px;max-width:280px;box-shadow:0 2px 6px rgba(0,0,0,.2);font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+thead th{background:var(--thead);color:#fff;font-weight:700;padding:7px 10px;text-align:right;white-space:normal;vertical-align:bottom;border-right:1px solid rgba(255,255,255,.15)}
+thead th:first-child,thead th.l{text-align:left}
+tbody th{text-align:left;font-weight:700;color:var(--ink);padding:6px 10px;white-space:nowrap}
+td{padding:6px 10px;text-align:right;white-space:nowrap;border-left:1px solid var(--rule2)}
+tbody tr{border-bottom:1px solid var(--rule2)}
+tbody tr:nth-child(even){background:#fafbfc}
+tr.grp th{background:#e9edf2;color:var(--navy);font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:5px 10px}
+tr.hi{background:var(--hi)!important}
+tr.hi th,tr.hi td{font-weight:700}
+tr.bad td{color:var(--bad)}
+tr.tot{background:#e9edf2!important}
+tr.tot th,tr.tot td{font-weight:700}
+tr.base th,tr.base td{color:var(--muted)}
+td.note{color:var(--muted);text-align:left;white-space:normal;min-width:200px;font-size:11.5px}
+td.txt{text-align:left;white-space:normal;min-width:140px;color:var(--ink2)}
+.cmp td{text-align:left;white-space:normal}
+.cmp td:nth-child(2){color:var(--ink2)}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px;border:1px solid}
+.chip::before{margin-right:4px}
+.chip.good{color:var(--good);border-color:var(--good)}.chip.good::before{content:"✔"}
+.chip.warn{color:var(--warn);border-color:var(--warn)}.chip.warn::before{content:"!"}
+.chip.bad{color:var(--bad);border-color:var(--bad)}.chip.bad::before{content:"▼"}
+.pc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.pc h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.pro-h{color:var(--good)}.con-h{color:var(--bad)}
+.pc ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.pc li{display:grid;grid-template-columns:16px 1fr;gap:6px}
+.pro li::before{content:"+";color:var(--good);font-weight:700}
+.con li::before{content:"−";color:var(--bad);font-weight:700}
+.verdict{border:1px solid var(--rule);border-left:4px solid var(--navy);background:var(--soft);border-radius:0 4px 4px 0;padding:12px 14px;display:grid;gap:6px}
+.verdict p{margin:0;max-width:120ch}
+.verdict .big{font-size:14px;color:var(--navy)}
+.todo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 22px}
+.todo div{display:grid;gap:2px;align-content:start}
+.todo b{color:var(--navy)}
+.todo span{color:var(--ink2)}
+.method ul{margin:0;padding-left:18px;display:grid;gap:4px;color:var(--ink2);max-width:130ch}
+.foot{font-size:11px;color:var(--muted)}
+.scrim{display:none}
+.ctrl-top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end}
+fieldset.seg{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;min-width:0}
+fieldset.seg legend{float:left;width:100%;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:0;margin-bottom:4px}
+.seg label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.fld{display:grid;gap:3px}.fld label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.fld input{width:120px}
+input[type=number],select{font:12px var(--f);padding:5px 8px;border:1px solid #b9c2cd;border-radius:4px;background:#fff;color:var(--ink)}
+select:focus-visible,input:focus-visible,.btn:focus-visible{outline:2px solid var(--e2);outline-offset:1px}
+.btn{font:700 11.5px var(--f);padding:6px 11px;border-radius:4px;border:1px solid var(--thead);background:#fff;color:var(--navy);cursor:pointer}
+.btn:hover{background:#eef3fa}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.presets>span{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
+table.cfg td{text-align:left}
+table.cfg select{width:100%;min-width:150px}
+table.cfg tfoot th,table.cfg tfoot td{background:#e9edf2;font-weight:700;padding:7px 10px;text-align:left}
+.sat{display:inline-block;min-width:64px;text-align:right;padding:1px 7px;border-radius:3px;font-weight:700}
+.sat.g,td.hm-g{background:#d1fae5;color:#065f46}.sat.y,td.hm-y{background:#fef3c7;color:#92400e}.sat.r,td.hm-r{background:#fee2e2;color:#991b1b}
+.sat.na,td.hm-na{background:#eceff3;color:var(--muted);font-weight:400}
+table.heat td{text-align:center;font-weight:700;padding:6px 6px;border-left:1px solid #fff}
+table.heat td.yr{border-left:3px solid #fff}
+td.neg{color:var(--bad);font-weight:700}
+.scale{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2)}
+.scale span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}.sw.g{background:#d1fae5;border:1px solid #6ee7b7}.sw.y{background:#fef3c7;border:1px solid #fcd34d}.sw.r{background:#fee2e2;border:1px solid #fca5a5}
+.content a[data-tab]{color:var(--e2);font-weight:700}
+.stack{display:grid;gap:16px}
+.params{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:flex-end;padding:10px 12px;border:1px solid var(--rule);border-radius:4px;background:#fff}
+.params .foot{max-width:60ch;margin:0}
+.chartbox{max-width:820px}
+.chartbox.sm{max-width:600px}
+@media (max-width:1100px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;z-index:70;top:calc(42px + env(safe-area-inset-top,0px));bottom:0;left:0;width:260px;overflow-y:auto;transform:translateX(-105%);transition:transform .2s;padding-left:max(6px,env(safe-area-inset-left,0px))}
+  body.nav-open .side{transform:none}
+  body.nav-open .scrim{display:block;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.25)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fact:nth-child(3){border-left:0}.fact:nth-child(n+3){border-top:1px solid var(--rule)}
+  .pc,.todo{grid-template-columns:1fr}
+  .tb-right{display:none}
+}
+@media (max-width:480px){.kpis{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.side{transition:none}}
+@media print{
+  .topbar,.side,.tabs,.scrim{display:none!important}
+  .shell{display:block}.tabpanel[hidden]{display:grid!important}
+  .tabpanel{break-before:page}.panel{break-inside:avoid}
+}
+
+.params{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:flex-end;padding:10px 12px;border:1px solid var(--rule);border-radius:4px;background:#fff}
+.params .foot{max-width:60ch;margin:0}
+.ctrl-top{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:flex-end}
+fieldset.seg{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;min-width:0}
+fieldset.seg legend{float:left;width:100%;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:0;margin-bottom:4px}
+.seg label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.fld{display:grid;gap:3px}.fld label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.fld input{width:130px}
+input[type=number]{font:12px var(--f);padding:5px 8px;border:1px solid #b9c2cd;border-radius:4px;background:#fff;color:var(--ink)}
+input:focus-visible{outline:2px solid var(--e2);outline-offset:1px}
+.sat{display:inline-block;min-width:64px;text-align:right;padding:1px 7px;border-radius:3px;font-weight:700}
+.sat.g,td.hm-g{background:#d1fae5;color:#065f46}.sat.y,td.hm-y{background:#fef3c7;color:#92400e}.sat.r,td.hm-r{background:#fee2e2;color:#991b1b}
+table.heat td{text-align:center;font-weight:700;padding:7px 6px;border-left:1px solid #fff}
+table.heat th.sep,table.heat td.sep{border-left:3px solid var(--navy)}
+td.neg,span.neg{color:var(--bad);font-weight:700}
+.scale{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2)}
+.scale span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}.sw.g{background:#d1fae5;border:1px solid #6ee7b7}.sw.y{background:#fef3c7;border:1px solid #fcd34d}.sw.r{background:#fee2e2;border:1px solid #fca5a5}
+.vl.over{fill:var(--bad)}
+.chartbox{max-width:820px}
+.total{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;padding:12px 14px;border:1px solid var(--rule);border-left:4px solid var(--e1);background:var(--soft);border-radius:0 4px 4px 0}
+.total.e2{border-left-color:var(--e2)}
+.facts{grid-template-columns:repeat(3,minmax(0,1fr))}
+details.opt{display:grid;gap:12px}
+details.opt>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;width:max-content;max-width:100%;font:700 12px var(--f);color:var(--navy);background:#fff;border:1px solid var(--thead);border-radius:4px;padding:7px 12px}
+details.opt>summary::-webkit-details-marker{display:none}
+details.opt>summary::before{content:'▸';font-size:11px}
+details.opt[open]>summary::before{content:'▾'}
+details.opt>summary:hover{background:#eef3fa}
+details.opt>summary:focus-visible{outline:2px solid var(--e2);outline-offset:2px}
+.chartbox.sm{max-width:600px}
+.kpis.k5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.phases{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.phase{border:1px solid var(--rule);border-top:3px solid var(--e2);border-radius:4px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.phase b{font-size:16px;color:var(--navy)}
+.phase p{margin:4px 0 0;color:var(--ink2)}
+@media (max-width:1100px){.kpis.k5{grid-template-columns:repeat(2,minmax(0,1fr))}.phases{grid-template-columns:1fr}}
+.cb{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.cb .trk{display:inline-block;height:9px;background:var(--rule2);border-radius:2px;overflow:hidden}
+.cb .trk i{display:block;height:100%;border-radius:2px}
+.cb .cbt{min-width:3.2em;text-align:right}
+.total b{font-size:20px;color:var(--navy)}
+.shead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);border:1px solid var(--rule);border-left:6px solid var(--e1);border-radius:0 4px 4px 0;background:#fff}
+.shead.e2{border-left-color:var(--e2)}
+.shead>div{padding:12px 18px;display:grid;gap:4px;align-content:center}
+.shead>div+div{border-left:1px solid var(--rule)}
+.shead b{font-size:21px;line-height:1.2;letter-spacing:.03em;text-transform:uppercase;color:var(--navy)}
+.shead span{font-size:12.5px;color:var(--ink2)}
+@media (max-width:760px){.shead{grid-template-columns:1fr}.shead>div+div{border-left:0;border-top:1px solid var(--rule)}}
+.total.sum{display:grid;gap:8px}
+.total .tl{font-weight:700;color:var(--ink2)}
+.total .eq{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.total .term{display:grid;gap:2px}
+.total .term span{font-size:12px;color:var(--ink2)}
+.total .op{font-size:22px;font-weight:700;color:var(--muted)}
+.total .term.res b{font-size:24px}
+.big2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.need{border:1px solid var(--rule);border-top:3px solid var(--e2);border-radius:4px;padding:12px 14px;display:grid;gap:4px;background:#fff}
+.need b{font-size:24px;color:var(--navy)}
+.verdict.bad{border-left-color:var(--bad)}
+.verdict .h{font-size:17px;color:var(--bad);font-weight:700;margin:0}
+.kpi.bad{border-top-color:var(--bad)}
+@media (max-width:860px){.big2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Mostrar u ocultar el menú" aria-expanded="false" aria-controls="side"><span></span></button>
+  <span class="badge">GPB</span>
+  <span class="app">AGSA <small>· Planificación · Análisis de ciclos</small></span>
+  <span class="tb-right">Noviembre 2026 · Documento para Dirección</span>
+</header>
+<div class="scrim" id="scrim"></div>
+<div class="shell">
+<aside class="side" id="side">
+  <div class="user"><b>Planificador AGSA</b><b>Enrique Tejada Fornieles</b><span>etejada@clgrupoindustrial.com</span></div>
+  <nav class="tree" aria-label="Análisis">
+    <ul><li class="node"><span>Análisis de ciclos · Tubos</span>
+      <ul>
+        <li><a data-tab="situacion-actual" href="#situacion-actual">Situación actual</a></li>
+        <li class="node"><span>Costes de transformación</span>
+          <ul>
+            <li><a data-tab="escenario-1" href="#escenario-1">Escenario 1 · Equipos actuales</a></li>
+            <li><a data-tab="escenario-2" href="#escenario-2">Escenario 2 · Más equipos y M28</a></li>
+            <li><a data-tab="comparativa" href="#comparativa">Comparativa</a></li>
+          </ul></li>
+        <li class="node"><span>Capacidad</span><ul><li><a data-tab="saturacion" href="#saturacion">Saturación de máquinas</a></li></ul></li>
+        <li class="node"><span>Implantación</span><ul><li><a data-tab="presupuesto" href="#presupuesto">Presupuesto 2027</a></li></ul></li>
+        <li class="node"><span>Mínimos</span><ul><li><a href="Minimos_Fabricacion.html">Mínimos de fabricación</a></li></ul></li>
+      </ul></li></ul>
+  </nav>
+</aside>
+<main class="content"><div class="inner">
+  <div>
+    <div class="crumb">Análisis de ciclos › <b>Paso a ciclos de 21 días</b></div>
+    <h1>Paso a ciclos de fabricación de 21 días en Tubos</h1>
+    <p class="sub">M8, M16, M17 y M20 · Base: situación actual (órdenes de octubre 2025 a noviembre 2026), calendario de turnos y costes de transformación 2026 · Cifras anuales</p>
+  </div>
+  <div class="facts">
+    <div class="fact"><b>33–43 → 21 días</b><span>duración del ciclo (mediana; M17 en campañas)</span></div>
+    <div class="fact"><b>377 → 649</b><span>cambios al año (+72%)</span></div>
+    <div class="fact"><b>1.703 → 2.934 h</b><span>horas de cambio al año (+1.231 h)</span></div>
+  </div>
+  <div class="params">
+    <div class="fld"><label for="pMP">Materia prima (fleje), €/t</label><input id="pMP" type="number" min="0" step="10" value="750"></div>
+    <div class="fld"><label for="pCH">Recuperación chatarra, €/t</label><input id="pCH" type="number" min="0" step="10" value="0"></div>
+    <div class="fld"><label for="pTC">Coste anual de un equipo, €</label><input id="pTC" type="number" min="0" step="5000" value="160000"></div>
+    <p class="foot">Valores de ejemplo: cámbialos por los reales y todos los importes se recalculan. La merma se valora a materia prima menos chatarra.</p>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Escenarios">
+    <button class="tab" role="tab" id="t-a" aria-controls="situacion-actual"><i style="background:var(--hoy)"></i>Situación actual</button>
+    <button class="tab" role="tab" id="t-e1" aria-controls="escenario-1"><i style="background:var(--e1)"></i>Escenario 1 · Equipos actuales</button>
+    <button class="tab" role="tab" id="t-e2" aria-controls="escenario-2"><i style="background:var(--e2)"></i>Escenario 2 · Más equipos y M28</button>
+    <button class="tab" role="tab" id="t-s" aria-controls="saturacion"><i style="background:var(--open)"></i>Saturación</button>
+    <button class="tab" role="tab" id="t-c" aria-controls="comparativa"><i style="background:var(--navy)"></i>Comparativa</button>
+    <button class="tab" role="tab" id="t-p" aria-controls="presupuesto"><i style="background:var(--e2)"></i>Presupuesto</button>
+  </div>
+
+  <section class="tabpanel" role="tabpanel" id="situacion-actual" aria-labelledby="t-a">
+    <div class="kpis"><div class="kpi "><span class="kl">Ciclo real M8 · mediana</span><b>35 días</b><span class="ks">mediana de 8 ciclos medidos</span></div><div class="kpi "><span class="kl">Ciclo real M16 · mediana</span><b>43 días</b><span class="ks">mediana de 7 ciclos medidos</span></div><div class="kpi "><span class="kl">Ciclo real M17 · mediana</span><b>154 días</b><span class="ks">trabaja por campañas</span></div><div class="kpi "><span class="kl">Ciclo real M20 · mediana</span><b>33 días</b><span class="ks">mediana de 9 ciclos medidos</span></div></div>
+    <div class="panel"><div class="ph"><h3>Tiempo de repetición del ciclo</h3><span>Días entre un ciclo y el siguiente · octubre 2025 a noviembre 2026</span></div>
+      <div class="pb"><div class="legend"><span><i style="background:var(--navy)"></i>Ciclo real</span><span><i class="ln" style="border-color:var(--e2);border-top-style:dashed"></i>Media de la máquina</span></div>
+      <div class="chartbox"><svg viewBox="0 0 720 300" role="img" aria-label="Tiempo de repetición de cada ciclo real"><line x1="46" x2="706" y1="266.0" y2="266.0" class="grid"/><text x="38" y="270.0" class="tick" text-anchor="end">0</text><line x1="46" x2="706" y1="224.7" y2="224.7" class="grid"/><text x="38" y="228.7" class="tick" text-anchor="end">10</text><line x1="46" x2="706" y1="183.3" y2="183.3" class="grid"/><text x="38" y="187.3" class="tick" text-anchor="end">20</text><line x1="46" x2="706" y1="142.0" y2="142.0" class="grid"/><text x="38" y="146.0" class="tick" text-anchor="end">30</text><line x1="46" x2="706" y1="100.7" y2="100.7" class="grid"/><text x="38" y="104.7" class="tick" text-anchor="end">40</text><line x1="46" x2="706" y1="59.3" y2="59.3" class="grid"/><text x="38" y="63.3" class="tick" text-anchor="end">50</text><line x1="46" x2="706" y1="18.0" y2="18.0" class="grid"/><text x="38" y="22.0" class="tick" text-anchor="end">60</text><path d="M70.0,266.0V129.4Q70.0,126.4 73.0,126.4H89.0Q92.0,126.4 92.0,129.4V266.0Z" fill="var(--navy)" data-tip="M8 · ciclo 202509: 34 días"/><text x="81.0" y="121.4" class="tick" text-anchor="middle">34</text><path d="M95.0,266.0V57.7Q95.0,54.7 98.0,54.7H114.0Q117.0,54.7 117.0,57.7V266.0Z" fill="var(--navy)" data-tip="M8 · ciclo 202510: 51 días"/><text x="106.0" y="49.7" class="tick" text-anchor="middle">51</text><path d="M120.0,266.0V130.2Q120.0,127.2 123.0,127.2H139.0Q142.0,127.2 142.0,130.2V266.0Z" fill="var(--navy)" data-tip="M8 · ciclo 202511: 34 días"/><text x="131.0" y="122.2" class="tick" text-anchor="middle">34</text><path d="M145.0,266.0V120.8Q145.0,117.8 148.0,117.8H164.0Q167.0,117.8 167.0,120.8V266.0Z" fill="var(--navy)" data-tip="M8 · ciclo 202512: 36 días"/><text x="156.0" y="112.8" class="tick" text-anchor="middle">36</text><path d="M170.0,266.0V125.9Q170.0,122.9 173.0,122.9H189.0Q192.0,122.9 192.0,125.9V266.0Z" fill="var(--navy)" data-tip="M8 · ciclo 202601: 35 días"/><text x="181.0" y="117.9" class="tick" text-anchor="middle">35</text><path d="M195.0,266.0V125.5Q195.0,122.5 198.0,122.5H214.0Q217.0,122.5 217.0,125.5V266.0Z" fill="var(--navy)" data-tip="M8 · ciclo 202602: 35 días"/><text x="206.0" y="117.5" class="tick" text-anchor="middle">35</text><path d="M220.0,266.0V97.7Q220.0,94.7 223.0,94.7H239.0Q242.0,94.7 242.0,97.7V266.0Z" fill="var(--navy)" data-tip="M8 · ciclo 202603: 41 días"/><text x="231.0" y="89.7" class="tick" text-anchor="middle">41</text><line x1="64.0" x2="248.0" y1="88.7" y2="88.7" stroke="var(--e2)" stroke-width="2" stroke-dasharray="6 3"/><text x="156.0" y="288" class="xl" text-anchor="middle">M8 · media 43 días</text><path d="M315.0,266.0V101.8Q315.0,98.8 318.0,98.8H334.0Q337.0,98.8 337.0,101.8V266.0Z" fill="var(--navy)" data-tip="M16 · ciclo 202510: 40 días"/><text x="326.0" y="93.8" class="tick" text-anchor="middle">40</text><path d="M340.0,266.0V140.7Q340.0,137.7 343.0,137.7H359.0Q362.0,137.7 362.0,140.7V266.0Z" fill="var(--navy)" data-tip="M16 · ciclo 202511: 31 días"/><text x="351.0" y="132.7" class="tick" text-anchor="middle">31</text><path d="M365.0,266.0V120.9Q365.0,117.9 368.0,117.9H384.0Q387.0,117.9 387.0,120.9V266.0Z" fill="var(--navy)" data-tip="M16 · ciclo 202512: 36 días"/><text x="376.0" y="112.9" class="tick" text-anchor="middle">36</text><path d="M390.0,266.0V76.3Q390.0,73.3 393.0,73.3H409.0Q412.0,73.3 412.0,76.3V266.0Z" fill="var(--navy)" data-tip="M16 · ciclo 202601: 47 días"/><text x="401.0" y="68.3" class="tick" text-anchor="middle">47</text><path d="M415.0,266.0V91.4Q415.0,88.4 418.0,88.4H434.0Q437.0,88.4 437.0,91.4V266.0Z" fill="var(--navy)" data-tip="M16 · ciclo 202602: 43 días"/><text x="426.0" y="83.4" class="tick" text-anchor="middle">43</text><line x1="309.0" x2="443.0" y1="66.2" y2="66.2" stroke="var(--e2)" stroke-width="2" stroke-dasharray="6 3"/><text x="376.0" y="288" class="xl" text-anchor="middle">M16 · media 48 días</text><path d="M510.0,266.0V100.9Q510.0,97.9 513.0,97.9H529.0Q532.0,97.9 532.0,100.9V266.0Z" fill="var(--navy)" data-tip="M20 · ciclo 202507: 41 días"/><text x="521.0" y="92.9" class="tick" text-anchor="middle">41</text><path d="M535.0,266.0V185.2Q535.0,182.2 538.0,182.2H554.0Q557.0,182.2 557.0,185.2V266.0Z" fill="var(--navy)" data-tip="M20 · ciclo 202509: 20 días"/><text x="546.0" y="177.2" class="tick" text-anchor="middle">20</text><path d="M560.0,266.0V198.9Q560.0,195.9 563.0,195.9H579.0Q582.0,195.9 582.0,198.9V266.0Z" fill="var(--navy)" data-tip="M20 · ciclo 202510: 17 días"/><text x="571.0" y="190.9" class="tick" text-anchor="middle">17</text><path d="M585.0,266.0V162.1Q585.0,159.1 588.0,159.1H604.0Q607.0,159.1 607.0,162.1V266.0Z" fill="var(--navy)" data-tip="M20 · ciclo 202601: 26 días"/><text x="596.0" y="154.1" class="tick" text-anchor="middle">26</text><path d="M610.0,266.0V148.0Q610.0,145.0 613.0,145.0H629.0Q632.0,145.0 632.0,148.0V266.0Z" fill="var(--navy)" data-tip="M20 · ciclo 202602: 29 días"/><text x="621.0" y="140.0" class="tick" text-anchor="middle">29</text><path d="M635.0,266.0V131.0Q635.0,128.0 638.0,128.0H654.0Q657.0,128.0 657.0,131.0V266.0Z" fill="var(--navy)" data-tip="M20 · ciclo 202603: 33 días"/><text x="646.0" y="123.0" class="tick" text-anchor="middle">33</text><path d="M660.0,266.0V64.7Q660.0,61.7 663.0,61.7H679.0Q682.0,61.7 682.0,64.7V266.0Z" fill="var(--navy)" data-tip="M20 · ciclo 202604: 49 días"/><text x="671.0" y="56.7" class="tick" text-anchor="middle">49</text><line x1="504.0" x2="688.0" y1="112.7" y2="112.7" stroke="var(--e2)" stroke-width="2" stroke-dasharray="6 3"/><text x="596.0" y="288" class="xl" text-anchor="middle">M20 · media 37 días</text><line x1="46" x2="706" y1="266.0" y2="266.0" class="axis"/></svg></div>
+      <p class="foot">No se muestran los ciclos que duran más de 1,5 veces la mediana de su máquina, aunque sí cuentan en la media: M8 ciclo 202604 (78 días), M16 ciclo 202509 (67 días), M16 ciclo 202603 (74 días), M20 ciclo 202508 (54 días), M20 ciclo 202605 (64 días). M17 trabaja por campañas (180 y 128 días).</p></div></div>
+  </section>
+
+  <section class="tabpanel" role="tabpanel" id="escenario-1" aria-labelledby="t-e1" hidden>
+    <div class="shead"><div><b>Equipos actuales</b><span>8 equipos y el mismo calendario de turnos</span></div><div><b>Reducción de temporales de 33–43 días a 21 días</b><span>Mediana actual en días: M8 35 · M16 43 · M20 33 · M17 por campañas</span></div></div>
+    <div class="kpis k5">
+      <div class="kpi e1"><span class="kl">Producción anual</span><b>45.828 Tn</b><span class="ks"><span class="up">−5.282 Tn</span> (−10,3%) frente a hoy</span></div>
+      <div class="kpi e1"><span class="kl">Coste de transformación</span><b>79,53 €/t</b><span class="ks"><span class="up">▲ +11,5%</span> · hoy 71,31 €/t</span></div>
+      <div class="kpi e1"><span class="kl">Coste por pérdida de toneladas</span><b>378.079 €</b><span class="ks">al año, coste fijo repartido entre menos Tn</span></div>
+      <div class="kpi e1"><span class="kl">Coste por aumento de merma</span><b id="k_e1merma">70.535 €</b><span class="ks">al año · +94 Tn de merma de arranques</span></div>
+      <div class="kpi e1"><span class="kl">Margen que se deja de ganar</span><b>581.020 €</b><span class="ks">al año · 5.282 Tn × 110 €/t de margen</span></div>
+    </div>
+    <div class="total sum"><span class="tl">Coste total del escenario 1 · al año</span>
+      <div class="eq"><div class="term"><b>378.079 €</b><span>pérdida de toneladas</span></div><span class="op">+</span>
+        <div class="term"><b id="k_e1merma2">70.535 €</b><span>aumento de merma</span></div><span class="op">+</span>
+        <div class="term"><b>581.020 €</b><span>margen que se deja de ganar</span></div><span class="op">=</span>
+        <div class="term res"><b id="k_e1tot">1.029.634 €</b><span>total al año</span></div></div></div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Coste de transformación por máquina</h3><span>€/t · subida sobre cada máquina</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--hoy)"></i>Situación actual</span><span><i style="background:var(--e1)"></i>Escenario 1 · 21 días</span></div><svg viewBox="0 0 540 270" role="img" aria-label="Coste de transformación por máquina"><line x1="52" x2="530" y1="236.0" y2="236.0" class="grid"/><text x="44" y="240.0" class="tick" text-anchor="end">0</text><line x1="52" x2="530" y1="206.0" y2="206.0" class="grid"/><text x="44" y="210.0" class="tick" text-anchor="end">20</text><line x1="52" x2="530" y1="176.0" y2="176.0" class="grid"/><text x="44" y="180.0" class="tick" text-anchor="end">40</text><line x1="52" x2="530" y1="146.0" y2="146.0" class="grid"/><text x="44" y="150.0" class="tick" text-anchor="end">60</text><line x1="52" x2="530" y1="116.0" y2="116.0" class="grid"/><text x="44" y="120.0" class="tick" text-anchor="end">80</text><line x1="52" x2="530" y1="86.0" y2="86.0" class="grid"/><text x="44" y="90.0" class="tick" text-anchor="end">100</text><line x1="52" x2="530" y1="56.0" y2="56.0" class="grid"/><text x="44" y="60.0" class="tick" text-anchor="end">120</text><line x1="52" x2="530" y1="26.0" y2="26.0" class="grid"/><text x="44" y="30.0" class="tick" text-anchor="end">140</text><path d="M68.8,236.0V141.5Q68.8,138.5 71.8,138.5H95.8Q98.8,138.5 98.8,141.5V236.0Z" fill="var(--hoy)" data-tip="M8 · Situación actual: 65,00 €/t"/><path d="M100.8,236.0V128.7Q100.8,125.7 103.8,125.7H127.8Q130.8,125.7 130.8,128.7V236.0Z" fill="var(--e1)" data-tip="M8 · Escenario 1 · 21 días: 73,56 €/t"/><text x="99.8" y="258" class="xl" text-anchor="middle">M8</text><text x="99.8" y="118.7" class="vl" text-anchor="middle">+13,2%</text><path d="M164.4,236.0V134.0Q164.4,131.0 167.4,131.0H191.4Q194.4,131.0 194.4,134.0V236.0Z" fill="var(--hoy)" data-tip="M16 · Situación actual: 70,00 €/t"/><path d="M196.4,236.0V126.0Q196.4,123.0 199.4,123.0H223.4Q226.4,123.0 226.4,126.0V236.0Z" fill="var(--e1)" data-tip="M16 · Escenario 1 · 21 días: 75,34 €/t"/><text x="195.4" y="258" class="xl" text-anchor="middle">M16</text><text x="195.4" y="116.0" class="vl" text-anchor="middle">+7,6%</text><path d="M260.0,236.0V123.5Q260.0,120.5 263.0,120.5H287.0Q290.0,120.5 290.0,123.5V236.0Z" fill="var(--hoy)" data-tip="M17 · Situación actual: 77,00 €/t"/><path d="M292.0,236.0V77.0Q292.0,74.0 295.0,74.0H319.0Q322.0,74.0 322.0,77.0V236.0Z" fill="var(--e1)" data-tip="M17 · Escenario 1 · 21 días: 108,00 €/t"/><text x="291.0" y="258" class="xl" text-anchor="middle">M17</text><text x="291.0" y="67.0" class="vl" text-anchor="middle">+40,3%</text><path d="M355.6,236.0V81.5Q355.6,78.5 358.6,78.5H382.6Q385.6,78.5 385.6,81.5V236.0Z" fill="var(--hoy)" data-tip="M20 · Situación actual: 105,00 €/t"/><path d="M387.6,236.0V62.5Q387.6,59.5 390.6,59.5H414.6Q417.6,59.5 417.6,62.5V236.0Z" fill="var(--e1)" data-tip="M20 · Escenario 1 · 21 días: 117,67 €/t"/><text x="386.6" y="258" class="xl" text-anchor="middle">M20</text><text x="386.6" y="52.5" class="vl" text-anchor="middle">+12,1%</text><path d="M451.2,236.0V132.0Q451.2,129.0 454.2,129.0H478.2Q481.2,129.0 481.2,132.0V236.0Z" fill="var(--hoy)" data-tip="Total · Situación actual: 71,31 €/t"/><path d="M483.2,236.0V119.7Q483.2,116.7 486.2,116.7H510.2Q513.2,116.7 513.2,119.7V236.0Z" fill="var(--e1)" data-tip="Total · Escenario 1 · 21 días: 79,53 €/t"/><text x="482.2" y="258" class="xl" text-anchor="middle">Total</text><text x="482.2" y="109.7" class="vl" text-anchor="middle">+11,5%</text><line x1="52" x2="530" y1="236.0" y2="236.0" class="axis"/></svg></div></div>
+      <div class="panel"><div class="ph"><h3>Cada cuánto se produce un cambio</h3><span>Horas de turno disponibles entre dos cambios</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--hoy)"></i>Situación actual</span><span><i style="background:var(--e1)"></i>Escenario 1 · 21 días</span></div><svg viewBox="0 0 540 270" role="img" aria-label="Horas de turno entre dos cambios"><line x1="52" x2="530" y1="236.0" y2="236.0" class="grid"/><text x="44" y="240.0" class="tick" text-anchor="end">0</text><line x1="52" x2="530" y1="201.0" y2="201.0" class="grid"/><text x="44" y="205.0" class="tick" text-anchor="end">10</text><line x1="52" x2="530" y1="166.0" y2="166.0" class="grid"/><text x="44" y="170.0" class="tick" text-anchor="end">20</text><line x1="52" x2="530" y1="131.0" y2="131.0" class="grid"/><text x="44" y="135.0" class="tick" text-anchor="end">30</text><line x1="52" x2="530" y1="96.0" y2="96.0" class="grid"/><text x="44" y="100.0" class="tick" text-anchor="end">40</text><line x1="52" x2="530" y1="61.0" y2="61.0" class="grid"/><text x="44" y="65.0" class="tick" text-anchor="end">50</text><line x1="52" x2="530" y1="26.0" y2="26.0" class="grid"/><text x="44" y="30.0" class="tick" text-anchor="end">60</text><path d="M80.8,236.0V107.0Q80.8,104.0 83.8,104.0H107.8Q110.8,104.0 110.8,107.0V236.0Z" fill="var(--hoy)" data-tip="M8 · Situación actual: 38 h"/><path d="M112.8,236.0V161.0Q112.8,158.0 115.8,158.0H139.8Q142.8,158.0 142.8,161.0V236.0Z" fill="var(--e1)" data-tip="M8 · Escenario 1 · 21 días: 22 h"/><text x="111.8" y="258" class="xl" text-anchor="middle">M8</text><text x="111.8" y="97.0" class="vl" text-anchor="middle">38 → 22 h</text><path d="M200.2,236.0V112.1Q200.2,109.1 203.2,109.1H227.2Q230.2,109.1 230.2,112.1V236.0Z" fill="var(--hoy)" data-tip="M16 · Situación actual: 36 h"/><path d="M232.2,236.0V162.0Q232.2,159.0 235.2,159.0H259.2Q262.2,159.0 262.2,162.0V236.0Z" fill="var(--e1)" data-tip="M16 · Escenario 1 · 21 días: 22 h"/><text x="231.2" y="258" class="xl" text-anchor="middle">M16</text><text x="231.2" y="102.1" class="vl" text-anchor="middle">36 → 22 h</text><path d="M319.8,236.0V52.3Q319.8,49.3 322.8,49.3H346.8Q349.8,49.3 349.8,52.3V236.0Z" fill="var(--hoy)" data-tip="M17 · Situación actual: 53 h"/><path d="M351.8,236.0V161.7Q351.8,158.7 354.8,158.7H378.8Q381.8,158.7 381.8,161.7V236.0Z" fill="var(--e1)" data-tip="M17 · Escenario 1 · 21 días: 22 h"/><text x="350.8" y="258" class="xl" text-anchor="middle">M17</text><text x="350.8" y="42.3" class="vl" text-anchor="middle">53 → 22 h</text><path d="M439.2,236.0V123.4Q439.2,120.4 442.2,120.4H466.2Q469.2,120.4 469.2,123.4V236.0Z" fill="var(--hoy)" data-tip="M20 · Situación actual: 33 h"/><path d="M471.2,236.0V176.1Q471.2,173.1 474.2,173.1H498.2Q501.2,173.1 501.2,176.1V236.0Z" fill="var(--e1)" data-tip="M20 · Escenario 1 · 21 días: 18 h"/><text x="470.2" y="258" class="xl" text-anchor="middle">M20</text><text x="470.2" y="113.4" class="vl" text-anchor="middle">33 → 18 h</text><line x1="52" x2="530" y1="236.0" y2="236.0" class="axis"/></svg><p class="foot">Horas de calendario al año ÷ cambios completos y de calibrador al año.</p></div></div>
+    </div>
+    <div class="panel"><div class="ph"><h3>Coste del escenario 1 por máquina</h3><span>Al año · importes en €</span></div>
+        <div class="pb"><div class="tw"><table><thead><tr><th>Máquina</th><th>Horas perdidas por cambios</th><th>Tn perdidas</th><th>Coste por pérdida de Tn</th><th>Aumento de merma (Tn)</th><th>Coste por merma</th><th>Margen que se deja de ganar</th><th>Total</th></tr></thead><tbody><tr><th scope="row">M8</th><td>536</td><td>2.826</td><td>183.678</td><td>+51,9</td><td><span data-mp="51.940915">38.956</span></td><td>310.819</td><td><b><span data-tot="494496.69|51.940915">533.452</span></b></td></tr><tr><th scope="row">M16</th><td>334</td><td>1.424</td><td>99.704</td><td>+15,6</td><td><span data-mp="15.572754">11.680</span></td><td>156.667</td><td><b><span data-tot="256371.05|15.572754">268.051</span></b></td></tr><tr><th scope="row">M17</th><td>107</td><td>489</td><td>37.626</td><td>+22,2</td><td><span data-mp="22.205469">16.654</span></td><td>53.748</td><td><b><span data-tot="91374.56|22.205469">108.029</span></b></td></tr><tr><th scope="row">M20</th><td>254</td><td>544</td><td>57.072</td><td>+4,3</td><td><span data-mp="4.327468">3.246</span></td><td>59.785</td><td><b><span data-tot="116856.95|4.327468">120.103</span></b></td></tr><tr class="tot"><th scope="row">Total</th><td>1.231</td><td>5.282</td><td>378.079</td><td>+94,0</td><td><span data-mp="94.046606">70.535</span></td><td>581.020</td><td><span data-tot="959099.26|94.046606">1.029.634</span></td></tr></tbody></table></div>
+        <p class="foot">Horas perdidas = horas de cambio adicionales al pasar a 21 días. Margen = Tn perdidas × 110 €/t. Los empalmes no se incluyen en la merma: dependen de las toneladas y no de la duración del ciclo.</p></div></div>
+    <div class="verdict"><p><b>¿Y si se pasan familias a M28?</b> Con los equipos de ahora solo se mueve gente de una máquina a otra: M28 no tiene equipo propio, así que cada turno que trabaje M28 es un turno menos en M8 o M16. Los cambios suben igual (cada familia tiene que fabricarse cada 21 días en la máquina que sea) y la merma también. Con turnos fijos por máquina sale peor que no usarla, y aun con equipos polivalentes que se movieran cada día solo se recuperaría parte de la producción perdida, por la mayor velocidad de M28. Por eso el escenario 1 se queda como está.</p></div>
+    <details class="opt"><summary>Ver detalle del cálculo</summary>
+    <div class="panel"><div class="ph"><h3>Cálculo por máquina</h3><span>Situación actual frente a ciclo de 21 días</span></div>
+      <div class="pb"><div class="tw"><table><thead><tr><th>Concepto</th><th>M8</th><th>M16</th><th>M17</th><th>M20</th><th>Total</th><th class="l">Cálculo</th></tr></thead><tbody><tr class="grp"><th colspan="7">Cambios al año</th></tr><tr class=""><th scope="row">Duración del ciclo · actual (días)</th><td>43</td><td>48</td><td>154</td><td>37</td><td>37–48</td><td class="note">Media real (órdenes 2025–2026)</td></tr><tr class=""><th scope="row">Cambios completos · actual</th><td>78</td><td>90</td><td>8</td><td>47</td><td>223</td><td class="note">Reales, enero a octubre 2026 anualizado</td></tr><tr class=""><th scope="row">Cambios de calibrador · actual</th><td>62</td><td>58</td><td>0</td><td>34</td><td>154</td><td class="note"></td></tr><tr class=""><th scope="row">Cambios completos · 21 días</th><td>148</td><td>122</td><td>20</td><td>90</td><td>379</td><td class="note">Por ciclo según familias × 17,38 ciclos</td></tr><tr class=""><th scope="row">Cambios de calibrador · 21 días</th><td>90</td><td>122</td><td>0</td><td>58</td><td>269</td><td class="note"></td></tr><tr class="grp"><th colspan="7">Horas</th></tr><tr class=""><th scope="row">Horas de calendario</th><td>5.296</td><td>5.352</td><td>448</td><td>2.656</td><td>13.752</td><td class="note">Turnos 2026</td></tr><tr class=""><th scope="row">Horas de cambio · actual</th><td>694</td><td>639</td><td>76</td><td>295</td><td>1.703</td><td class="note">Cambios × tiempo objetivo</td></tr><tr class=""><th scope="row">Horas de cambio · 21 días</th><td>1.230</td><td>973</td><td>182</td><td>549</td><td>2.934</td><td class="note"></td></tr><tr class="hi"><th scope="row">Horas de cambio extra</th><td>536</td><td>334</td><td>107</td><td>254</td><td>1.231</td><td class="note">Diferencia</td></tr><tr class="grp"><th colspan="7">Producción</th></tr><tr class=""><th scope="row">Tn al año · actual</th><td>24.283</td><td>20.079</td><td>1.702</td><td>5.046</td><td>51.110</td><td class="note">Horas de calendario × Tn/h máquina real</td></tr><tr class=""><th scope="row">Tn/h en horas sin cambio</th><td>5,28</td><td>4,26</td><td>4,57</td><td>2,14</td><td>4,29</td><td class="note">Tn actuales ÷ (horas − horas de cambio actuales)</td></tr><tr class="hi"><th scope="row">Tn perdidas al año</th><td>2.826</td><td>1.424</td><td>489</td><td>544</td><td>5.282</td><td class="note">Horas extra × Tn/h sin cambio</td></tr><tr class=""><th scope="row">Tn al año · 21 días</th><td>21.458</td><td>18.654</td><td>1.214</td><td>4.503</td><td>45.828</td><td class="note"></td></tr><tr class="grp"><th colspan="7">Coste</th></tr><tr class=""><th scope="row">€/t · actual</th><td>65,00</td><td>70,00</td><td>77,00</td><td>105,00</td><td>71,31</td><td class="note">Coste medio 2026</td></tr><tr class="hi"><th scope="row">€/t · 21 días</th><td>73,56</td><td>75,34</td><td>108,00</td><td>117,67</td><td>79,53</td><td class="note">Mismo coste fijo entre menos Tn</td></tr><tr class="hi"><th scope="row">Coste por pérdida de toneladas (€/año)</th><td>183.678</td><td>99.704</td><td>37.626</td><td>57.072</td><td>378.079</td><td class="note">Tn perdidas × €/t actual</td></tr><tr class=""><th scope="row">Merma de arranques · actual (Tn)</th><td>140,6</td><td>30,4</td><td>31,5</td><td>5,3</td><td>207,8</td><td class="note">Cambios completos, calibrador y espesor reales</td></tr><tr class=""><th scope="row">Merma de arranques · 21 días (Tn)</th><td>192,6</td><td>46,0</td><td>53,7</td><td>9,6</td><td>301,8</td><td class="note">Sin empalmes: no dependen del ciclo</td></tr><tr class="hi"><th scope="row">Coste por aumento de merma (€/año)</th><td><span data-mp="51.940915">38.956</span></td><td><span data-mp="15.572754">11.680</span></td><td><span data-mp="22.205469">16.654</span></td><td><span data-mp="4.327468">3.246</span></td><td><span data-mp="94.046606">70.535</span></td><td class="note">Aumento de merma × (materia prima − chatarra)</td></tr></tbody></table></div></div></div>
+    </details>
+    <details class="opt"><summary>Ver pros y contras</summary>
+    <div class="panel"><div class="pb"><div class="pc"><div><h4 class="pro-h">A favor</h4><ul class="pro"><li><span>No hay que contratar ni cambiar turnos: se puede aplicar de inmediato.</span></li><li><span>El stock medio de ciclo baja de 4.364 a 1.799 Tn.</span></li><li><span>Cada medida se fabrica cada 21 días: mejor respuesta a la demanda y menos espera del MTO.</span></li></ul></div><div><h4 class="con-h">En contra</h4><ul class="con"><li><span>Se pierden 5.282 Tn al año (−10,3%): las máquinas pasan 1.231 h más paradas en cambios.</span></li><li><span>El coste de transformación sube de 71,31 a 79,53 €/t (+11,5%): 378.079 € al año sin absorber.</span></li><li><span>La merma de arranques sube de 208 a 302 Tn al año (<span data-mp="94.046606">70.535 €</span>).</span></li><li><span>Las máquinas ya están cerca o por encima del 100% de saturación: la producción perdida es demanda sin servir.</span></li><li><span>Un cambio cada 21 h de turno en lugar de cada 36 h: más carga para ajustadores y mecánicos.</span></li></ul></div></div></div></div>
+    </details>
+  </section>
+
+  <section class="tabpanel" role="tabpanel" id="escenario-2" aria-labelledby="t-e2" hidden>
+    <div class="shead e2"><div><b>Aumento de equipos</b><span>+2,3 equipos (de 8 a 10,3) · M28 en marcha</span></div><div><b>Mismos temporales</b><span>Ciclos de 21 días, como en el escenario 1 · de lunes a viernes (convenio)</span></div></div>
+    <div class="kpis">
+      <div class="kpi e2"><span class="kl">Equipos</span><b>10,3</b><span class="ks">+2,3 sobre los 8 actuales</span></div>
+      <div class="kpi e2"><span class="kl">Demanda cubierta</span><b>52.440 Tn</b><span class="ks">toda la demanda prevista del año (M17 al límite)</span></div>
+      <div class="kpi e2"><span class="kl">Demanda extra que se podría atender</span><b>≈ 10.600 Tn</b><span class="ks">al año con los equipos de más, sin contar M17</span></div>
+      <div class="kpi e2"><span class="kl">Coste de los equipos adicionales</span><b id="k_e2ref">366.186 €</b><span class="ks">al año, con el coste por equipo de la barra superior</span></div>
+    </div>
+    <div class="total e2"><span>Coste total del escenario 2</span><b id="k_e2tot">…</b><span>al año: equipos adicionales y la misma merma extra que el escenario 1</span></div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Coste de transformación</h3><span>€/t de la planta con el coste de los equipos adicionales</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--hoy)"></i>Situación actual · 51.110 Tn</span><span><i style="background:var(--e2)"></i>Escenario 2 · demanda actual, 52.440 Tn</span><span><i style="background:var(--navy)"></i>Escenario 2 · fabricando también ≈ 10.600 Tn más, 63.085 Tn</span></div><div id="e2eur"></div><p class="foot">Coste de transformación actual más el de los equipos adicionales, repartido entre las toneladas de cada caso (plantilla fija). Fabricar las toneladas extra solo baja el €/t si hay demanda para venderlas. Por máquina no es comparable, porque parte de la producción de M8 y M16 pasa a M28.</p></div></div>
+      <div class="panel"><div class="ph"><h3>Cada cuánto se produce un cambio</h3><span>Horas de turno disponibles entre dos cambios</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--hoy)"></i>Situación actual</span><span><i style="background:var(--e2)"></i>Escenario 2</span></div><svg viewBox="0 0 540 270" role="img" aria-label="Horas de turno entre dos cambios"><line x1="52" x2="530" y1="236.0" y2="236.0" class="grid"/><text x="44" y="240.0" class="tick" text-anchor="end">0</text><line x1="52" x2="530" y1="201.0" y2="201.0" class="grid"/><text x="44" y="205.0" class="tick" text-anchor="end">10</text><line x1="52" x2="530" y1="166.0" y2="166.0" class="grid"/><text x="44" y="170.0" class="tick" text-anchor="end">20</text><line x1="52" x2="530" y1="131.0" y2="131.0" class="grid"/><text x="44" y="135.0" class="tick" text-anchor="end">30</text><line x1="52" x2="530" y1="96.0" y2="96.0" class="grid"/><text x="44" y="100.0" class="tick" text-anchor="end">40</text><line x1="52" x2="530" y1="61.0" y2="61.0" class="grid"/><text x="44" y="65.0" class="tick" text-anchor="end">50</text><line x1="52" x2="530" y1="26.0" y2="26.0" class="grid"/><text x="44" y="30.0" class="tick" text-anchor="end">60</text><path d="M80.8,236.0V107.0Q80.8,104.0 83.8,104.0H107.8Q110.8,104.0 110.8,107.0V236.0Z" fill="var(--hoy)" data-tip="M8 · Situación actual: 38 h"/><path d="M112.8,236.0V143.3Q112.8,140.3 115.8,140.3H139.8Q142.8,140.3 142.8,143.3V236.0Z" fill="var(--e2)" data-tip="M8 · Escenario 2: 27 h"/><text x="111.8" y="258" class="xl" text-anchor="middle">M8</text><text x="111.8" y="97.0" class="vl" text-anchor="middle">38 → 27 h</text><path d="M200.2,236.0V112.1Q200.2,109.1 203.2,109.1H227.2Q230.2,109.1 230.2,112.1V236.0Z" fill="var(--hoy)" data-tip="M16 · Situación actual: 36 h"/><path d="M232.2,236.0V133.2Q232.2,130.2 235.2,130.2H259.2Q262.2,130.2 262.2,133.2V236.0Z" fill="var(--e2)" data-tip="M16 · Escenario 2: 30 h"/><text x="231.2" y="258" class="xl" text-anchor="middle">M16</text><text x="231.2" y="102.1" class="vl" text-anchor="middle">36 → 30 h</text><path d="" fill="var(--hoy)" data-tip="M28 · Situación actual: 0 h"/><path d="M351.8,236.0V162.9Q351.8,159.9 354.8,159.9H378.8Q381.8,159.9 381.8,162.9V236.0Z" fill="var(--e2)" data-tip="M28 · Escenario 2: 22 h"/><text x="350.8" y="258" class="xl" text-anchor="middle">M28</text><text x="350.8" y="152.9" class="vl" text-anchor="middle">22 h</text><path d="M439.2,236.0V123.4Q439.2,120.4 442.2,120.4H466.2Q469.2,120.4 469.2,123.4V236.0Z" fill="var(--hoy)" data-tip="M20 · Situación actual: 33 h"/><path d="M471.2,236.0V111.4Q471.2,108.4 474.2,108.4H498.2Q501.2,108.4 501.2,111.4V236.0Z" fill="var(--e2)" data-tip="M20 · Escenario 2: 36 h"/><text x="470.2" y="258" class="xl" text-anchor="middle">M20</text><text x="470.2" y="101.4" class="vl" text-anchor="middle">33 → 36 h</text><line x1="52" x2="530" y1="236.0" y2="236.0" class="axis"/></svg><p class="foot">Horas de turno ÷ cambios completos y de calibrador al año. M28 hoy no trabaja.</p></div></div>
+    </div>
+    <div class="panel"><div class="ph"><h3>¿Cuántos equipos más necesitamos?</h3><span>Para cubrir la demanda actual con ciclos de 21 días, de lunes a viernes</span></div>
+      <div class="pb">
+        <div class="tw"><table><thead><tr><th>Máquina</th><th class="l">Turnos hoy</th><th class="l">Turnos escenario 2</th><th>Equipos hoy</th><th>Equipos escenario 2</th><th>Diferencia</th><th>Carga (h/año)</th><th>Horas de turno</th><th>Saturación</th><th>Demanda extra posible</th></tr></thead><tbody><tr><th scope="row">M8</th><td class="l">3 turnos</td><td class="l">3 turnos</td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:100.0%;background:var(--hoy)"></i></span><span class="cbt">3,0</span></span></td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:100.0%;background:var(--e2)"></i></span><span class="cbt">3,0</span></span></td><td>0,0</td><td>4.857</td><td>5.384</td><td><span class="sat y">90%</span></td><td><span class="cb"><span class="trk" style="width:90px"><i style="width:77.8%;background:var(--e2)"></i></span><span class="cbt">2.800 Tn</span></span></td></tr><tr><th scope="row">M16</th><td class="l">3 turnos</td><td class="l">2 turnos</td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:100.0%;background:var(--hoy)"></i></span><span class="cbt">3,0</span></span></td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:66.7%;background:var(--e2)"></i></span><span class="cbt">2,0</span></span></td><td>−1,0</td><td>3.281</td><td>3.589</td><td><span class="sat y">91%</span></td><td><span class="cb"><span class="trk" style="width:90px"><i style="width:36.8%;background:var(--e2)"></i></span><span class="cbt">1.300 Tn</span></span></td></tr><tr><th scope="row">M28</th><td class="l">parada</td><td class="l">2 turnos</td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:0.0%;background:var(--hoy)"></i></span><span class="cbt">0,0</span></span></td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:66.7%;background:var(--e2)"></i></span><span class="cbt">2,0</span></span></td><td>+2,0</td><td>3.044</td><td>3.589</td><td><span class="sat g">85%</span></td><td><span class="cb"><span class="trk" style="width:90px"><i style="width:83.3%;background:var(--e2)"></i></span><span class="cbt">3.000 Tn</span></span></td></tr><tr><th scope="row">M20</th><td class="l">1–2 turnos</td><td class="l">3 turnos</td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:57.0%;background:var(--hoy)"></i></span><span class="cbt">1,7</span></span></td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:100.0%;background:var(--e2)"></i></span><span class="cbt">3,0</span></span></td><td>+1,3</td><td>3.712</td><td>5.384</td><td><span class="sat g">69%</span></td><td><span class="cb"><span class="trk" style="width:90px"><i style="width:100.0%;background:var(--e2)"></i></span><span class="cbt">3.600 Tn</span></span></td></tr><tr><th scope="row">M17</th><td class="l">campañas</td><td class="l">campañas</td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:9.6%;background:var(--hoy)"></i></span><span class="cbt">0,3</span></span></td><td><span class="cb"><span class="trk" style="width:48px"><i style="width:9.6%;background:var(--e2)"></i></span><span class="cbt">0,3</span></span></td><td>0,0</td><td>475</td><td>448</td><td><span class="sat r">106%</span></td><td>faltan 27 h</td></tr><tr class="tot"><th scope="row">Total</th><td></td><td></td><td>8,0</td><td>10,3</td><td>+2,3</td><td>15.369</td><td>18.395</td><td></td><td>≈ 10.600 Tn</td></tr></tbody></table></div>
+        <p class="foot">M16 cede un equipo a M28, que necesita 2 turnos; M20 pasa a 3 turnos. M28 recibe unas 4.401 Tn al año de M8 (Ø76) y 8.029 Tn de M16 (Ø45, Ø48, Ø50, Ø58, Ø60), según el reparto estimado. M28 tiene los tiempos de cambio de M8 (6,5 h el completo y 3 h el de calibrador). Sin M28 no es posible: M8 y M16 necesitarían el 109% y el 105% de sus horas con 3 turnos. Con el ciclo actual, cubrir la demanda pediría 8,3 equipos. Demanda extra posible = horas de turno que sobran × ritmo de producción de la máquina; M17 queda al margen porque trabaja por campañas.</p>
+      </div></div>
+    <details class="opt"><summary>Ver pros y contras</summary>
+    <div class="panel"><div class="pb"><div class="pc"><div><h4 class="pro-h">A favor</h4><ul class="pro"><li><span>Cubre la demanda actual con ciclos de 21 días trabajando solo de lunes a viernes, como marca el convenio.</span></li><li><span>Deja capacidad para atender unas 10.600 Tn más al año (sin contar M17).</span></li><li><span>El stock medio de ciclo baja de 4.364 a 1.799 Tn, como en el escenario 1.</span></li><li><span>M28 fabrica los productos que recibe un 20% más rápido que hoy.</span></li></ul></div><div><h4 class="con-h">En contra</h4><ul class="con"><li><span>Exige 2,3 equipos más (de 8 a 10,3): <span data-team="2.288660">366.186 €</span> al año.</span></li><li><span>Los cambios suben igual que en el escenario 1 (+72%) y con ellos la merma de arranque (<span data-mp="94.046606">70.535 €</span> al año).</span></li><li><span>Hay que poner en marcha M28 con 2 turnos y pasarle 12.431 Tn al año de M8 y M16; el reparto es estimado.</span></li><li><span>La capacidad extra viene de M28 y de los equipos nuevos, no del ciclo de 21 días: con el ciclo actual esos mismos refuerzos darían unas 5.300 Tn más, porque las 1.231 h de cambios extra se dedicarían a fabricar.</span></li><li><span>M17 trabaja por campañas y sigue al límite: le faltan unas horas al año.</span></li></ul></div></div></div></div>
+    </details>
+  </section>
+
+  <section class="tabpanel" role="tabpanel" id="saturacion" aria-labelledby="t-s" hidden>
+    <p class="lede">Saturación anual = horas de carga (demanda y cambios) ÷ horas de turno. ¿Hay capacidad con el calendario actual, con 3 turnos, con sábados (4T) o con domingos (5T)?</p>
+    <div class="panel"><div class="pb"><div class="ctrl-top">
+      <fieldset class="seg"><legend>Demanda</legend>
+        <label><input type="radio" name="sBase" value="prev" checked> Previsión MTS + media MTO</label>
+        <label><input type="radio" name="sBase" value="temp"> Temporal del ciclo</label></fieldset>
+      <fieldset class="seg"><legend>Gráfico de barras</legend>
+        <label><input type="radio" name="sScen" value="a"> Situación actual</label>
+        <label><input type="radio" name="sScen" value="21" checked> Escenario 1 · 21 días</label>
+        <label><input type="radio" name="sScen" value="e2"> Escenario 2 · lunes a viernes con M28</label></fieldset>
+    </div></div></div>
+    <div class="panel"><div class="ph"><h3>Saturación anual por máquina y calendario</h3><span>La línea roja marca el 100%</span></div>
+      <div class="pb"><div class="legend" id="satLegend"></div>
+      <div class="chartbox" id="satChart"></div></div></div>
+    <div class="panel"><div class="ph"><h3>Mapa de saturación</h3><span>Anual · situación actual frente a los dos escenarios</span></div>
+      <div class="pb"><div class="tw"><table class="heat"><thead><tr class="grp"><th></th><th colspan="4" style="text-align:center">Situación actual</th><th colspan="4" class="sep" style="text-align:center">Escenario 1 · 21 días</th><th colspan="4" class="sep" style="text-align:center">Escenario 2 · lunes a viernes con M28</th></tr>
+        <tr><th>Máquina</th><th>Cal. actual</th><th>3T</th><th>4T</th><th>5T</th><th class="sep">Cal. actual</th><th>3T</th><th>4T</th><th>5T</th><th class="sep">1T</th><th>2T</th><th>3T</th><th>Propuesta</th></tr></thead><tbody id="heatBody"></tbody></table></div>
+      <div class="scale"><span><i class="sw g"></i>Menos del 85%</span><span><i class="sw y"></i>85–100%</span><span><i class="sw r"></i>Más del 100%: no hay capacidad</span></div>
+      <p class="foot">Agosto al 40% y diciembre al 60% de un mes normal. 3T = 3 turnos de lunes a viernes en los días laborables de la planta; 4T añade los sábados y 5T los domingos. Cada turno más es un equipo más en esa máquina. 4T y 5T no son posibles hoy: el convenio solo permite trabajar de lunes a viernes. Escenario 2: ciclo de 21 días con los productos del reparto pasados a M28; propuesta = M8 3T, M16 2T, M28 2T, M20 3T y M17 en campañas.</p></div></div>
+  </section>
+
+  <section class="tabpanel" role="tabpanel" id="comparativa" aria-labelledby="t-c" hidden>
+    <div class="kpis">
+      <div class="kpi bad"><span class="kl">Coste anual · escenario 1</span><b id="k_c1">1.029.634 €</b><span class="ks">pérdida de toneladas + merma + margen</span></div>
+      <div class="kpi bad"><span class="kl">Coste anual · escenario 2</span><b id="k_c2">…</b><span class="ks">+2,3 equipos + merma</span></div>
+      <div class="kpi bad"><span class="kl">Producción perdida · escenario 1</span><b>−5.282 Tn</b><span class="ks">−10,3% de la producción actual</span></div>
+      <div class="kpi bad"><span class="kl">Equipos · escenario 2</span><b>10,3</b><span class="ks">+2,3 y M28 en marcha</span></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><div class="ph"><h3>Coste anual de pasar a 21 días</h3><span>€ al año por escenario</span></div>
+        <div class="pb"><div class="legend"><span><i style="background:var(--e1)"></i>Pérdida de toneladas</span><span><i style="background:#b9c2cd"></i>Aumento de merma</span><span><i style="background:#f6b89c"></i>Margen que se deja de ganar</span><span><i style="background:var(--e2)"></i>Equipos adicionales</span></div><div id="cmpEur"></div></div></div>
+      <div class="panel"><div class="ph"><h3>Coste de transformación</h3><span>€/t de la planta</span></div>
+        <div class="pb"><div id="cmpTr"></div><p class="foot">Coste de transformación (plantilla fija) repartido entre las Tn de cada caso: 51.110 Tn hoy, 45.828 Tn en el escenario 1 y 63.085 Tn en el escenario 2 (fabricando también las ≈ 10.600 Tn extra), que suma el coste de los 2,3 equipos adicionales. Sin merma. El escenario 2 solo baja así si hay demanda para vender esas toneladas.</p></div></div>
+    </div>
+    <details class="opt"><summary>Ver detalle de la comparativa</summary>
+    <div class="panel"><div class="ph"><h3>Situación actual frente a los dos escenarios</h3><span>Cifras anuales</span></div>
+      <div class="pb"><div class="tw"><table class="cmp"><thead><tr><th>Concepto</th><th class="l">Situación actual</th><th class="l">Escenario 1 · Equipos actuales</th><th class="l">Escenario 2 · Más equipos y M28</th></tr></thead><tbody><tr><th scope="row">Duración del ciclo</th><td>33–43 días (mediana; M17 en campañas)</td><td>21 días</td><td>21 días, de lunes a viernes, con M28</td></tr><tr><th scope="row">Cambios al año (completos + calibrador)</th><td>377</td><td>649</td><td>649</td></tr><tr><th scope="row">Horas de cambio al año</th><td>1.703</td><td>2.934</td><td>3.028 (M28 con los tiempos de M8)</td></tr><tr><th scope="row">Equipos</th><td>8</td><td>8</td><td>10,3 (+2,3)</td></tr><tr><th scope="row">Producción anual (Tn)</th><td>51.110</td><td>45.828 <span class="neg">(−5.282)</span></td><td>52.440 (toda la demanda) y capacidad para ≈ 10.600 Tn más</td></tr><tr><th scope="row">Coste de transformación (€/t)</th><td>71,31</td><td>79,53</td><td><span id="c_e2eur">76,49</span></td></tr><tr><th scope="row">Coste por pérdida de toneladas</th><td>–</td><td>378.079 €</td><td>–</td></tr><tr><th scope="row">Coste por aumento de merma de arranques</th><td>–</td><td><span data-mp="94.046606">70.535 €</span></td><td><span data-mp="94.046606">70.535 €</span></td></tr><tr><th scope="row">Margen que se deja de ganar</th><td>–</td><td>581.020 €</td><td>–</td></tr><tr><th scope="row">Coste de los equipos adicionales</th><td>–</td><td>–</td><td><span data-team="2.288660">366.186 €</span></td></tr><tr><th scope="row"><b>Coste total al año</b></th><td>–</td><td><span id="c_e1tot"></span></td><td><span id="c_e2tot"></span></td></tr><tr><th scope="row">Equipos para cubrir la demanda prevista (lunes a viernes)</th><td>8,3</td><td>Imposible sin M28 (M8 y M16 no tienen más turnos)</td><td>10,3 con M28</td></tr><tr><th scope="row">Stock medio de ciclo (Tn)</th><td>4.364</td><td>1.799</td><td>1.799</td></tr></tbody></table></div></div></div>
+    </details>
+  </section>
+
+  <section class="tabpanel" role="tabpanel" id="presupuesto" aria-labelledby="t-p" hidden>
+    <p class="lede">Presupuesto 2027: <b>60.000 Tn</b> repartidas según el presupuesto de ventas, con los equipos pasando de 9 a 10 en junio y a 11 en octubre. ¿Cuándo se puede pasar a ciclos de 21 días sin dejar de cumplir el presupuesto? Cada turno es una máquina trabajando 8 h.</p>
+    <div class="kpis">
+      <div class="kpi e2"><span class="kl">Producción presupuestada</span><b>60.000 Tn</b><span class="ks">1.985 turnos necesarios · 30,2 Tn por turno</span></div>
+      <div class="kpi e2"><span class="kl">Holgura de turnos 2027</span><b>162 turnos</b><span class="ks">2.147 disponibles · la capacidad queda por debajo de la demanda en agosto y diciembre</span></div>
+      <div class="kpi bad"><span class="kl">21 días todo el año</span><b>+154 turnos</b><span class="ks">de cambios · el año cierra con solo 8 turnos de margen, adelantando stock</span></div>
+      <div class="kpi e2"><span class="kl">Propuesta</span><b>21 días desde octubre</b><span class="ks">28 días de junio a septiembre · consume 56 turnos y quedan 107</span></div>
+    </div>
+    <div class="panel"><div class="ph"><h3>Plan de implantación propuesto</h3><span>Por fases, siguiendo la evolución de equipos</span></div>
+      <div class="pb"><div class="phases"><div class="phase"><span class="kl">Fase 1</span><b>9 equipos · ciclo actual</b><span class="ks">Inicio: enero 2027 · Fin: mayo 2027</span></div><div class="phase"><span class="kl">Fase 2</span><b>10 equipos · ciclo de 28 días</b><span class="ks">Inicio: junio 2027 · Fin: septiembre 2027</span></div><div class="phase"><span class="kl">Fase 3</span><b>11 equipos · ciclo de 21 días</b><span class="ks">Inicio: octubre 2027 · Fin: diciembre 2027</span></div></div>
+      <p class="foot">Desde enero de 2028, con 11 equipos todo el año y el mismo presupuesto, la holgura sería de unos 429 turnos frente a los 154 que pide el ciclo de 21 días al año.</p></div></div>
+    <div class="panel"><div class="ph"><h3>Evolución de la capacidad de la planta</h3><span>Según los equipos de cada mes, frente a la demanda presupuestada</span></div>
+      <div class="pb">
+        <fieldset class="seg"><legend>Ver en</legend>
+          <label><input type="radio" name="bView" value="tn" checked> Toneladas</label>
+          <label><input type="radio" name="bView" value="tur"> Turnos</label></fieldset>
+        <div id="bTn">
+          <div class="legend"><span><i style="background:var(--hoy)"></i>Demanda presupuestada (Tn)</span><span><i class="ln" style="border-color:var(--navy)"></i>Capacidad con los equipos (Tn)</span><span><i class="ln" style="border-color:var(--bad)"></i>Capacidad por debajo de la demanda</span></div>
+          <svg viewBox="0 0 980 320" role="img" aria-label="Demanda presupuestada y Capacidad con los equipos por mes en 2027"><line x1="60" x2="968" y1="276.0" y2="276.0" class="grid"/><text x="52" y="280.0" class="tick" text-anchor="end">0</text><line x1="60" x2="968" y1="213.0" y2="213.0" class="grid"/><text x="52" y="217.0" class="tick" text-anchor="end">2.000</text><line x1="60" x2="968" y1="150.0" y2="150.0" class="grid"/><text x="52" y="154.0" class="tick" text-anchor="end">4.000</text><line x1="60" x2="968" y1="87.0" y2="87.0" class="grid"/><text x="52" y="91.0" class="tick" text-anchor="end">6.000</text><line x1="60" x2="968" y1="24.0" y2="24.0" class="grid"/><text x="52" y="28.0" class="tick" text-anchor="end">8.000</text><path d="M79.8,276.0V137.2Q79.8,134.2 82.8,134.2H112.8Q115.8,134.2 115.8,137.2V276.0Z" fill="var(--hoy)" data-tip="Ene: 4.500 Tn · demanda presupuestada"/><line x1="73.8" x2="121.8" y1="105.0" y2="105.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Ene: 5.428 Tn · capacidad con los equipos (9 equipos)"/><text x="97.8" y="296" class="xl" text-anchor="middle">Ene</text><text x="97.8" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M155.5,276.0V127.8Q155.5,124.8 158.5,124.8H188.5Q191.5,124.8 191.5,127.8V276.0Z" fill="var(--hoy)" data-tip="Feb: 4.800 Tn · demanda presupuestada"/><line x1="149.5" x2="197.5" y1="105.0" y2="105.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Feb: 5.428 Tn · capacidad con los equipos (9 equipos)"/><text x="173.5" y="296" class="xl" text-anchor="middle">Feb</text><text x="173.5" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M231.2,276.0V121.5Q231.2,118.5 234.2,118.5H264.2Q267.2,118.5 267.2,121.5V276.0Z" fill="var(--hoy)" data-tip="Mar: 5.000 Tn · demanda presupuestada"/><line x1="225.2" x2="273.2" y1="105.0" y2="105.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Mar: 5.428 Tn · capacidad con los equipos (9 equipos)"/><text x="249.2" y="296" class="xl" text-anchor="middle">Mar</text><text x="249.2" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M306.8,276.0V121.5Q306.8,118.5 309.8,118.5H339.8Q342.8,118.5 342.8,121.5V276.0Z" fill="var(--hoy)" data-tip="Abr: 5.000 Tn · demanda presupuestada"/><line x1="300.8" x2="348.8" y1="105.0" y2="105.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Abr: 5.428 Tn · capacidad con los equipos (9 equipos)"/><text x="324.8" y="296" class="xl" text-anchor="middle">Abr</text><text x="324.8" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M382.5,276.0V115.2Q382.5,112.2 385.5,112.2H415.5Q418.5,112.2 418.5,115.2V276.0Z" fill="var(--hoy)" data-tip="May: 5.200 Tn · demanda presupuestada"/><line x1="376.5" x2="424.5" y1="105.0" y2="105.0" stroke="var(--navy)" stroke-width="2.5" data-tip="May: 5.428 Tn · capacidad con los equipos (9 equipos)"/><text x="400.5" y="296" class="xl" text-anchor="middle">May</text><text x="400.5" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M458.2,276.0V108.9Q458.2,105.9 461.2,105.9H491.2Q494.2,105.9 494.2,108.9V276.0Z" fill="var(--hoy)" data-tip="Jun: 5.400 Tn · demanda presupuestada"/><line x1="452.2" x2="500.2" y1="86.0" y2="86.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Jun: 6.032 Tn · capacidad con los equipos (10 equipos)"/><text x="476.2" y="296" class="xl" text-anchor="middle">Jun</text><text x="476.2" y="312" class="tick" text-anchor="middle">10 eq.</text><path d="M533.8,276.0V112.1Q533.8,109.1 536.8,109.1H566.8Q569.8,109.1 569.8,112.1V276.0Z" fill="var(--hoy)" data-tip="Jul: 5.300 Tn · demanda presupuestada"/><line x1="527.8" x2="575.8" y1="86.0" y2="86.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Jul: 6.032 Tn · capacidad con los equipos (10 equipos)"/><text x="551.8" y="296" class="xl" text-anchor="middle">Jul</text><text x="551.8" y="312" class="tick" text-anchor="middle">10 eq.</text><path d="M609.5,276.0V193.9Q609.5,190.9 612.5,190.9H642.5Q645.5,190.9 645.5,193.9V276.0Z" fill="var(--hoy)" data-tip="Ago: 2.700 Tn · demanda presupuestada"/><line x1="603.5" x2="651.5" y1="200.0" y2="200.0" stroke="var(--bad)" stroke-width="2.5" data-tip="Ago: 2.413 Tn · capacidad con los equipos (10 equipos)"/><text x="627.5" y="296" class="xl" text-anchor="middle">Ago</text><text x="627.5" y="312" class="tick" text-anchor="middle">10 eq.</text><path d="M685.2,276.0V124.7Q685.2,121.7 688.2,121.7H718.2Q721.2,121.7 721.2,124.7V276.0Z" fill="var(--hoy)" data-tip="Sep: 4.900 Tn · demanda presupuestada"/><line x1="679.2" x2="727.2" y1="86.0" y2="86.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Sep: 6.032 Tn · capacidad con los equipos (10 equipos)"/><text x="703.2" y="296" class="xl" text-anchor="middle">Sep</text><text x="703.2" y="312" class="tick" text-anchor="middle">10 eq.</text><path d="M760.8,276.0V74.2Q760.8,71.2 763.8,71.2H793.8Q796.8,71.2 796.8,74.2V276.0Z" fill="var(--hoy)" data-tip="Oct: 6.500 Tn · demanda presupuestada"/><line x1="754.8" x2="802.8" y1="67.0" y2="67.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Oct: 6.635 Tn · capacidad con los equipos (11 equipos)"/><text x="778.8" y="296" class="xl" text-anchor="middle">Oct</text><text x="778.8" y="312" class="tick" text-anchor="middle">11 eq.</text><path d="M836.5,276.0V74.2Q836.5,71.2 839.5,71.2H869.5Q872.5,71.2 872.5,74.2V276.0Z" fill="var(--hoy)" data-tip="Nov: 6.500 Tn · demanda presupuestada"/><line x1="830.5" x2="878.5" y1="67.0" y2="67.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Nov: 6.635 Tn · capacidad con los equipos (11 equipos)"/><text x="854.5" y="296" class="xl" text-anchor="middle">Nov</text><text x="854.5" y="312" class="tick" text-anchor="middle">11 eq.</text><path d="M912.2,276.0V146.7Q912.2,143.7 915.2,143.7H945.2Q948.2,143.7 948.2,146.7V276.0Z" fill="var(--hoy)" data-tip="Dic: 4.200 Tn · demanda presupuestada"/><line x1="906.2" x2="954.2" y1="150.6" y2="150.6" stroke="var(--bad)" stroke-width="2.5" data-tip="Dic: 3.981 Tn · capacidad con los equipos (11 equipos)"/><text x="930.2" y="296" class="xl" text-anchor="middle">Dic</text><text x="930.2" y="312" class="tick" text-anchor="middle">11 eq.</text><line x1="60" x2="968" y1="276.0" y2="276.0" class="axis"/></svg>
+          <p class="foot">Demanda según el presupuesto de ventas: de 2.700 Tn en agosto a 6.500 Tn en octubre y noviembre. La capacidad de los equipos se reparte por igual: 19,95 días equivalentes por mes normal (agosto al 40% y diciembre al 60%) × equipos × 30,2 Tn por turno. En el año: 64.900 Tn de capacidad frente a 60.000 Tn de demanda. La capacidad queda por debajo de la demanda en agosto y diciembre y va justa en mayo, octubre y noviembre; de enero a mayo sobran 87 turnos para adelantar stock.</p>
+        </div>
+        <div id="bTur" hidden>
+          <div class="legend"><span><i style="background:var(--hoy)"></i>Turnos necesarios para la demanda</span><span><i class="ln" style="border-color:var(--navy)"></i>Turnos disponibles con los equipos</span><span><i class="ln" style="border-color:var(--bad)"></i>Disponibles por debajo de lo necesario</span></div>
+          <svg viewBox="0 0 980 320" role="img" aria-label="Turnos necesarios para la demanda y Turnos disponibles con los equipos por mes en 2027"><line x1="60" x2="968" y1="276.0" y2="276.0" class="grid"/><text x="52" y="280.0" class="tick" text-anchor="end">0</text><line x1="60" x2="968" y1="225.6" y2="225.6" class="grid"/><text x="52" y="229.6" class="tick" text-anchor="end">50</text><line x1="60" x2="968" y1="175.2" y2="175.2" class="grid"/><text x="52" y="179.2" class="tick" text-anchor="end">100</text><line x1="60" x2="968" y1="124.8" y2="124.8" class="grid"/><text x="52" y="128.8" class="tick" text-anchor="end">150</text><line x1="60" x2="968" y1="74.4" y2="74.4" class="grid"/><text x="52" y="78.4" class="tick" text-anchor="end">200</text><line x1="60" x2="968" y1="24.0" y2="24.0" class="grid"/><text x="52" y="28.0" class="tick" text-anchor="end">250</text><path d="M79.8,276.0V128.9Q79.8,125.9 82.8,125.9H112.8Q115.8,125.9 115.8,128.9V276.0Z" fill="var(--hoy)" data-tip="Ene: 149 turnos · turnos necesarios para la demanda"/><line x1="73.8" x2="121.8" y1="95.0" y2="95.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Ene: 180 turnos · turnos disponibles con los equipos (9 equipos)"/><text x="97.8" y="296" class="xl" text-anchor="middle">Ene</text><text x="97.8" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M155.5,276.0V118.9Q155.5,115.9 158.5,115.9H188.5Q191.5,115.9 191.5,118.9V276.0Z" fill="var(--hoy)" data-tip="Feb: 159 turnos · turnos necesarios para la demanda"/><line x1="149.5" x2="197.5" y1="95.0" y2="95.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Feb: 180 turnos · turnos disponibles con los equipos (9 equipos)"/><text x="173.5" y="296" class="xl" text-anchor="middle">Feb</text><text x="173.5" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M231.2,276.0V112.3Q231.2,109.3 234.2,109.3H264.2Q267.2,109.3 267.2,112.3V276.0Z" fill="var(--hoy)" data-tip="Mar: 165 turnos · turnos necesarios para la demanda"/><line x1="225.2" x2="273.2" y1="95.0" y2="95.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Mar: 180 turnos · turnos disponibles con los equipos (9 equipos)"/><text x="249.2" y="296" class="xl" text-anchor="middle">Mar</text><text x="249.2" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M306.8,276.0V112.3Q306.8,109.3 309.8,109.3H339.8Q342.8,109.3 342.8,112.3V276.0Z" fill="var(--hoy)" data-tip="Abr: 165 turnos · turnos necesarios para la demanda"/><line x1="300.8" x2="348.8" y1="95.0" y2="95.0" stroke="var(--navy)" stroke-width="2.5" data-tip="Abr: 180 turnos · turnos disponibles con los equipos (9 equipos)"/><text x="324.8" y="296" class="xl" text-anchor="middle">Abr</text><text x="324.8" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M382.5,276.0V105.6Q382.5,102.6 385.5,102.6H415.5Q418.5,102.6 418.5,105.6V276.0Z" fill="var(--hoy)" data-tip="May: 172 turnos · turnos necesarios para la demanda"/><line x1="376.5" x2="424.5" y1="95.0" y2="95.0" stroke="var(--navy)" stroke-width="2.5" data-tip="May: 180 turnos · turnos disponibles con los equipos (9 equipos)"/><text x="400.5" y="296" class="xl" text-anchor="middle">May</text><text x="400.5" y="312" class="tick" text-anchor="middle">9 eq.</text><path d="M458.2,276.0V98.9Q458.2,95.9 461.2,95.9H491.2Q494.2,95.9 494.2,98.9V276.0Z" fill="var(--hoy)" data-tip="Jun: 179 turnos · turnos necesarios para la demanda"/><line x1="452.2" x2="500.2" y1="74.9" y2="74.9" stroke="var(--navy)" stroke-width="2.5" data-tip="Jun: 200 turnos · turnos disponibles con los equipos (10 equipos)"/><text x="476.2" y="296" class="xl" text-anchor="middle">Jun</text><text x="476.2" y="312" class="tick" text-anchor="middle">10 eq.</text><path d="M533.8,276.0V102.3Q533.8,99.3 536.8,99.3H566.8Q569.8,99.3 569.8,102.3V276.0Z" fill="var(--hoy)" data-tip="Jul: 175 turnos · turnos necesarios para la demanda"/><line x1="527.8" x2="575.8" y1="74.9" y2="74.9" stroke="var(--navy)" stroke-width="2.5" data-tip="Jul: 200 turnos · turnos disponibles con los equipos (10 equipos)"/><text x="551.8" y="296" class="xl" text-anchor="middle">Jul</text><text x="551.8" y="312" class="tick" text-anchor="middle">10 eq.</text><path d="M609.5,276.0V189.0Q609.5,186.0 612.5,186.0H642.5Q645.5,186.0 645.5,189.0V276.0Z" fill="var(--hoy)" data-tip="Ago: 89 turnos · turnos necesarios para la demanda"/><line x1="603.5" x2="651.5" y1="195.5" y2="195.5" stroke="var(--bad)" stroke-width="2.5" data-tip="Ago: 80 turnos · turnos disponibles con los equipos (10 equipos)"/><text x="627.5" y="296" class="xl" text-anchor="middle">Ago</text><text x="627.5" y="312" class="tick" text-anchor="middle">10 eq.</text><path d="M685.2,276.0V115.6Q685.2,112.6 688.2,112.6H718.2Q721.2,112.6 721.2,115.6V276.0Z" fill="var(--hoy)" data-tip="Sep: 162 turnos · turnos necesarios para la demanda"/><line x1="679.2" x2="727.2" y1="74.9" y2="74.9" stroke="var(--navy)" stroke-width="2.5" data-tip="Sep: 200 turnos · turnos disponibles con los equipos (10 equipos)"/><text x="703.2" y="296" class="xl" text-anchor="middle">Sep</text><text x="703.2" y="312" class="tick" text-anchor="middle">10 eq.</text><path d="M760.8,276.0V62.2Q760.8,59.2 763.8,59.2H793.8Q796.8,59.2 796.8,62.2V276.0Z" fill="var(--hoy)" data-tip="Oct: 215 turnos · turnos necesarios para la demanda"/><line x1="754.8" x2="802.8" y1="54.7" y2="54.7" stroke="var(--navy)" stroke-width="2.5" data-tip="Oct: 220 turnos · turnos disponibles con los equipos (11 equipos)"/><text x="778.8" y="296" class="xl" text-anchor="middle">Oct</text><text x="778.8" y="312" class="tick" text-anchor="middle">11 eq.</text><path d="M836.5,276.0V62.2Q836.5,59.2 839.5,59.2H869.5Q872.5,59.2 872.5,62.2V276.0Z" fill="var(--hoy)" data-tip="Nov: 215 turnos · turnos necesarios para la demanda"/><line x1="830.5" x2="878.5" y1="54.7" y2="54.7" stroke="var(--navy)" stroke-width="2.5" data-tip="Nov: 220 turnos · turnos disponibles con los equipos (11 equipos)"/><text x="854.5" y="296" class="xl" text-anchor="middle">Nov</text><text x="854.5" y="312" class="tick" text-anchor="middle">11 eq.</text><path d="M912.2,276.0V138.9Q912.2,135.9 915.2,135.9H945.2Q948.2,135.9 948.2,138.9V276.0Z" fill="var(--hoy)" data-tip="Dic: 139 turnos · turnos necesarios para la demanda"/><line x1="906.2" x2="954.2" y1="143.2" y2="143.2" stroke="var(--bad)" stroke-width="2.5" data-tip="Dic: 132 turnos · turnos disponibles con los equipos (11 equipos)"/><text x="930.2" y="296" class="xl" text-anchor="middle">Dic</text><text x="930.2" y="312" class="tick" text-anchor="middle">11 eq.</text><line x1="60" x2="968" y1="276.0" y2="276.0" class="axis"/></svg>
+          <p class="foot">Turnos necesarios: 1.985 del presupuesto repartidos según el presupuesto de ventas (30,2 Tn por turno). Turnos disponibles = equipos × 19,95 días equivalentes por mes normal, también al 40% en agosto y al 60% en diciembre. En el año: 2.147 disponibles frente a 1.985 necesarios.</p>
+        </div>
+      </div></div>
+    <details class="opt"><summary>Ver detalle mes a mes</summary>
+    <div class="panel"><div class="ph"><h3>Detalle mensual de la propuesta</h3><span>Turnos de 8 h</span></div>
+      <div class="pb"><div class="tw"><table><thead><tr><th>Concepto</th><th>Ene</th><th>Feb</th><th>Mar</th><th>Abr</th><th>May</th><th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th><th>Total</th></tr></thead><tbody><tr class=""><th scope="row">Presupuesto de ventas (Tn)</th><td>4.500</td><td>4.800</td><td>5.000</td><td>5.000</td><td>5.200</td><td>5.400</td><td>5.300</td><td>2.700</td><td>4.900</td><td>6.500</td><td>6.500</td><td>4.200</td><td><b>60.000</b></td></tr><tr class=""><th scope="row">Días equivalentes</th><td>19,95</td><td>19,95</td><td>19,95</td><td>19,95</td><td>19,95</td><td>19,95</td><td>19,95</td><td>7,98</td><td>19,95</td><td>19,95</td><td>19,95</td><td>11,97</td><td><b>219,5</b></td></tr><tr class=""><th scope="row">Equipos (turnos diarios)</th><td>9</td><td>9</td><td>9</td><td>9</td><td>9</td><td>10</td><td>10</td><td>10</td><td>10</td><td>11</td><td>11</td><td>11</td><td><b></b></td></tr><tr class=""><th scope="row">Turnos necesarios (presupuesto)</th><td>149</td><td>159</td><td>165</td><td>165</td><td>172</td><td>179</td><td>175</td><td>89</td><td>162</td><td>215</td><td>215</td><td>139</td><td><b>1.985</b></td></tr><tr class=""><th scope="row">Turnos disponibles</th><td>180</td><td>180</td><td>180</td><td>180</td><td>180</td><td>200</td><td>200</td><td>80</td><td>200</td><td>220</td><td>220</td><td>132</td><td><b>2.147</b></td></tr><tr class="hi"><th scope="row">Holgura</th><td>+30,7</td><td>+20,8</td><td>+14,2</td><td>+14,2</td><td>+7,6</td><td>+20,9</td><td>+24,2</td><td>−9,5</td><td>+37,4</td><td>+4,5</td><td>+4,5</td><td>−7,2</td><td><b>162</b></td></tr><tr><th scope="row">Ciclo propuesto</th><td>actual</td><td>actual</td><td>actual</td><td>actual</td><td>actual</td><td>28 días</td><td>28 días</td><td>28 días</td><td>28 días</td><td>21 días</td><td>21 días</td><td>21 días</td><td></td></tr><tr class=""><th scope="row">Turnos extra por más cambios</th><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>5,7</td><td>5,7</td><td>2,3</td><td>5,7</td><td>14,0</td><td>14,0</td><td>8,4</td><td><b>55,6</b></td></tr><tr class=""><th scope="row">Saldo del mes</th><td>+30,7</td><td>+20,8</td><td>+14,2</td><td>+14,2</td><td>+7,6</td><td>+15,2</td><td>+18,6</td><td>−11,8</td><td>+31,8</td><td>−9,5</td><td>−9,5</td><td>−15,6</td><td><b>+106,5</b></td></tr><tr class="hi"><th scope="row">Saldo acumulado</th><td>+30,7</td><td>+51,5</td><td>+65,7</td><td>+79,9</td><td>+87,4</td><td>+102,7</td><td>+121,2</td><td>+109,4</td><td>+141,2</td><td>+131,7</td><td>+122,2</td><td>+106,5</td><td><b></b></td></tr></tbody></table></div>
+      <p class="foot">Turnos extra = horas de cambio adicionales del ciclo (1.231 h al año con 21 días y 497 h con 28 días, frente a la situación actual) ÷ 8 h, repartidas según los días de trabajo de cada mes (agosto 40%, diciembre 60%). Es un cálculo de planta: supone que los equipos nuevos se asignan a las máquinas donde aumentan los cambios y que M28 trabaja con el reparto de M8 y M16, como en el escenario 2.</p></div></div>
+    </details>
+  </section>
+</div></main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('[role="tab"]'));
+  var links=[].slice.call(document.querySelectorAll('a[data-tab]'));
+  function show(id,focus){
+    var ok=false;
+    tabs.forEach(function(t){var on=t.getAttribute('aria-controls')===id;if(on)ok=true;
+      t.setAttribute('aria-selected',on?'true':'false');t.tabIndex=on?0:-1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden=!on;if(on&&focus)t.focus();});
+    if(!ok)return show('situacion-actual',focus);
+    links.forEach(function(a){if(a.getAttribute('data-tab')===id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+    document.body.classList.remove('nav-open');
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){var id=t.getAttribute('aria-controls');if(location.hash!=='#'+id)location.hash=id;else show(id);});
+    t.addEventListener('keydown',function(e){var k=e.key,j=-1;if(k==='ArrowRight')j=(i+1)%tabs.length;if(k==='ArrowLeft')j=(i-1+tabs.length)%tabs.length;
+      if(j>=0){e.preventDefault();var id=tabs[j].getAttribute('aria-controls');location.hash=id;show(id,true);}});
+  });
+  links.forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var id=a.getAttribute('data-tab');if(location.hash!=='#'+id)location.hash=id;else show(id);window.scrollTo(0,0);});});
+  window.addEventListener('hashchange',function(){show(location.hash.slice(1));});
+  show(location.hash.slice(1)||'situacion-actual');
+  var btn=document.getElementById('menuBtn');
+  btn.addEventListener('click',function(){var o=document.body.classList.toggle('nav-open');btn.setAttribute('aria-expanded',o?'true':'false');});
+  document.getElementById('scrim').addEventListener('click',function(){document.body.classList.remove('nav-open');btn.setAttribute('aria-expanded','false');});
+  // tooltips
+  var tip=document.getElementById('tip');
+  function place(x,y){var w=tip.offsetWidth,h=tip.offsetHeight,l=x+14,t=y-h-10;if(l+w>innerWidth-8)l=x-w-14;if(t<50)t=y+16;tip.style.left=l+'px';tip.style.top=t+'px';}
+  document.addEventListener('pointermove',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');
+    if(el){tip.textContent=el.getAttribute('data-tip');tip.hidden=false;place(e.clientX,e.clientY);}else if(!e.target.closest||!e.target.closest('#hit'))tip.hidden=true;});
+  // break-even crosshair
+  var svg=document.getElementById('beChart'),hit=document.getElementById('hit'),hov=document.getElementById('hov'),L=document.getElementById('hovL'),P=document.getElementById('hovP');
+  if(svg&&hit){
+    var G={};
+    function f(v,d){return v.toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});}
+    hit.addEventListener('pointermove',function(ev){var pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;var p=pt.matrixTransform(svg.getScreenCTM().inverse());
+      var x=Math.max(G.x0,Math.min(G.x1,p.x)),c=(x-G.x0)/(G.x1-G.x0)*G.xmax,v=G.base+c/G.tn,y=G.y1-(G.y1-G.y0)*(v-G.ymin)/(G.ymax-G.ymin);
+      L.setAttribute('x1',x);L.setAttribute('x2',x);P.setAttribute('cx',x);P.setAttribute('cy',y);hov.setAttribute('visibility','visible');
+      tip.innerHTML='Refuerzo: <b>'+f(Math.round(c/1000)*1000,0)+' €/año</b><br>Escenario 2: '+f(v,2)+' €/t<br>Escenario 1: '+f(G.e1,2)+' €/t';tip.hidden=false;place(ev.clientX,ev.clientY);});
+    hit.addEventListener('pointerleave',function(){hov.setAttribute('visibility','hidden');tip.hidden=true;});
+  }
+})();
+
+(function(){
+  var G={"noabs": 378079.260186258, "darr": 94.046605640417, "fte": 2.2886597938144337, "tn_e2": 52439.75401199696, "spare": 10645.703818468264, "C": 3644850.6204148494, "tn_a": 51110.45605454363, "stkr": 2565.0078163737935, "m": {"M8": {"C": 1578420.34288928, "tn": 24283.3898906044, "eur": 65}, "M16": {"C": 1405495.40178291, "tn": 20078.5057397559, "eur": 70}, "M17": {"C": 131075.914190623, "tn": 1702.28459987822, "eur": 77}, "M20": {"C": 529858.961552036, "tn": 5046.27582430511, "eur": 105}}, "eur0": 71.31320872044593, "eur21": 79.53306911086888, "margin": 581020},N=['M8','M16','M17','M20'];
+  function $(i){return document.getElementById(i);}
+  function fmt(v,d){d=d||0;var s=Math.abs(v).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');var z=Number(Math.abs(v).toFixed(d))===0;return (v<0&&!z?'−':'')+s.join(',');}
+  function bar(x,y,w,h){if(h<=0)return '';var r=Math.min(3,w/2,h);return 'M'+x+','+(y+h)+'V'+(y+r)+'Q'+x+','+y+' '+(x+r)+','+y+'H'+(x+w-r)+'Q'+(x+w)+','+y+' '+(x+w)+','+(y+r)+'V'+(y+h)+'Z';}
+  function vbars(cats,ser,ymax,step,tops,unit){var W=540,Hh=270,L=52,Rm=10,Tm=26,B=34,pw=W-L-Rm,ph=Hh-Tm-B,Y=function(v){return Tm+ph-ph*Math.min(v,ymax)/ymax;};
+    var s='<svg viewBox="0 0 '+W+' '+Hh+'" role="img">';for(var v=0;v<=ymax+1e-9;v+=step){s+='<line x1="'+L+'" x2="'+(W-Rm)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" class="grid"/><text x="'+(L-8)+'" y="'+(Y(v)+4)+'" class="tick" text-anchor="end">'+fmt(v)+'</text>';}
+    var gw=pw/cats.length,n=ser.length,bw=Math.min(30,(gw-18)/n-2);
+    cats.forEach(function(c,i){var gx=L+i*gw+(gw-(n*bw+(n-1)*2))/2,top=0;ser.forEach(function(se,j){var v=se.v[i],x=gx+j*(bw+2),col=Array.isArray(se.c)?se.c[i]:se.c;top=Math.max(top,v);s+='<path d="'+bar(x,Y(v),bw,Y(0)-Y(v))+'" fill="'+col+'" data-tip="'+c+' · '+se.n+': '+fmt(v,unit==='€/t'?2:0)+' '+unit+'"/>';});
+      s+='<text x="'+(L+i*gw+gw/2)+'" y="'+(Hh-12)+'" class="xl" text-anchor="middle">'+c+'</text>';if(tops)s+='<text x="'+(L+i*gw+gw/2)+'" y="'+(Y(top)-7)+'" class="vl" text-anchor="middle">'+tops[i]+'</text>';});
+    return s+'<line x1="'+L+'" x2="'+(W-Rm)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" class="axis"/></svg>';}
+  function pr(){return Math.max(0,(parseFloat($('pMP').value)||0)-(parseFloat($('pCH').value)||0));}
+  function tc(){return Math.max(0,parseFloat($('pTC').value)||0);}
+  function upd(){var p=pr(),t=tc();
+    document.querySelectorAll('[data-mp]').forEach(function(e){var v=parseFloat(e.getAttribute('data-mp'))*p;e.textContent=fmt(v)+(e.textContent.indexOf('€')>=0?' €':'');});
+    document.querySelectorAll('[data-team]').forEach(function(e){var v=parseFloat(e.getAttribute('data-team'))*t;e.textContent=fmt(v)+(e.textContent.indexOf('€')>=0?' €':'');});
+    document.querySelectorAll('[data-tot]').forEach(function(e){var a=e.getAttribute('data-tot').split('|');e.textContent=fmt(parseFloat(a[0])+parseFloat(a[1])*p);});
+    var m=G.darr*p,e1=G.noabs+m+G.margin,rf=G.fte*t,e2=rf+m;
+    function set(i,v){if($(i))$(i).textContent=v;}
+    set('k_e1merma',fmt(m)+' €');set('k_e1merma2',fmt(m)+' €');set('k_e1tot',fmt(e1)+' €');set('c_e1tot',fmt(e1)+' €');set('c_e2tot',fmt(e2)+' €');set('k_e2ref',fmt(rf)+' €');set('k_e2tot',fmt(e2)+' €');
+    set('v_e1',fmt(e1)+' €');set('v_e2',fmt(e2)+' €');set('k_c1',fmt(e1)+' €');set('k_c2',fmt(e2)+' €');
+    set('c_e2eur',fmt((G.C+rf)/G.tn_a,2));set('k_e2eur',fmt((G.C+rf)/G.tn_a,2)+' €/t');
+    set('s_e1',fmt(e1/G.stkr)+' €');set('s_e1b',fmt(e1/G.stkr)+' €');set('s_e2',fmt(e2/G.stkr)+' €');set('s_e2b',fmt(e2/G.stkr)+' €');set('k_e2tot',fmt(e2)+' €');
+    var e2v=(G.C+rf)/G.tn_e2,e3v=(G.C+rf)/(G.tn_e2+G.spare),ym=Math.ceil(Math.max(e2v,G.eur0)/20)*20+20;
+    function dp(v){var d=v/G.eur0-1;return fmt(v,2)+' €/t ('+(d>=0?'+':'−')+fmt(Math.abs(d)*100,1)+'%)';}
+    if($('e2eur'))$('e2eur').innerHTML=vbars(['Situación actual','Esc. 2 · demanda actual','Esc. 2 · con '+fmt(Math.round(G.spare/100)*100)+' Tn más'],[{n:'€/t',c:['var(--hoy)','var(--e2)','var(--navy)'],v:[G.eur0,e2v,e3v]}],ym,20,[fmt(G.eur0,2)+' €/t',dp(e2v),dp(e3v)],'€/t');
+    set('k_e3eur',fmt(e3v,2)+' €/t');
+    if($('cmpTr')){var y2=Math.ceil(Math.max(G.eur21,e3v,G.eur0)/20)*20+20;$('cmpTr').innerHTML=vbars(['Situación actual','Escenario 1','Esc. 2 · +'+fmt(Math.round(G.spare/100)*100)+' Tn'],[{n:'€/t',c:['var(--hoy)','var(--e1)','var(--e2)'],v:[G.eur0,G.eur21,e3v]}],y2,20,[fmt(G.eur0,2)+' €/t',dp(G.eur21),dp(e3v)],'€/t');}
+    set('c_e2eur',fmt(e2v,2));set('k_e2eur',fmt(e2v,2)+' €/t');
+    if($('cmpEur')){var mx=Math.max(e1,e2)*1.15,W=560,Hh=300,L=64,Rm=16,Tm=26,B=34,pw=W-L-Rm,ph=Hh-Tm-B,st=Math.pow(10,Math.floor(Math.log10(mx)))/2;while(mx/st>8)st*=2;var Y=function(v){return Tm+ph-ph*v/mx;};
+      var s='<svg viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Coste anual de pasar a 21 días por escenario">';for(var v=0;v<=mx;v+=st)s+='<line x1="'+L+'" x2="'+(W-Rm)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" class="grid"/><text x="'+(L-8)+'" y="'+(Y(v)+4)+'" class="tick" text-anchor="end">'+fmt(v/1000)+' k€</text>';
+      var MC='#b9c2cd',MG='#f6b89c',cols=[[['Pérdida de toneladas',G.noabs,'var(--e1)','#fff'],['Aumento de merma',m,MC,'var(--ink)'],['Margen que se deja de ganar',G.margin,MG,'var(--ink)']],[['Equipos adicionales',rf,'var(--e2)','#fff'],['Aumento de merma',m,MC,'var(--ink)']]],labs=['Escenario 1','Escenario 2'],bw=120;
+      cols.forEach(function(cs,i){var x=L+pw*(i===0?.27:.73)-bw/2,base=0;cs.forEach(function(c,k){var y0=Y(base+c[1]),h=Y(base)-y0-(k===0?0:2);s+='<rect x="'+x+'" y="'+y0+'" width="'+bw+'" height="'+Math.max(h,0)+'" fill="'+c[2]+'" data-tip="'+labs[i]+' · '+c[0]+': '+fmt(c[1])+' €"/>';
+          if(h>16)s+='<text x="'+(x+bw/2)+'" y="'+(y0+h/2+4)+'" class="vl" text-anchor="middle" style="fill:'+c[3]+'">'+fmt(c[1]/1000)+' k€</text>';base+=c[1];});
+        s+='<text x="'+(x+bw/2)+'" y="'+(Y(base)-8)+'" class="vl" text-anchor="middle" style="font-size:13px">'+fmt(base)+' €</text><text x="'+(x+bw/2)+'" y="'+(Hh-12)+'" class="xl" text-anchor="middle">'+labs[i]+'</text>';});
+      $('cmpEur').innerHTML=s+'<line x1="'+L+'" x2="'+(W-Rm)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" class="axis"/></svg>';}
+  }
+  ['pMP','pCH','pTC'].forEach(function(i){$(i).addEventListener('input',upd);});upd();
+  document.querySelectorAll('input[name="bView"]').forEach(function(r){r.addEventListener('change',function(){var tn=document.querySelector('input[name="bView"]:checked').value==='tn';$('bTn').hidden=!tn;$('bTur').hidden=tn;});});
+})();
+(function(){
+  var S={"names": ["M8", "M16", "M17", "M20"], "cal": {"M8": [432.0, 480.0, 512.0, 464.0, 464.0, 528.0, 528.0, 160.0, 456.0, 496.0, 488.0, 288.0], "M16": [432.0, 480.0, 536.0, 472.0, 464.0, 520.0, 544.0, 160.0, 456.0, 480.0, 480.0, 328.0], "M17": [80.0, 0.0, 0.0, 80.0, 0.0, 80.0, 88.0, 0.0, 40.0, 56.0, 24.0, 0.0], "M20": [184.0, 320.0, 352.0, 232.0, 304.0, 224.0, 176.0, 104.0, 248.0, 256.0, 160.0, 96.0]}, "refH": [432.0, 480.0, 536.0, 472.0, 464.0, 528.0, 544.0, 160.0, 456.0, 496.0, 488.0, 328.0], "satH": [96.0, 96.0, 96.0, 96.0, 120.0, 96.0, 96.0, 72.0, 96.0, 120.0, 96.0, 96.0], "sunH": [48.0, 64.0, 80.0, 72.0, 80.0, 64.0, 72.0, 72.0, 72.0, 72.0, 88.0, 88.0], "D": {"prev": {"M8": 2227.5977272727273, "M16": 1814.895, "M17": 121.40354545454545, "M20": 614.4274545454546}, "temp": {"M8": 1788.3333333333333, "M16": 1784.0, "M17": 116.66666666666667, "M20": 398.3333333333333}}, "FY": 11.0, "rsc": {"M8": 5.276932915512278, "M16": 4.260238858424761, "M17": 4.571118689254082, "M20": 2.1369847650991405}, "hc_a": {"M8": 694.2, "M16": 639.0, "M17": 75.6, "M20": 294.59999999999997}, "hc_21": {"M8": 1229.702380952381, "M16": 973.3333333333333, "M17": 182.5, "M20": 548.9484126984121}, "teams": {"M8": 3, "M16": 3, "M17": 0.28865979381443296, "M20": 1.711340206185567}, "m28": {"M8": {"tn": 4401.236, "share": 0.17961607642966382, "ratio": 1.3439090294854115, "hcm": 182.0, "comp": 17.38095238095238, "cal": 23.174603174603114, "fams": ["\u00d876"], "hcm28": 182.49999999999983}, "M16": {"tn": 8029.464999999999, "share": 0.4022003276422953, "ratio": 1.1390254752527347, "hcm": 494.0, "comp": 60.83333333333334, "cal": 63.73015873015873, "fams": ["\u00d845", "\u00d848", "\u00d850", "\u00d858", "\u00d860"], "hcm28": 586.6071428571429}}, "cfgE2": {"M8": "3", "M16": "2", "M28": "2", "M20": "3", "M17": "A"}, "calM17": 448.0},N=S.names,NA=['M8','M16','M28','M20','M17'];
+  var REGS={a:[['A','Calendario actual'],['3','3T'],['4','4T · sábados'],['5','5T · domingos']],'21':[['A','Calendario actual'],['3','3T'],['4','4T · sábados'],['5','5T · domingos']],e2:[['1','1T'],['2','2T'],['3','3T'],['P','Propuesta escenario 2']]};
+  var SCN=[['a','Situación actual'],['21','Escenario 1'],['e2','Escenario 2']];
+  function $(i){return document.getElementById(i);}
+  if(!$('satChart'))return;
+  function fmt(v,d){d=d||0;var s=Math.abs(v).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return s.join(',');}
+  function ov(v){return Math.round(v*1000)>1000;}
+  function cls(v){return v==null?'na':ov(v)?'r':v>=.85?'y':'g';}
+  function sum(a){return a.reduce(function(x,y){return x+y;},0);}
+  function hrs(n,r){if(r==='P')r=S.cfgE2[n];if(r==='A')return n==='M28'?0:sum(S.cal[n]);var t=+r,ref=sum(S.refH);return t<=3?ref*t/3:ref+sum(S.satH)+(t===5?sum(S.sunH):0);}
+  function base(){var r=document.querySelector('input[name="sBase"]:checked');return r?r.value:'prev';}
+  function load(n,sc){var b=base();
+    if(sc==='e2'){if(n==='M28'){var t=0;for(var k in S.m28){t+=S.D[b][k]*S.FY*S.m28[k].share/(S.rsc[k]*S.m28[k].ratio)+S.m28[k].hcm28;}return t;}
+      var sh=S.m28[n]?S.m28[n].share:0;return S.D[b][n]*S.FY*(1-sh)/S.rsc[n]+S.hc_21[n]-(S.m28[n]?S.m28[n].hcm:0);}
+    if(n==='M28')return null;return S.D[b][n]*S.FY/S.rsc[n]+(sc==='a'?S.hc_a[n]:S.hc_21[n]);}
+  function sat(n,sc,r){var l=load(n,sc),h=hrs(n,r);return (l==null||!h)?null:l/h;}
+  var COL={A:'var(--hoy)','1':'#c9d3df','2':'#9fb0c4','3':'#7f90a6','4':'var(--e2)','5':'var(--navy)',P:'var(--e2)'};
+  function render(){var scr=document.querySelector('input[name="sScen"]:checked'),sc=scr?scr.value:'21',REG=REGS[sc],MS=sc==='e2'?NA:N;
+    $('satLegend').innerHTML=REG.map(function(r){return '<span><i style="background:'+COL[r[0]]+'"></i>'+r[1]+'</span>';}).join('');
+    var mx=1.5;MS.forEach(function(n){REG.forEach(function(r){var v=sat(n,sc,r[0]);if(v!=null)mx=Math.max(mx,Math.ceil(v/.25)*.25);});});mx=Math.min(mx,2.5);
+    var W=640,L=48,Rm=60,bh=11,g=2,gg=18,top=6,ph=MS.length*(4*bh+3*g)+(MS.length-1)*gg,Hh=top+ph+28,pw=W-L-Rm,X=function(v){return L+pw*Math.min(v,mx)/mx;};
+    var s='<svg viewBox="0 0 '+W+' '+Hh+'" role="img" aria-label="Saturación anual por máquina y calendario">';
+    for(var v=0;v<=mx+1e-9;v+=(mx>2?.5:.25))s+='<line x1="'+X(v)+'" x2="'+X(v)+'" y1="'+top+'" y2="'+(top+ph)+'" class="grid"/><text x="'+X(v)+'" y="'+(top+ph+16)+'" class="tick" text-anchor="middle">'+Math.round(v*100)+'%</text>';
+    MS.forEach(function(n,i){var y0=top+i*(4*bh+3*g+gg);s+='<text x="'+(L-8)+'" y="'+(y0+2*bh+g+4)+'" class="xl" text-anchor="end">'+n+'</text>';
+      REG.forEach(function(r,j){var v=sat(n,sc,r[0]),y=y0+j*(bh+g);if(v==null)return;s+='<rect x="'+L+'" y="'+y+'" width="'+Math.max(1,X(v)-L)+'" height="'+bh+'" rx="2" fill="'+COL[r[0]]+'" data-tip="'+n+' · '+r[1]+': '+fmt(v*100,1)+'%"/><text x="'+(X(v)+5)+'" y="'+(y+bh-2)+'" class="vl'+(ov(v)?' over':'')+'">'+fmt(v*100,0)+'%'+(v>mx?' ▸':'')+'</text>';});});
+    s+='<line x1="'+X(1)+'" x2="'+X(1)+'" y1="'+(top-4)+'" y2="'+(top+ph+2)+'" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="4 3"/></svg>';$('satChart').innerHTML=s;
+    var h='';NA.forEach(function(n){h+='<tr><th scope="row">'+n+'</th>';SCN.forEach(function(c,ci){REGS[c[0]].forEach(function(r,j){var v=sat(n,c[0],r[0]),l=load(n,c[0]);
+        h+='<td class="hm-'+cls(v)+(j===0&&ci>0?' sep':'')+'"'+(v==null?'':' data-tip="'+n+' · '+c[1]+' · '+r[1]+': '+fmt(l)+' h de carga / '+fmt(hrs(n,r[0]))+' h de turno"')+'>'+(v==null?'–':fmt(v*100,0)+'%')+'</td>';});});h+='</tr>';});
+    $('heatBody').innerHTML=h;}
+  document.querySelectorAll('input[name="sBase"],input[name="sScen"]').forEach(function(e){e.addEventListener('change',render);});render();
+})();
+</script>
+</body>
+</html>

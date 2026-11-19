@@ -78,9 +78,13 @@ No hay build ni tests: se valida abriendo el HTML en un navegador (Playwright) y
 - Idioma: español en interfaz, comentarios y mensajes de commit.
 - Herramientas en HTML autocontenido (un archivo por herramienta) salvo que se pida otra cosa.
 - No subir contraseñas ni claves privadas al repo.
-- El trabajo terminado se fusiona en `main`: las sesiones nuevas solo ven `main`.
+
+## Rama de trabajo: siempre `main`
+- Indicación expresa del usuario: trabajar y subir los cambios **directamente a la rama `main`**
+  de este repo (commit + push a `main`). No crear ramas `claude/...` ni pull requests.
+- Las sesiones nuevas solo leen `main`: lo que no esté en `main` no forma parte del contexto.
 
 ## Trabajo en curso
 @PROGRESO.md
 
-Al terminar cada tarea: actualizar `PROGRESO.md` y hacer commit.
+Al terminar cada tarea: actualizar `PROGRESO.md`, hacer commit y push a `main`.

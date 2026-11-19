@@ -11,8 +11,14 @@
 - Panel de Carga de Capacidad adaptado para AGSA (tubos).
 
 ## Pendiente / próximos pasos
-- Crear la organización PLANIFICACION-CL en GitHub y mover este repo allí.
-- Crear los repos del resto de empresas con su propio `CLAUDE.md`.
+- Organización PLANIFICACION-CL creada (faltan los repos FERROMALLAS y LASAOMALLAS).
+  Bloqueado: la app de Claude en GitHub aún no tiene acceso a la organización.
+- Migración: inventario hecho de todas las ramas de AGSA, PERSEIDA, FERROMALLAS y ONDUPET.
+  Herramientas de AGSA aún en ramas sin fusionar: ABC_Estrategias (abc-production-strategies-tool),
+  Definiciones_Planificacion (funny-rubin), analisis ciclo 21 días (happy-hawking).
+  Fuera de lugar en este repo: secuenciador y balance de masas (→ ONDUPET), integración
+  MGT–Ondupack (→ MGT-PDA, por confirmar), modelo de planificación CL y P2R (→ DEPARTAMENTO, por confirmar),
+  memoria de conversaciones (→ comun).
 
 ## Decisiones tomadas
 - Un repositorio por empresa, dentro de la organización PLANIFICACION-CL.

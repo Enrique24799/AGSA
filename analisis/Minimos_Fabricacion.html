@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mínimos de fabricación</title>
+<style>
+:root{
+  /* Layout: shell de la aplicación GPB (barra superior + panel lateral con árbol) y contenido en pestañas con paneles de cabecera gris */
+  color-scheme: light;
+  --bar1:#3d516a; --bar2:#506987; --btn:#6482a3; --badge:#617e9f;
+  --side:#f5f6f4; --panel:#ffffff; --bg:#ffffff; --navy:#2a385d; --ink:#1f2937; --ink2:#465263; --muted:#6b7686;
+  --rule:#d8dde4; --rule2:#e8ebef; --thead:#50698a; --soft:#f4f6f9; --hi:#eef3fa; --email:#3a5f9a;
+  --hoy:#9aa5b4; --e1:#eb6834; --e2:#2a78d6; --chg:#3d516a; --prod:#cfd7e1; --open:#7f90a6; --free:#e6eaef; --zone:rgba(42,120,214,.07);
+  --good:#0b7a0b; --bad:#c0392b; --warn:#a86400;
+  --f:Tahoma, Verdana, "Segoe UI", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:13px/1.5 var(--f)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--bar1)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;height:42px;display:flex;align-items:center;gap:10px;
+  padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+  background:linear-gradient(90deg,var(--bar1) 0%,var(--bar2) 50%,#42566f 100%);box-shadow:0 2px 3px rgba(0,0,0,.12);color:#fff}
+.menu-btn{width:30px;height:28px;border:0;border-radius:6px;background:var(--btn);display:grid;place-items:center;cursor:pointer;padding:0}
+.menu-btn span{display:block;width:12px;height:2px;background:#fff;box-shadow:0 -4px 0 #fff,0 4px 0 #fff}
+.menu-btn:focus-visible,.tab:focus-visible,.tree a:focus-visible{outline:2px solid #ffd27a;outline-offset:2px}
+.badge{font:700 14px/1 Georgia,"Times New Roman",serif;background:var(--badge);padding:5px 8px 4px;border-radius:7px;letter-spacing:.02em}
+.app{font-weight:700;font-size:13px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app small{font-weight:400;opacity:.8}
+.tb-right{margin-left:auto;font-size:12px;opacity:.85;white-space:nowrap}
+.shell{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:calc(100vh - 42px)}
+.side{background:var(--side);border-right:3px solid var(--navy);padding:12px 8px 20px 6px;display:grid;gap:10px;align-content:start}
+.user{border-left:3px solid #425469;border-radius:6px 0 0 6px;padding:4px 6px 8px;border-bottom:1px solid var(--rule)}
+.user b{display:block;color:var(--navy);font-size:11.5px;line-height:1.35}
+.user span{display:block;color:var(--email);font-size:11px;font-weight:700}
+.tree{background:#fff;border-radius:6px;padding:10px 8px 12px 10px}
+.tree ul{list-style:none;margin:0;padding:0}
+.tree ul ul{margin-left:9px;padding-left:12px;border-left:1px dotted #b7bec8}
+.tree li{position:relative;padding:3px 0 3px 14px;font-size:11.5px}
+.tree li::before{content:"";position:absolute;left:0;top:11px;width:9px;border-top:1px dotted #b7bec8}
+.tree .node>span{font-weight:700;color:var(--navy)}
+.tree .node>span::before{content:"⊟";font-weight:400;color:#8a929d;margin-right:5px;font-size:11px}
+.tree a{color:var(--ink);text-decoration:none;border-radius:3px;padding:1px 4px;cursor:pointer;display:inline-block}
+.tree a:hover{background:#e9eef5}
+.tree a[aria-current="page"]{background:var(--navy);color:#fff}
+.tree .off{color:#9aa1ab}
+.content{min-width:0;padding-block:18px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:1180px;display:grid;gap:16px}
+.crumb{font-size:11px;color:var(--muted)}
+.crumb b{color:var(--navy)}
+h1{margin:0;font-size:20px;color:var(--navy);text-wrap:balance}
+.sub{margin:2px 0 0;color:var(--ink2);font-size:12.5px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--rule);border-radius:4px;background:var(--soft)}
+.fact{padding:9px 12px;display:grid;gap:1px}
+.fact+.fact{border-left:1px solid var(--rule)}
+.fact b{font-size:16px;color:var(--navy);font-variant-numeric:tabular-nums}
+.fact span{font-size:11.5px;color:var(--muted)}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--navy);overflow-x:auto}
+.tab{font:700 12.5px/1 var(--f);color:var(--ink2);background:#e9ecf0;border:1px solid var(--rule);border-bottom:0;border-radius:5px 5px 0 0;padding:10px 16px 9px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.tab:hover{background:#dfe4ea}
+.tab[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tabpanel{display:grid;gap:16px}
+.tabpanel[hidden]{display:none}
+.lede{margin:0;color:var(--ink2);max-width:110ch}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--rule);border-top:3px solid var(--navy);border-radius:4px;padding:10px 12px;display:grid;gap:2px;align-content:start}
+.kpi.e1{border-top-color:var(--e1)}.kpi.e2{border-top-color:var(--e2)}
+.kl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.kpi b{font-size:21px;color:var(--navy);font-variant-numeric:tabular-nums;line-height:1.2}
+.ks{font-size:11.5px;color:var(--ink2)}
+.ks .up{color:var(--bad);font-weight:700}.ks .eq{color:var(--good);font-weight:700}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;min-width:0;display:grid;align-content:start}
+.ph{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:8px 12px;background:linear-gradient(#f8f9fb,#eef1f5);border-bottom:1px solid var(--rule);border-radius:4px 4px 0 0}
+.ph h3{margin:0;font-size:12.5px;color:var(--navy);text-transform:uppercase;letter-spacing:.04em}
+.ph span{font-size:11.5px;color:var(--muted)}
+.pb{padding:12px;display:grid;gap:10px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:11.5px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:2px;display:inline-block}
+.legend i.ln{height:0;border-top:2px solid;width:16px;border-radius:0}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:var(--rule2);stroke-width:1}
+.axis{stroke:#9aa3ae;stroke-width:1}
+.tick{fill:var(--muted);font:11px var(--f);font-variant-numeric:tabular-nums}
+.xl{fill:var(--ink2);font:700 11px var(--f)}
+.vl{fill:var(--ink);font:700 11px var(--f);font-variant-numeric:tabular-nums}
+.vl.mut{fill:var(--ink2);font-weight:400}
+.vl.over{fill:var(--bad)}
+.axt{fill:var(--ink2);font:11px var(--f)}
+.zone{fill:var(--zone)}
+.zl{fill:var(--muted);font:700 10.5px var(--f);letter-spacing:.03em}
+[data-tip]{cursor:default}
+[data-tip]:hover{opacity:.85}
+.tip{position:fixed;z-index:80;pointer-events:none;background:var(--navy);color:#fff;font:12px/1.4 var(--f);padding:6px 9px;border-radius:3px;max-width:280px;box-shadow:0 2px 6px rgba(0,0,0,.2);font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto;border:1px solid var(--rule);border-radius:4px}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+thead th{background:var(--thead);color:#fff;font-weight:700;padding:7px 10px;text-align:right;white-space:normal;vertical-align:bottom;border-right:1px solid rgba(255,255,255,.15)}
+thead th:first-child,thead th.l{text-align:left}
+tbody th{text-align:left;font-weight:700;color:var(--ink);padding:6px 10px;white-space:nowrap}
+td{padding:6px 10px;text-align:right;white-space:nowrap;border-left:1px solid var(--rule2)}
+tbody tr{border-bottom:1px solid var(--rule2)}
+tbody tr:nth-child(even){background:#fafbfc}
+tr.grp th{background:#e9edf2;color:var(--navy);font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:5px 10px}
+tr.hi{background:var(--hi)!important}
+tr.hi th,tr.hi td{font-weight:700}
+tr.bad td{color:var(--bad)}
+tr.tot{background:#e9edf2!important}
+tr.tot th,tr.tot td{font-weight:700}
+tr.base th,tr.base td{color:var(--muted)}
+td.note{color:var(--muted);text-align:left;white-space:normal;min-width:200px;font-size:11.5px}
+td.txt{text-align:left;white-space:normal;min-width:140px;color:var(--ink2)}
+.cmp td{text-align:left;white-space:normal}
+.cmp td:nth-child(2){color:var(--ink2)}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px;border:1px solid}
+.chip::before{margin-right:4px}
+.chip.good{color:var(--good);border-color:var(--good)}.chip.good::before{content:"✔"}
+.chip.warn{color:var(--warn);border-color:var(--warn)}.chip.warn::before{content:"!"}
+.chip.bad{color:var(--bad);border-color:var(--bad)}.chip.bad::before{content:"▼"}
+.pc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.pc h4{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.pro-h{color:var(--good)}.con-h{color:var(--bad)}
+.pc ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.pc li{display:grid;grid-template-columns:16px 1fr;gap:6px}
+.pro li::before{content:"+";color:var(--good);font-weight:700}
+.con li::before{content:"−";color:var(--bad);font-weight:700}
+.verdict{border:1px solid var(--rule);border-left:4px solid var(--navy);background:var(--soft);border-radius:0 4px 4px 0;padding:12px 14px;display:grid;gap:6px}
+.verdict p{margin:0;max-width:120ch}
+.verdict .big{font-size:14px;color:var(--navy)}
+.todo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 22px}
+.todo div{display:grid;gap:2px;align-content:start}
+.todo b{color:var(--navy)}
+.todo span{color:var(--ink2)}
+.method ul{margin:0;padding-left:18px;display:grid;gap:4px;color:var(--ink2);max-width:130ch}
+.foot{font-size:11px;color:var(--muted)}
+.scrim{display:none}
+.ctrl-top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end}
+fieldset.seg{border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;min-width:0}
+fieldset.seg legend{float:left;width:100%;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:0;margin-bottom:4px}
+.seg label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.fld{display:grid;gap:3px}.fld label{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.fld input{width:120px}
+input[type=number],select{font:12px var(--f);padding:5px 8px;border:1px solid #b9c2cd;border-radius:4px;background:#fff;color:var(--ink)}
+select:focus-visible,input:focus-visible,.btn:focus-visible{outline:2px solid var(--e2);outline-offset:1px}
+.btn{font:700 11.5px var(--f);padding:6px 11px;border-radius:4px;border:1px solid var(--thead);background:#fff;color:var(--navy);cursor:pointer}
+.btn:hover{background:#eef3fa}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.presets>span{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
+table.cfg td{text-align:left}
+table.cfg select{width:100%;min-width:150px}
+table.cfg tfoot th,table.cfg tfoot td{background:#e9edf2;font-weight:700;padding:7px 10px;text-align:left}
+.sat{display:inline-block;min-width:64px;text-align:right;padding:1px 7px;border-radius:3px;font-weight:700}
+.sat.g,td.hm-g{background:#d1fae5;color:#065f46}.sat.y,td.hm-y{background:#fef3c7;color:#92400e}.sat.r,td.hm-r{background:#fee2e2;color:#991b1b}
+.sat.na,td.hm-na{background:#eceff3;color:var(--muted);font-weight:400}
+table.heat td{text-align:center;font-weight:700;padding:6px 6px;border-left:1px solid #fff}
+table.heat td.yr{border-left:3px solid #fff}
+td.neg{color:var(--bad);font-weight:700}
+.scale{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2)}
+.scale span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}.sw.g{background:#d1fae5;border:1px solid #6ee7b7}.sw.y{background:#fef3c7;border:1px solid #fcd34d}.sw.r{background:#fee2e2;border:1px solid #fca5a5}
+.content a[data-tab]{color:var(--e2);font-weight:700}
+.stack{display:grid;gap:16px}
+.params{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:flex-end;padding:10px 12px;border:1px solid var(--rule);border-radius:4px;background:#fff}
+.params .foot{max-width:60ch;margin:0}
+.chartbox{max-width:820px}
+.chartbox.sm{max-width:600px}
+@media (max-width:1100px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;z-index:70;top:calc(42px + env(safe-area-inset-top,0px));bottom:0;left:0;width:260px;overflow-y:auto;transform:translateX(-105%);transition:transform .2s;padding-left:max(6px,env(safe-area-inset-left,0px))}
+  body.nav-open .side{transform:none}
+  body.nav-open .scrim{display:block;position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.25)}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fact:nth-child(3){border-left:0}.fact:nth-child(n+3){border-top:1px solid var(--rule)}
+  .pc,.todo{grid-template-columns:1fr}
+  .tb-right{display:none}
+}
+@media (max-width:480px){.kpis{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.side{transition:none}}
+@media print{
+  .topbar,.side,.tabs,.scrim{display:none!important}
+  .shell{display:block}.tabpanel[hidden]{display:grid!important}
+  .tabpanel{break-before:page}.panel{break-inside:avoid}
+}
+
+.inner{max-width:1240px}
+.crit{border:1px solid var(--rule);border-left:4px solid var(--navy);background:var(--soft);border-radius:0 4px 4px 0;padding:12px 14px;display:grid;gap:8px}
+.crit h2{margin:0;font-size:13px;color:var(--navy);text-transform:uppercase;letter-spacing:.04em}
+.crit ol{margin:0;padding-left:20px;display:grid;gap:5px;max-width:125ch}
+.crit .f{font-family:Consolas,"Courier New",monospace;font-size:12px;background:#fff;border:1px solid var(--rule);border-radius:3px;padding:1px 6px;display:inline-block;max-width:100%;white-space:normal}
+.inner>*{min-width:0}
+.content{min-width:0}
+.gen{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:flex-end}
+.gen .fld input{width:110px}
+.apply{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:flex-end;padding-top:10px;border-top:1px dashed var(--rule)}
+.apply .fld input{width:96px}
+table.inp td{padding:4px 6px}
+table.inp input{width:84px;text-align:right}
+table.inp td.ro{color:var(--ink2);font-weight:700}
+.res{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.mc{border:1px solid var(--rule);border-top:3px solid var(--navy);border-radius:4px;padding:10px 12px;display:grid;gap:6px;background:#fff}
+.mc h4{margin:0;font-size:13px;color:var(--navy)}
+.mc .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mc .row span{font-size:11px;color:var(--ink2)}
+.mc .row b{font-size:20px;color:var(--navy);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mc .row b.med{color:var(--e2)}
+.mc .now{font-size:11px;color:var(--muted);border-top:1px solid var(--rule2);padding-top:5px}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:0 6px;border-radius:8px;border:1px solid var(--muted);color:var(--ink2);margin-left:4px}
+.warnmsg{color:var(--bad);font-weight:700;font-size:12px}
+details.opt{display:grid;gap:12px}
+details.opt>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;width:max-content;max-width:100%;font:700 12px var(--f);color:var(--navy);background:#fff;border:1px solid var(--thead);border-radius:4px;padding:7px 12px}
+details.opt>summary::-webkit-details-marker{display:none}
+details.opt>summary::before{content:'▸';font-size:11px}
+details.opt[open]>summary::before{content:'▾'}
+@media (max-width:1100px){.res{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:700px){.res{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.res{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Mostrar u ocultar el menú" aria-expanded="false" aria-controls="side"><span></span></button>
+  <span class="badge">GPB</span>
+  <span class="app">AGSA <small>· Planificación · Análisis de ciclos</small></span>
+  <span class="tb-right">Noviembre 2026 · Herramienta de planificación</span>
+</header>
+<div class="scrim" id="scrim"></div>
+<div class="shell">
+<aside class="side" id="side">
+  <div class="user"><b>Planificador AGSA</b><b>Enrique Tejada Fornieles</b><span>etejada@clgrupoindustrial.com</span></div>
+  <nav class="tree" aria-label="Análisis">
+    <ul><li class="node"><span>Análisis de ciclos · Tubos</span>
+      <ul>
+        <li><a href="Escenarios_Ciclo_21_dias.html#situacion-actual">Situación actual</a></li>
+        <li class="node"><span>Costes de transformación</span>
+          <ul>
+            <li><a href="Escenarios_Ciclo_21_dias.html#escenario-1">Escenario 1 · Equipos actuales</a></li>
+            <li><a href="Escenarios_Ciclo_21_dias.html#escenario-2">Escenario 2 · Más equipos y M28</a></li>
+            <li><a href="Escenarios_Ciclo_21_dias.html#comparativa">Comparativa</a></li>
+          </ul></li>
+        <li class="node"><span>Capacidad</span><ul><li><a href="Escenarios_Ciclo_21_dias.html#saturacion">Saturación de máquinas</a></li></ul></li>
+        <li class="node"><span>Implantación</span><ul><li><a href="Escenarios_Ciclo_21_dias.html#presupuesto">Presupuesto 2027</a></li></ul></li>
+        <li class="node"><span>Mínimos</span><ul><li><a href="#" aria-current="page">Mínimos de fabricación</a></li></ul></li>
+      </ul></li></ul>
+  </nav>
+</aside>
+<main class="content"><div class="inner">
+  <div>
+    <div class="crumb">Análisis de ciclos › <b>Mínimos de fabricación</b></div>
+    <h1>Calculadora del mínimo de fabricación por máquina</h1>
+    <p class="sub">M8, M16, M17, M20 y M28 · Coste del cambio (operarios y merma de arranque) frente al margen objetivo y a la merma objetivo</p>
+  </div>
+
+  <section class="crit" aria-labelledby="critH">
+    <h2 id="critH">Criterio</h2>
+    <ol>
+      <li><b>Coste de un cambio</b> = horas de cambio × nº de operarios × coste por operario + merma de arranque × (materia prima − chatarra). Merma de arranque = barras por cambio × peso medio por barra.</li>
+      <li><b>Tipo de cambio:</b> si la medida abre su familia en el ciclo provoca un <b>cambio completo</b> → mínimo por familia. Si la familia ya está montada provoca un <b>cambio de calibrador</b> → mínimo por medida.</li>
+      <li><b>Mínimo por margen:</b> después de pagar el cambio, cada tonelada del lote tiene que dejar al menos el margen objetivo. <span class="f">lote ≥ coste del cambio ÷ (margen actual − margen objetivo)</span></li>
+      <li><b>Mínimo por merma:</b> la merma de arranque no puede superar el % objetivo del lote. <span class="f">lote ≥ merma de arranque ÷ % de merma objetivo</span></li>
+      <li><b>Lote mínimo</b> = el mayor de los dos, redondeado al múltiplo superior. Si una medida no llega con su demanda, se fabrica cada 2 o 3 ciclos; si ni así llega, bajo pedido o por campañas.</li>
+    </ol>
+    <p class="foot">No incluye la producción que se deja de fabricar si la máquina va llena ni el coste fijo de la máquina: las horas de cambio se valoran solo con el coste de los operarios. Los empalmes no cuentan, porque dependen de las toneladas y no del tamaño del lote.</p>
+  </section>
+
+  <div class="panel"><div class="ph"><h3>Parámetros</h3><span>Las celdas se guardan en este navegador</span></div>
+    <div class="pb">
+      <div class="gen">
+        <div class="fld"><label for="g_mp">Materia prima, €/Tn</label><input id="g_mp" type="number" min="0" step="10"></div>
+        <div class="fld"><label for="g_ch">Chatarra, €/Tn</label><input id="g_ch" type="number" min="0" step="10"></div>
+        <div class="fld"><label for="g_ma">Margen actual, €/Tn</label><input id="g_ma" type="number" step="1"></div>
+        <div class="fld"><label for="g_rd">Redondeo del lote, Tn</label><input id="g_rd" type="number" min="1" step="1"></div>
+        <button class="btn" id="reset" type="button">Volver a los valores de ejemplo</button>
+      </div>
+      <div class="apply">
+        <div class="fld"><label for="a_op">Coste operario, €/h</label><input id="a_op" type="number" min="0" step="1" value="25"></div>
+        <div class="fld"><label for="a_n">Nº operarios</label><input id="a_n" type="number" min="0" step="1" value="3"></div>
+        <div class="fld"><label for="a_mo">Margen objetivo, €/Tn</label><input id="a_mo" type="number" step="1" value="100"></div>
+        <div class="fld"><label for="a_pm">% merma objetivo</label><input id="a_pm" type="number" min="0" step="0.1" value="1"></div>
+        <button class="btn" id="applyAll" type="button">Aplicar a todas las máquinas</button>
+      </div>
+      <p class="foot">Valores de ejemplo: coste por operario, nº de operarios, margen objetivo, % de merma, materia prima y chatarra. Pon los reales. El margen actual (110 €/Tn) es el que diste para el escenario 1.</p>
+      <div class="tw"><table class="inp" id="tIn">
+        <thead><tr><th>Máquina</th><th>Coste por operario (€/h)</th><th>Nº de operarios en el cambio</th><th>Margen objetivo (€/Tn)</th><th>% de merma objetivo</th><th>El cambio puede costar hasta (€/Tn)</th></tr></thead>
+        <tbody></tbody></table></div>
+      <details class="opt"><summary>Ver y editar los datos de cada máquina</summary>
+        <div class="tw"><table class="inp" id="tData">
+          <thead><tr><th>Máquina</th><th>Cambio completo (h)</th><th>Cambio de calibrador (h)</th><th>Barras de merma · completo</th><th>Barras de merma · calibrador</th><th>Peso medio por barra (kg)</th><th>Tn/h en marcha</th><th>Mínimo actual (Tn)</th></tr></thead>
+          <tbody></tbody></table></div>
+        <p class="foot">Tiempos de cambio objetivo, Tn/h en marcha y mínimos actuales: hojas Máquinas y Familias. Barras y peso por barra: datos de merma (barras de 6 m). M28: tiempos de cambio de M8, barras de M8 (supuesto), peso por barra de las medidas que pasan a M28 en el primer trimestre de 2027 y Tn/h estimadas.</p>
+      </details>
+    </div></div>
+
+  <div class="panel"><div class="ph"><h3>Lote mínimo por máquina</h3><span>Por familia (cambio completo) y por medida (cambio de calibrador)</span></div>
+    <div class="pb"><div class="res" id="cards"></div></div></div>
+
+  <div class="panel"><div class="ph"><h3>Mínimo actual frente al calculado</h3><span>Tn por lote</span></div>
+    <div class="pb"><div class="legend"><span><i style="background:var(--hoy)"></i>Mínimo actual en sistema</span><span><i style="background:var(--e2)"></i>Por medida · cambio de calibrador</span><span><i style="background:var(--navy)"></i>Por familia · cambio completo</span></div>
+    <div class="chartbox" id="chart"></div></div></div>
+
+  <div class="panel"><div class="ph"><h3>Detalle del cálculo</h3><span>Por máquina y tipo de cambio</span></div>
+    <div class="pb"><div class="tw"><table id="tRes">
+      <thead><tr><th>Máquina</th><th class="l">Cambio</th><th>Coste de operarios (€)</th><th>Merma de arranque (Tn)</th><th>Coste de la merma (€)</th><th>Coste del cambio (€)</th><th>Lote por margen (Tn)</th><th>Lote por merma (Tn)</th><th>Lote mínimo (Tn)</th><th class="l">Lo fija</th><th>Horas de fabricación del lote</th><th>Coste del cambio por Tn (€/Tn)</th><th>Margen que queda (€/Tn)</th><th>Merma sobre el lote</th></tr></thead>
+      <tbody></tbody></table></div></div></div>
+</div></main>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script>
+(function(){
+  var DEF={"gen": {"mp": 750, "ch": 0, "ma": 110, "rd": 5}, "mq": [{"id": "M8", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 6.5, "hk": 3, "bc": 15, "bk": 10, "kg": 31.1, "th": 7.54, "min": 30}, {"id": "M16", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 5.5, "hk": 2.5, "bc": 12, "bk": 8, "kg": 12.0, "th": 4.88, "min": 30}, {"id": "M17", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 9, "hk": 4.5, "bc": 10, "bk": 8, "kg": 112.4, "th": 8.23, "min": 100}, {"id": "M20", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 4.5, "hk": 2.5, "bc": 10, "bk": 6, "kg": 5.8, "th": 3.15, "min": 30}, {"id": "M28", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 6.5, "hk": 3, "bc": 15, "bk": 10, "kg": 18.9, "th": 5.6, "min": 30}]}, KEY='agsa-minimos-v1', S;
+  function clone(o){return JSON.parse(JSON.stringify(o));}
+  try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){S=null;}
+  if(!S||!S.mq||S.mq.length!==DEF.mq.length)S=clone(DEF);
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+  function $(i){return document.getElementById(i);}
+  function fmt(v,d){if(!isFinite(v))return '–';d=d||0;var s=Math.abs(v).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (v<0&&Number(Math.abs(v).toFixed(d))!==0?'−':'')+s.join(',');}
+  function num(v){var x=parseFloat(v);return isFinite(x)?x:0;}
+  var IN=[['op',1],['n',1],['mo',1],['pm',0.1]], DA=[['hc',0.5],['hk',0.5],['bc',1],['bk',1],['kg',0.1],['th',0.01],['min',5]];
+  function inputRow(m,i,cols){return '<tr><th scope="row">'+m.id+'</th>'+cols.map(function(c){return '<td><input type="number" step="'+c[1]+'" data-i="'+i+'" data-k="'+c[0]+'" value="'+m[c[0]]+'" aria-label="'+m.id+' '+c[0]+'"></td>';}).join('')+(cols===IN?'<td class="ro" id="adm'+i+'"></td>':'')+'</tr>';}
+  function build(){
+    $('tIn').tBodies[0].innerHTML=S.mq.map(function(m,i){return inputRow(m,i,IN);}).join('');
+    $('tData').tBodies[0].innerHTML=S.mq.map(function(m,i){return inputRow(m,i,DA);}).join('');
+    ['mp','ch','ma','rd'].forEach(function(k){$('g_'+k).value=S.gen[k];});
+  }
+  function calc(m,t){var g=S.gen,h=t?m.hk:m.hc,b=t?m.bk:m.bc;
+    var pers=h*m.n*m.op,mt=b*m.kg/1000,me=mt*Math.max(0,g.mp-g.ch),tot=pers+me,adm=g.ma-m.mo,pm=m.pm/100;
+    var lm=adm>0?tot/adm:Infinity,lw=pm>0?mt/pm:0,rd=Math.max(1,g.rd),L=isFinite(lm)?Math.ceil(Math.max(lm,lw)/rd-1e-9)*rd:Infinity;
+    return {h:h,pers:pers,mt:mt,me:me,tot:tot,adm:adm,lm:lm,lw:lw,L:L,fija:!isFinite(lm)?'–':(lm>=lw?'Margen':'Merma'),hrs:L/m.th,cpt:tot/L,left:g.ma-tot/L,mp:mt/L};}
+  function render(){
+    var R=S.mq.map(function(m){return {m:m,c:calc(m,0),k:calc(m,1)};});
+    R.forEach(function(r,i){$('adm'+i).textContent=r.m.mo<S.gen.ma?fmt(S.gen.ma-r.m.mo,1):'–';});
+    $('cards').innerHTML=R.map(function(r){var bad=!isFinite(r.c.L);
+      return '<div class="mc"><h4>'+r.m.id+'</h4>'+(bad?'<p class="warnmsg">El margen objetivo tiene que ser menor que el margen actual.</p>':
+        '<div class="row"><span>Por familia<br>cambio completo<span class="tag">'+r.c.fija+'</span></span><b>'+fmt(r.c.L)+' Tn</b></div>'+
+        '<div class="row"><span>Por medida<br>cambio de calibrador<span class="tag">'+r.k.fija+'</span></span><b class="med">'+fmt(r.k.L)+' Tn</b></div>')+
+        '<div class="now">Mínimo actual en sistema: '+fmt(r.m.min)+' Tn</div></div>';}).join('');
+    var rows='';
+    R.forEach(function(r){[['Completo',r.c],['Calibrador',r.k]].forEach(function(p,j){var c=p[1];
+      rows+='<tr'+(j===1?' class="base"':'')+'><th scope="row">'+(j===0?r.m.id:'')+'</th><td class="txt">'+p[0]+' · '+fmt(c.h,1)+' h</td><td>'+fmt(c.pers)+'</td><td>'+fmt(c.mt,2)+'</td><td>'+fmt(c.me)+'</td><td><b>'+fmt(c.tot)+'</b></td><td>'+fmt(c.lm,1)+'</td><td>'+fmt(c.lw,1)+'</td><td><b>'+fmt(c.L)+'</b></td><td class="txt">'+c.fija+'</td><td>'+fmt(c.hrs,1)+'</td><td>'+fmt(c.cpt,1)+'</td><td>'+fmt(c.left,1)+'</td><td>'+(isFinite(c.mp)?fmt(c.mp*100,2)+'%':'–')+'</td></tr>';});});
+    $('tRes').tBodies[0].innerHTML=rows;
+    // gráfico
+    var W=900,H=300,Lm=52,Rm=10,T=26,Bm=34,pw=W-Lm-Rm,ph=H-T-Bm,vals=[];
+    R.forEach(function(r){vals.push(r.m.min,r.k.L,r.c.L);});
+    var fin=vals.filter(isFinite),mx=Math.max.apply(null,fin.concat([10]))*1.12,st=Math.pow(10,Math.floor(Math.log10(mx)));if(mx/st<3)st/=2;if(mx/st>8)st*=2;
+    var Y=function(v){return T+ph-ph*Math.min(v,mx)/mx;},s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Mínimo actual frente al calculado por máquina">';
+    for(var v=0;v<=mx;v+=st)s+='<line x1="'+Lm+'" x2="'+(W-Rm)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" class="grid"/><text x="'+(Lm-8)+'" y="'+(Y(v)+4)+'" class="tick" text-anchor="end">'+fmt(v)+'</text>';
+    var gw=pw/R.length,bw=Math.min(34,(gw-24)/3);
+    R.forEach(function(r,i){var x0=Lm+i*gw+(gw-3*bw-4)/2;[[r.m.min,'var(--hoy)','Mínimo actual'],[r.k.L,'var(--e2)','Por medida'],[r.c.L,'var(--navy)','Por familia']].forEach(function(b,j){
+      if(!isFinite(b[0]))return;var x=x0+j*(bw+2),y=Y(b[0]),h=Y(0)-y;
+      s+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+Math.max(h,0)+'" rx="2" fill="'+b[1]+'" data-tip="'+r.m.id+' · '+b[2]+': '+fmt(b[0])+' Tn"/><text x="'+(x+bw/2)+'" y="'+(y-5)+'" class="vl" text-anchor="middle">'+fmt(b[0])+'</text>';});
+      s+='<text x="'+(Lm+i*gw+gw/2)+'" y="'+(H-12)+'" class="xl" text-anchor="middle">'+r.m.id+'</text>';});
+    $('chart').innerHTML=s+'<line x1="'+Lm+'" x2="'+(W-Rm)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" class="axis"/></svg>';
+    save();
+  }
+  document.addEventListener('input',function(e){var t=e.target;
+    if(t.dataset&&t.dataset.k){S.mq[+t.dataset.i][t.dataset.k]=num(t.value);render();}
+    else if(t.id&&t.id.indexOf('g_')===0){S.gen[t.id.slice(2)]=num(t.value);render();}});
+  $('applyAll').addEventListener('click',function(){var v={op:num($('a_op').value),n:num($('a_n').value),mo:num($('a_mo').value),pm:num($('a_pm').value)};
+    S.mq.forEach(function(m){for(var k in v)m[k]=v[k];});build();render();});
+  $('reset').addEventListener('click',function(){S=clone(DEF);build();render();});
+  var btn=$('menuBtn');btn.addEventListener('click',function(){var o=document.body.classList.toggle('nav-open');btn.setAttribute('aria-expanded',o?'true':'false');});
+  $('scrim').addEventListener('click',function(){document.body.classList.remove('nav-open');btn.setAttribute('aria-expanded','false');});
+  var tip=$('tip');
+  document.addEventListener('pointermove',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');
+    if(el){tip.textContent=el.getAttribute('data-tip');tip.hidden=false;var w=tip.offsetWidth,l=e.clientX+14,t=e.clientY-tip.offsetHeight-10;if(l+w>innerWidth-8)l=e.clientX-w-14;if(t<50)t=e.clientY+16;tip.style.left=l+'px';tip.style.top=t+'px';}else tip.hidden=true;});
+  build();render();
+})();
+</script>
+</body>
+</html>

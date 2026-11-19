@@ -11,12 +11,11 @@ from pathlib import Path
 from generar_intervenciones_ondupet import D, I, NUEVA, construir
 
 PALANCAS = [
-    ('P2R-01', 'Gestión de la demanda', 'HT-P2R-01'),
-    ('P2R-02', 'S&OP y plan de capacidad', 'HT-P2R-03'),
-    ('P2R-05', 'Planificación de materiales por excepción', 'HT-P2R-06, HT-P2R-07'),
+    ('P2R-01', 'Gestión de coberturas', 'HT-P2R-01 (HT-P2R-13 a confirmar)'),
+    ('P2R-02', 'Plan de capacidad', 'HT-P2R-03'),
+    ('P2R-05', 'Análisis de las excepciones', 'HT-P2R-06, HT-P2R-07'),
     ('P2R-06', 'Programación estable y optimizada', 'HT-P2R-08, HT-P2R-09'),
-    ('P2R-08', 'Control del servicio y mejora continua', 'HT-P2R-11, HT-P2R-12'),
-    ('P2R-03', 'Política de inventario por segmento', 'HT-P2R-04 (a confirmar)'),
+    ('P2R-08', 'Control del servicio', 'HT-P2R-11'),
 ]
 
 CAJAS = [
@@ -47,7 +46,7 @@ FASE_NUEVAS = {'Previsión de referencias repetitivas': 'Demanda y previsión',
                'Registro de la demanda perdida': 'Demanda y previsión'}
 
 INTERVENCIONES = [
-    # ---------------------------------------------------------------- P2R-01 · Gestión de la demanda
+    # ---------------------------------------------------------------- P2R-01 · Gestión de coberturas
     I('P2R-01', 'Negocio', 'Origen de la demanda y clientes repetitivos',
       'Clasificar la demanda de los últimos 12 meses por origen (pedido firme, pedido de stock e intercompany) e '
       'identificar los clientes y referencias con consumo repetitivo, que serán los primeros en tener previsión.',
@@ -93,7 +92,24 @@ INTERVENCIONES = [
       cob=0.80, exc=0.20,
       depende='Registro de la demanda perdida (12 meses) · migración de GIO a web en Ondupack', detalle='D-PL01'),
 
-    # ---------------------------------------------------------------- P2R-02 · S&OP y plan de capacidad
+    I('P2R-01', 'Negocio', 'Política de stock anticipado y sobrantes',
+      'Decidir cuánto stock adelantado por agrupación se permite por referencia y qué se hace con los sobrantes al '
+      'cerrar la orden: asignarlos al próximo pedido, venderlos o darlos de baja.',
+      D(1, 9, 2027), D(31, 10, 2027),
+      'El stock que generan las agrupaciones y los sobrantes tiene límite y destino.',
+      '100 % del stock anticipado dentro del límite por referencia.',
+      decidir='Crear solo si se marca HT-P2R-13 en Ondupack · límite de cobertura por referencia', detalle='D-PL09'),
+    I('P2R-01', 'Automatización', 'Control del stock anticipado y de sobrantes',
+      'GIO marca el stock generado por agrupación o por sobrante y avisa cuando supera la cobertura permitida.',
+      D(1, 11, 2027), D(31, 1, 2028),
+      'El stock anticipado se ve y se corrige antes de que envejezca.',
+      '€ de stock sin movimiento > 3 meses a la baja 3 meses seguidos.',
+      cajas=[('Agrupar pedidos repetitivos', 'Se simplifica'), ('Cierre automático al terminar converting', 'Se simplifica')],
+      comite='El sistema vigila el stock que generan las agrupaciones y los sobrantes.',
+      cob=1.0, exc=0.10, depende='Política de stock anticipado y sobrantes',
+      decidir='Crear solo si se marca HT-P2R-13 en Ondupack', detalle='D-PL09'),
+
+    # ---------------------------------------------------------------- P2R-02 · Plan de capacidad
     I('P2R-02', 'Negocio', 'Capacidad real de la 924',
       'Medir con Producción la velocidad y el OEE reales de la 924 frente a los objetivos y acordar la capacidad que '
       'se puede planificar mientras no se corrija. La velocidad objetivo se mantiene en R2M.',
@@ -128,7 +144,7 @@ INTERVENCIONES = [
       cob=0.70, exc=0.30,
       depende='Carga con velocidad real · migración de GIO a web en Ondupack', detalle='D-PL07'),
 
-    # ---------------------------------------------------------------- P2R-05 · Materiales por excepción
+    # ---------------------------------------------------------------- P2R-05 · Análisis de las excepciones
     I('P2R-05', 'Negocio', 'Maestro MRP y política de reposición',
       'Completar lead time, lote mínimo, stock de seguridad y calendario de proveedor para papel y auxiliares, '
       'incluido el ciclo de MGT/PDA para el papel intercompany. Decidir qué auxiliares van por MRP y cuáles por '
@@ -288,24 +304,6 @@ INTERVENCIONES = [
       comite='Los ajustes tras un atraso los prepara un agente con su causa; Planificación los aprueba.',
       cob=0.75, exc=0.25, depende='Reunión semanal con KPIs y causas · Cuadro de mando de servicio y adherencia',
       detalle='D-PL24'),
-
-    # ---------------------------------------------------------------- P2R-03 · solo si se confirma HT-P2R-04
-    I('P2R-03', 'Negocio', 'Política de stock anticipado y sobrantes',
-      'Decidir cuánto stock adelantado por agrupación se permite por referencia y qué se hace con los sobrantes al '
-      'cerrar la orden: asignarlos al próximo pedido, venderlos o darlos de baja.',
-      D(1, 9, 2027), D(31, 10, 2027),
-      'El stock que generan las agrupaciones y los sobrantes tiene límite y destino.',
-      '100 % del stock anticipado dentro del límite por referencia.',
-      decidir='Crear solo si se confirma HT-P2R-04 · límite de cobertura por referencia', detalle='D-PL09'),
-    I('P2R-03', 'Automatización', 'Control del stock anticipado y de sobrantes',
-      'GIO marca el stock generado por agrupación o por sobrante y avisa cuando supera la cobertura permitida.',
-      D(1, 11, 2027), D(31, 1, 2028),
-      'El stock anticipado se ve y se corrige antes de que envejezca.',
-      '€ de stock sin movimiento > 3 meses a la baja 3 meses seguidos.',
-      cajas=[('Agrupar pedidos repetitivos', 'Se simplifica'), ('Cierre automático al terminar converting', 'Se simplifica')],
-      comite='El sistema vigila el stock que generan las agrupaciones y los sobrantes.',
-      cob=1.0, exc=0.10, depende='Política de stock anticipado y sobrantes',
-      decidir='Crear solo si se confirma HT-P2R-04', detalle='D-PL09'),
 ]
 
 if __name__ == '__main__':

@@ -19,7 +19,7 @@ from hojas_empresa import hoja_empresa, hoja_fichas
 from fichas_palancas import hojas_fichas
 from kpis_p2r import hoja_kpis
 
-FECHA = '29/10/2026'
+FECHA = '19/11/2026'
 EMPRESAS = ['Ondupet', 'Ondupack', 'MGT']
 F2P, P2P = 'Forecast to Plan', 'Plan to Produce'
 DEM, SOP, NEC = 'Demanda y previsión (Forecast to Plan)', 'S&OP y Plan Maestro (Forecast to Plan)', 'Necesidades de Fabricación y MRP'
@@ -84,86 +84,97 @@ CELDAS = ['P2R × Ondupet', 'P2R × Ondupack', 'P2R × MGT']
 S = '✓'
 # (id, nombre, fase, descripción, familia, naturaleza, métrica, se cura con, caza inversa, aplicado en Ondupet/Ondupack/MGT)
 HALLAZGOS = [
-    ('HT-P2R-01', 'Demanda sin previsión fiable', DEM,
-     'No hay previsión, o la que hay no se cierra, no se consensúa ni se mide: el plan trabaja con una demanda que cambia o '
-     'que no se conoce, y la demanda perdida no se registra.',
-     'Ineficiencia', 'Circulante', '€ de demanda mensual planificada sin previsión cerrada y consensuada', 'P2R-01', '—',
+    ('HT-P2R-01', 'Roturas de stock', DEM,
+     'Falta producto terminado que debería estar en stock (infracobertura): hay agotados y pedidos que no se sirven o se '
+     'sirven tarde.',
+     'Oportunidad', '—', '€ de ventas / año en líneas de pedido con agotado de producto terminado', 'P2R-01', '—', (S, S, S)),
+    ('HT-P2R-03', 'Optimización carga capacidad', SOP,
+     'La carga no se equilibra con la capacidad: hay turnos pagados sin carga suficiente y, a la vez, líneas sobrecargadas.',
+     'Ineficiencia', 'Transformación', 'Horas de línea / año de turnos no ajustados a la carga', 'P2R-02', '—', (S, S, S)),
+    ('HT-P2R-05', 'Fechas de entrega poco realistas', SOP,
+     'La fecha al cliente se promete sin comprobar disponibilidad ni capacidad y no se renegocia cuando no se llega.',
+     'Oportunidad', '—', '€ de ventas / año en pedidos entregados después de la fecha pedida', 'P2R-04', 'Ondupack',
+     (S, '', S)),
+    ('HT-P2R-06', 'Optimización gestión faltas', NEC,
+     'Las máquinas paran por falta de materia prima, auxiliares o semielaborado porque las faltas se detectan tarde. '
+     'Incluye las horas de máquina paradas.',
+     'Ineficiencia', 'Fuga de P&L', 'Horas de máquina / año paradas por falta de material', 'P2R-05', 'MGT', (S, S, '')),
+    ('HT-P2R-07', 'Optimización gestión necesidades', NEC,
+     'Las necesidades de materias primas y semielaborado no salen del plan o usan parámetros desactualizados: sobra stock '
+     'de unos materiales y falta de otros.',
+     'Ineficiencia', 'Circulante', '€ de stock de materias primas y semielaborado por encima de la cobertura objetivo',
+     'P2R-05', 'Ondupet', ('', S, S)),
+    ('HT-P2R-08', 'Optimización secuenciación', PRO,
+     'La secuencia no minimiza los cambios (molde, altura, calidad, ancho): se hacen más cambios por unidad producida de '
+     'los necesarios.',
+     'Ineficiencia', 'Transformación', 'Horas de línea / año en cambios evitables', 'P2R-06', '—', (S, S, S)),
+    ('HT-P2R-09', 'Optimización urgencias secuenciación', PRO,
+     'Sin zona congelada ni reglas de prioridad, las urgencias rompen el programa cerrado y añaden cambios y '
+     'resecuenciaciones.',
+     'Ineficiencia', 'Transformación', 'Horas de línea / año en cambios metidos en el programa cerrado', 'P2R-06', '—',
      (S, S, S)),
-    ('HT-P2R-03', 'Demanda y capacidad sin equilibrar', SOP,
-     'Sin S&OP, la capacidad (turnos, reservas, intercompany) se decide por intuición y a mano, y el desequilibrio se arregla '
-     'con urgencias.',
-     'Ineficiencia', 'Transformación', 'Horas de línea y turnos no ajustados a la carga / mes', 'P2R-02', '—', (S, S, S)),
-    ('HT-P2R-04', 'Stock sin política clara', SOP,
-     'Sin segmentación ni estrategia por material, sobra stock de unos y falta de otros, en producto terminado y en materias '
-     'primas.',
-     'Ineficiencia', 'Circulante', '€ de stock fuera de política (exceso y obsoleto)', 'P2R-03', 'Ondupack', (S, '', S)),
-    ('HT-P2R-05', 'Fecha al cliente no fiable', SOP,
-     'La fecha se promete sin comprobar disponibilidad, no se renegocia cuando no se llega y hay roturas en lo que debería '
-     'estar en stock.',
-     'Oportunidad', '—', '€ de pedidos / mes entregados tarde o no servidos', 'P2R-03, P2R-04', 'Ondupack', (S, '', S)),
-    ('HT-P2R-06', 'Faltas tardías y gestionadas a mano', NEC,
-     'El MRP corre con poca frecuencia, las faltas se revisan todas a mano y acaban en compras y transportes urgentes.',
-     'Ineficiencia', 'Fuga de P&L', '€ de sobrecoste urgente por faltas / mes', 'P2R-05', '—', ('', S, '')),
-    ('HT-P2R-07', 'Necesidades poco fiables', NEC,
-     'Parámetros desactualizados, producto terminado y semielaborado sin sincronizar y agrupación de lotes a mano.',
-     'Ineficiencia', 'Circulante', '€ de stock de semielaborado y materia prima por encima de la necesidad', 'P2R-05', '—',
-     ('', S, S)),
-    ('HT-P2R-08', 'Secuencia sin optimizar', PRO,
-     'Se secuencia a mano, sin capacidad finita y con la ruta por defecto.',
-     'Ineficiencia', 'Transformación', 'Horas de cambio y de sobrecarga / semana', 'P2R-06', '—', (S, S, S)),
-    ('HT-P2R-09', 'Programa inestable', PRO,
-     'Sin zona congelada ni reglas de prioridad, las urgencias obligan a resecuenciar.',
-     'Ineficiencia', 'Transformación', 'Resecuenciaciones / semana', 'P2R-06', '—', (S, S, S)),
-    ('HT-P2R-10', 'Liberación sin control', LIB,
-     'Se libera sin confirmar material, utillaje y aprovisionamiento a línea, y sin ventana de liberación.',
-     'Ineficiencia', 'Transformación', 'Arranques fallidos / mes', 'P2R-07', 'Ondupack', ('', '', S)),
-    ('HT-P2R-11', 'Servicio sin control', SEG,
-     'No hay KPIs formales de servicio ni de adherencia al programa, y los atrasos se ven cuando ya han ocurrido.',
-     'Oportunidad', '—', '€ de pedidos atrasados sin aviso / mes', 'P2R-08', '—', (S, S, S)),
-    ('HT-P2R-12', 'Ciclo sin aprendizaje', SEG,
-     'Las desviaciones no tienen análisis de causa ni vuelven a la previsión ni a los parámetros, y el seguimiento se hace a '
-     'mano.',
-     'Ineficiencia', 'Transformación', 'Desviaciones repetidas sin causa / mes', 'P2R-08', 'Ondupack', (S, '', S)),
+    ('HT-P2R-10', 'Optimización aprovisionamiento línea', LIB,
+     'Se libera sin confirmar material, utillaje y aprovisionamiento a línea, y la orden arranca con lo que falta.',
+     'Ineficiencia', 'Transformación', 'Horas de línea / año perdidas en arranques fallidos', 'P2R-07',
+     'Ondupack, Ondupet', ('', '', S)),
+    ('HT-P2R-11', 'Optimización servicio', SEG,
+     'El servicio no se mide ni se gestiona: los atrasos se ven cuando ya han ocurrido y no dejan causa.',
+     'Oportunidad', '—', '€ de ventas / año en pedidos fuera de OTIF', 'P2R-08', '—', (S, S, S)),
+    ('HT-P2R-12', 'Secuenciación manual', PRO,
+     'Tiempo del planificador secuenciando y resecuenciando a mano.',
+     'Ineficiencia', 'Esfuerzo', 'Horas de persona / año secuenciando a mano', 'P2R-06', 'MGT, Ondupack', (S, '', '')),
+    ('HT-P2R-13', 'Sobrecobertura de stock', SOP,
+     'Hay producto terminado con más días de stock que su objetivo: se fabrica de más o contra una previsión inflada.',
+     'Ineficiencia', 'Circulante', '€ de stock de producto terminado por encima de la cobertura objetivo', 'P2R-01',
+     'MGT, Ondupack', (S, '', '')),
+    ('HT-P2R-14', 'Gestión manual servicio', SEG,
+     'Tiempo del planificador en el seguimiento manual del servicio: reportes de atrasos, avisos y ajustes pedido a pedido.',
+     'Ineficiencia', 'Esfuerzo', 'Horas de persona / año en seguimiento manual del servicio', 'P2R-08', 'MGT, Ondupack',
+     (S, '', '')),
+    ('HT-P2R-15', 'Gestión manual faltas', NEC,
+     'Tiempo del planificador y de Compras revisando y persiguiendo las faltas de material una a una.',
+     'Ineficiencia', 'Esfuerzo', 'Horas de persona / año gestionando faltas a mano', 'P2R-05', 'MGT, Ondupack',
+     (S, '', '')),
 ]
 
 # (código, palanca, qué cambia, base expuesta, fase as-is, cura tipos, KPI, aplicada en Ondupet/Ondupack/MGT)
+# P2R-04 y P2R-07 salen truncados en la aplicación: nombre por confirmar.
 PALANCAS = [
-    ('P2R-01', 'Gestión de la demanda',
-     'Hay previsión, al menos de la demanda repetitiva; se cierra en fecha, se consensúa cada mes entre Comercial y '
-     'Planificación, cubre el horizonte de las decisiones y se mide y corrige.',
-     '€ de stock medio de producto terminado expuesto al error de previsión',
-     DEM, 'HT-P2R-01', 'Precisión y sesgo por familia · cambios tras el cierre', (S, S, S)),
-    ('P2R-02', 'S&OP y plan de capacidad',
-     'Demanda y capacidad se equilibran cada mes, con datos y con dirección: turnos, reservas de capacidad e intercompany se '
-     'deciden con escenarios, no con urgencias.',
-     'Horas de línea / año de turnos no ajustados a la carga', SOP, 'HT-P2R-03',
-     'Ocupación real frente a planificada · horas extra no planificadas', (S, S, S)),
-    ('P2R-03', 'Política de inventario por segmento',
-     'Cada material, de producto terminado y de materia prima, tiene segmento, estrategia y stock objetivo, revisados '
-     'periódicamente.',
-     '€ de stock de producto terminado por encima de la cobertura objetivo', SOP,
-     'HT-P2R-04, HT-P2R-05 (×2)', '€ de stock fuera de política · roturas', (S, '', S)),
-    ('P2R-04', 'Promesa de fecha fiable',
-     'La fecha al cliente se confirma con disponibilidad real y se renegocia en cuanto se sabe que no se llega.',
-     '€ de ventas / año en pedidos no entregados en la primera fecha confirmada', SOP, 'HT-P2R-05 (×2)', 'OTIF a fecha confirmada', (S, '', S)),
-    ('P2R-05', 'Planificación de materiales por excepción',
-     'Las necesidades se calculan a tiempo, con parámetros vigentes y en todos los niveles, y el planificador solo atiende '
-     'las excepciones críticas.',
-     '€ / año de compras y transportes urgentes por faltas · € de stock de materias primas y semielaborado por encima de la cobertura objetivo', NEC,
-     'HT-P2R-06, HT-P2R-07', '€ urgentes por faltas · faltas detectadas a tiempo', ('', S, S)),
+    ('P2R-01', 'Gestión de coberturas',
+     'Cada referencia tiene una cobertura objetivo según su segmento y su demanda (previsión cerrada y consensuada), y se '
+     'corrige antes de que falte (rotura) o sobre (sobrecobertura).',
+     '€ de ventas / año con agotado · € de stock de producto terminado por encima de la cobertura objetivo',
+     DEM, 'HT-P2R-01, HT-P2R-13', 'Roturas de PT · días de stock de PT', (S, S, S)),
+    ('P2R-02', 'Plan de capacidad',
+     'Carga y capacidad se equilibran cada mes, con datos: turnos, reservas de capacidad e intercompany se deciden con '
+     'escenarios, no con urgencias.',
+     'Horas de línea / año de turnos no ajustados a la carga', SOP, 'HT-P2R-03', '% de saturación del cuello de botella',
+     (S, S, S)),
+    ('P2R-04', 'Promesa de fecha mediante CTP',
+     'La fecha al cliente se confirma con disponibilidad y capacidad reales (CTP) y se renegocia en cuanto se sabe que no se '
+     'llega.',
+     '€ de ventas / año en pedidos no entregados en la fecha pedida', SOP, 'HT-P2R-05', 'OTIF contra la fecha pedida',
+     (S, '', S)),
+    ('P2R-05', 'Análisis de las excepciones',
+     'Las necesidades se calculan a tiempo y con parámetros vigentes, y el planificador solo atiende las faltas y excepciones '
+     'críticas, antes de que paren la máquina.',
+     'Horas de máquina / año paradas por falta de material · € de stock de materias primas y semielaborado por encima de la '
+     'cobertura objetivo · horas de persona / año gestionando faltas',
+     NEC, 'HT-P2R-06, HT-P2R-07, HT-P2R-15', 'Paradas por falta de material · días de stock MMPP y ST', (S, S, S)),
     ('P2R-06', 'Programación estable y optimizada',
      'El programa respeta la capacidad, minimiza los cambios y solo se modifica dentro de reglas: zona congelada y '
      'prioridades.',
-     'Horas de línea / año en cambios y resecuenciaciones evitables', PRO, 'HT-P2R-08, HT-P2R-09',
-     'Horas de cambio · adherencia al programa', (S, S, S)),
-    ('P2R-07', 'Liberación controlada',
+     'Horas de línea / año en cambios evitables y en cambios del programa cerrado · horas de persona / año secuenciando',
+     PRO, 'HT-P2R-08, HT-P2R-09, HT-P2R-12', 'Cambios / producción · cambios en el programa cerrado', (S, S, S)),
+    ('P2R-07', 'Liberación con confirmación',
      'Una orden solo se libera con material, utillaje y aprovisionamiento a línea confirmados, y dentro de su ventana.',
-     'Horas de línea / año perdidas en arranques fallidos', LIB, 'HT-P2R-10', 'Arranques fallidos', ('', '', S)),
-    ('P2R-08', 'Control del servicio y mejora continua',
+     'Horas de línea / año perdidas en arranques fallidos', LIB, 'HT-P2R-10', '% de órdenes liberadas sin confirmación',
+     ('', '', S)),
+    ('P2R-08', 'Control del servicio',
      'Servicio y adherencia se miden solos, los riesgos se avisan antes y cada desviación tiene causa y una acción que vuelve '
      'a la planificación.',
-     '€ de ventas / año en pedidos fuera de OTIF · horas de línea / año perdidas en desviaciones repetidas', SEG, 'HT-P2R-11, HT-P2R-12',
-     'OTIF · desviaciones con causa', (S, S, S)),
+     '€ de ventas / año en pedidos fuera de OTIF · horas de persona / año en seguimiento manual', SEG, 'HT-P2R-11, HT-P2R-14',
+     'OTIF contra la fecha confirmada', (S, S, S)),
 ]
 
 AVISO = 'FCE4E4'
@@ -171,17 +182,20 @@ AVISO = 'FCE4E4'
 # KPI y fórmula sugeridos por tipo (tokens de la aplicación: valor, obj). Resultado en €/año; las constantes son de
 # ejemplo y se ajustan en cada celda.
 KPI_FORMULA = {
-    'HT-P2R-01': ('Error de previsión (WMAPE) ↓ · sin previsión, valor = 100 %', '(valor-obj)/valor*800000*0.08'),
-    'HT-P2R-03': ('% Saturación ↑', '(obj-valor)/100*6000*150'),
-    'HT-P2R-04': ('Días Stock PT, ST y MMPP ↓ · dimensión PT', '(valor-obj)*20000*0.08'),
-    'HT-P2R-05': ('Roturas Stock PT, ST y MMPP ↓ · dimensión PT', '(valor-obj)*52*3000'),
-    'HT-P2R-06': ('Roturas Stock PT, ST y MMPP ↓ · dimensión ST y MMPP', '(valor-obj)*52*400'),
-    'HT-P2R-07': ('Días Stock PT, ST y MMPP ↓ · dimensión ST y MMPP', '(valor-obj)*8000*0.08'),
-    'HT-P2R-08': ('Nº Cambios / Producción ↓', '(valor-obj)*20000*1.5*150'),
-    'HT-P2R-09': ('Cambios en el programa cerrado ↓ · falta en DICE', '(valor-obj)*52*0.5*150'),
-    'HT-P2R-10': ('% Órdenes liberadas sin material confirmado ↓ · falta en DICE', '(valor-obj)/100*3000*0.5*150'),
-    'HT-P2R-11': ('OTIF ↑', '(obj-valor)/100*10000000'),
-    'HT-P2R-12': ('% Adherencia al programa ↑ · falta en DICE', '(obj-valor)/100*3000*0.5*150'),
+    'HT-P2R-01': ('Roturas PT ↓ (% líneas con agotado)', '(valor-obj)/100*8000000*0.25'),
+    'HT-P2R-03': ('% Saturación ↑ (horas de turno pagadas sin carga)', '(obj-valor)/100*6000*150'),
+    'HT-P2R-05': ('OTIF ↑ (contra fecha pedida)', '(obj-valor)/100*8000000*0.25'),
+    'HT-P2R-06': ('Paradas por falta de material ↓ (h/mes)', '(valor-obj)*12*150'),
+    'HT-P2R-07': ('Días de stock MMPP y ST ↓', '(valor-obj)*8000*0.08'),
+    'HT-P2R-08': ('Nº cambios / producción ↓', '(valor-obj)*20000*1.5*150'),
+    'HT-P2R-09': ('Cambios en el programa cerrado ↓ (nº/semana)', '(valor-obj)*52*1.5*150'),
+    'HT-P2R-10': ('% órdenes liberadas sin confirmación ↓ (en DICE pone «Cambios en el programa cerrado»)',
+                  '(valor-obj)/100*3000*0.5*150'),
+    'HT-P2R-11': ('OTIF ↑ (contra fecha confirmada)', '(obj-valor)/100*8000000*0.25'),
+    'HT-P2R-12': ('Tiempo persona ↓ (h/año)', '(valor-obj)*35'),
+    'HT-P2R-13': ('Días de stock PT ↓', '(valor-obj)*20000*0.08'),
+    'HT-P2R-14': ('Tiempo persona ↓ (h/año)', '(valor-obj)*35'),
+    'HT-P2R-15': ('Tiempo persona ↓ (h/año)', '(valor-obj)*35'),
 }
 
 
@@ -196,7 +210,7 @@ def construir(salida):
 
     # --- Fases ---
     titulo(wf, 'Esqueleto estándar · P2R · Plan to Release',
-           f'Transcrito de la aplicación el {FECHA}. Repositorio: sin repositorio · 8 palancas lo usan · 0 con uno propio. '
+           f'Transcrito de la aplicación el {FECHA}. Repositorio: sin repositorio · 7 palancas lo usan · 0 con uno propio. '
            'Variantes de P2R: 0 (todas las celdas usan el esqueleto estándar).')
     cabecera(wf, 4, ['Orden', 'Fase', 'Tramo', 'Descripción (de → a)', 'Opcional', 'Áreas de negocio', 'Actividades',
                      'Hallazgos del catálogo', 'Palancas del catálogo'], [8, 40, 17, 62, 10, 16, 12, 14, 14])
@@ -261,7 +275,7 @@ def construir(salida):
 
     # --- Hallazgos ---
     titulo(wh, 'Catálogo de tipos de hallazgo · P2R',
-           f'Transcrito de la aplicación el {FECHA} (11 tipos). Descripción, métrica, KPI y fórmula del maestro; en la '
+           f'Transcrito de la aplicación el {FECHA} (13 tipos). Descripción, métrica, KPI y fórmula del maestro; en la '
            'fórmula, valor y obj son los tokens de la aplicación y las constantes son de ejemplo. '
            '«Empresas» se calcula con las columnas de cada empresa.')
     cab = ['ID', 'Nombre', 'Fase', 'Descripción', 'Familia', 'Naturaleza', 'Métrica (volumen expuesto)', 'KPI sugerido',
@@ -282,7 +296,7 @@ def construir(salida):
 
     # --- Palancas ---
     titulo(wp, 'Catálogo de palancas · P2R',
-           f'Transcrito de la aplicación el {FECHA} (8 palancas). €/año de referencia: vacío (el € sale de cada empresa) · '
+           f'Transcrito de la aplicación el {FECHA} (7 palancas). €/año de referencia: vacío (el € sale de cada empresa) · '
            'confianza: por cuantificar. «Qué cambia», KPI y base expuesta del maestro.')
     cab = ['Código', 'Palanca', 'Qué cambia', 'KPI', 'Base expuesta', 'Fase as-is', '€/año ref.', 'Confianza', 'Cura tipos',
            *EMPRESAS, 'Aplicada en']

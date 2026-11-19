@@ -11,14 +11,13 @@ from pathlib import Path
 from generar_intervenciones_ondupet import D, I, NUEVA, construir
 
 PALANCAS = [
-    ('P2R-01', 'Gestión de la demanda', 'HT-P2R-01'),
-    ('P2R-02', 'S&OP y plan de capacidad', 'HT-P2R-03'),
-    ('P2R-03', 'Política de inventario por segmento', 'HT-P2R-04'),
-    ('P2R-04', 'Promesa de fecha fiable', 'HT-P2R-05'),
-    ('P2R-05', 'Planificación de materiales por excepción', 'HT-P2R-07'),
+    ('P2R-01', 'Gestión de coberturas', 'HT-P2R-01, HT-P2R-13'),
+    ('P2R-02', 'Plan de capacidad', 'HT-P2R-03'),
+    ('P2R-04', 'Promesa de fecha mediante CTP', 'HT-P2R-05'),
+    ('P2R-05', 'Análisis de las excepciones', 'HT-P2R-07'),
     ('P2R-06', 'Programación estable y optimizada', 'HT-P2R-08, HT-P2R-09'),
-    ('P2R-07', 'Liberación controlada', 'HT-P2R-10'),
-    ('P2R-08', 'Control del servicio y mejora continua', 'HT-P2R-11, HT-P2R-12'),
+    ('P2R-07', 'Liberación con confirmación', 'HT-P2R-10'),
+    ('P2R-08', 'Control del servicio', 'HT-P2R-11'),
 ]
 
 CAJAS = [
@@ -53,7 +52,7 @@ FASE_NUEVAS = {'Previsión del próximo ciclo': 'Demanda y previsión',
                'Revisión mensual del stock intercompany': 'S&OP y Plan Maestro'}
 
 INTERVENCIONES = [
-    # ---------------------------------------------------------------- P2R-01 · Gestión de la demanda
+    # ---------------------------------------------------------------- P2R-01 · Gestión de coberturas
     I('P2R-01', 'Negocio', 'Previsión de papel de Ondupack por ciclo',
       'Acordar con Ondupack que, en cada ciclo, envíe la previsión de papel de los ciclos siguientes por calidad y ancho, '
       'además del pedido firme 10 días antes. Es la otra mitad de la intervención «Previsión de papel compartida con '
@@ -97,7 +96,40 @@ INTERVENCIONES = [
       cob=0.80, exc=0.20, depende='Previsión del ciclo cargada en GIO · Registro de las ventas perdidas (6 meses)',
       detalle='D-PL01'),
 
-    # ---------------------------------------------------------------- P2R-02 · S&OP y plan de capacidad
+    I('P2R-01', 'Negocio', 'Pull system con Ondupack',
+      'Definir con Ondupack qué referencias se reponen por pull, con un mínimo y un máximo en MGT. Ondupack retira cada día '
+      'de ese stock y MGT lo repone al combinar sus ciclos.',
+      D(4, 10, 2027), D(17, 12, 2027),
+      'El stock de Ondupack en MGT tiene límites y deja de crecer sin control.',
+      'Referencias pull con mínimo y máximo aprobados y stock intercompany dentro del máximo.',
+      decidir='Referencias, mínimos y máximos · de quién es el stock', detalle='D-PL09, D-PL13'),
+    I('P2R-01', 'Negocio', 'Ajuste del pedido intercompany a lo fabricado',
+      'Cuando se fabrica más que el pedido de Ondupack dentro de una tolerancia, el pedido se modifica para que se lleve '
+      'todo lo fabricado. La modificación se hace en O2C.',
+      D(4, 10, 2027), D(30, 11, 2027),
+      'Lo fabricado de más deja de quedarse en el almacén de MGT.',
+      '0 excedentes de pedidos intercompany sin asignar a más de 30 días.',
+      decidir='Tolerancia de sobrefabricación', detalle='D-PL09'),
+    I('P2R-01', 'Automatización', 'Reposición automática por mínimo y máximo',
+      'GIO genera la necesidad de reposición de las referencias pull cuando el stock baja del mínimo, y la mete en la '
+      'cartera del próximo ciclo.',
+      D(3, 1, 2028), D(31, 3, 2028),
+      'La reposición de las referencias pull no depende de un pedido manual.',
+      '100 % de las roturas de mínimo con reposición en el siguiente ciclo.',
+      cajas=[('Propuesta de fabricación de PT por pedido', 'Se simplifica')],
+      comite='Además de por pedido, el sistema propone fabricar para reponer las referencias pull.',
+      cob=1.0, exc=0.10, depende='Pull system con Ondupack', detalle='D-PL09'),
+    I('P2R-01', 'Agente', 'Agente de stock intercompany',
+      'Cada mes revisa la cobertura de las referencias de Ondupack en MGT, propone ajustar mínimos y máximos y avisa del '
+      'stock que se queda sin salida.',
+      D(1, 6, 2028), D(22, 12, 2028),
+      'El stock intercompany se ajusta antes de que envejezca.',
+      '€ de stock intercompany −20 % en 6 meses sin roturas en referencias pull.',
+      cajas=[('Revisión mensual del stock intercompany', NUEVA)],
+      comite='Nueva tarea mensual en S&OP y Plan Maestro: un agente revisa el stock intercompany y propone ajustes.',
+      cob=0.80, exc=0.20, depende='Reposición automática por mínimo y máximo', detalle='D-PL09'),
+
+    # ---------------------------------------------------------------- P2R-02 · Plan de capacidad
     I('P2R-02', 'Negocio', 'Política de llenado de capacidad',
       'Decidir con Dirección qué se fabrica cuando sobra capacidad (referencias repetitivas con mínimo y máximo, sobre todo '
       'las de Ondupack) y cuándo compensa parar, comparando el coste de parada con el coste del stock. Sustituye a la '
@@ -142,41 +174,7 @@ INTERVENCIONES = [
       comite='El ciclo de las 4 calidades lo propone un agente con escenarios valorados; Planificación decide.',
       cob=0.70, exc=0.30, depende='Carga a capacidad finita · Propuesta de duración de los ciclos', detalle='D-PL07'),
 
-    # ---------------------------------------------------------------- P2R-03 · Política de inventario por segmento
-    I('P2R-03', 'Negocio', 'Pull system con Ondupack',
-      'Definir con Ondupack qué referencias se reponen por pull, con un mínimo y un máximo en MGT. Ondupack retira cada día '
-      'de ese stock y MGT lo repone al combinar sus ciclos.',
-      D(4, 10, 2027), D(17, 12, 2027),
-      'El stock de Ondupack en MGT tiene límites y deja de crecer sin control.',
-      'Referencias pull con mínimo y máximo aprobados y stock intercompany dentro del máximo.',
-      decidir='Referencias, mínimos y máximos · de quién es el stock', detalle='D-PL09, D-PL13'),
-    I('P2R-03', 'Negocio', 'Ajuste del pedido intercompany a lo fabricado',
-      'Cuando se fabrica más que el pedido de Ondupack dentro de una tolerancia, el pedido se modifica para que se lleve '
-      'todo lo fabricado. La modificación se hace en O2C.',
-      D(4, 10, 2027), D(30, 11, 2027),
-      'Lo fabricado de más deja de quedarse en el almacén de MGT.',
-      '0 excedentes de pedidos intercompany sin asignar a más de 30 días.',
-      decidir='Tolerancia de sobrefabricación', detalle='D-PL09'),
-    I('P2R-03', 'Automatización', 'Reposición automática por mínimo y máximo',
-      'GIO genera la necesidad de reposición de las referencias pull cuando el stock baja del mínimo, y la mete en la '
-      'cartera del próximo ciclo.',
-      D(3, 1, 2028), D(31, 3, 2028),
-      'La reposición de las referencias pull no depende de un pedido manual.',
-      '100 % de las roturas de mínimo con reposición en el siguiente ciclo.',
-      cajas=[('Propuesta de fabricación de PT por pedido', 'Se simplifica')],
-      comite='Además de por pedido, el sistema propone fabricar para reponer las referencias pull.',
-      cob=1.0, exc=0.10, depende='Pull system con Ondupack', detalle='D-PL09'),
-    I('P2R-03', 'Agente', 'Agente de stock intercompany',
-      'Cada mes revisa la cobertura de las referencias de Ondupack en MGT, propone ajustar mínimos y máximos y avisa del '
-      'stock que se queda sin salida.',
-      D(1, 6, 2028), D(22, 12, 2028),
-      'El stock intercompany se ajusta antes de que envejezca.',
-      '€ de stock intercompany −20 % en 6 meses sin roturas en referencias pull.',
-      cajas=[('Revisión mensual del stock intercompany', NUEVA)],
-      comite='Nueva tarea mensual en S&OP y Plan Maestro: un agente revisa el stock intercompany y propone ajustes.',
-      cob=0.80, exc=0.20, depende='Reposición automática por mínimo y máximo', detalle='D-PL09'),
-
-    # ---------------------------------------------------------------- P2R-04 · Promesa de fecha fiable
+    # ---------------------------------------------------------------- P2R-04 · Promesa de fecha mediante CTP
     I('P2R-04', 'Negocio', 'Fecha confirmada por Planificación',
       'Cada pedido externo recibe una fecha confirmada por Planificación en un plazo fijo, distinta de la solicitada. Los '
       'pedidos de Ondupack llevan una fecha firme por ciclo, y cambiarla dentro del ciclo requiere acuerdo.',
@@ -203,7 +201,7 @@ INTERVENCIONES = [
       comite='Las consultas de plazo se resuelven con un copiloto.',
       cob=0.80, exc=0.20, depende='Propuesta de fecha con la capacidad libre del ciclo', detalle='D-PL25'),
 
-    # ---------------------------------------------------------------- P2R-05 · Materiales por excepción
+    # ---------------------------------------------------------------- P2R-05 · Análisis de las excepciones
     I('P2R-05', 'Negocio', 'Planificación de la bobina madre',
       'Levantar y documentar cómo se planifica hoy la bobina madre por gramaje y calidad, quién lo hace y con qué dato.',
       D(4, 10, 2027), D(29, 10, 2027),
@@ -280,7 +278,7 @@ INTERVENCIONES = [
       comite='Las urgencias las evalúa un agente; solo los conflictos llegan a Comercial.',
       cob=0.75, exc=0.25, depende='Alertas de planificación', detalle='D-PL20'),
 
-    # ---------------------------------------------------------------- P2R-07 · Liberación controlada
+    # ---------------------------------------------------------------- P2R-07 · Liberación con confirmación
     I('P2R-07', 'Negocio', 'Criterio de liberación',
       'Definir qué tiene que estar disponible para liberar una orden (materias primas, auxiliares y bobina madre) y que la '
       'orden llegue a producción en formato digital.',

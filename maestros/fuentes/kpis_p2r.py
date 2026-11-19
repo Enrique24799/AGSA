@@ -23,8 +23,11 @@ OEE = 'OEE del cuello de botella'
 CAMB = 'Horas de cambio'
 PROG = 'Cambios en el programa cerrado'
 ADH = 'Adherencia al programa'
-COBPT = 'Cobertura de producto terminado'
-COBMP = 'Cobertura de materias primas'
+COBPT = 'Días de stock PT'
+COBMP = 'Días de stock MMPP y ST'
+ROT = 'Roturas de PT'
+PAR = 'Paradas por falta de material'
+CAMBPROD = 'Cambios por producción'
 EXACT = 'Exactitud del stock de materiales'
 STKIC = 'Stock intercompany'
 LIBMAT = 'Órdenes liberadas con material pendiente'
@@ -48,7 +51,12 @@ CATALOGO = [
     (PROG, 'nº', BAJA, SEM, SUMA, 'Cambios y urgencias metidos en el programa después de cerrarlo.'),
     (ADH, '%', SUBE, SEM, MEDIA, 'Órdenes fabricadas en el día o turno programado / órdenes programadas.'),
     (COBPT, 'días', BAJA, MES, MEDIA, 'Stock de producto terminado / consumo medio diario.'),
-    (COBMP, 'días', BAJA, MES, MEDIA, 'Stock de materias primas / consumo medio diario.'),
+    (COBMP, 'días', BAJA, MES, MEDIA, 'Stock de materias primas y semielaborado / consumo medio diario.'),
+    (ROT, '%', BAJA, MES, MEDIA, 'Líneas de pedido con agotado de producto terminado / líneas pedidas. Sale del registro de '
+     'agotados.'),
+    (PAR, 'h', BAJA, MES, SUMA, 'Horas de máquina paradas por falta de materia prima, auxiliares o semielaborado.'),
+    (CAMBPROD, 'nº', BAJA, SEM, MEDIA, 'Cambios (molde, formato, calidad o ancho) / producción del periodo, por cada 1.000 '
+     'unidades, t o m².'),
     (EXACT, '%', BAJA, MES, MEDIA, 'Descuadre entre el stock del sistema y el recuento físico / stock.'),
     (STKIC, '€', BAJA, SEM, SUMA, 'Stock que la empresa guarda para otras empresas del grupo.'),
     (LIBMAT, '%', BAJA, SEM, MEDIA, 'Órdenes liberadas sin todo el material disponible / órdenes liberadas.'),
@@ -73,11 +81,16 @@ KPIS = {
          'Confirmar que los partes registran el tiempo de cambio.'),
         (PROG, 'Cambios de última hora dentro del programa', 'GIO', 'P2R-06', 'HT-P2R-09', 'No',
          'Definir la zona congelada y registrar cada cambio con su causa.'),
-        (ADH, 'Órdenes fabricadas en el día y turno programados', 'GIO frente a partes de producción', 'P2R-08 · P2R-06',
-         'HT-P2R-12', 'Por confirmar', 'Comparar programa y partes de producción por orden.'),
+        (ADH, 'Órdenes fabricadas en el día y turno programados', 'GIO frente a partes de producción', 'P2R-06',
+         'HT-P2R-09', 'Por confirmar', 'Comparar programa y partes de producción por orden.'),
         (CAMBPREV, 'Cambios de la previsión del mes en curso después del día de cierre', 'GIO (registro de cambios, ACC-01)',
          'P2R-01', 'HT-P2R-01', 'No', 'Día de cierre y bloqueo con registro de cambios.'),
-        (COBPT, 'Por segmento ABC', 'GIO y SAP', 'P2R-03', 'HT-P2R-04', 'Parcial', 'Segmentar por ABC/XYZ (ACC-06).'),
+        (COBPT, 'Por segmento ABC', 'GIO y SAP', 'P2R-01', 'HT-P2R-13', 'Parcial', 'Segmentar por ABC/XYZ (ACC-06).'),
+        (ROT, 'Agotados del registro diario frente a las líneas pedidas', 'GIO (registro diario de agotados)', 'P2R-01',
+         'HT-P2R-01', 'Sí', ''),
+        (PAR, 'Horas de extrusión y termoformado paradas por falta de material', 'Partes de producción', 'P2R-05',
+         'HT-P2R-06', 'Sí', ''),
+        (CAMBPROD, 'Cambios de molde y altura por producción', 'Partes de producción', 'P2R-06', 'HT-P2R-08', 'Sí', ''),
     ],
     'Ondupack Almendralejo': [
         (OTIF, 'Contra la fecha propuesta por el CTP', 'GIO', 'P2R-08', 'HT-P2R-11', 'Sí',
@@ -92,7 +105,7 @@ KPIS = {
         (PROG, 'Cambios del cliente aceptados con el pedido ya programado', 'GIO (trazabilidad del pedido)', 'P2R-06',
          'HT-P2R-09', 'Parcial', 'Registrar la causa de cada reprogramación.'),
         (ADH, 'Órdenes fabricadas en las fechas previstas de control de producción', 'GIO (control de producción)',
-         'P2R-08 · P2R-06', 'HT-P2R-12', 'Sí', ''),
+         'P2R-06', 'HT-P2R-09', 'Sí', ''),
         (OEE, 'La 924', 'GIO y Click (históricos)', 'P2R-02', 'HT-P2R-03', 'Sí', ''),
         (LIBMAT, 'Órdenes autorizadas sin todo el material', 'GIO', 'P2R-05', 'HT-P2R-06', 'Sí', ''),
         (URG, 'Por faltas de materia prima', 'SAP', 'P2R-05', 'HT-P2R-06', 'Por confirmar', 'Marcar en SAP las compras urgentes.'),
@@ -113,9 +126,9 @@ KPIS = {
          'Confirmar que los partes registran el tiempo de cambio.'),
         (PROG, 'Urgencias encajadas en el ciclo, también las de Ondupack fuera de plazo', 'GIO', 'P2R-06', 'HT-P2R-09', 'No',
          'Registrar cada urgencia con su origen.'),
-        (ADH, 'Órdenes fabricadas en el ciclo y día previstos', 'GIO frente a partes de producción', 'P2R-08 · P2R-06',
-         'HT-P2R-12', 'Por confirmar', 'Comparar plan del ciclo y partes de producción.'),
-        (STKIC, 'Referencias de Ondupack en el almacén de MGT', 'SAP', 'P2R-03', 'HT-P2R-04', 'Sí', ''),
+        (ADH, 'Órdenes fabricadas en el ciclo y día previstos', 'GIO frente a partes de producción', 'P2R-06',
+         'HT-P2R-09', 'Por confirmar', 'Comparar plan del ciclo y partes de producción.'),
+        (STKIC, 'Referencias de Ondupack en el almacén de MGT', 'SAP', 'P2R-01', 'HT-P2R-13', 'Sí', ''),
         (COBMP, 'Materias primas y auxiliares', 'SAP', 'P2R-05', 'HT-P2R-07', 'Parcial',
          'Registrar las entradas de báscula en el momento.'),
         (EXACT, 'En el cuadre quincenal', 'SAP', 'P2R-05', 'HT-P2R-07', 'Parcial',

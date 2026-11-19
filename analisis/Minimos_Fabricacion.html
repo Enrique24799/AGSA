@@ -214,6 +214,17 @@ details.opt>summary{list-style:none;cursor:pointer;display:inline-flex;align-ite
 details.opt>summary::-webkit-details-marker{display:none}
 details.opt>summary::before{content:'▸';font-size:11px}
 details.opt[open]>summary::before{content:'▾'}
+.sit{font-size:10px;font-weight:700;padding:0 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
+.sit.h{color:var(--good);border:1px solid var(--good)}.sit.l{color:var(--bad);border:1px solid var(--bad)}
+table.inp select{font:12px var(--f);padding:4px 6px;border:1px solid #b9c2cd;border-radius:4px;background:#fff}
+.pa{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start}
+.pa .ins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.pa .ins .fld input,.pa .ins .fld select{width:100%}
+.pa .outs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ver{grid-column:1/-1;border:1px solid var(--rule);border-left:4px solid var(--navy);border-radius:0 4px 4px 0;padding:10px 12px;background:var(--soft)}
+.ver.ok{border-left-color:var(--good)}.ver.ko{border-left-color:var(--bad)}
+.ver b{color:var(--navy)}
+@media (max-width:900px){.pa{grid-template-columns:1fr}}
 @media (max-width:1100px){.res{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.res{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:420px){.res{grid-template-columns:1fr}}
@@ -223,7 +234,7 @@ details.opt[open]>summary::before{content:'▾'}
 <header class="topbar">
   <button class="menu-btn" id="menuBtn" aria-label="Mostrar u ocultar el menú" aria-expanded="false" aria-controls="side"><span></span></button>
   <span class="badge">GPB</span>
-  <span class="app">AGSA <small>· Planificación · Análisis de ciclos</small></span>
+  <span class="app">AGSA <small>· Planificación · Mínimos de fabricación</small></span>
   <span class="tb-right">Noviembre 2026 · Herramienta de planificación</span>
 </header>
 <div class="scrim" id="scrim"></div>
@@ -231,24 +242,13 @@ details.opt[open]>summary::before{content:'▾'}
 <aside class="side" id="side">
   <div class="user"><b>Planificador AGSA</b><b>Enrique Tejada Fornieles</b><span>etejada@clgrupoindustrial.com</span></div>
   <nav class="tree" aria-label="Análisis">
-    <ul><li class="node"><span>Análisis de ciclos · Tubos</span>
-      <ul>
-        <li><a href="Escenarios_Ciclo_21_dias.html#situacion-actual">Situación actual</a></li>
-        <li class="node"><span>Costes de transformación</span>
-          <ul>
-            <li><a href="Escenarios_Ciclo_21_dias.html#escenario-1">Escenario 1 · Equipos actuales</a></li>
-            <li><a href="Escenarios_Ciclo_21_dias.html#escenario-2">Escenario 2 · Más equipos y M28</a></li>
-            <li><a href="Escenarios_Ciclo_21_dias.html#comparativa">Comparativa</a></li>
-          </ul></li>
-        <li class="node"><span>Capacidad</span><ul><li><a href="Escenarios_Ciclo_21_dias.html#saturacion">Saturación de máquinas</a></li></ul></li>
-        <li class="node"><span>Implantación</span><ul><li><a href="Escenarios_Ciclo_21_dias.html#presupuesto">Presupuesto 2027</a></li></ul></li>
-        <li class="node"><span>Mínimos</span><ul><li><a href="#" aria-current="page">Mínimos de fabricación</a></li></ul></li>
-      </ul></li></ul>
+    <ul><li class="node"><span>Planificación · Tubos</span>
+      <ul><li><a href="#" aria-current="page">Mínimos de fabricación</a></li></ul></li></ul>
   </nav>
 </aside>
 <main class="content"><div class="inner">
   <div>
-    <div class="crumb">Análisis de ciclos › <b>Mínimos de fabricación</b></div>
+    <div class="crumb">Planificación › <b>Mínimos de fabricación</b></div>
     <h1>Calculadora del mínimo de fabricación por máquina</h1>
     <p class="sub">M8, M16, M17, M20 y M28 · Coste del cambio (operarios y merma de arranque) frente al margen objetivo y a la merma objetivo</p>
   </div>
@@ -261,8 +261,10 @@ details.opt[open]>summary::before{content:'▾'}
       <li><b>Mínimo por margen:</b> después de pagar el cambio, cada tonelada del lote tiene que dejar al menos el margen objetivo. <span class="f">lote ≥ coste del cambio ÷ (margen actual − margen objetivo)</span></li>
       <li><b>Mínimo por merma:</b> la merma de arranque no puede superar el % objetivo del lote. <span class="f">lote ≥ merma de arranque ÷ % de merma objetivo</span></li>
       <li><b>Lote mínimo</b> = el mayor de los dos, redondeado al múltiplo superior. Si una medida no llega con su demanda, se fabrica cada 2 o 3 ciclos; si ni así llega, bajo pedido o por campañas.</li>
+      <li><b>Máquina llena:</b> lo que no se fabrica en las horas de cambio no se recupera, así que esas horas se valoran con el margen que se deja de ganar (coste de oportunidad) en lugar del coste de los operarios, que se pagan igual. <span class="f">coste de oportunidad por hora = Tn/h que se dejan de fabricar × margen de contribución</span></li>
+      <li><b>Producto A en máquina llena:</b> compensa si su margen por hora de máquina, contando el cambio, supera el de lo que desplaza. <span class="f">lote mínimo de A ≥ (coste de oportunidad por hora × horas de cambio + merma) ÷ (margen de A − coste de oportunidad por hora ÷ Tn/h de A)</span></li>
     </ol>
-    <p class="foot">No incluye la producción que se deja de fabricar si la máquina va llena ni el coste fijo de la máquina: las horas de cambio se valoran solo con el coste de los operarios. Los empalmes no cuentan, porque dependen de las toneladas y no del tamaño del lote.</p>
+    <p class="foot">Con holgura, las horas de cambio se valoran con el coste de los operarios y no hay coste de oportunidad: lo que no se fabrica en esas horas se fabrica en otras libres. No se incluye el coste fijo de la máquina. Los empalmes no cuentan, porque dependen de las toneladas y no del tamaño del lote. Usa como margen de contribución el precio menos materia prima y costes variables.</p>
   </section>
 
   <div class="panel"><div class="ph"><h3>Parámetros</h3><span>Las celdas se guardan en este navegador</span></div>
@@ -281,15 +283,15 @@ details.opt[open]>summary::before{content:'▾'}
         <div class="fld"><label for="a_pm">% merma objetivo</label><input id="a_pm" type="number" min="0" step="0.1" value="1"></div>
         <button class="btn" id="applyAll" type="button">Aplicar a todas las máquinas</button>
       </div>
-      <p class="foot">Valores de ejemplo: coste por operario, nº de operarios, margen objetivo, % de merma, materia prima y chatarra. Pon los reales. El margen actual (110 €/Tn) es el que diste para el escenario 1.</p>
+      <p class="foot">Valores de ejemplo: coste por operario, nº de operarios, margen objetivo, % de merma, materia prima y chatarra. Pon los reales. El margen actual (110 €/Tn) es el que diste para el análisis de ciclos. Situación: según el análisis de saturación, hoy M8, M16 y M20 van llenas; M17 y M28 tienen holgura.</p>
       <div class="tw"><table class="inp" id="tIn">
-        <thead><tr><th>Máquina</th><th>Coste por operario (€/h)</th><th>Nº de operarios en el cambio</th><th>Margen objetivo (€/Tn)</th><th>% de merma objetivo</th><th>El cambio puede costar hasta (€/Tn)</th></tr></thead>
+        <thead><tr><th>Máquina</th><th class="l">Situación</th><th>Coste por operario (€/h)</th><th>Nº de operarios en el cambio</th><th>Margen objetivo (€/Tn)</th><th>% de merma objetivo</th><th>Margen de contribución (€/Tn)</th><th>El cambio puede costar hasta (€/Tn)</th><th>Coste de una hora de cambio (€/h)</th></tr></thead>
         <tbody></tbody></table></div>
       <details class="opt"><summary>Ver y editar los datos de cada máquina</summary>
         <div class="tw"><table class="inp" id="tData">
-          <thead><tr><th>Máquina</th><th>Cambio completo (h)</th><th>Cambio de calibrador (h)</th><th>Barras de merma · completo</th><th>Barras de merma · calibrador</th><th>Peso medio por barra (kg)</th><th>Tn/h en marcha</th><th>Mínimo actual (Tn)</th></tr></thead>
+          <thead><tr><th>Máquina</th><th>Cambio completo (h)</th><th>Cambio de calibrador (h)</th><th>Barras de merma · completo</th><th>Barras de merma · calibrador</th><th>Peso medio por barra (kg)</th><th>Tn/h en marcha</th><th>Tn/h que se dejan de fabricar por hora parada</th><th>Mínimo actual (Tn)</th></tr></thead>
           <tbody></tbody></table></div>
-        <p class="foot">Tiempos de cambio objetivo, Tn/h en marcha y mínimos actuales: hojas Máquinas y Familias. Barras y peso por barra: datos de merma (barras de 6 m). M28: tiempos de cambio de M8, barras de M8 (supuesto), peso por barra de las medidas que pasan a M28 en el primer trimestre de 2027 y Tn/h estimadas.</p>
+        <p class="foot">Tiempos de cambio objetivo, Tn/h en marcha y mínimos actuales: hojas Máquinas y Familias. Tn/h que se dejan de fabricar: ritmo real fuera de los cambios (incluye las demás paradas), el del análisis de costes. Barras y peso por barra: datos de merma (barras de 6 m). M28: tiempos de cambio de M8, barras de M8 (supuesto), peso por barra de las medidas que pasan a M28 en el primer trimestre de 2027 y Tn/h estimadas.</p>
       </details>
     </div></div>
 
@@ -300,39 +302,57 @@ details.opt[open]>summary::before{content:'▾'}
     <div class="pb"><div class="legend"><span><i style="background:var(--hoy)"></i>Mínimo actual en sistema</span><span><i style="background:var(--e2)"></i>Por medida · cambio de calibrador</span><span><i style="background:var(--navy)"></i>Por familia · cambio completo</span></div>
     <div class="chartbox" id="chart"></div></div></div>
 
+  <div class="panel"><div class="ph"><h3>Evaluar un producto A</h3><span>¿Compensa fabricarlo en esa máquina y con qué lote mínimo?</span></div>
+    <div class="pb"><div class="pa">
+      <div class="ins">
+        <div class="fld"><label for="pa_mq">Máquina</label><select id="pa_mq"></select></div>
+        <div class="fld"><label for="pa_t">Cambio que provoca</label><select id="pa_t"><option value="1">Calibrador (familia montada)</option><option value="0">Completo (abre la familia)</option></select></div>
+        <div class="fld"><label for="pa_ma">Margen de contribución de A, €/Tn</label><input id="pa_ma" type="number" step="1"></div>
+        <div class="fld"><label for="pa_ra">Tn/h de A</label><input id="pa_ra" type="number" min="0" step="0.01"></div>
+        <div class="fld"><label for="pa_kg">Peso por barra de A, kg</label><input id="pa_kg" type="number" min="0" step="0.1"></div>
+        <div class="fld"><label for="pa_d">Demanda de A por ciclo, Tn</label><input id="pa_d" type="number" min="0" step="1"></div>
+        <p class="foot" style="grid-column:1/-1">Al cambiar de máquina, Tn/h y peso por barra toman los de la máquina; cámbialos por los de A si los tienes. La situación (holgura o llena) y el margen objetivo son los de la máquina, arriba.</p>
+      </div>
+      <div class="outs" id="paOut"></div>
+    </div></div></div>
+
   <div class="panel"><div class="ph"><h3>Detalle del cálculo</h3><span>Por máquina y tipo de cambio</span></div>
     <div class="pb"><div class="tw"><table id="tRes">
-      <thead><tr><th>Máquina</th><th class="l">Cambio</th><th>Coste de operarios (€)</th><th>Merma de arranque (Tn)</th><th>Coste de la merma (€)</th><th>Coste del cambio (€)</th><th>Lote por margen (Tn)</th><th>Lote por merma (Tn)</th><th>Lote mínimo (Tn)</th><th class="l">Lo fija</th><th>Horas de fabricación del lote</th><th>Coste del cambio por Tn (€/Tn)</th><th>Margen que queda (€/Tn)</th><th>Merma sobre el lote</th></tr></thead>
+      <thead><tr><th>Máquina</th><th class="l">Cambio</th><th>Coste de las horas de cambio (€)</th><th>Merma de arranque (Tn)</th><th>Coste de la merma (€)</th><th>Coste del cambio (€)</th><th>Lote por margen (Tn)</th><th>Lote por merma (Tn)</th><th>Lote mínimo (Tn)</th><th class="l">Lo fija</th><th>Horas de fabricación del lote</th><th>Coste del cambio por Tn (€/Tn)</th><th>Margen que queda (€/Tn)</th><th>Merma sobre el lote</th></tr></thead>
       <tbody></tbody></table></div></div></div>
 </div></main>
 </div>
 <div class="tip" id="tip" hidden></div>
 <script>
 (function(){
-  var DEF={"gen": {"mp": 750, "ch": 0, "ma": 110, "rd": 5}, "mq": [{"id": "M8", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 6.5, "hk": 3, "bc": 15, "bk": 10, "kg": 31.1, "th": 7.54, "min": 30}, {"id": "M16", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 5.5, "hk": 2.5, "bc": 12, "bk": 8, "kg": 12.0, "th": 4.88, "min": 30}, {"id": "M17", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 9, "hk": 4.5, "bc": 10, "bk": 8, "kg": 112.4, "th": 8.23, "min": 100}, {"id": "M20", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 4.5, "hk": 2.5, "bc": 10, "bk": 6, "kg": 5.8, "th": 3.15, "min": 30}, {"id": "M28", "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 6.5, "hk": 3, "bc": 15, "bk": 10, "kg": 18.9, "th": 5.6, "min": 30}]}, KEY='agsa-minimos-v1', S;
+  var DEF={"gen": {"mp": 750, "ch": 0, "ma": 110, "rd": 5}, "a": {"mq": 0, "t": 1, "ma": 150, "ra": 5.28, "kg": 31.1, "d": 30}, "mq": [{"id": "M8", "sit": "holgura", "mc": 110, "tr": 5.28, "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 6.5, "hk": 3, "bc": 15, "bk": 10, "kg": 31.1, "th": 7.54, "min": 30}, {"id": "M16", "sit": "holgura", "mc": 110, "tr": 4.26, "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 5.5, "hk": 2.5, "bc": 12, "bk": 8, "kg": 12.0, "th": 4.88, "min": 30}, {"id": "M17", "sit": "holgura", "mc": 110, "tr": 4.57, "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 9, "hk": 4.5, "bc": 10, "bk": 8, "kg": 112.4, "th": 8.23, "min": 100}, {"id": "M20", "sit": "holgura", "mc": 110, "tr": 2.14, "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 4.5, "hk": 2.5, "bc": 10, "bk": 6, "kg": 5.8, "th": 3.15, "min": 30}, {"id": "M28", "sit": "holgura", "mc": 110, "tr": 4.9, "op": 25, "n": 3, "mo": 100, "pm": 1, "hc": 6.5, "hk": 3, "bc": 15, "bk": 10, "kg": 18.9, "th": 5.6, "min": 30}]}, KEY='agsa-minimos-v2', S;
   function clone(o){return JSON.parse(JSON.stringify(o));}
   try{S=JSON.parse(localStorage.getItem(KEY));}catch(e){S=null;}
-  if(!S||!S.mq||S.mq.length!==DEF.mq.length)S=clone(DEF);
+  if(!S||!S.mq||S.mq.length!==DEF.mq.length||!S.a)S=clone(DEF);
   function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
   function $(i){return document.getElementById(i);}
   function fmt(v,d){if(!isFinite(v))return '–';d=d||0;var s=Math.abs(v).toFixed(d).split('.');s[0]=s[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (v<0&&Number(Math.abs(v).toFixed(d))!==0?'−':'')+s.join(',');}
   function num(v){var x=parseFloat(v);return isFinite(x)?x:0;}
-  var IN=[['op',1],['n',1],['mo',1],['pm',0.1]], DA=[['hc',0.5],['hk',0.5],['bc',1],['bk',1],['kg',0.1],['th',0.01],['min',5]];
-  function inputRow(m,i,cols){return '<tr><th scope="row">'+m.id+'</th>'+cols.map(function(c){return '<td><input type="number" step="'+c[1]+'" data-i="'+i+'" data-k="'+c[0]+'" value="'+m[c[0]]+'" aria-label="'+m.id+' '+c[0]+'"></td>';}).join('')+(cols===IN?'<td class="ro" id="adm'+i+'"></td>':'')+'</tr>';}
+  var IN=[['op',1],['n',1],['mo',1],['pm',0.1],['mc',1]], DA=[['hc',0.5],['hk',0.5],['bc',1],['bk',1],['kg',0.1],['th',0.01],['tr',0.01],['min',5]];
+  function inputRow(m,i,cols){var sel=cols===IN?'<td><select data-i="'+i+'" data-k="sit" aria-label="'+m.id+' situación"><option value="holgura"'+(m.sit==='holgura'?' selected':'')+'>Con holgura</option><option value="llena"'+(m.sit==='llena'?' selected':'')+'>Llena</option></select></td>':'';
+    return '<tr><th scope="row">'+m.id+'</th>'+sel+cols.map(function(c){return '<td><input type="number" step="'+c[1]+'" data-i="'+i+'" data-k="'+c[0]+'" value="'+m[c[0]]+'" aria-label="'+m.id+' '+c[0]+'"></td>';}).join('')+(cols===IN?'<td class="ro" id="adm'+i+'"></td><td class="ro" id="hc'+i+'"></td>':'')+'</tr>';}
   function build(){
     $('tIn').tBodies[0].innerHTML=S.mq.map(function(m,i){return inputRow(m,i,IN);}).join('');
     $('tData').tBodies[0].innerHTML=S.mq.map(function(m,i){return inputRow(m,i,DA);}).join('');
     ['mp','ch','ma','rd'].forEach(function(k){$('g_'+k).value=S.gen[k];});
+    $('pa_mq').innerHTML=S.mq.map(function(m,i){return '<option value="'+i+'"'+(i===S.a.mq?' selected':'')+'>'+m.id+'</option>';}).join('');
+    $('pa_t').value=String(S.a.t);['ma','ra','kg','d'].forEach(function(k){$('pa_'+k).value=S.a[k];});
   }
+  function hourCost(m){return m.sit==='llena'?m.tr*m.mc:m.n*m.op;}
   function calc(m,t){var g=S.gen,h=t?m.hk:m.hc,b=t?m.bk:m.bc;
-    var pers=h*m.n*m.op,mt=b*m.kg/1000,me=mt*Math.max(0,g.mp-g.ch),tot=pers+me,adm=g.ma-m.mo,pm=m.pm/100;
+    var pers=h*hourCost(m),mt=b*m.kg/1000,me=mt*Math.max(0,g.mp-g.ch),tot=pers+me,adm=g.ma-m.mo,pm=m.pm/100;
     var lm=adm>0?tot/adm:Infinity,lw=pm>0?mt/pm:0,rd=Math.max(1,g.rd),L=isFinite(lm)?Math.ceil(Math.max(lm,lw)/rd-1e-9)*rd:Infinity;
     return {h:h,pers:pers,mt:mt,me:me,tot:tot,adm:adm,lm:lm,lw:lw,L:L,fija:!isFinite(lm)?'–':(lm>=lw?'Margen':'Merma'),hrs:L/m.th,cpt:tot/L,left:g.ma-tot/L,mp:mt/L};}
   function render(){
     var R=S.mq.map(function(m){return {m:m,c:calc(m,0),k:calc(m,1)};});
-    R.forEach(function(r,i){$('adm'+i).textContent=r.m.mo<S.gen.ma?fmt(S.gen.ma-r.m.mo,1):'–';});
+    R.forEach(function(r,i){$('adm'+i).textContent=r.m.mo<S.gen.ma?fmt(S.gen.ma-r.m.mo,1):'–';$('hc'+i).textContent=fmt(hourCost(r.m))+(r.m.sit==='llena'?' · margen':' · operarios');});
     $('cards').innerHTML=R.map(function(r){var bad=!isFinite(r.c.L);
-      return '<div class="mc"><h4>'+r.m.id+'</h4>'+(bad?'<p class="warnmsg">El margen objetivo tiene que ser menor que el margen actual.</p>':
+      return '<div class="mc"><h4>'+r.m.id+(r.m.sit==='llena'?'<span class="sit l">Llena</span>':'<span class="sit h">Con holgura</span>')+'</h4>'+(bad?'<p class="warnmsg">El margen objetivo tiene que ser menor que el margen actual.</p>':
         '<div class="row"><span>Por familia<br>cambio completo<span class="tag">'+r.c.fija+'</span></span><b>'+fmt(r.c.L)+' Tn</b></div>'+
         '<div class="row"><span>Por medida<br>cambio de calibrador<span class="tag">'+r.k.fija+'</span></span><b class="med">'+fmt(r.k.L)+' Tn</b></div>')+
         '<div class="now">Mínimo actual en sistema: '+fmt(r.m.min)+' Tn</div></div>';}).join('');
@@ -352,11 +372,31 @@ details.opt[open]>summary::before{content:'▾'}
       s+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+Math.max(h,0)+'" rx="2" fill="'+b[1]+'" data-tip="'+r.m.id+' · '+b[2]+': '+fmt(b[0])+' Tn"/><text x="'+(x+bw/2)+'" y="'+(y-5)+'" class="vl" text-anchor="middle">'+fmt(b[0])+'</text>';});
       s+='<text x="'+(Lm+i*gw+gw/2)+'" y="'+(H-12)+'" class="xl" text-anchor="middle">'+r.m.id+'</text>';});
     $('chart').innerHTML=s+'<line x1="'+Lm+'" x2="'+(W-Rm)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" class="axis"/></svg>';
+    renderA();
     save();
   }
-  document.addEventListener('input',function(e){var t=e.target;
-    if(t.dataset&&t.dataset.k){S.mq[+t.dataset.i][t.dataset.k]=num(t.value);render();}
-    else if(t.id&&t.id.indexOf('g_')===0){S.gen[t.id.slice(2)]=num(t.value);render();}});
+  function renderA(){var a=S.a,m=S.mq[a.mq],g=S.gen,t=+a.t,h=t?m.hk:m.hc,b=t?m.bk:m.bc,full=m.sit==='llena';
+    var mt=b*a.kg/1000,me=mt*Math.max(0,g.mp-g.ch),co=m.tr*m.mc,ch=h*(full?co:m.n*m.op),rd=Math.max(1,g.rd);
+    var den=full?a.ma-co/a.ra:a.ma-m.mo,L=den>0&&a.ra>0?Math.ceil((ch+me)/den/rd-1e-9)*rd:Infinity;
+    var mhA=a.ma*a.ra,lotH=a.d>0&&a.ra>0?(a.ma*a.d-me-(full?0:ch))/(a.d/a.ra+h):NaN,k=isFinite(L)&&a.d>0?Math.ceil(L/a.d-1e-9):NaN;
+    var box=function(l,v,s){return '<div class="kpi"><span class="kl">'+l+'</span><b>'+v+'</b><span class="ks">'+s+'</span></div>';};
+    var o=box('Coste de una hora de cambio',fmt(full?co:m.n*m.op)+' €/h',full?'máquina llena: margen que se deja de ganar ('+fmt(m.tr,2)+' Tn/h × '+fmt(m.mc)+' €/Tn)':'con holgura: '+fmt(m.n)+' operarios × '+fmt(m.op)+' €/h')+
+      box('Coste del cambio de A',fmt(ch+me)+' €',fmt(h,1)+' h de cambio + '+fmt(me)+' € de merma ('+fmt(mt,2)+' Tn)')+
+      box('Margen por hora de A',fmt(mhA)+' €/h',full?'lo que desplaza deja '+fmt(co)+' €/h':'sin contar el cambio')+
+      box('Lote mínimo de A',isFinite(L)?fmt(L)+' Tn':'–',isFinite(L)?(full?'para igualar el margen por hora de la máquina':'para dejar el margen objetivo de '+fmt(m.mo)+' €/Tn'):'no hay lote que compense');
+    var v;
+    if(!isFinite(L))v='<div class="ver ko"><b>No compensa fabricar A en '+m.id+(full?' llena':'')+'.</b> '+(full?'A deja '+fmt(mhA)+' €/h y lo que desplaza deja '+fmt(co)+' €/h: aunque no hubiera cambio, cada hora de A resta margen. Opciones: subir su precio o ponerle un recargo, pasarlo a una máquina con holgura, o fabricarlo solo bajo pedido.':'Su margen ('+fmt(a.ma)+' €/Tn) no llega al margen objetivo ('+fmt(m.mo)+' €/Tn) ni sin cambio.')+'</div>';
+    else if(a.d>0&&a.d>=L)v='<div class="ver ok"><b>Compensa fabricar A en cada ciclo.</b> Su demanda ('+fmt(a.d)+' Tn) supera el lote mínimo ('+fmt(L)+' Tn). Margen por hora del lote, con el cambio: '+fmt(lotH)+' €/h'+(full?' frente a '+fmt(co)+' €/h de lo que desplaza.':'.')+'</div>';
+    else if(a.d>0)v='<div class="ver ko"><b>Con '+fmt(a.d)+' Tn por ciclo no compensa en cada ciclo.</b> Hay que juntar '+k+' ciclos (rotación '+k+') para llegar a '+fmt(L)+' Tn'+(k>3?': son más de 3 ciclos, mejor bajo pedido o por campañas':'')+'. Ahora el lote deja '+fmt(lotH)+' €/h'+(full?' frente a '+fmt(co)+' €/h de lo que desplaza.':'.')+'</div>';
+    else v='<div class="ver"><b>Lote mínimo de A: '+fmt(L)+' Tn.</b> Pon su demanda por ciclo para ver la rotación.</div>';
+    $('paOut').innerHTML=o+v;}
+  function onEdit(e){var t=e.target;
+    if(t.dataset&&t.dataset.k){S.mq[+t.dataset.i][t.dataset.k]=t.dataset.k==='sit'?t.value:num(t.value);render();}
+    else if(t.id==='pa_mq'){S.a.mq=+t.value;var m=S.mq[S.a.mq];S.a.ra=m.tr;S.a.kg=m.kg;$('pa_ra').value=m.tr;$('pa_kg').value=m.kg;render();}
+    else if(t.id==='pa_t'){S.a.t=+t.value;render();}
+    else if(t.id&&t.id.indexOf('pa_')===0){S.a[t.id.slice(3)]=num(t.value);render();}
+    else if(t.id&&t.id.indexOf('g_')===0){S.gen[t.id.slice(2)]=num(t.value);render();}}
+  document.addEventListener('input',onEdit);document.addEventListener('change',function(e){if(e.target.tagName==='SELECT')onEdit(e);});
   $('applyAll').addEventListener('click',function(){var v={op:num($('a_op').value),n:num($('a_n').value),mo:num($('a_mo').value),pm:num($('a_pm').value)};
     S.mq.forEach(function(m){for(var k in v)m[k]=v[k];});build();render();});
   $('reset').addEventListener('click',function(){S=clone(DEF);build();render();});

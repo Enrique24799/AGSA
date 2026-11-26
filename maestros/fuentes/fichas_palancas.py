@@ -21,33 +21,34 @@ OWNER = 'el owner'
 
 # ---------------------------------------------------------------- palancas
 LINEA = {'Circulante': 'Circulante', 'Fuga de P&L': 'P&L · fuga', 'Transformación': 'Transformación (capacidad de línea)',
-         '—': 'Oportunidad (ingreso)'}
-QUITAR = {('Ondupet', 'P2R-03', 'OPP-02'), ('MGT', 'P2R-03', 'OPP-02'), ('Ondupet', 'P2R-01', 'INF-16')}
-FAMILIA_CORREGIDA = {('MGT', 'INF-01'): 'Circulante'}
+         'Esfuerzo': 'Esfuerzo (horas de personas)', '—': 'Oportunidad (ingreso)'}
+QUITAR = {('Ondupet', 'P2R-01', 'INF-16')}
+FAMILIA_CORREGIDA = {}
 
 # (empresa, palanca): owner, equipo de apoyo, horas de personas, contador, qué cambiar en la aplicación
 FICHA_PALANCA = {
     ('Ondupet', 'P2R-01'): (
         'Manuel Jesús Trinidad Montero', 'Victoriano Pérez Carrasco · Monica Gordillo Guerrero',
         'Previsión y Precisión · Victoriano Pérez · 86 h/año (5 % en Demanda y previsión); INT-01 le quita ≈ 26 h',
-        'Precisión y sesgo por familia: previsión cerrada frente a expediciones, en GIO',
+        'Roturas de PT (agotados del registro diario) y días de stock de PT, en GIO',
         'Quitar la línea de INF-16 (ya no está vivo) y añadir «+ Horas de personas» en Previsión y Precisión para que cuente '
-        'la capacidad de INT-01 (903 €).'),
+        'la capacidad de INT-01 (903 €). Pasar a esta palanca ACC-06, ACC-07 y ACC-08 (stock por segmento).'),
     ('Ondupet', 'P2R-02'): (
         'Victoriano Pérez Carrasco', 'Manuel Jesús Trinidad Montero · ' + IT,
         'Plan Maestro · Manuel Jesús Trinidad 258 h/año y Monica Gordillo 344 h/año (S&OP y Plan Maestro)',
         '% de saturación por línea de extrusión y termoformado, en GIO',
         'Añadir «+ Horas de personas» en Plan Maestro (INT-02). Revisar la dedicación de Victoriano: no tiene % en S&OP y Plan '
         'Maestro aunque hace el plan de fabricación y los temporales.'),
-    ('Ondupet', 'P2R-03'): (
-        'Monica Gordillo Guerrero', 'Victoriano Pérez Carrasco · Manuel Jesús Trinidad Montero',
-        '— (ninguna intervención cambia cajas)', 'Cobertura en días de producto terminado por segmento, en GIO',
-        'Quitar OPP-02 de «qué ataca»: lo cura P2R-04.'),
     ('Ondupet', 'P2R-04'): (
         'Manuel Jesús Trinidad Montero', 'Victoriano Pérez Carrasco · Monica Gordillo Guerrero',
         'Plan Maestro (Cartera Pedidos) · Manuel Jesús Trinidad 258 h/año y Monica Gordillo 344 h/año',
         '% de pedidos entregados en la primera fecha confirmada: fecha confirmada frente a fecha de carga, en GIO',
         'Añadir «+ Horas de personas» en Plan Maestro (INT-03).'),
+    ('Ondupet', 'P2R-05'): (
+        'Victoriano Pérez Carrasco', 'Bárbara Ayuste Tejera · Antonio Nogales Carrión',
+        'MRP Semanal · Victoriano Pérez 516 h/año (30 %) y Bárbara Ayuste 430 h/año (25 %) en Necesidades',
+        'Horas de máquina paradas por falta de material, en los partes de producción',
+        'Dar de alta intervenciones: la palanca no tiene ninguna en Ondupet.'),
     ('Ondupet', 'P2R-06'): (
         'Victoriano Pérez Carrasco', 'Producción (dar de alta en el censo) · ' + IT,
         'Programación · Victoriano Pérez · 430 h/año (25 %)', 'Horas de cambio de molde y altura por semana, en los partes de producción',
@@ -81,18 +82,14 @@ FICHA_PALANCA = {
         'Añadir «+ Horas de personas» en Seguimiento del Servicio (INT-02).'),
     ('MGT', 'P2R-01'): (
         'Albert Fontanet Lopez', 'Joan Carles Girones Campaña · Angélica Lemus Fernández (Ondupack)',
-        '— (ninguna intervención cambia cajas)', '% de la demanda (Ondupack y clientes repetitivos) con previsión por calidad y ancho',
-        ''),
+        'Plan Fabricación · Joan Carles Girones (sin dedicación cargada: 0 h)',
+        '% de la demanda con previsión por calidad y ancho · días de cobertura del stock de Ondupack en MGT, en SAP',
+        'Pasar a esta palanca ACC-05 e INT-02 (stock intercompany) y añadir «+ Horas de personas» en Plan Fabricación (INT-02).'),
     ('MGT', 'P2R-02'): (
         'Joan Carles Girones Campaña', 'Albert Fontanet Lopez',
         'Carga de Capacidad · Joan Carles Girones (sin dedicación cargada: 0 h)',
         'Horas de máquina a 3 turnos sin cartera, en GIO y en los partes de producción',
         'Añadir «+ Horas de personas» en Carga de Capacidad (INT-01).'),
-    ('MGT', 'P2R-03'): (
-        'Joan Carles Girones Campaña', 'Angélica Lemus Fernández (Ondupack) · Albert Fontanet Lopez',
-        'Plan Fabricación · Joan Carles Girones (sin dedicación cargada: 0 h)',
-        '€ y días de cobertura del stock de Ondupack en MGT, en SAP',
-        'Quitar OPP-02 de «qué ataca» (lo cura P2R-04) y añadir «+ Horas de personas» en Plan Fabricación (INT-02).'),
     ('MGT', 'P2R-04'): (
         'Albert Fontanet Lopez', 'Joan Carles Girones Campaña',
         'Demanda Externa · Joan Carles Girones, que hace de atención al cliente (sin dedicación cargada: 0 h)',
@@ -403,10 +400,9 @@ def hojas_fichas(wb):
            'Responsable de la palanca', 'Equipo de apoyo', 'Ventana: desde', 'Ventana: hasta', 'Contador', 'Proyecto',
            'Qué cambiar en la aplicación']
     cabecera(wp, 4, cab, [20, 9, 30, 44, 48, 28, 40, 12, 12, 44, 30, 52])
-    nombres = {'P2R-01': 'Gestión de la demanda', 'P2R-02': 'S&OP y plan de capacidad', 'P2R-03': 'Política de inventario por segmento',
-               'P2R-04': 'Promesa de fecha fiable', 'P2R-05': 'Planificación de materiales por excepción',
-               'P2R-06': 'Programación estable y optimizada', 'P2R-07': 'Liberación controlada',
-               'P2R-08': 'Control del servicio y mejora continua'}
+    nombres = {'P2R-01': 'Gestión de coberturas', 'P2R-02': 'Plan de capacidad', 'P2R-04': 'Promesa de fecha mediante CTP',
+               'P2R-05': 'Análisis de las excepciones', 'P2R-06': 'Programación estable y optimizada',
+               'P2R-07': 'Liberación con confirmación', 'P2R-08': 'Control del servicio'}
     qn = "'Interv. negocio y software'"
     qa = "'Interv. agentes'"
     rn = lambda col: f'{qn}!${col}$5:${col}${n_ult}'
@@ -426,6 +422,8 @@ def hojas_fichas(wb):
                      f'IF({ca}>0,_xlfn.MINIFS({ra("P")},{ra("A")},$A{r},{ra("D")},$B{r}),2958465))')
             hasta = (f'=MAX(_xlfn.MAXIFS({rn("I")},{rn("A")},$A{r},{rn("E")},$B{r}),'
                      f'_xlfn.MAXIFS({ra("Q")},{ra("A")},$A{r},{ra("D")},$B{r}))')
+            if not any(i[3] == pid for i in INTERVENCIONES[emp]):
+                desde = hasta = '—'
             vals = [emp, pid, nombres[pid], '\n'.join(lineas), horas, owner, equipo, desde, hasta, contador, PROYECTO[emp],
                     cambiar or None]
             for j, v in enumerate(vals, 1):

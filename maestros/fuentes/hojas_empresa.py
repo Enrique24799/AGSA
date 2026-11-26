@@ -28,97 +28,130 @@ def descripcion(empresa, texto):
         raise KeyError(f'{empresa}: «{texto}» no es una propuesta conocida ni parece una descripción')
     return texto
 
+# tipos del catálogo de DICE (19/11/2026): nombre y familia · naturaleza
+TIPOS = {
+    'HT-P2R-01': ('Roturas de stock', f'{OPOR} · —'),
+    'HT-P2R-03': ('Optimización carga capacidad', f'{INEF} · Transformación'),
+    'HT-P2R-05': ('Fechas de entrega poco realistas', f'{OPOR} · —'),
+    'HT-P2R-06': ('Optimización gestión faltas', f'{INEF} · Fuga de P&L'),
+    'HT-P2R-07': ('Optimización gestión necesidades', f'{INEF} · Circulante'),
+    'HT-P2R-08': ('Optimización secuenciación', f'{INEF} · Transformación'),
+    'HT-P2R-09': ('Optimización urgencias secuenciación', f'{INEF} · Transformación'),
+    'HT-P2R-10': ('Optimización aprovisionamiento línea', f'{INEF} · Transformación'),
+    'HT-P2R-11': ('Optimización servicio', f'{OPOR} · —'),
+    'HT-P2R-12': ('Secuenciación manual', f'{INEF} · Esfuerzo'),
+    'HT-P2R-13': ('Sobrecobertura de stock', f'{INEF} · Circulante'),
+    'HT-P2R-14': ('Gestión manual servicio', f'{INEF} · Esfuerzo'),
+    'HT-P2R-15': ('Gestión manual faltas', f'{INEF} · Esfuerzo'),
+}
+
+
+def H(hid, tipo, anclaje, desc, palancas):
+    """Hallazgo de una celda: el nombre del tipo y su familia · naturaleza salen del catálogo."""
+    nombre, famnat = TIPOS[tipo]
+    return (hid, f'{tipo} · {nombre}', famnat, anclaje, desc, palancas)
+
+
 # hallazgos de cada celda: (id, tipo, familia · naturaleza, anclaje, descripción, palancas que lo curan)
 HALLAZGOS = {
     'Ondupet': [
-        ('INF-10', 'HT-P2R-01 · Demanda sin previsión fiable', f'{INEF} · Circulante', f'Previsión y Precisión · {DEM}',
-         'Previsión inestable: Comercial modifica la previsión a comienzo de mes, incluso con el material ya fabricado, sin '
-         'comunicación formal ni cierre ni consenso, y nadie responde del stock que queda fabricado.', ['P2R-01']),
-        ('INF-16', 'HT-P2R-01 · Demanda sin previsión fiable', f'{INEF} · Circulante', f'Previsión y Precisión · {DEM}',
-         'Previsión sin medición ni aprendizaje: la reunión mensual de accuracy existe pero no genera acciones, hay '
-         'desviaciones grandes sin causa ni corrección y los agotados se registran de forma irregular.', ['P2R-01']),
-        ('INF-11', 'HT-P2R-03 · Demanda y capacidad sin equilibrar', f'{INEF} · Transformación', f'Plan Maestro · {SOP}',
-         'Las necesidades se cargan sin comprobar la capacidad de extrusión y termoformado ni balancear entre líneas, y los '
-         'temporales se calculan a mano.', ['P2R-02']),
-        ('INF-13', 'HT-P2R-04 · Stock sin política clara', f'{INEF} · Circulante', f'Plan Maestro · {SOP}',
-         'No se calculan ABC ni estrategias MTS/MTO aunque GIO tiene la transacción, y el stock fabricado por cambios de '
-         'previsión queda sin dueño.', ['P2R-03']),
-        ('OPP-02', 'HT-P2R-05 · Fecha al cliente no fiable', f'{OPOR} · —', f'Plan Maestro · {SOP}',
-         'Se mantiene la fecha del cliente aunque se sabe desde el principio que no se llega, y las dos fechas del pedido no '
-         'se usan.', ['P2R-03', 'P2R-04']),
-        ('INF-12', 'HT-P2R-08 · Secuencia sin optimizar', f'{INEF} · Transformación', f'Programación · {PRO}',
-         'La secuencia se hace totalmente a mano en GIO, sin optimizar los cambios de molde y altura y con la ruta por '
-         'defecto sin reequilibrar.', ['P2R-06']),
-        ('INF-14', 'HT-P2R-09 · Programa inestable', f'{INEF} · Transformación', f'Programación · {PRO}',
-         'No hay zona congelada: los cambios de última hora llegan por teléfono y las prioridades se resuelven a mano; sin '
-         'acuerdo, decide el director de planta.', ['P2R-06']),
-        ('OPP-03', 'HT-P2R-11 · Servicio sin control', f'{OPOR} · —', f'Seguimiento y control · {SEG}',
-         'No se mide el % de cumplimiento del servicio: el reporte diario de cargas atrasadas no es un KPI de OTIF y la fecha '
-         'pensada para medir retrasos no se usa.', ['P2R-08']),
-        ('INF-15', 'HT-P2R-12 · Ciclo sin aprendizaje', f'{INEF} · Transformación', f'Seguimiento y control · {SEG}',
-         'El reporte de atrasos se envía sin análisis de causa y los ajustes se hacen pedido a pedido, sin volver a la '
-         'previsión ni a los parámetros.', ['P2R-08']),
+        H('INF-10', 'HT-P2R-01', f'Previsión y Precisión · {DEM}',
+          'Previsión inestable: Comercial modifica la previsión a comienzo de mes, incluso con el material ya fabricado, sin '
+          'comunicación formal ni cierre ni consenso; falta lo que se necesita y sobra lo que ya se fabricó.', ['P2R-01']),
+        H('INF-16', 'HT-P2R-01', f'Previsión y Precisión · {DEM}',
+          'Previsión sin medición ni aprendizaje: la reunión mensual de accuracy existe pero no genera acciones, hay '
+          'desviaciones grandes sin causa ni corrección y los agotados se registran de forma irregular.', ['P2R-01']),
+        H('INF-13', 'HT-P2R-13', f'Plan Maestro · {SOP}',
+          'Hay producto terminado con más días de stock que su objetivo: no se calculan ABC ni estrategias MTS/MTO aunque GIO '
+          'tiene la transacción, y el stock fabricado por cambios de previsión queda sin dueño.', ['P2R-01']),
+        H('INF-11', 'HT-P2R-03', f'Plan Maestro · {SOP}',
+          'Las necesidades se cargan sin comprobar la capacidad de extrusión y termoformado ni balancear entre líneas, y los '
+          'temporales se calculan a mano.', ['P2R-02']),
+        H('OPP-02', 'HT-P2R-05', f'Plan Maestro · {SOP}',
+          'Se mantiene la fecha del cliente aunque se sabe desde el principio que no se llega, y las dos fechas del pedido no '
+          'se usan.', ['P2R-04']),
+        H('INF-17', 'HT-P2R-06', f'MRP Semanal · {NEC}',
+          'Las líneas paran por falta de materia prima o auxiliares: las faltas del MRP semanal se ven tarde y se resuelven a '
+          'mano con Compras. Incluye las horas de línea paradas por falta de material.', ['P2R-05']),
+        H('INF-19', 'HT-P2R-15', f'MRP Semanal · {NEC}',
+          'Las faltas del MRP semanal se revisan una a una y se persiguen a mano con Compras: es tiempo del planificador y de '
+          'Compras que no aporta valor.', ['P2R-05']),
+        H('INF-12', 'HT-P2R-08', f'Programación · {PRO}',
+          'La secuencia se hace totalmente a mano en GIO, sin optimizar los cambios de molde y altura y con la ruta por '
+          'defecto sin reequilibrar.', ['P2R-06']),
+        H('INF-14', 'HT-P2R-09', f'Programación · {PRO}',
+          'No hay zona congelada: los cambios de última hora llegan por teléfono y las prioridades se resuelven a mano; sin '
+          'acuerdo, decide el director de planta.', ['P2R-06']),
+        H('INF-18', 'HT-P2R-12', f'Programación · {PRO}',
+          'El planificador secuencia a mano en GIO y resecuencia cada urgencia: es tiempo del planificador, aparte de la '
+          'secuencia que resulta.', ['P2R-06']),
+        H('OPP-03', 'HT-P2R-11', f'Seguimiento y control · {SEG}',
+          'No se mide el % de cumplimiento del servicio: el reporte diario de cargas atrasadas no es un KPI de OTIF y la fecha '
+          'pensada para medir retrasos no se usa.', ['P2R-08']),
+        H('INF-15', 'HT-P2R-14', f'Seguimiento y control · {SEG}',
+          'El reporte diario de atrasos y los ajustes pedido a pedido se preparan a mano y sin análisis de causa: es tiempo del '
+          'planificador que no vuelve a la previsión ni a los parámetros.', ['P2R-08']),
     ],
     'MGT': [
-        ('INF-01', 'HT-P2R-01 · Demanda sin previsión fiable', f'{OPOR} · —', f'Demanda Intercompany · {DEM}',
-         'No hay previsión de ningún tipo, ni externa ni intercompany: se planifica solo con la cartera, y no se sabe si se '
-         'registran las ventas perdidas.', ['P2R-01']),
-        ('INF-02', 'HT-P2R-03 · Demanda y capacidad sin equilibrar', f'{INEF} · Transformación', f'Carga de Capacidad · {SOP}',
-         'Los pedidos se cargan a capacidad infinita y la máquina trabaja siempre a 3 turnos a velocidad máxima; la duración '
-         'de cada calidad en el ciclo se ajusta sobre la marcha, sin propuesta.', ['P2R-02']),
-        ('INF-03', 'HT-P2R-04 · Stock sin política clara', f'{INEF} · Circulante', f'Plan Fabricación · {SOP}',
-         'Se acumula stock de Ondupack en MGT, que lo va retirando poco a poco; lo fabricado de más no se ajusta en el pedido '
-         'y las 3 turnos generan stock aunque todo se fabrica bajo pedido.', ['P2R-03']),
-        ('OPP-02', 'HT-P2R-05 · Fecha al cliente no fiable', f'{OPOR} · —', f'Plan Fabricación · {SOP}',
-         'Al entrar el pedido no se propone fecha porque la planificación no está integrada con Comercial, y las fechas de '
-         'Ondupack no son fiables: marcan el inicio del ciclo y después cambian.', ['P2R-03', 'P2R-04']),
-        ('INF-04', 'HT-P2R-07 · Necesidades poco fiables', f'{INEF} · Circulante', f'Propuesta de Fabricación · {NEC}',
-         'El MRP de materias primas se hace en un Excel; el de auxiliares, en SAP, se descuadra porque la entrada de báscula '
-         'se registra después del consumo, y no se sabe cómo se planifica la bobina madre.', ['P2R-05']),
-        ('INF-05', 'HT-P2R-08 · Secuencia sin optimizar', f'{INEF} · Transformación', f'Programación · {PRO}',
-         'El algoritmo de combinación no tiene en cuenta lo ya fabricado ni hay fecha límite de cartera, y la agrupación por '
-         'calidad y ancho es manual salvo que se use su salida.', ['P2R-06']),
-        ('INF-06', 'HT-P2R-09 · Programa inestable', f'{INEF} · Transformación', f'Programación · {PRO}',
-         'Las urgencias, también las de Ondupack fuera del plazo de 10 días, se encajan a mano, sin alertas ni zona '
-         'congelada, y las prioridades se negocian caso a caso.', ['P2R-06']),
-        ('INF-08', 'HT-P2R-10 · Liberación sin control', f'{INEF} · Transformación', f'Liberación de la Orden · {LIB}',
-         'No hay faltas por orden: el planificador comprueba a mano, en varios sitios, que hay material, sin ver cuándo llega, '
-         'y la orden se entrega impresa en papel.', ['P2R-07']),
-        ('OPP-03', 'HT-P2R-11 · Servicio sin control', f'{OPOR} · —', f'Seguimiento del servicio · {SEG}',
-         'No hay pilar de servicio ni KPI: las incidencias se resuelven por llamada y la coordinación de entregas con Ondupack '
-         'lleva unos 16 correos al día.', ['P2R-08']),
-        ('INF-07', 'HT-P2R-12 · Ciclo sin aprendizaje', f'{INEF} · Transformación', f'Seguimiento del servicio · {SEG}',
-         'No se analizan desviaciones ni atrasos y las incidencias no dejan causa registrada.', ['P2R-08']),
+        H('INF-01', 'HT-P2R-01', f'Demanda Intercompany · {DEM}',
+          'No hay previsión de ningún tipo, ni externa ni intercompany: se planifica solo con la cartera, y no se sabe si se '
+          'registran las ventas perdidas.', ['P2R-01']),
+        H('INF-03', 'HT-P2R-13', f'Plan Fabricación · {SOP}',
+          'Se acumula stock de Ondupack en MGT, que lo va retirando poco a poco; lo fabricado de más no se ajusta en el pedido '
+          'y las 3 turnos generan stock aunque todo se fabrica bajo pedido.', ['P2R-01']),
+        H('INF-02', 'HT-P2R-03', f'Carga de Capacidad · {SOP}',
+          'Los pedidos se cargan a capacidad infinita y la máquina trabaja siempre a 3 turnos a velocidad máxima; la duración '
+          'de cada calidad en el ciclo se ajusta sobre la marcha, sin propuesta.', ['P2R-02']),
+        H('OPP-02', 'HT-P2R-05', f'Plan Fabricación · {SOP}',
+          'Al entrar el pedido no se propone fecha porque la planificación no está integrada con Comercial, y las fechas de '
+          'Ondupack no son fiables: marcan el inicio del ciclo y después cambian.', ['P2R-04']),
+        H('INF-04', 'HT-P2R-07', f'Propuesta de Fabricación · {NEC}',
+          'El MRP de materias primas se hace en un Excel; el de auxiliares, en SAP, se descuadra porque la entrada de báscula '
+          'se registra después del consumo, y no se sabe cómo se planifica la bobina madre.', ['P2R-05']),
+        H('INF-05', 'HT-P2R-08', f'Programación · {PRO}',
+          'El algoritmo de combinación no tiene en cuenta lo ya fabricado ni hay fecha límite de cartera, y la agrupación por '
+          'calidad y ancho es manual salvo que se use su salida.', ['P2R-06']),
+        H('INF-06', 'HT-P2R-09', f'Programación · {PRO}',
+          'Las urgencias, también las de Ondupack fuera del plazo de 10 días, se encajan a mano, sin alertas ni zona '
+          'congelada, y las prioridades se negocian caso a caso.', ['P2R-06']),
+        H('INF-08', 'HT-P2R-10', f'Liberación de la Orden · {LIB}',
+          'No hay faltas por orden: el planificador comprueba a mano, en varios sitios, que hay material, sin ver cuándo llega, '
+          'y la orden se entrega impresa en papel.', ['P2R-07']),
+        H('OPP-03', 'HT-P2R-11', f'Seguimiento del servicio · {SEG}',
+          'No hay pilar de servicio ni KPI: las incidencias se resuelven por llamada y la coordinación de entregas con Ondupack '
+          'lleva unos 16 correos al día.', ['P2R-08']),
+        H('INF-07', 'HT-P2R-11', f'Seguimiento del servicio · {SEG}',
+          'No se analizan desviaciones ni atrasos y las incidencias no dejan causa registrada.', ['P2R-08']),
     ],
     'Ondupack Almendralejo': [
-        ('INF-01', 'HT-P2R-01 · Demanda sin previsión fiable', f'{INEF} · Circulante', f'Entrada de Pedidos y Fecha · {DEM}',
-         'No se usa previsión aunque hay clientes con consumo repetitivo, no se sabe qué parte de la demanda es de pedido '
-         'firme, de stock o intercompany, y la demanda perdida no se registra en el sistema.', ['P2R-01']),
-        ('INF-06', 'HT-P2R-03 · Demanda y capacidad sin equilibrar', f'{INEF} · Transformación', f'Carga Capacidad · {SOP}',
-         'La 924 no alcanza los metros planificados y arrastra pedidos lanzados. La sobresaturación se detecta tarde: por las '
-         'fechas de entrega o porque se llena el almacén intermedio.', ['P2R-02']),
-        ('INF-02', 'HT-P2R-06 · Faltas tardías y gestionadas a mano', f'{INEF} · Fuga de P&L', f'Papel y Auxiliares · {NEC}',
-         'La falta de materia prima es su primer problema. El papel se pide por consumo pasado y los auxiliares se reponen a '
-         'mano; no hay MRP ni aviso de faltas por orden, y GIO solo ve el stock de papel.', ['P2R-05']),
-        ('INF-03', 'HT-P2R-07 · Necesidades poco fiables', f'{INEF} · Circulante', f'Papel y Auxiliares · {NEC}',
-         'La necesidad de papel no sale del plan, sale del histórico. Las sustituciones se hacen a mano, los consumos se dan '
-         'por diferencia de inventario cada mes y el maestro está incompleto (sin lote mínimo ni calendario).', ['P2R-05']),
-        ('INF-04', 'HT-P2R-08 · Secuencia sin optimizar', f'{INEF} · Transformación', f'Onduladora · {PRO}',
-         'La combinación de onduladora y la secuencia de converting no se optimizan; la optimización está aplazada hasta '
-         'estabilizar los datos. Se repiten maestros fabricados en la misma semana.', ['P2R-06']),
-        ('INF-05', 'HT-P2R-09 · Programa inestable', f'{INEF} · Transformación', f'Onduladora · {PRO}',
-         'No hay zona congelada: los cambios del cliente se aceptan por email mientras el pedido no esté fabricado, las '
-         'urgencias se resuelven llamando y no se registra la causa de las reprogramaciones.', ['P2R-06']),
-        ('OPP-01', 'HT-P2R-11 · Servicio sin control', f'{OPOR} · —', f'Revisión Semanal · {SEG}',
-         'Falta un KPI oficial de servicio: Dirección y Comercial todavía no han decidido cuál usar ni contra qué fecha '
-         'medirlo.', ['P2R-08']),
+        H('INF-01', 'HT-P2R-01', f'Entrada de Pedidos y Fecha · {DEM}',
+          'No se usa previsión aunque hay clientes con consumo repetitivo, no se sabe qué parte de la demanda es de pedido '
+          'firme, de stock o intercompany, y la demanda perdida no se registra en el sistema.', ['P2R-01']),
+        H('INF-06', 'HT-P2R-03', f'Carga Capacidad · {SOP}',
+          'La 924 no alcanza los metros planificados y arrastra pedidos lanzados. La sobresaturación se detecta tarde: por las '
+          'fechas de entrega o porque se llena el almacén intermedio.', ['P2R-02']),
+        H('INF-02', 'HT-P2R-06', f'Papel y Auxiliares · {NEC}',
+          'La falta de materia prima es su primer problema. El papel se pide por consumo pasado y los auxiliares se reponen a '
+          'mano; no hay MRP ni aviso de faltas por orden, y GIO solo ve el stock de papel.', ['P2R-05']),
+        H('INF-03', 'HT-P2R-07', f'Papel y Auxiliares · {NEC}',
+          'La necesidad de papel no sale del plan, sale del histórico. Las sustituciones se hacen a mano, los consumos se dan '
+          'por diferencia de inventario cada mes y el maestro está incompleto (sin lote mínimo ni calendario).', ['P2R-05']),
+        H('INF-04', 'HT-P2R-08', f'Onduladora · {PRO}',
+          'La combinación de onduladora y la secuencia de converting no se optimizan; la optimización está aplazada hasta '
+          'estabilizar los datos. Se repiten maestros fabricados en la misma semana.', ['P2R-06']),
+        H('INF-05', 'HT-P2R-09', f'Onduladora · {PRO}',
+          'No hay zona congelada: los cambios del cliente se aceptan por email mientras el pedido no esté fabricado, las '
+          'urgencias se resuelven llamando y no se registra la causa de las reprogramaciones.', ['P2R-06']),
+        H('OPP-01', 'HT-P2R-11', f'Revisión Semanal · {SEG}',
+          'Falta un KPI oficial de servicio: Dirección y Comercial todavía no han decidido cuál usar ni contra qué fecha '
+          'medirlo.', ['P2R-08']),
     ],
 }
 
 # palancas aplicadas en cada celda, en orden
 PALANCAS = {
-    'Ondupet': ['P2R-01', 'P2R-02', 'P2R-03', 'P2R-04', 'P2R-06', 'P2R-08'],
-    'MGT': ['P2R-01', 'P2R-02', 'P2R-03', 'P2R-04', 'P2R-05', 'P2R-06', 'P2R-07', 'P2R-08'],
+    'Ondupet': ['P2R-01', 'P2R-02', 'P2R-04', 'P2R-05', 'P2R-06', 'P2R-08'],
+    'MGT': ['P2R-01', 'P2R-02', 'P2R-04', 'P2R-05', 'P2R-06', 'P2R-07', 'P2R-08'],
     'Ondupack Almendralejo': ['P2R-01', 'P2R-02', 'P2R-05', 'P2R-06', 'P2R-08'],
 }
 
@@ -140,11 +173,11 @@ INTERVENCIONES = {
         ('INT-02', 'Propuestas de balanceo', 'agente', 'P2R-02', 'Plan Maestro', 6000,
          'Agente que propone el reparto de turnos y de carga entre las líneas de extrusión y termoformado, con su impacto en '
          'horas y €. Planificación lo aprueba en la revisión mensual de capacidad.'),
-        ('ACC-06', 'Definir criterios ABC / estrategia', 'negocio', 'P2R-03', NC, None,
+        ('ACC-06', 'Definir criterios ABC / estrategia', 'negocio', 'P2R-01', NC, None,
          'Criterios de segmentación y estrategia de stock'),
-        ('ACC-07', 'Definir acciones para el stock sin rotación', 'negocio', 'P2R-03', NC, None,
+        ('ACC-07', 'Definir acciones para el stock sin rotación', 'negocio', 'P2R-01', NC, None,
          'Responsable del stock sin movimiento'),
-        ('ACC-08', 'Cálculo automático de días de stock', 'software', 'P2R-03', NC, None,
+        ('ACC-08', 'Cálculo automático de días de stock', 'software', 'P2R-01', NC, None,
          'El sistema calcula la cobertura en días de stock de cada referencia y avisa de las que superan el objetivo de su '
          'segmento, para decidir a tiempo qué se deja de fabricar o se liquida.'),
         ('ACC-09', 'Definir política de fecha confirmada', 'negocio', 'P2R-04', NC, None, 'Política de fecha confirmada'),
@@ -190,9 +223,9 @@ INTERVENCIONES['MGT'] = [
     ('ACC-03', 'Política de llenado de capacidad', 'negocio', 'P2R-02', NC, None, 'Política de llenado de capacidad'),
     ('ACC-04', 'Revisión mensual de capacidad y ciclos', 'negocio', 'P2R-02', NC, None, 'Revisión mensual de capacidad y ciclos'),
     ('INT-01', 'Agente de escenarios de ciclo', 'agente', 'P2R-02', 'Carga de Capacidad', 0, 'Agente de escenarios de ciclo'),
-    ('ACC-05', 'Pull system con Ondupack, con mínimo y máximo por referencia', 'negocio', 'P2R-03', NC, None,
+    ('ACC-05', 'Pull system con Ondupack, con mínimo y máximo por referencia', 'negocio', 'P2R-01', NC, None,
      'Pull system con Ondupack'),
-    ('INT-02', 'Agente de stock intercompany', 'agente', 'P2R-03', 'Plan Fabricación', 0, 'Agente de stock intercompany'),
+    ('INT-02', 'Agente de stock intercompany', 'agente', 'P2R-01', 'Plan Fabricación', 0, 'Agente de stock intercompany'),
     ('INT-04', 'Copiloto de plazos para Comercial', 'agente', 'P2R-04', 'Demanda Externa', 0, 'Copiloto de plazos para Comercial'),
     ('ACC-06', 'MRP de materias primas en SAP', 'software', 'P2R-05', NC, None, 'MRP de materias primas en SAP'),
     ('INT-03', 'Agente de compras de materiales', 'agente', 'P2R-05', 'MRP', 0, 'Agente de compras de materiales'),
@@ -217,14 +250,18 @@ CABECERA = {
 }
 NOTAS = {
     'Ondupet': [
-        'INF-10 e INF-16 son del mismo tipo (HT-P2R-01) desde que se agruparon los de previsión: conviene fusionarlos para no '
-        'contar dos veces su valor.',
-        'OPP-02 cuelga de P2R-03 y de P2R-04 (aviso ⚠ en la aplicación); lo cura P2R-04, así que se puede quitar de P2R-03.',
+        'INF-10 e INF-16 son del mismo tipo (HT-P2R-01): conviene fusionarlos para no contar dos veces su valor.',
+        'P2R-05 cura HT-P2R-06 y HT-P2R-15 pero todavía no tiene intervenciones en Ondupet: hay que proponerlas.',
+        'INF-17, INF-18 e INF-19 (HT-P2R-06, HT-P2R-12 y HT-P2R-15) tienen ID provisional: usar el que dé la aplicación.',
+        'Las intervenciones de stock por segmento (ACC-06, ACC-07 y ACC-08) pasan a P2R-01 (la palanca de inventario '
+        'por segmento se ha eliminado), que ahora cubre roturas y sobrecobertura.',
         'En la aplicación la descripción de cada hallazgo es solo el nombre del tipo; aquí van las descripciones acordadas, '
         'para copiarlas.',
     ],
     'MGT': [
-        'OPP-02 cuelga de P2R-03 y de P2R-04 (aviso ⚠ en P2R-03); lo cura P2R-04, así que se puede quitar de P2R-03.',
+        'INF-03 pasa a HT-P2R-13 (sobrecobertura), pero en la aplicación HT-P2R-13 no está marcado en MGT: marcarlo o quitar '
+        'INF-03. Sus intervenciones (ACC-05 e INT-02) pasan a P2R-01.',
+        'INF-07 (antes «Ciclo sin aprendizaje») pasa a HT-P2R-11, junto a OPP-03.',
         'P2R-05 no cura HT-P2R-06 en MGT (no está asignado), solo HT-P2R-07.',
         'P2R-04 solo tiene el copiloto de plazos: sin la «Fecha confirmada por Planificación» (negocio) nada cambia cómo se '
         'promete la fecha, que es lo que describe OPP-02.',
@@ -234,11 +271,10 @@ NOTAS = {
         'para copiarlas.',
     ],
     'Ondupack Almendralejo': [
-        'El tipo HT-P2R-01 es ahora Oportunidad, pero INF-01 sigue como Ineficiencia · Circulante (igual que INF-10 e INF-16 '
-        'en Ondupet).',
         'ACC-07 es un agente que no cambia ninguna caja: si se marca sobre «Autorizar la liberación con material pendiente», '
         'aparecerá en el to-be y tendrá capacidad.',
-        'HT-P2R-12 no está asignado en esta celda, así que P2R-08 solo cura OPP-01.',
+        'Las intervenciones de stock anticipado y sobrantes (antes en la palanca de inventario) cuelgan ahora de P2R-01 y solo se crean si se '
+        'marca HT-P2R-13 en Ondupack.',
     ],
 }
 
@@ -323,17 +359,19 @@ def hoja_empresa(wb, empresa, palancas_cat):
 
 # ---------------------------------------------------------------- fichas de hallazgo (formulario «Hallazgo», sin cuantificación)
 METRICA_TIPO = {
-    'HT-P2R-01': '€ de stock medio de producto terminado expuesto al error de previsión',
+    'HT-P2R-01': '€ de ventas / año en líneas de pedido con agotado de producto terminado',
     'HT-P2R-03': 'Horas de línea / año de turnos no ajustados a la carga',
-    'HT-P2R-04': '€ de stock de producto terminado por encima de la cobertura objetivo',
-    'HT-P2R-05': '€ de ventas / año en pedidos no entregados en la primera fecha confirmada',
-    'HT-P2R-06': '€ / año de compras y transportes urgentes por faltas',
+    'HT-P2R-05': '€ de ventas / año en pedidos entregados después de la fecha pedida',
+    'HT-P2R-06': 'Horas de máquina / año paradas por falta de material',
     'HT-P2R-07': '€ de stock de materias primas y semielaborado por encima de la cobertura objetivo',
     'HT-P2R-08': 'Horas de línea / año en cambios evitables',
-    'HT-P2R-09': 'Horas de línea / año en resecuenciaciones',
+    'HT-P2R-09': 'Horas de línea / año en cambios metidos en el programa cerrado',
     'HT-P2R-10': 'Horas de línea / año perdidas en arranques fallidos',
     'HT-P2R-11': '€ de ventas / año en pedidos fuera de OTIF',
-    'HT-P2R-12': 'Horas de línea / año perdidas en desviaciones repetidas',
+    'HT-P2R-12': 'Horas de persona / año secuenciando a mano',
+    'HT-P2R-13': '€ de stock de producto terminado por encima de la cobertura objetivo',
+    'HT-P2R-14': 'Horas de persona / año en seguimiento manual del servicio',
+    'HT-P2R-15': 'Horas de persona / año gestionando faltas a mano',
 }
 # (empresa, id): esfuerzo, impacto y, solo si cambia algo respecto a la aplicación, anclaje, familia, descripción, métrica y nota
 FICHAS = {
@@ -351,10 +389,13 @@ FICHAS = {
     ('Ondupet', 'INF-14'): dict(esf=1, imp=3),
     ('Ondupet', 'OPP-03'): dict(esf=2, imp=3),
     ('Ondupet', 'INF-15'): dict(esf=1, imp=2),
-    ('MGT', 'INF-01'): dict(esf=3, imp=4, fam='Ineficiencia · Circulante',
-                            nota='Cambiar la familia a Ineficiencia · Circulante, como el tipo.'),
+    ('Ondupet', 'INF-17'): dict(esf=3, imp=4, nota='ID provisional: usar el que dé la aplicación.'),
+    ('Ondupet', 'INF-18'): dict(esf=2, imp=3, nota='ID provisional: usar el que dé la aplicación.'),
+    ('Ondupet', 'INF-19'): dict(esf=2, imp=2, nota='ID provisional: usar el que dé la aplicación.'),
+    ('MGT', 'INF-01'): dict(esf=3, imp=4),
     ('MGT', 'INF-02'): dict(esf=3, imp=4, met='Horas / año de máquina a 3 turnos sin cartera que los llene'),
-    ('MGT', 'INF-03'): dict(esf=3, imp=5, met='€ de stock de Ondupack en MGT por encima de la cobertura objetivo'),
+    ('MGT', 'INF-03'): dict(esf=3, imp=5, met='€ de stock de Ondupack en MGT por encima de la cobertura objetivo',
+                            nota='Marcar HT-P2R-13 en MGT o quitar este hallazgo.'),
     ('MGT', 'OPP-02'): dict(esf=4, imp=3, anc=f'Demanda Externa · {DEM}',
                             nota='Cambiar el anclaje a Demanda Externa: es donde se da (o no) la fecha.'),
     ('MGT', 'INF-04'): dict(esf=3, imp=3, anc=f'MRP · {NEC}',
@@ -381,12 +422,15 @@ FICHAS = {
 METRICA_FICHA = {
     ('Ondupet', 'INF-10'): '€ / mes de previsión cambiada tras el inicio del mes o sin consensuar',
     ('Ondupet', 'INF-11'): 'Horas de línea / año de extrusión y termoformado planificadas sin cruzar carga y capacidad',
-    ('Ondupet', 'INF-13'): '€ de stock medio de producto terminado sin ABC ni estrategia',
+    ('Ondupet', 'INF-13'): '€ de stock medio de producto terminado por encima de sus días objetivo',
     ('Ondupet', 'OPP-02'): '€ de ventas / año en pedidos entregados después de la fecha del cliente',
     ('Ondupet', 'INF-12'): 'Horas de línea / año en cambios de molde y altura',
     ('Ondupet', 'INF-14'): 'Cambios de última hora / año dentro del programa',
     ('Ondupet', 'OPP-03'): '€ de ventas / año en pedidos atrasados (reporte diario de cargas atrasadas)',
-    ('Ondupet', 'INF-15'): 'Atrasos / año sin análisis de causa',
+    ('Ondupet', 'INF-15'): 'Horas / año del planificador en el reporte de atrasos y los ajustes pedido a pedido',
+    ('Ondupet', 'INF-17'): 'Horas / año de extrusión y termoformado paradas por falta de material',
+    ('Ondupet', 'INF-18'): 'Horas / año del planificador secuenciando y resecuenciando a mano',
+    ('Ondupet', 'INF-19'): 'Horas / año del planificador y de Compras revisando y persiguiendo faltas',
     ('MGT', 'INF-01'): 't / año de papel (Ondupack y clientes repetitivos) planificadas sin previsión',
     ('MGT', 'INF-02'): 'Horas / año de máquina a 3 turnos sin cartera que los llene',
     ('MGT', 'INF-03'): '€ de stock de Ondupack en MGT',

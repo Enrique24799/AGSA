@@ -18,12 +18,11 @@ NAVY, GREY, BORDER = '00263A', '5B6B78', 'D7DFE5'
 COLOR_TIPO = {'Negocio': 'EEF1F4', 'Automatización': 'E3F3EA', 'Agente': 'EEE9FB', 'Consulta': 'E4EEFB'}
 
 PALANCAS = [
-    ('P2R-01', 'Gestión de la demanda', 'HT-P2R-01'),
-    ('P2R-02', 'S&OP y plan de capacidad', 'HT-P2R-03'),
-    ('P2R-03', 'Política de inventario por segmento', 'HT-P2R-04, HT-P2R-05'),
-    ('P2R-04', 'Promesa de fecha fiable', 'HT-P2R-05'),
-    ('P2R-06', 'Programación estable y optimizada', 'HT-P2R-08, HT-P2R-09'),
-    ('P2R-08', 'Control del servicio y mejora continua', 'HT-P2R-11, HT-P2R-12'),
+    ('P2R-01', 'Gestión de coberturas', 'HT-P2R-01, HT-P2R-13'),
+    ('P2R-02', 'Plan de capacidad', 'HT-P2R-03'),
+    ('P2R-04', 'Promesa de fecha mediante CTP', 'HT-P2R-05'),
+    ('P2R-06', 'Programación estable y optimizada', 'HT-P2R-08, HT-P2R-09, HT-P2R-12'),
+    ('P2R-08', 'Control del servicio', 'HT-P2R-11, HT-P2R-14'),
 ]
 
 # Cajas del flujo as-is de Ondupet (fase, caja)
@@ -59,7 +58,7 @@ def I(pal, tipo, nombre, que, inicio, fin, resultado, criterio, cajas=(), comite
 
 
 INTERVENCIONES = [
-    # ---------------------------------------------------------------- P2R-01 · Gestión de la demanda
+    # ---------------------------------------------------------------- P2R-01 · Gestión de coberturas
     I('P2R-01', 'Negocio', 'Calendario de previsión con día de cierre',
       'Fijar un día de cierre mensual de la previsión y congelar el mes en curso. Después del cierre, cualquier cambio '
       'necesita la aprobación de Planificación y queda registrado con su motivo. Publicar el calendario del año.',
@@ -120,7 +119,39 @@ INTERVENCIONES = [
       comite='La previsión la prepara un agente y Comercial revisa solo las excepciones.',
       cob=0.80, exc=0.20, depende='Registro diario de agotados (12 meses de histórico limpio)', detalle='D-PL01'),
 
-    # ---------------------------------------------------------------- P2R-02 · S&OP y plan de capacidad
+    I('P2R-01', 'Negocio', 'Criterios de segmentación y estrategia de stock',
+      'Definir ABC por valor, XYZ por variabilidad y la matriz que asigna a cada segmento MTS o MTO y su stock de '
+      'seguridad. Comercial valida las estrategias.',
+      D(1, 3, 2027), D(31, 3, 2027),
+      'Cada material tiene una estrategia y un stock objetivo justificados.',
+      'Matriz aprobada por Planificación y Comercial.',
+      decidir='Cortes de ABC y XYZ · nivel de servicio por segmento', detalle='D-PL09'),
+    I('P2R-01', 'Negocio', 'Responsable del stock sin movimiento',
+      'Revisión mensual con Comercial del producto terminado sin movimiento: se decide venderlo, reprocesarlo o '
+      'depreciarlo, y se imputa a quien lo originó cuando viene de un cambio de previsión fuera de plazo.',
+      D(1, 4, 2027), D(31, 5, 2027),
+      'El stock fabricado y no vendido tiene dueño y decisión.',
+      '100 % del stock sin movimiento > 6 meses con decisión y responsable.',
+      depende='Reunión mensual de consenso de demanda', detalle='D-PL09'),
+    I('P2R-01', 'Automatización', 'ABC y estrategias recalculados cada trimestre',
+      'Ejecutar la transacción de ABC que ya tiene GIO y programar el recálculo trimestral, avisando de los materiales '
+      'que cambian de segmento para que Planificación los revise.',
+      D(1, 3, 2027), D(30, 4, 2027),
+      'El ABC y las estrategias están siempre al día sin trabajo manual.',
+      'Recálculo trimestral sin intervención y 100 % de materiales con segmento vigente.',
+      comite='No cambia ninguna caja: actualiza el dato que usan el plan de fabricación y la propuesta.',
+      cob=1.0, exc=0.10, depende='Criterios de segmentación y estrategia de stock', detalle='D-PL09'),
+    I('P2R-01', 'Agente', 'Agente de stock por segmento',
+      'Cada mes revisa la cobertura de cada segmento, detecta exceso, obsoleto y riesgo de rotura en MTS, y propone la '
+      'acción: ajustar el stock de seguridad, cambiar la estrategia o liquidar. Planificación aprueba.',
+      D(1, 1, 2028), D(30, 4, 2028),
+      'El stock se corrige antes de que sobre o falte.',
+      '€ de stock fuera de política −20 % en 6 meses y 0 roturas en materiales A-MTS.',
+      cajas=[('Revisión mensual de stock por segmento', NUEVA)],
+      comite='Nueva tarea mensual en S&OP y Plan Maestro: un agente revisa el stock por segmento y propone acciones.',
+      cob=0.80, exc=0.20, depende='ABC y estrategias recalculados cada trimestre', detalle='D-PL09'),
+
+    # ---------------------------------------------------------------- P2R-02 · Plan de capacidad
     I('P2R-02', 'Negocio', 'Capacidad real de extrusión y termoformado',
       'Levantar con Producción el calendario de turnos y paradas y validar los tiempos de ciclo por línea de extrusión y '
       'termoformado. El dato se mantiene en R2M; aquí se pide y se usa.',
@@ -164,40 +195,7 @@ INTERVENCIONES = [
       comite='El plan de turnos y balanceo lo propone un agente con escenarios valorados; Planificación decide.',
       cob=0.70, exc=0.30, depende='Carga frente a capacidad automática · migración de GIO a web', detalle='D-PL07'),
 
-    # ---------------------------------------------------------------- P2R-03 · Política de inventario por segmento
-    I('P2R-03', 'Negocio', 'Criterios de segmentación y estrategia de stock',
-      'Definir ABC por valor, XYZ por variabilidad y la matriz que asigna a cada segmento MTS o MTO y su stock de '
-      'seguridad. Comercial valida las estrategias.',
-      D(1, 3, 2027), D(31, 3, 2027),
-      'Cada material tiene una estrategia y un stock objetivo justificados.',
-      'Matriz aprobada por Planificación y Comercial.',
-      decidir='Cortes de ABC y XYZ · nivel de servicio por segmento', detalle='D-PL09'),
-    I('P2R-03', 'Negocio', 'Responsable del stock sin movimiento',
-      'Revisión mensual con Comercial del producto terminado sin movimiento: se decide venderlo, reprocesarlo o '
-      'depreciarlo, y se imputa a quien lo originó cuando viene de un cambio de previsión fuera de plazo.',
-      D(1, 4, 2027), D(31, 5, 2027),
-      'El stock fabricado y no vendido tiene dueño y decisión.',
-      '100 % del stock sin movimiento > 6 meses con decisión y responsable.',
-      depende='Reunión mensual de consenso de demanda', detalle='D-PL09'),
-    I('P2R-03', 'Automatización', 'ABC y estrategias recalculados cada trimestre',
-      'Ejecutar la transacción de ABC que ya tiene GIO y programar el recálculo trimestral, avisando de los materiales '
-      'que cambian de segmento para que Planificación los revise.',
-      D(1, 3, 2027), D(30, 4, 2027),
-      'El ABC y las estrategias están siempre al día sin trabajo manual.',
-      'Recálculo trimestral sin intervención y 100 % de materiales con segmento vigente.',
-      comite='No cambia ninguna caja: actualiza el dato que usan el plan de fabricación y la propuesta.',
-      cob=1.0, exc=0.10, depende='Criterios de segmentación y estrategia de stock', detalle='D-PL09'),
-    I('P2R-03', 'Agente', 'Agente de stock por segmento',
-      'Cada mes revisa la cobertura de cada segmento, detecta exceso, obsoleto y riesgo de rotura en MTS, y propone la '
-      'acción: ajustar el stock de seguridad, cambiar la estrategia o liquidar. Planificación aprueba.',
-      D(1, 1, 2028), D(30, 4, 2028),
-      'El stock se corrige antes de que sobre o falte.',
-      '€ de stock fuera de política −20 % en 6 meses y 0 roturas en materiales A-MTS.',
-      cajas=[('Revisión mensual de stock por segmento', NUEVA)],
-      comite='Nueva tarea mensual en S&OP y Plan Maestro: un agente revisa el stock por segmento y propone acciones.',
-      cob=0.80, exc=0.20, depende='ABC y estrategias recalculados cada trimestre', detalle='D-PL09'),
-
-    # ---------------------------------------------------------------- P2R-04 · Promesa de fecha fiable
+    # ---------------------------------------------------------------- P2R-04 · Promesa de fecha mediante CTP
     I('P2R-04', 'Negocio', 'Política de fecha confirmada',
       'Cada pedido lleva fecha solicitada y fecha confirmada. Planificación confirma en un plazo fijo y, si sabe que no '
       'se llega, Comercial avisa al cliente con la nueva fecha; el aviso lo ejecuta O2C.',
@@ -278,7 +276,7 @@ INTERVENCIONES = [
       comite='Las urgencias las evalúa un agente con su impacto; solo los conflictos llegan a la dirección de planta.',
       cob=0.75, exc=0.25, depende='Optimizador de secuencia', detalle='D-PL20'),
 
-    # ---------------------------------------------------------------- P2R-08 · Control del servicio y mejora continua
+    # ---------------------------------------------------------------- P2R-08 · Control del servicio
     I('P2R-08', 'Negocio', 'KPI de servicio y de adherencia',
       'Definir el OTIF contra fecha confirmada y la adherencia al programa (fórmula, fuente y frecuencia) y revisarlos '
       'cada semana con Comercial.',

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Papeleras y Cartoneras</title>
+<style>
+:root{color-scheme:light;--primary:#0d1b2a;--secondary:#1b2838;--accent:#00b4d8;--accent2:#0077b6;--bg:#f0f2f5;--card:#fff;--text:#191919;--tl:#666666;--border:#dee2e6;--grid:#e7e7e7;--axis:#c2c2c2;
+  --mgt:#257de0;--pda:#f47230;--pdo:#00b894;--ext:#aab3bd;--oa:#6a4ce2;--on:#008a17;--bar:#257de0;--muted:#c9cfd6;--warn:#fbb315;--crit:#dc3c3d;--good:#006c10;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;}
+.hero{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:24px 16px 20px;}
+.hero .in,.tabs .in,main,.mock .in{max-width:1180px;margin:0 auto;}
+.hero small{color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:2px;}
+.hero h1{font-size:26px;line-height:1.25;margin:4px 0;}
+.hero p{color:rgba(255,255,255,.7);font-size:14px;}
+.mock{background:#fff4d6;border-bottom:1px solid #f1d58a;padding:9px 16px;font-size:13.5px;color:#5a4300;}
+.mock .in{display:flex;gap:10px;align-items:center;}
+.mock b{display:inline-flex;align-items:center;gap:6px;}
+.mock b::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--warn);color:#0b0b0b;font-size:12px;font-weight:800;}
+.tabs{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.04);}
+.tabs .in{display:flex;overflow-x:auto;padding:0 16px;}
+.tabs button{flex:none;background:none;border:none;border-bottom:3px solid transparent;padding:15px 15px;font:inherit;font-size:14px;color:var(--tl);cursor:pointer;}
+.tabs button:hover{color:var(--accent2);}
+.tabs button[aria-selected="true"]{color:var(--primary);font-weight:600;border-bottom-color:var(--accent);}
+.tabs button span{display:inline-block;background:var(--bg);color:var(--tl);border-radius:10px;font-size:11px;font-weight:600;padding:1px 7px;margin-right:6px;}
+.tabs button[aria-selected="true"] span{background:var(--accent);color:#fff;}
+main{padding:22px 16px 48px;}
+.panel{animation:fi .25s;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:10px;padding:22px 24px;box-shadow:0 1px 6px rgba(0,0,0,.05);margin-bottom:18px;}
+h2{font-size:21px;color:var(--primary);margin-bottom:6px;}
+.sub{font-size:15.5px;color:#3d4756;max-width:920px;}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--tl);margin-bottom:4px;}
+.cap{font-size:13.5px;color:var(--tl);margin-bottom:12px;}
+.note{font-size:12.5px;color:var(--tl);margin-top:10px;}
+.grid2{display:grid;grid-template-columns:3fr 2fr;gap:18px;}
+.grid2>.card{margin-bottom:0;min-width:0;}
+.row{margin-bottom:18px;}
+/* Indicadores */
+.kg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+.kg.k4{grid-template-columns:repeat(4,1fr);}
+.kc{background:var(--card);border-radius:10px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,.05);border-left:4px solid var(--accent);}
+.kc.alert{border-left-color:var(--crit);}
+.kc .kl{font-size:12px;color:var(--tl);}
+.kc .kv{font-size:28px;font-weight:650;color:var(--primary);line-height:1.2;margin:4px 0 2px;}
+.kc .ks{font-size:12.5px;color:var(--tl);}
+.hero-n{font-size:52px;font-weight:650;color:var(--primary);line-height:1.1;}
+/* Gráficos */
+.chart{width:100%;overflow-x:auto;}
+.chart svg{display:block;width:100%;height:auto;min-width:620px;}
+.chart text{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;color:var(--tl);margin:2px 0 10px;}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;}
+.legend i.dot{border-radius:50%;}
+.legend i.ln{height:2px;width:16px;border-radius:1px;}
+details{margin-top:10px;font-size:13px;}
+details summary{cursor:pointer;color:var(--accent2);}
+/* Tablas */
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;font-variant-numeric:tabular-nums;}
+th{background:var(--primary);color:#fff;text-align:left;font-weight:600;padding:8px 12px;font-size:12.5px;}
+td{padding:8px 12px;border-top:1px solid var(--border);}
+tbody tr:nth-child(even) td{background:#f8f9fb;}
+td.n,th.n{text-align:right;white-space:nowrap;}
+td.k{font-weight:600;}
+td.bad{color:#b02a37;font-weight:600;}
+td.ok{color:var(--good);font-weight:600;}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:8px;}
+/* Mensajes */
+.msgs{list-style:none;counter-reset:m;}
+.msgs li{counter-increment:m;display:flex;gap:14px;padding:14px 0;border-top:1px solid var(--border);font-size:15px;}
+.msgs li:first-child{border-top:none;}
+.msgs li::before{content:counter(m);flex:none;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.msgs b{color:var(--primary);}
+/* Tooltip */
+#tip{position:fixed;pointer-events:none;background:#fff;border:1px solid rgba(11,11,11,.12);box-shadow:0 4px 14px rgba(0,0,0,.12);border-radius:8px;padding:8px 10px;font-size:12.5px;z-index:100;display:none;min-width:150px;}
+#tip .t{color:var(--tl);margin-bottom:4px;}
+#tip .r{display:flex;align-items:center;gap:8px;}
+#tip .r i{display:inline-block;width:14px;height:2px;border-radius:1px;}
+#tip .r b{font-size:13.5px;color:var(--text);}
+#tip .r span{color:var(--tl);}
+.hit{cursor:default;}
+.hit:hover,.hit:focus{opacity:.85;outline:none;}
+@media screen and (max-width:860px){.grid2,.kg,.kg.k4{grid-template-columns:1fr;}.hero h1{font-size:22px;}.card{padding:18px 16px;}}
+@page{size:A4 landscape;margin:10mm;}
+@media print{
+  body{background:#fff;zoom:.72;}
+  .tabs,#tip,details{display:none;}
+  .panel[hidden]{display:block!important;}
+  .panel{break-before:page;animation:none;}
+  .panel:first-of-type{break-before:auto;}
+  main,.hero .in{max-width:none;}main{padding:10px 0 0;}
+  .card,.kc{box-shadow:none;border:1px solid var(--border);break-inside:avoid;}
+  .chart svg{min-width:0;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="in">
+    <small>Papeleras y cartoneras del grupo</small>
+    <h1>Situación actual entre papeleras y cartoneras</h1>
+    <p>Papeleras MGT, PDA y PDO · Cartoneras Ondupack Almendralejo y Ondupack Navalmoral · últimos 12 meses (dic 2025 – nov 2026)</p>
+  </div>
+</header>
+<div class="mock"><div class="in"><b>Datos ficticios de ejemplo</b><span>Esta maqueta usa cifras inventadas. Hay que sustituirlas por los datos reales de SAP antes de presentarla.</span></div></div>
+
+<nav class="tabs" role="tablist">
+  <div class="in">
+    <button role="tab" data-t="res" aria-selected="true"><span>0</span>Resumen</button>
+    <button role="tab" data-t="mapa" aria-selected="false"><span>1</span>Mapa del grupo</button>
+    <button role="tab" data-t="serv" aria-selected="false"><span>2</span>Servicio</button>
+    <button role="tab" data-t="cap" aria-selected="false"><span>3</span>Capacidad</button>
+    <button role="tab" data-t="stock" aria-selected="false"><span>4</span>Stock y logística</button>
+    <button role="tab" data-t="coste" aria-selected="false"><span>5</span>Coste</button>
+    <button role="tab" data-t="concl" aria-selected="false"><span>6</span>Conclusiones</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ RESUMEN ============ -->
+<section class="panel" id="p-res" role="tabpanel">
+  <div class="card">
+    <h2>El grupo se abastece a sí mismo, pero sirve peor que los proveedores externos</h2>
+    <p class="sub">Las tres papeleras cubren el 79% del papel que consumen las dos cartoneras. Aun así, el servicio interno está 10 puntos por debajo del externo, y no estar integrados cuesta unos 0,9 M€ al año.</p>
+  </div>
+  <div class="kg">
+    <div class="kc"><div class="kl">Flujo interno papelera → cartonera</div><div class="kv">83.000 t/año</div><div class="ks">43,2 M€ al año · 79% del consumo de las cartoneras</div></div>
+    <div class="kc alert"><div class="kl">Entregas a tiempo y completas</div><div class="kv">81%</div><div class="ks">Papeleras del grupo · frente a un 91% de los proveedores externos</div></div>
+    <div class="kc alert"><div class="kl">Urgentes</div><div class="kv">325 al año</div><div class="ks">Unos 27 al mes · 0,37 M€ de sobrecoste</div></div>
+    <div class="kc alert"><div class="kl">Saturación de MGT</div><div class="kv">94%</div><div class="ks">Es el mayor proveedor de Almendralejo y no tiene holgura</div></div>
+    <div class="kc"><div class="kl">Stock de las cartoneras en las papeleras</div><div class="kv">4.500 t</div><div class="ks">2,3 M€ · sin acuerdo de propiedad ni límite</div></div>
+    <div class="kc alert"><div class="kl">Coste de no estar integrados</div><div class="kv">0,89 M€/año</div><div class="ks">Urgentes, almacenaje, camiones, paradas y horas manuales</div></div>
+  </div>
+</section>
+
+<!-- ============ MAPA ============ -->
+<section class="panel" id="p-mapa" role="tabpanel" hidden>
+  <div class="card">
+    <h2>MGT abastece la mitad de Almendralejo; Navalmoral reparte entre PDA y PDO</h2>
+    <p class="sub">De las 105.000 t de papel que consumen las dos cartoneras, 83.000 t (79%) vienen de papeleras del grupo. Para cada papelera, el grupo es solo entre el 21% y el 24% de su producción.</p>
+  </div>
+  <div class="card">
+    <h3>Flujo de papel al año</h3>
+    <p class="cap">Toneladas al año de cada proveedor a cada cartonera. Pasa el cursor por un flujo para ver el detalle.</p>
+    <div class="legend"><span><i style="background:var(--mgt)"></i>MGT</span><span><i style="background:var(--pda)"></i>PDA</span><span><i style="background:var(--pdo)"></i>PDO</span><span><i style="background:var(--ext)"></i>Proveedores externos</span></div>
+    <div class="chart" id="c-sankey"></div>
+    <details><summary>Ver datos</summary><div class="tw" id="t-sankey"></div></details>
+  </div>
+  <div class="card">
+    <h3>Peso del grupo en cada papelera</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Papelera</th><th class="n">Producción (t/año)</th><th class="n">A cartoneras del grupo (t/año)</th><th class="n">% al grupo</th><th class="n">A clientes externos (t/año)</th></tr></thead>
+      <tbody>
+        <tr><td class="k">MGT</td><td class="n">160.000</td><td class="n">38.000</td><td class="n">24%</td><td class="n">122.000</td></tr>
+        <tr><td class="k">PDA</td><td class="n">120.000</td><td class="n">26.000</td><td class="n">22%</td><td class="n">94.000</td></tr>
+        <tr><td class="k">PDO</td><td class="n">90.000</td><td class="n">19.000</td><td class="n">21%</td><td class="n">71.000</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Valor del flujo interno calculado a un precio medio de 520 €/t.</p>
+  </div>
+</section>
+
+<!-- ============ SERVICIO ============ -->
+<section class="panel" id="p-serv" role="tabpanel" hidden>
+  <div class="card">
+    <h2>El peor servicio está en el flujo más grande: MGT → Almendralejo, 74%</h2>
+    <p class="sub">Ninguna papelera del grupo llega al objetivo del 95% de entregas a tiempo y completas. Los proveedores externos están en el 90–92%.</p>
+  </div>
+  <div class="grid2 row">
+    <div class="card">
+      <h3>Entregas a tiempo y completas</h3>
+      <p class="cap">% de pedidos de los últimos 12 meses, por proveedor y cartonera.</p>
+      <div class="legend"><span><i class="dot" style="background:var(--oa)"></i>Ondupack Almendralejo</span><span><i class="dot" style="background:var(--on)"></i>Ondupack Navalmoral</span></div>
+      <div class="chart" id="c-otif"></div>
+    </div>
+    <div class="card">
+      <h3>Detalle por pareja</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Proveedor</th><th class="n">Almendralejo</th><th class="n">Navalmoral</th></tr></thead>
+        <tbody>
+          <tr><td class="k">MGT</td><td class="n bad">74%</td><td class="n">83%</td></tr>
+          <tr><td class="k">PDA</td><td class="n">86%</td><td class="n">82%</td></tr>
+          <tr><td class="k">PDO</td><td class="n">79%</td><td class="n">90%</td></tr>
+          <tr><td class="k">Externos</td><td class="n ok">92%</td><td class="n ok">90%</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Objetivo: 95%. Media ponderada del grupo: 81%; externos: 91%.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Urgentes al mes</h3>
+    <p class="cap">Pedidos que obligan a cambiar el ciclo de la papelera o a mandar un camión extra. Sobrecoste medio estimado: 1.150 € por urgente.</p>
+    <div class="legend"><span><i class="ln" style="background:var(--oa)"></i>Ondupack Almendralejo</span><span><i class="ln" style="background:var(--on)"></i>Ondupack Navalmoral</span></div>
+    <div class="chart" id="c-urg"></div>
+    <details><summary>Ver datos</summary><div class="tw" id="t-urg"></div></details>
+  </div>
+  <div class="kg">
+    <div class="kc alert"><div class="kl">Urgentes en 12 meses</div><div class="kv">325</div><div class="ks">198 en Almendralejo · 127 en Navalmoral</div></div>
+    <div class="kc"><div class="kl">Sobrecoste de urgentes</div><div class="kv">0,37 M€</div><div class="ks">A 1.150 € por urgente</div></div>
+    <div class="kc alert"><div class="kl">Paradas por falta de papel</div><div class="kv">74 h</div><div class="ks">46 h en Almendralejo · 28 h en Navalmoral</div></div>
+  </div>
+</section>
+
+<!-- ============ CAPACIDAD ============ -->
+<section class="panel" id="p-cap" role="tabpanel" hidden>
+  <div class="card">
+    <h2>MGT trabaja al 94%: por eso los urgentes y retrasos se concentran en Almendralejo</h2>
+    <p class="sub">PDO tiene un 21% de capacidad libre y es quien mejor sirve a Navalmoral. Hay margen para pasar parte del papel de Almendralejo de MGT a PDO.</p>
+  </div>
+  <div class="card">
+    <h3>Saturación media de los últimos 3 meses</h3>
+    <p class="cap">% de la capacidad de cada planta. En azul, las plantas por encima del 90%, donde cuesta absorber urgentes.</p>
+    <div class="chart" id="c-sat"></div>
+    <details><summary>Ver datos</summary><div class="tw" id="t-sat"></div></details>
+  </div>
+</section>
+
+<!-- ============ STOCK Y LOGÍSTICA ============ -->
+<section class="panel" id="p-stock" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Hay stock, pero en el sitio equivocado</h2>
+    <p class="sub">Almendralejo trabaja con 9 días de cobertura, por debajo del objetivo de 10, mientras 3.200 t suyas esperan en MGT. El 18% de ese stock lleva más de 60 días.</p>
+  </div>
+  <div class="kg k4">
+    <div class="kc alert"><div class="kl">Cobertura en Almendralejo</div><div class="kv">9 días</div><div class="ks">Objetivo: 10 días</div></div>
+    <div class="kc"><div class="kl">Cobertura en Navalmoral</div><div class="kv">14 días</div><div class="ks">Objetivo: 10 días</div></div>
+    <div class="kc"><div class="kl">Stock de bobinas en la cadena</div><div class="kv">7.700 t</div><div class="ks">4,0 M€ inmovilizados</div></div>
+    <div class="kc alert"><div class="kl">Stock en MGT con más de 60 días</div><div class="kv">18%</div><div class="ks">Unas 580 t · antigüedad media 38 días</div></div>
+  </div>
+  <div class="grid2 row">
+    <div class="card">
+      <h3>Stock de las cartoneras guardado en las papeleras</h3>
+      <p class="cap">Toneladas y valor a 520 €/t.</p>
+      <div class="chart" id="c-stock"></div>
+      <details><summary>Ver datos</summary><div class="tw" id="t-stock"></div></details>
+    </div>
+    <div class="card">
+      <h3>Logística y proceso</h3>
+      <div class="tw"><table>
+        <tbody>
+          <tr><td class="k">Camiones al mes</td><td class="n">≈ 290</td></tr>
+          <tr><td class="k">Camiones con carga completa</td><td class="n bad">80%</td></tr>
+          <tr><td class="k">Camiones urgentes al mes</td><td class="n">27</td></tr>
+          <tr><td class="k">Coste medio de transporte</td><td class="n">18 €/t</td></tr>
+          <tr><td class="k">Horas a la semana grabando pedidos y cruzando correos</td><td class="n">49 h</td></tr>
+          <tr><td class="k">Incidencias en pedidos y facturas entre empresas</td><td class="n">22 al mes</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">Las 49 h semanales (≈ 1,3 personas a tiempo completo) se reparten entre las cinco plantas: Almendralejo 14, Navalmoral 11, MGT 10, PDA 8 y PDO 6.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COSTE ============ -->
+<section class="panel" id="p-coste" role="tabpanel" hidden>
+  <div class="card">
+    <h2>No estar integrados cuesta unos 0,9 M€ al año</h2>
+    <p class="sub">Más de la mitad viene de los urgentes y del almacenaje de stock de las cartoneras en las papeleras. Además, hay 2,3 M€ de stock inmovilizado en las papeleras.</p>
+  </div>
+  <div class="grid2 row">
+    <div class="card">
+      <h3>Coste anual estimado, por partida</h3>
+      <p class="cap">M€ al año.</p>
+      <div class="chart" id="c-coste"></div>
+      <details><summary>Ver datos</summary><div class="tw" id="t-coste"></div></details>
+    </div>
+    <div class="card">
+      <h3>Total estimado</h3>
+      <div class="hero-n">0,89 M€</div>
+      <p class="cap">al año</p>
+      <h3 style="margin-top:14px">Supuestos</h3>
+      <ul style="font-size:13.5px;color:#3d4756;padding-left:18px">
+        <li>Urgentes: 325 al año a 1.150 € cada uno.</li>
+        <li>Almacenaje: 4.500 t a 4 €/t al mes.</li>
+        <li>Camiones incompletos: el 20% de unos 3.500 camiones al año, con un 40% de capacidad sin usar a 18 €/t.</li>
+        <li>Paradas: 74 h al año a 1.500 €/h de onduladora parada.</li>
+        <li>Horas manuales: 49 h a la semana a 30 €/h.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONCLUSIONES ============ -->
+<section class="panel" id="p-concl" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Conclusiones</h2>
+    <ul class="msgs">
+      <li><div><b>El grupo se autoabastece en un 79%,</b> pero sirve peor que los proveedores externos: 81% de entregas a tiempo y completas frente a un 91%.</div></li>
+      <li><div><b>MGT está al 94% de su capacidad</b> y es el mayor proveedor de Almendralejo. Ahí se concentran el peor servicio (74%), la mayoría de urgentes y las paradas.</div></li>
+      <li><div><b>PDO tiene capacidad libre</b> (79% de saturación) y el mejor servicio interno. Hay margen para reequilibrar el suministro.</div></li>
+      <li><div><b>Hay 4.500 t de stock de las cartoneras en las papeleras</b> (2,3 M€) sin acuerdo de propiedad ni límite, mientras Almendralejo trabaja por debajo de su cobertura objetivo.</div></li>
+      <li><div><b>No estar integrados cuesta unos 0,9 M€ al año,</b> sin contar el coste financiero del stock inmovilizado.</div></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Siguiente paso</h3>
+    <p style="font-size:15px">Decidir el modelo de integración entre los dos escenarios ya analizados para MGT–Ondupack Almendralejo: activar la integración SAP con sistema pull, o crear un departamento de planificación común. Después, extenderlo al resto de papeleras y cartoneras del grupo.</p>
+  </div>
+</section>
+
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+// ---------- Datos (ficticios) ----------
+const C = {MGT:'#257de0', PDA:'#f47230', PDO:'#00b894', Externos:'#aab3bd', OA:'#6a4ce2', ON:'#008a17'};
+const NAME = {OA:'Ondupack Almendralejo', ON:'Ondupack Navalmoral'};
+const flows = [
+  ['MGT','OA',30000],['MGT','ON',8000],['PDA','OA',12000],['PDA','ON',14000],
+  ['PDO','OA',6000],['PDO','ON',13000],['Externos','OA',12000],['Externos','ON',10000]];
+const otif = [['MGT',74,83],['PDA',86,82],['PDO',79,90],['Externos',92,90]];
+const months = ['Dic','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov'];
+const urg = {OA:[14,12,16,15,18,17,20,13,15,19,21,18], ON:[9,8,11,10,12,9,14,8,10,13,12,11]};
+const sat = [['Papeleras','MGT',94],['Papeleras','PDA',88],['Papeleras','PDO',79],['Cartoneras','Ondupack Almendralejo',86],['Cartoneras','Ondupack Navalmoral',72]];
+const stock = [['MGT',3200],['PDA',900],['PDO',400]];
+const coste = [['Urgentes',0.37],['Almacenaje del stock en papeleras',0.22],['Camiones incompletos',0.12],['Paradas por falta de papel',0.11],['Horas de gestión manual',0.07]];
+
+// ---------- Utilidades ----------
+const NS = 'http://www.w3.org/2000/svg';
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const dec = (n, d = 2) => n.toFixed(d).replace('.', ',');
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function txt(parent, x, y, s, attrs = {}) {
+  const t = el('text', {x, y, 'font-size': 12, fill: '#666666', ...attrs}, parent);
+  t.textContent = s;
+  return t;
+}
+function svg(id, w, h, label) {
+  const s = el('svg', {viewBox: `0 0 ${w} ${h}`, role: 'img', 'aria-label': label});
+  document.getElementById(id).appendChild(s);
+  return s;
+}
+// Tooltip (texto con textContent)
+const tip = document.getElementById('tip');
+function showTip(ev, title, rows) {
+  tip.replaceChildren();
+  const t = document.createElement('div'); t.className = 't'; t.textContent = title; tip.appendChild(t);
+  for (const [color, value, label] of rows) {
+    const r = document.createElement('div'); r.className = 'r';
+    const i = document.createElement('i'); i.style.background = color; r.appendChild(i);
+    const b = document.createElement('b'); b.textContent = value; r.appendChild(b);
+    if (label) { const sp = document.createElement('span'); sp.textContent = label; r.appendChild(sp); }
+    tip.appendChild(r);
+  }
+  tip.style.display = 'block';
+  const x = ev.clientX ?? (ev.target.getBoundingClientRect().left + 10);
+  const y = ev.clientY ?? (ev.target.getBoundingClientRect().top + 10);
+  const w = tip.offsetWidth;
+  tip.style.left = Math.min(x + 14, window.innerWidth - w - 8) + 'px';
+  tip.style.top = (y + 14) + 'px';
+}
+const hideTip = () => { tip.style.display = 'none'; };
+function hover(node, title, rows) {
+  node.setAttribute('class', 'hit'); node.setAttribute('tabindex', '0');
+  node.addEventListener('pointermove', e => showTip(e, title, rows));
+  node.addEventListener('pointerleave', hideTip);
+  node.addEventListener('focus', e => showTip(e, title, rows));
+  node.addEventListener('blur', hideTip);
+}
+function table(id, head, rows, numFrom = 1) {
+  const tb = document.createElement('table');
+  const th = tb.createTHead().insertRow();
+  head.forEach((h, i) => { const c = document.createElement('th'); c.textContent = h; if (i >= numFrom) c.className = 'n'; th.appendChild(c); });
+  const body = tb.createTBody();
+  rows.forEach(r => { const tr = body.insertRow(); r.forEach((v, i) => { const c = tr.insertCell(); c.textContent = v; if (i >= numFrom) c.className = 'n'; }); });
+  document.getElementById(id).appendChild(tb);
+}
+// Barra horizontal con extremo de datos redondeado (4 px) y base recta
+function hbar(parent, x, y, w, h, fill) {
+  const r = Math.min(4, w / 2);
+  return el('path', {d: `M${x} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x}Z`, fill}, parent);
+}
+
+// ---------- 1. Mapa: diagrama de flujos ----------
+(function () {
+  const W = 940, H = 390, nw = 14, lx = 150, rx = W - 210 - nw, top = 10, gapL = 16;
+  const srcs = ['MGT', 'PDA', 'PDO', 'Externos'], tgts = ['OA', 'ON'];
+  const total = flows.reduce((s, f) => s + f[2], 0);
+  const k = (H - 2 * top - gapL * (srcs.length - 1)) / total;
+  const gapR = H - 2 * top - total * k;
+  const s = svg('c-sankey', W, H, 'Flujo anual de papel de cada proveedor a cada cartonera');
+  const sum = (key, i) => flows.filter(f => f[i] === key).reduce((a, f) => a + f[2], 0);
+  const sy = {}, ty = {};
+  let y = top; srcs.forEach(n => { sy[n] = y; y += sum(n, 0) * k + gapL; });
+  y = top; tgts.forEach(n => { ty[n] = y; y += sum(n, 1) * k + gapR; });
+  const so = {...sy}, to = {...ty};
+  const links = el('g', {}, s);
+  for (const n of srcs) for (const t of tgts) {
+    const f = flows.find(f => f[0] === n && f[1] === t); if (!f) continue;
+    const h = f[2] * k, x0 = lx + nw, x1 = rx, xm = (x0 + x1) / 2;
+    const y0 = so[n], y1 = to[t]; so[n] += h; to[t] += h;
+    const p = el('path', {d: `M${x0} ${y0}C${xm} ${y0} ${xm} ${y1} ${x1} ${y1}V${y1 + h}C${xm} ${y1 + h} ${xm} ${y0 + h} ${x0} ${y0 + h}Z`,
+      fill: C[n], 'fill-opacity': 0.32}, links);
+    const share = Math.round(100 * f[2] / sum(t, 1));
+    hover(p, `${n} → ${NAME[t]}`, [[C[n], `${fmt(f[2])} t/año`, `${share}% de su consumo`]]);
+    p.addEventListener('pointerenter', () => p.setAttribute('fill-opacity', 0.55));
+    p.addEventListener('pointerleave', () => p.setAttribute('fill-opacity', 0.32));
+  }
+  srcs.forEach(n => {
+    const v = sum(n, 0), h = v * k;
+    el('rect', {x: lx, y: sy[n], width: nw, height: h, rx: 2, fill: C[n]}, s);
+    txt(s, lx - 10, sy[n] + h / 2 - 2, n === 'Externos' ? 'Externos' : n, {'text-anchor': 'end', 'font-size': 13.5, 'font-weight': 650, fill: '#191919'});
+    txt(s, lx - 10, sy[n] + h / 2 + 14, `${fmt(v)} t`, {'text-anchor': 'end'});
+  });
+  tgts.forEach(t => {
+    const v = sum(t, 1), h = v * k, grp = v - flows.filter(f => f[1] === t && f[0] === 'Externos')[0][2];
+    el('rect', {x: rx, y: ty[t], width: nw, height: h, rx: 2, fill: '#1b2838'}, s);
+    txt(s, rx + nw + 10, ty[t] + h / 2 - 2, NAME[t], {'font-size': 13.5, 'font-weight': 650, fill: '#191919'});
+    txt(s, rx + nw + 10, ty[t] + h / 2 + 14, `${fmt(v)} t · ${Math.round(100 * grp / v)}% del grupo`);
+  });
+  table('t-sankey', ['Proveedor', 'Cartonera', 't/año', '% de su consumo'],
+    flows.map(f => [f[0], NAME[f[1]], fmt(f[2]), Math.round(100 * f[2] / sum(f[1], 1)) + '%']), 2);
+})();
+
+// ---------- 2a. Servicio: puntos por proveedor ----------
+(function () {
+  const W = 640, rowH = 54, top = 30, H = top + rowH * otif.length + 34, l = 92, r = 24, x0 = 60, x1 = 100;
+  const X = v => l + (v - x0) / (x1 - x0) * (W - l - r);
+  const s = svg('c-otif', W, H, 'Entregas a tiempo y completas por proveedor y cartonera');
+  [60, 70, 80, 90, 100].forEach(v => {
+    el('line', {x1: X(v), x2: X(v), y1: top - 8, y2: H - 30, stroke: '#e7e7e7'}, s);
+    txt(s, X(v), H - 12, v + '%', {'text-anchor': 'middle', 'font-size': 11.5});
+  });
+  el('line', {x1: X(95), x2: X(95), y1: top - 14, y2: H - 30, stroke: '#191919', 'stroke-width': 1.25, 'stroke-dasharray': '4 3'}, s);
+  txt(s, X(95), top - 18, 'Objetivo 95%', {'text-anchor': 'middle', 'font-size': 11.5, fill: '#191919'});
+  otif.forEach(([n, a, b], i) => {
+    const y = top + rowH * i + rowH / 2;
+    if (n === 'Externos') el('line', {x1: 0, x2: W, y1: y - rowH / 2, y2: y - rowH / 2, stroke: '#e7e7e7'}, s);
+    txt(s, 0, y + 4, n, {'font-size': 13, 'font-weight': 650, fill: '#191919'});
+    el('line', {x1: X(Math.min(a, b)), x2: X(Math.max(a, b)), y1: y, y2: y, stroke: '#c2c2c2', 'stroke-width': 2}, s);
+    [['OA', a], ['ON', b]].forEach(([t, v]) => {
+      const g = el('g', {}, s);
+      el('circle', {cx: X(v), cy: y, r: 12, fill: 'transparent'}, g);
+      el('circle', {cx: X(v), cy: y, r: 6.5, fill: C[t], stroke: '#fff', 'stroke-width': 2}, g);
+      hover(g, `${n} → ${NAME[t]}`, [[C[t], v + '%', 'a tiempo y completo']]);
+    });
+    if (n === 'MGT') txt(s, X(a), y - 13, a + '%', {'text-anchor': 'middle', 'font-size': 12, 'font-weight': 650, fill: '#191919'});
+  });
+})();
+
+// ---------- 2b. Urgentes: líneas por mes ----------
+(function () {
+  const W = 940, H = 280, l = 40, r = 150, top = 16, bot = 30, ymax = 25;
+  const X = i => l + i * (W - l - r) / (months.length - 1), Y = v => top + (1 - v / ymax) * (H - top - bot);
+  const s = svg('c-urg', W, H, 'Urgentes al mes en cada cartonera');
+  [0, 5, 10, 15, 20, 25].forEach(v => {
+    el('line', {x1: l, x2: W - r, y1: Y(v), y2: Y(v), stroke: v ? '#e7e7e7' : '#c2c2c2'}, s);
+    txt(s, l - 8, Y(v) + 4, v, {'text-anchor': 'end', 'font-size': 11.5});
+  });
+  months.forEach((m, i) => txt(s, X(i), H - 10, m, {'text-anchor': 'middle', 'font-size': 11.5}));
+  const cross = el('line', {x1: 0, x2: 0, y1: top, y2: H - bot, stroke: '#c2c2c2', visibility: 'hidden'}, s);
+  ['OA', 'ON'].forEach(t => {
+    const pts = urg[t].map((v, i) => `${X(i)},${Y(v)}`).join(' ');
+    el('polyline', {points: pts, fill: 'none', stroke: C[t], 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'}, s);
+    const last = urg[t].length - 1, v = urg[t][last];
+    el('circle', {cx: X(last), cy: Y(v), r: 4.5, fill: C[t], stroke: '#fff', 'stroke-width': 2}, s);
+    txt(s, X(last) + 12, Y(v) + 4, `${NAME[t].replace('Ondupack ', '')} · ${v}`, {'font-size': 12.5, fill: '#191919'});
+  });
+  const dots = ['OA', 'ON'].map(t => el('circle', {r: 4.5, fill: C[t], stroke: '#fff', 'stroke-width': 2, visibility: 'hidden'}, s));
+  const hit = el('rect', {x: l, y: top, width: W - l - r, height: H - top - bot, fill: 'transparent', tabindex: 0}, s);
+  const at = i => {
+    cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i)); cross.setAttribute('visibility', 'visible');
+    ['OA', 'ON'].forEach((t, k) => { dots[k].setAttribute('cx', X(i)); dots[k].setAttribute('cy', Y(urg[t][i])); dots[k].setAttribute('visibility', 'visible'); });
+  };
+  hit.addEventListener('pointermove', e => {
+    const b = s.getBoundingClientRect(), px = (e.clientX - b.left) * W / b.width;
+    const i = Math.max(0, Math.min(months.length - 1, Math.round((px - l) / ((W - l - r) / (months.length - 1)))));
+    at(i);
+    showTip(e, months[i] + (i === 0 ? ' 2025' : ' 2026'), [[C.OA, urg.OA[i], 'Almendralejo'], [C.ON, urg.ON[i], 'Navalmoral']]);
+  });
+  hit.addEventListener('pointerleave', () => { hideTip(); cross.setAttribute('visibility', 'hidden'); dots.forEach(d => d.setAttribute('visibility', 'hidden')); });
+  table('t-urg', ['Mes', 'Almendralejo', 'Navalmoral'], months.map((m, i) => [m, urg.OA[i], urg.ON[i]]));
+})();
+
+// ---------- 3. Capacidad: barras horizontales ----------
+(function () {
+  const W = 940, rowH = 40, l = 200, r = 60, top = 26;
+  const rows = [], H0 = top;
+  let y = top; let lastGrp = '';
+  sat.forEach(([g, n, v]) => { if (g !== lastGrp) { rows.push({head: g, y}); y += 26; lastGrp = g; } rows.push({n, v, y}); y += rowH; });
+  const H = y + 26, X = v => l + v / 100 * (W - l - r);
+  const s = svg('c-sat', W, H, 'Saturación de cada planta');
+  [0, 25, 50, 75, 100].forEach(v => {
+    el('line', {x1: X(v), x2: X(v), y1: top - 6, y2: H - 24, stroke: v ? '#e7e7e7' : '#c2c2c2'}, s);
+    txt(s, X(v), H - 8, v + '%', {'text-anchor': 'middle', 'font-size': 11.5});
+  });
+  el('line', {x1: X(90), x2: X(90), y1: top - 14, y2: H - 24, stroke: '#191919', 'stroke-width': 1.25, 'stroke-dasharray': '4 3'}, s);
+  txt(s, X(90), top - 18, '90%', {'text-anchor': 'middle', 'font-size': 11.5, fill: '#191919'});
+  rows.forEach(rw => {
+    if (rw.head) { txt(s, 0, rw.y + 16, rw.head.toUpperCase(), {'font-size': 11, 'font-weight': 700, 'letter-spacing': 1}); return; }
+    const by = rw.y + (rowH - 22) / 2;
+    txt(s, 0, by + 15, rw.n, {'font-size': 13, 'font-weight': 600, fill: '#191919'});
+    const b = hbar(s, X(0), by, X(rw.v) - X(0), 22, rw.v >= 90 ? '#257de0' : '#c9cfd6');
+    hover(b, rw.n, [[rw.v >= 90 ? '#257de0' : '#9aa5b1', rw.v + '%', 'de saturación']]);
+    txt(s, X(rw.v) + 8, by + 15, rw.v + '%', {'font-size': 12.5, 'font-weight': 650, fill: '#191919', stroke: '#fff', 'stroke-width': 5, 'paint-order': 'stroke'});
+  });
+  table('t-sat', ['Tipo', 'Planta', 'Saturación'], sat.map(([g, n, v]) => [g, n, v + '%']), 2);
+})();
+
+// ---------- 4. Stock en papeleras ----------
+(function () {
+  const W = 620, rowH = 46, l = 70, r = 150, top = 8, H = top + rowH * stock.length + 6, max = 3200;
+  const X = v => l + v / max * (W - l - r);
+  const s = svg('c-stock', W, H, 'Stock de las cartoneras guardado en cada papelera');
+  stock.forEach(([n, v], i) => {
+    const by = top + i * rowH + (rowH - 22) / 2;
+    txt(s, 0, by + 15, n, {'font-size': 13, 'font-weight': 650, fill: '#191919'});
+    const b = hbar(s, X(0), by, X(v) - X(0), 22, '#257de0');
+    hover(b, `Stock de cartoneras en ${n}`, [['#257de0', `${fmt(v)} t`, `${dec(v * 520 / 1e6)} M€`]]);
+    txt(s, X(v) + 8, by + 15, `${fmt(v)} t · ${dec(v * 520 / 1e6, 1)} M€`, {'font-size': 12.5, fill: '#191919'});
+  });
+  el('line', {x1: l, x2: l, y1: 0, y2: H, stroke: '#c2c2c2'}, s);
+  table('t-stock', ['Papelera', 't', 'M€'], stock.map(([n, v]) => [n, fmt(v), dec(v * 520 / 1e6)]));
+})();
+
+// ---------- 5. Coste por partida ----------
+(function () {
+  const W = 620, rowH = 44, l = 230, r = 70, top = 6, H = top + rowH * coste.length + 4, max = 0.4;
+  const X = v => l + v / max * (W - l - r);
+  const s = svg('c-coste', W, H, 'Coste anual estimado de no estar integrados, por partida');
+  coste.forEach(([n, v], i) => {
+    const by = top + i * rowH + (rowH - 22) / 2;
+    txt(s, 0, by + 15, n, {'font-size': 12.5, fill: '#191919'});
+    const b = hbar(s, X(0), by, X(v) - X(0), 22, '#257de0');
+    hover(b, n, [['#257de0', dec(v) + ' M€', 'al año']]);
+    txt(s, X(v) + 8, by + 15, dec(v) + ' M€', {'font-size': 12.5, 'font-weight': 650, fill: '#191919'});
+  });
+  el('line', {x1: l, x2: l, y1: 0, y2: H, stroke: '#c2c2c2'}, s);
+  table('t-coste', ['Partida', 'M€/año'], [...coste.map(([n, v]) => [n, dec(v)]), ['Total', dec(coste.reduce((a, c) => a + c[1], 0))]]);
+})();
+
+// ---------- Pestañas ----------
+const tabs = [...document.querySelectorAll('[role=tab]')];
+function show(id) {
+  tabs.forEach(t => {
+    const on = t.dataset.t === id;
+    t.setAttribute('aria-selected', on);
+    document.getElementById('p-' + t.dataset.t).hidden = !on;
+  });
+  hideTip();
+}
+tabs.forEach(t => t.addEventListener('click', () => {
+  show(t.dataset.t);
+  try { history.replaceState(null, '', '#' + t.dataset.t); } catch (e) {}
+  window.scrollTo({ top: 0 });
+}));
+const start = location.hash.slice(1);
+show(tabs.some(t => t.dataset.t === start) ? start : 'res');
+</script>
+</body>
+</html>

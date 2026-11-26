@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mapa, Almacén y Capacidad</title>
+<style>
+:root{color-scheme:light;--primary:#0d1b2a;--secondary:#1b2838;--accent:#00b4d8;--accent2:#0077b6;--bg:#f0f2f5;--card:#fff;--text:#191919;--tl:#666666;--border:#dee2e6;--warn:#fbb315;--crit:#dc3c3d;--good:#006c10;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;}
+.hero{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:24px 16px 20px;}
+.hero .in,.tabs .in,main,.mock .in{max-width:1180px;margin:0 auto;}
+.hero small{color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:2px;}
+.hero h1{font-size:26px;line-height:1.25;margin:4px 0;}
+.hero p{color:rgba(255,255,255,.7);font-size:14px;}
+.mock{background:#fff4d6;border-bottom:1px solid #f1d58a;padding:9px 16px;font-size:13.5px;color:#5a4300;}
+.mock .in{display:flex;gap:10px;align-items:center;}
+.mock b{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.mock b::before{content:'!';display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--warn);color:#0b0b0b;font-size:12px;font-weight:800;}
+.tabs{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.04);}
+.tabs .in{display:flex;overflow-x:auto;padding:0 16px;}
+.tabs button{flex:none;background:none;border:none;border-bottom:3px solid transparent;padding:15px 14px;font:inherit;font-size:14px;color:var(--tl);cursor:pointer;}
+.tabs button:hover{color:var(--accent2);}
+.tabs button[aria-selected="true"]{color:var(--primary);font-weight:600;border-bottom-color:var(--accent);}
+.tabs button span{display:inline-block;background:var(--bg);color:var(--tl);border-radius:10px;font-size:11px;font-weight:600;padding:1px 7px;margin-right:6px;}
+.tabs button[aria-selected="true"] span{background:var(--accent);color:#fff;}
+main{padding:22px 16px 48px;}
+.panel{animation:fi .25s;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:10px;padding:22px 24px;box-shadow:0 1px 6px rgba(0,0,0,.05);margin-bottom:18px;}
+h2{font-size:21px;color:var(--primary);margin-bottom:6px;}
+.sub{font-size:15.5px;color:#3d4756;max-width:940px;}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--tl);margin-bottom:4px;}
+.cap{font-size:13.5px;color:var(--tl);margin-bottom:12px;}
+.note{font-size:12.5px;color:var(--tl);margin-top:10px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.grid2.wide{grid-template-columns:3fr 2fr;}
+.grid2>.card{margin-bottom:0;min-width:0;}
+.row{margin-bottom:18px;}
+.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+.kg.k3{grid-template-columns:repeat(3,1fr);}
+.kc{background:var(--card);border-radius:10px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,.05);border-left:4px solid var(--accent);}
+.kc.alert{border-left-color:var(--crit);}
+.kc .kl{font-size:12px;color:var(--tl);}
+.kc .kv{font-size:28px;font-weight:650;color:var(--primary);line-height:1.2;margin:4px 0 2px;}
+.kc .ks{font-size:12.5px;color:var(--tl);}
+.chart{width:100%;overflow-x:auto;}
+.chart svg{display:block;width:100%;height:auto;min-width:480px;}
+.chart text{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;color:var(--tl);margin:2px 0 10px;}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;}
+.legend i.dot{border-radius:50%;}
+details{margin-top:10px;font-size:13px;}
+details summary{cursor:pointer;color:var(--accent2);}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px;font-variant-numeric:tabular-nums;}
+th{background:var(--primary);color:#fff;text-align:left;font-weight:600;padding:8px 12px;font-size:12.5px;}
+td{padding:8px 12px;border-top:1px solid var(--border);}
+tbody tr:nth-child(even) td{background:#f8f9fb;}
+td.n,th.n{text-align:right;white-space:nowrap;}
+td.k{font-weight:600;}
+td.bad{color:#b02a37;font-weight:600;}
+td.ok{color:var(--good);font-weight:600;}
+tr.tot td{font-weight:700;background:#eef2f6!important;}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:8px;}
+/* Mapa de calor */
+table.heat td.h{text-align:center;font-weight:600;border:2px solid #fff;}
+table.heat tr.co td{background:#eef2f6;font-weight:700;}
+table.heat tr.co td.h{border-color:#eef2f6;}
+.scale{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--tl);margin-top:10px;flex-wrap:wrap;}
+.scale .bar{display:flex;height:10px;border-radius:3px;overflow:hidden;}
+.scale .bar i{display:block;width:18px;}
+#tip{position:fixed;pointer-events:none;background:#fff;border:1px solid rgba(11,11,11,.12);box-shadow:0 4px 14px rgba(0,0,0,.12);border-radius:8px;padding:8px 10px;font-size:12.5px;z-index:100;display:none;min-width:150px;}
+#tip .t{color:var(--tl);margin-bottom:4px;}
+#tip .r{display:flex;align-items:center;gap:8px;}
+#tip .r i{display:inline-block;width:14px;height:2px;border-radius:1px;}
+#tip .r b{font-size:13.5px;color:var(--text);}
+#tip .r span{color:var(--tl);}
+.hit{cursor:default;}
+.hit:hover,.hit:focus{opacity:.85;outline:none;}
+@media screen and (max-width:860px){.grid2,.grid2.wide,.kg,.kg.k3{grid-template-columns:1fr;}.hero h1{font-size:22px;}.card{padding:18px 16px;}.mock .in{flex-direction:column;align-items:flex-start;gap:2px;}}
+@page{size:A4 landscape;margin:10mm;}
+@media print{
+  body{background:#fff;zoom:.72;}
+  .tabs,#tip,details{display:none;}
+  .panel[hidden]{display:block!important;}
+  .panel{break-before:page;animation:none;}
+  .panel:first-of-type{break-before:auto;}
+  main,.hero .in{max-width:none;}main{padding:10px 0 0;}
+  .card,.kc{box-shadow:none;border:1px solid var(--border);break-inside:avoid;}
+  .chart svg{min-width:0;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="in">
+    <small>Papeleras y cartoneras del grupo</small>
+    <h1>Mapa del grupo, almacén intermedio y capacidad de las papeleras</h1>
+    <p>Papeleras MGT, PDA y PDO · Cartoneras Ondupack Almendralejo y Ondupack Navalmoral · Almacén intermedio de PDO · últimos 12 meses y cartera a 26 de noviembre de 2026</p>
+  </div>
+</header>
+<div class="mock"><div class="in"><b>Datos ficticios de ejemplo</b><span>Esta maqueta usa cifras inventadas. Hay que sustituirlas por los datos reales de SAP antes de presentarla.</span></div></div>
+
+<nav class="tabs" role="tablist">
+  <div class="in">
+    <button role="tab" data-t="mapa" aria-selected="true"><span>1</span>Mapa del grupo</button>
+    <button role="tab" data-t="coste" aria-selected="false"><span>2</span>Coste del almacén</button>
+    <button role="tab" data-t="serv" aria-selected="false"><span>3</span>Almacén frente a PDO</button>
+    <button role="tab" data-t="sat" aria-selected="false"><span>4</span>Saturación con la cartera</button>
+    <button role="tab" data-t="fam" aria-selected="false"><span>5</span>Familias por máquina</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ 1. MAPA ============ -->
+<section class="panel" id="p-mapa" role="tabpanel">
+  <div class="card">
+    <h2>Las cartoneras del grupo son solo el 22% de lo que producen las papeleras</h2>
+    <p class="sub">De las 370.000 t que producen MGT, PDA y PDO, 83.000 t van a las dos Ondupack y 287.000 t a otros clientes. Las cartoneras, en cambio, dependen del grupo para el 79% de su papel.</p>
+  </div>
+  <div class="card">
+    <h3>Flujo de papel al año</h3>
+    <p class="cap">Toneladas al año de cada papelera y de los proveedores externos a cada destino. Pasa el cursor por un flujo para ver el detalle.</p>
+    <div class="legend"><span><i style="background:#257de0"></i>MGT</span><span><i style="background:#f47230"></i>PDA</span><span><i style="background:#00b894"></i>PDO</span><span><i style="background:#aab3bd"></i>Proveedores externos</span></div>
+    <div class="chart" id="c-sankey"></div>
+    <details><summary>Ver datos</summary><div class="tw" id="t-sankey"></div></details>
+  </div>
+</section>
+
+<!-- ============ 2. COSTE DEL ALMACÉN ============ -->
+<section class="panel" id="p-coste" role="tabpanel" hidden>
+  <div class="card">
+    <h2>El almacén intermedio cuesta 450.000 € al año: 15 € por cada tonelada que pasa por él</h2>
+    <p class="sub">240.000 € son fijos (el alquiler) y se pagan pase lo que pase. Los otros 210.000 € son variables: 7 €/t por llevar el papel al almacén en lugar de directo al cliente.</p>
+  </div>
+  <div class="kg">
+    <div class="kc"><div class="kl">Coste fijo</div><div class="kv">240.000 €</div><div class="ks">Alquiler anual · 20.000 € al mes</div></div>
+    <div class="kc"><div class="kl">Coste variable</div><div class="kv">210.000 €</div><div class="ks">7 €/t × 30.000 t al año</div></div>
+    <div class="kc alert"><div class="kl">Coste total</div><div class="kv">450.000 €</div><div class="ks">Al año</div></div>
+    <div class="kc"><div class="kl">Coste por tonelada</div><div class="kv">15 €/t</div><div class="ks">Sobre las 30.000 t que pasan por el almacén</div></div>
+  </div>
+  <div class="grid2 wide row">
+    <div class="card">
+      <h3>Coste mensual del almacén</h3>
+      <p class="cap">Miles de euros al mes. El fijo no cambia; el variable sigue a las toneladas que pasan por el almacén.</p>
+      <div class="legend"><span><i style="background:#257de0"></i>Fijo (alquiler)</span><span><i style="background:#f47230"></i>Variable (desvío al almacén)</span></div>
+      <div class="chart" id="c-mes"></div>
+      <details><summary>Ver datos</summary><div class="tw" id="t-mes"></div></details>
+    </div>
+    <div class="card">
+      <h3>Desglose anual</h3>
+      <div class="tw"><table>
+        <thead><tr><th>Concepto</th><th class="n">€/t</th><th class="n">€ al año</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Alquiler del almacén</td><td class="n">8,0</td><td class="n">240.000</td></tr>
+          <tr><td class="k">Transporte adicional papelera → almacén</td><td class="n">4,5</td><td class="n">135.000</td></tr>
+          <tr><td class="k">Manipulación de entrada y salida</td><td class="n">2,5</td><td class="n">75.000</td></tr>
+          <tr class="tot"><td>Total</td><td class="n">15,0</td><td class="n">450.000</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">El €/t del alquiler se reparte sobre las 30.000 t al año. Con menos volumen, cada tonelada sale más cara: a 20.000 t serían 19 €/t.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. ALMACÉN FRENTE A PDO ============ -->
+<section class="panel" id="p-serv" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Desde el almacén se sirve en 1,8 días y con un 95% de servicio; desde PDO, en 7,0 días y con un 88%</h2>
+    <p class="sub">El almacén compra servicio: 5,2 días menos y 7 puntos más de entregas a tiempo y completas. La mayor diferencia está en Almendralejo, donde lo servido directo desde PDO solo llega a tiempo el 74% de las veces.</p>
+  </div>
+  <div class="kg">
+    <div class="kc"><div class="kl">Tiempo medio desde el almacén</div><div class="kv">1,8 días</div><div class="ks">30.000 t al año</div></div>
+    <div class="kc alert"><div class="kl">Tiempo medio desde PDO</div><div class="kv">7,0 días</div><div class="ks">60.000 t al año</div></div>
+    <div class="kc"><div class="kl">Servicio desde el almacén</div><div class="kv">95%</div><div class="ks">Pedidos a tiempo y completos</div></div>
+    <div class="kc alert"><div class="kl">Servicio desde PDO</div><div class="kv">88%</div><div class="ks">Pedidos a tiempo y completos</div></div>
+  </div>
+  <div class="grid2 row">
+    <div class="card">
+      <h3>Tiempo medio de servicio</h3>
+      <p class="cap">Días desde el pedido hasta la entrega, según desde dónde se expide.</p>
+      <div class="legend"><span><i style="background:#6a4ce2"></i>Desde el almacén</span><span><i style="background:#00b894"></i>Directo desde PDO</span></div>
+      <div class="chart" id="c-lead"></div>
+      <details><summary>Ver datos</summary><div class="tw" id="t-lead"></div></details>
+    </div>
+    <div class="card">
+      <h3>Pedidos servidos a tiempo y completos</h3>
+      <p class="cap">% de pedidos de los últimos 12 meses, según desde dónde se expide.</p>
+      <div class="legend"><span><i class="dot" style="background:#6a4ce2"></i>Desde el almacén</span><span><i class="dot" style="background:#00b894"></i>Directo desde PDO</span></div>
+      <div class="chart" id="c-otif"></div>
+      <details><summary>Ver datos</summary><div class="tw" id="t-otif"></div></details>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Detalle por destino</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Destino</th><th class="n">t/año desde almacén</th><th class="n">t/año directo PDO</th><th class="n">Días desde almacén</th><th class="n">Días directo PDO</th><th class="n">Servicio desde almacén</th><th class="n">Servicio directo PDO</th></tr></thead>
+      <tbody id="b-dest"></tbody>
+    </table></div>
+    <p class="note">Medias ponderadas por toneladas. Por el almacén pasa solo papel de PDO.</p>
+  </div>
+</section>
+
+<!-- ============ 4. SATURACIÓN CON LA CARTERA ============ -->
+<section class="panel" id="p-sat" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Con la cartera actual, MGT MP1 supera su capacidad las dos próximas semanas</h2>
+    <p class="sub">MGT tiene vendida el 100% de su capacidad de las próximas 4 semanas; PDA, el 86%, y PDO, el 71%. Hay hueco en PDO para absorber parte de los pedidos de MGT.</p>
+  </div>
+  <div class="kg k3">
+    <div class="kc alert"><div class="kl">MGT</div><div class="kv">100%</div><div class="ks">MP1 al 104% · MP2 al 93%</div></div>
+    <div class="kc"><div class="kl">PDA</div><div class="kv">86%</div><div class="ks">Una máquina, MP1</div></div>
+    <div class="kc"><div class="kl">PDO</div><div class="kv">71%</div><div class="ks">Unas 2.000 t libres en 4 semanas</div></div>
+  </div>
+  <div class="card">
+    <h3>Saturación con la cartera actual, por semana</h3>
+    <p class="cap">Toneladas en cartera ÷ capacidad de cada semana. ▲ marca las semanas con más cartera que capacidad.</p>
+    <div class="tw"><table class="heat" id="heat"></table></div>
+    <div class="scale"><span>60%</span><span class="bar" id="scale"></span><span>120%</span></div>
+  </div>
+  <div class="card">
+    <h3>Capacidad y cartera de las próximas 4 semanas</h3>
+    <div class="tw"><table id="capt"></table></div>
+  </div>
+</section>
+
+<!-- ============ 5. FAMILIAS POR MÁQUINA ============ -->
+<section class="panel" id="p-fam" role="tabpanel" hidden>
+  <div class="card">
+    <h2>Cada familia dura entre 2 y 6 días; PDA hace las campañas más largas</h2>
+    <p class="sub">La duración de cada familia marca cuánto tarda en volver una calidad. PDO, con dos familias cortas, cierra su ciclo en 6 días; PDA, con tres familias, tarda 12.</p>
+  </div>
+  <div class="kg k3">
+    <div class="kc"><div class="kl">Duración media de familia · MGT</div><div class="kv">3,4 días</div><div class="ks">5 familias en 2 máquinas</div></div>
+    <div class="kc alert"><div class="kl">Duración media de familia · PDA</div><div class="kv">4,0 días</div><div class="ks">3 familias · ciclo de 12 días</div></div>
+    <div class="kc"><div class="kl">Duración media de familia · PDO</div><div class="kv">3,0 días</div><div class="ks">2 familias · ciclo de 6 días</div></div>
+  </div>
+  <div class="card">
+    <h3>Composición del ciclo de cada máquina</h3>
+    <p class="cap">Días de cada familia dentro del ciclo. La longitud total de la barra es el ciclo de la máquina.</p>
+    <div class="legend" id="lg-fam"></div>
+    <div class="chart" id="c-fam"></div>
+  </div>
+  <div class="card">
+    <h3>Duración media por familia, máquina y empresa</h3>
+    <div class="tw"><table id="famt"></table></div>
+  </div>
+</section>
+
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+// ---------- Datos (ficticios) ----------
+const SRC = {MGT:'#257de0', PDA:'#f47230', PDO:'#00b894', 'Proveedores externos':'#aab3bd'};
+const flows = [
+  ['MGT','Ondupack Almendralejo',30000],['MGT','Ondupack Navalmoral',8000],['MGT','Otros clientes',122000],
+  ['PDA','Ondupack Almendralejo',12000],['PDA','Ondupack Navalmoral',14000],['PDA','Otros clientes',94000],
+  ['PDO','Ondupack Almendralejo',6000],['PDO','Ondupack Navalmoral',13000],['PDO','Otros clientes',71000],
+  ['Proveedores externos','Ondupack Almendralejo',12000],['Proveedores externos','Ondupack Navalmoral',10000]];
+const months = ['Dic','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov'];
+const almT = [2300,2200,2500,2600,2700,2600,2800,2100,1900,2700,2900,2700]; // t/mes que pasan por el almacén
+const FIJO_MES = 20000, VAR_T = 7;
+// destino: [t almacén, t directo, días almacén, días directo, % almacén, % directo]
+const dest = [['Ondupack Almendralejo',4000,2000,1.5,7.5,95,74],['Ondupack Navalmoral',6000,7000,1.3,6.5,97,86],['Otros clientes',20000,51000,2.0,7.0,94,89]];
+const weeks = ['S49 · 30 nov','S50 · 7 dic','S51 · 14 dic','S52 · 21 dic'];
+// máquina: [empresa, nombre, capacidad t/semana, saturación por semana]
+const mach = [['MGT','MP1',1825,[118,109,98,91]],['MGT','MP2',1250,[101,96,90,85]],['PDA','MP1',2310,[95,89,83,77]],['PDO','MP1',1730,[82,74,68,60]]];
+const FAM = {Testliner:'#257de0', Kraftliner:'#f47230', 'White top':'#00b894', Fluting:'#f2a600', 'Semiquímico':'#ee7fac'};
+const FAM_INK = {Testliner:'#fff', Kraftliner:'#fff', 'White top':'#fff', Fluting:'#0b0b0b', 'Semiquímico':'#fff'};
+const fams = [['MGT','MP1',[['Testliner',4.5],['Kraftliner',3.0],['White top',2.5]]],['MGT','MP2',[['Fluting',5.0],['Semiquímico',2.0]]],
+              ['PDA','MP1',[['Testliner',6.0],['Fluting',4.0],['White top',2.0]]],['PDO','MP1',[['Testliner',3.5],['Fluting',2.5]]]];
+
+// ---------- Utilidades ----------
+const NS = 'http://www.w3.org/2000/svg';
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const dec = (n, d = 1) => n.toFixed(d).replace('.', ',');
+function el(tag, attrs = {}, parent) { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, attrs = {}) { const t = el('text', {x, y, 'font-size': 12, fill: '#666666', ...attrs}, parent); t.textContent = s; return t; }
+const INK = {'font-size': 12.5, 'font-weight': 650, fill: '#191919', stroke: '#fff', 'stroke-width': 5, 'paint-order': 'stroke'};
+function svg(id, w, h, label) { const s = el('svg', {viewBox: `0 0 ${w} ${h}`, role: 'img', 'aria-label': label}); document.getElementById(id).appendChild(s); return s; }
+const tip = document.getElementById('tip');
+function showTip(ev, title, rows) {
+  tip.replaceChildren();
+  const t = document.createElement('div'); t.className = 't'; t.textContent = title; tip.appendChild(t);
+  for (const [color, value, label] of rows) {
+    const r = document.createElement('div'); r.className = 'r';
+    const i = document.createElement('i'); i.style.background = color; r.appendChild(i);
+    const b = document.createElement('b'); b.textContent = value; r.appendChild(b);
+    if (label) { const sp = document.createElement('span'); sp.textContent = label; r.appendChild(sp); }
+    tip.appendChild(r);
+  }
+  tip.style.display = 'block';
+  const rect = ev.target.getBoundingClientRect ? ev.target.getBoundingClientRect() : {left: 0, top: 0};
+  const x = ev.clientX || rect.left + 10, y = ev.clientY || rect.top + 10;
+  tip.style.left = Math.min(x + 14, window.innerWidth - tip.offsetWidth - 8) + 'px';
+  tip.style.top = (y + 14) + 'px';
+}
+const hideTip = () => { tip.style.display = 'none'; };
+function hover(node, title, rows) {
+  node.setAttribute('class', 'hit'); node.setAttribute('tabindex', '0');
+  node.addEventListener('pointermove', e => showTip(e, title, rows));
+  node.addEventListener('pointerleave', hideTip);
+  node.addEventListener('focus', e => showTip(e, title, rows));
+  node.addEventListener('blur', hideTip);
+}
+function cell(tr, v, cls) { const c = tr.insertCell(); c.textContent = v; if (cls) c.className = cls; return c; }
+function table(id, head, rows, numFrom = 1) {
+  const tb = document.createElement('table');
+  const th = tb.createTHead().insertRow();
+  head.forEach((h, i) => { const c = document.createElement('th'); c.textContent = h; if (i >= numFrom) c.className = 'n'; th.appendChild(c); });
+  const body = tb.createTBody();
+  rows.forEach(r => { const tr = body.insertRow(); r.forEach((v, i) => cell(tr, v, i >= numFrom ? 'n' : '')); });
+  document.getElementById(id).appendChild(tb);
+}
+function hbar(parent, x, y, w, h, fill) {
+  const r = Math.max(0, Math.min(4, w / 2));
+  return el('path', {d: `M${x} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x}Z`, fill}, parent);
+}
+function vtop(parent, x, y, w, h, fill) { // columna con extremo superior redondeado
+  const r = Math.max(0, Math.min(4, w / 2, h));
+  return el('path', {d: `M${x} ${y + h}V${y + r}Q${x} ${y} ${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h}Z`, fill}, parent);
+}
+
+// ---------- 1. Mapa: flujos con otros clientes ----------
+(function () {
+  const W = 980, H = 490, nw = 14, lx = 190, rx = W - 230 - nw, top = 10, bot = 32, gapL = 18;
+  const srcs = ['MGT', 'PDA', 'PDO', 'Proveedores externos'], tgts = ['Ondupack Almendralejo', 'Ondupack Navalmoral', 'Otros clientes'];
+  const total = flows.reduce((s, f) => s + f[2], 0);
+  const k = (H - top - bot - gapL * (srcs.length - 1)) / total;
+  const gapR = (H - top - bot - total * k) / (tgts.length - 1);
+  const s = svg('c-sankey', W, H, 'Flujo anual de papel de cada papelera y proveedor externo a cada destino');
+  const sum = (key, i) => flows.filter(f => f[i] === key).reduce((a, f) => a + f[2], 0);
+  const sy = {}, ty = {};
+  let y = top; srcs.forEach(n => { sy[n] = y; y += sum(n, 0) * k + gapL; });
+  y = top; tgts.forEach(n => { ty[n] = y; y += sum(n, 1) * k + gapR; });
+  const so = {...sy}, to = {...ty};
+  const links = el('g', {}, s);
+  for (const n of srcs) for (const t of tgts) {
+    const f = flows.find(f => f[0] === n && f[1] === t); if (!f) continue;
+    const h = f[2] * k, x0 = lx + nw, x1 = rx, xm = (x0 + x1) / 2;
+    const y0 = so[n], y1 = to[t]; so[n] += h; to[t] += h;
+    const p = el('path', {d: `M${x0} ${y0}C${xm} ${y0} ${xm} ${y1} ${x1} ${y1}V${y1 + h}C${xm} ${y1 + h} ${xm} ${y0 + h} ${x0} ${y0 + h}Z`, fill: SRC[n], 'fill-opacity': 0.32}, links);
+    hover(p, `${n} → ${t}`, [[SRC[n], `${fmt(f[2])} t/año`, `${Math.round(100 * f[2] / sum(n, 0))}% de lo que sale de ${n === 'Proveedores externos' ? 'externos' : n}`]]);
+    p.addEventListener('pointerenter', () => p.setAttribute('fill-opacity', 0.55));
+    p.addEventListener('pointerleave', () => p.setAttribute('fill-opacity', 0.32));
+  }
+  srcs.forEach(n => {
+    const v = sum(n, 0), h = v * k, grp = flows.filter(f => f[0] === n && f[1] !== 'Otros clientes').reduce((a, f) => a + f[2], 0);
+    el('rect', {x: lx, y: sy[n], width: nw, height: h, rx: 2, fill: SRC[n]}, s);
+    const extra = n === 'Proveedores externos' ? 'Solo a las cartoneras' : `${Math.round(100 * grp / v)}% al grupo`;
+    txt(s, lx - 10, sy[n] + h / 2 - 8, n === 'Proveedores externos' ? 'Prov. externos' : n, {'text-anchor': 'end', 'font-size': 13.5, 'font-weight': 650, fill: '#191919'});
+    txt(s, lx - 10, sy[n] + h / 2 + 8, `${fmt(v)} t`, {'text-anchor': 'end'});
+    txt(s, lx - 10, sy[n] + h / 2 + 23, extra, {'text-anchor': 'end', 'font-size': 11.5});
+  });
+  tgts.forEach(t => {
+    const v = sum(t, 1), h = v * k, other = t === 'Otros clientes';
+    el('rect', {x: rx, y: ty[t], width: nw, height: h, rx: 2, fill: other ? '#8a96a3' : '#1b2838'}, s);
+    txt(s, rx + nw + 10, ty[t] + h / 2 - 2, t, {'font-size': 13.5, 'font-weight': 650, fill: '#191919'});
+    const ext = flows.filter(f => f[1] === t && f[0] === 'Proveedores externos').reduce((a, f) => a + f[2], 0);
+    txt(s, rx + nw + 10, ty[t] + h / 2 + 14, other ? `${fmt(v)} t · clientes de fuera del grupo` : `${fmt(v)} t · ${Math.round(100 * (v - ext) / v)}% del grupo`);
+  });
+  table('t-sankey', ['Origen', 'Destino', 't/año'], flows.map(f => [f[0], f[1], fmt(f[2])]), 2);
+})();
+
+// ---------- 2. Coste mensual del almacén ----------
+(function () {
+  const W = 640, H = 270, l = 40, r = 10, top = 14, bot = 28, ymax = 40;
+  const n = months.length, band = (W - l - r) / n, bw = Math.min(24, band * 0.6);
+  const Y = v => top + (1 - v / ymax) * (H - top - bot);
+  const s = svg('c-mes', W, H, 'Coste mensual del almacén, fijo y variable');
+  [0, 10, 20, 30, 40].forEach(v => {
+    el('line', {x1: l, x2: W - r, y1: Y(v), y2: Y(v), stroke: v ? '#e7e7e7' : '#c2c2c2'}, s);
+    txt(s, l - 8, Y(v) + 4, v + 'k', {'text-anchor': 'end', 'font-size': 11.5});
+  });
+  months.forEach((m, i) => {
+    const x = l + i * band + (band - bw) / 2, fijo = FIJO_MES / 1000, vari = almT[i] * VAR_T / 1000;
+    const g = el('g', {}, s);
+    el('rect', {x, y: Y(fijo), width: bw, height: Y(0) - Y(fijo), fill: '#257de0'}, g);
+    vtop(g, x, Y(fijo + vari), bw, Y(fijo) - Y(fijo + vari) - 2, '#f47230');
+    el('rect', {x: x - 4, y: top, width: bw + 8, height: Y(0) - top, fill: 'transparent'}, g);
+    hover(g, `${m} · ${fmt(almT[i])} t por el almacén`, [['#f47230', fmt(almT[i] * VAR_T) + ' €', 'variable'], ['#257de0', fmt(FIJO_MES) + ' €', 'fijo'], ['#191919', fmt(FIJO_MES + almT[i] * VAR_T) + ' €', 'total']]);
+    txt(s, x + bw / 2, H - 9, m, {'text-anchor': 'middle', 'font-size': 11.5});
+  });
+  table('t-mes', ['Mes', 't por el almacén', 'Fijo (€)', 'Variable (€)', 'Total (€)'],
+    months.map((m, i) => [m, fmt(almT[i]), fmt(FIJO_MES), fmt(almT[i] * VAR_T), fmt(FIJO_MES + almT[i] * VAR_T)]));
+})();
+
+// ---------- 3a. Tiempo medio de servicio ----------
+(function () {
+  const W = 560, l = 150, r = 76, top = 6, bh = 18, rowH = 60, max = 8;
+  const H = top + rowH * dest.length + 24, X = v => l + v / max * (W - l - r);
+  const s = svg('c-lead', W, H, 'Tiempo medio de servicio desde el almacén y directo desde PDO');
+  [0, 2, 4, 6, 8].forEach(v => { el('line', {x1: X(v), x2: X(v), y1: 0, y2: H - 22, stroke: v ? '#e7e7e7' : '#c2c2c2'}, s); txt(s, X(v), H - 6, v, {'text-anchor': 'middle', 'font-size': 11.5}); });
+  dest.forEach(([n, ta, td, da, dd], i) => {
+    const y = top + i * rowH + 4;
+    txt(s, 0, y + bh + 5, n.replace('Ondupack ', ''), {'font-size': 12.5, 'font-weight': 600, fill: '#191919'});
+    [[da, '#6a4ce2', 'Desde el almacén'], [dd, '#00b894', 'Directo desde PDO']].forEach(([v, c, lab], k) => {
+      const by = y + k * (bh + 2), b = hbar(s, X(0), by, X(v) - X(0), bh, c);
+      hover(b, `${n} · ${lab}`, [[c, dec(v) + ' días', 'de media']]);
+      txt(s, X(v) + 8, by + 14, dec(v) + ' días', INK);
+    });
+  });
+  table('t-lead', ['Destino', 'Desde el almacén (días)', 'Directo desde PDO (días)'], dest.map(d => [d[0], dec(d[3]), dec(d[4])]));
+})();
+
+// ---------- 3b. Servicio a tiempo y completo ----------
+(function () {
+  const W = 560, rowH = 58, top = 30, H = top + rowH * dest.length + 34, l = 120, r = 24, x0 = 70, x1 = 100;
+  const X = v => l + (v - x0) / (x1 - x0) * (W - l - r);
+  const s = svg('c-otif', W, H, 'Pedidos a tiempo y completos desde el almacén y directo desde PDO');
+  [70, 80, 90, 100].forEach(v => { el('line', {x1: X(v), x2: X(v), y1: top - 8, y2: H - 30, stroke: '#e7e7e7'}, s); txt(s, X(v), H - 12, v + '%', {'text-anchor': 'middle', 'font-size': 11.5}); });
+  el('line', {x1: X(95), x2: X(95), y1: top - 14, y2: H - 30, stroke: '#191919', 'stroke-width': 1.25, 'stroke-dasharray': '4 3'}, s);
+  txt(s, X(95), top - 18, 'Objetivo 95%', {'text-anchor': 'middle', 'font-size': 11.5, fill: '#191919'});
+  dest.forEach(([n, ta, td, da, dd, pa, pd], i) => {
+    const y = top + rowH * i + rowH / 2;
+    txt(s, 0, y + 4, n.replace('Ondupack ', ''), {'font-size': 12.5, 'font-weight': 600, fill: '#191919'});
+    el('line', {x1: X(pd), x2: X(pa), y1: y, y2: y, stroke: '#c2c2c2', 'stroke-width': 2}, s);
+    [[pa, '#6a4ce2', 'Desde el almacén'], [pd, '#00b894', 'Directo desde PDO']].forEach(([v, c, lab]) => {
+      const g = el('g', {}, s);
+      el('circle', {cx: X(v), cy: y, r: 12, fill: 'transparent'}, g);
+      el('circle', {cx: X(v), cy: y, r: 6.5, fill: c, stroke: '#fff', 'stroke-width': 2}, g);
+      hover(g, `${n} · ${lab}`, [[c, v + '%', 'a tiempo y completo']]);
+      txt(s, X(v), y - 13, v + '%', {...INK, 'text-anchor': 'middle', 'font-size': 12});
+    });
+  });
+  table('t-otif', ['Destino', 'Desde el almacén', 'Directo desde PDO'], dest.map(d => [d[0], d[5] + '%', d[6] + '%']));
+})();
+(function () {
+  const b = document.getElementById('b-dest');
+  dest.forEach(([n, ta, td, da, dd, pa, pd]) => {
+    const tr = b.insertRow();
+    cell(tr, n, 'k'); cell(tr, fmt(ta), 'n'); cell(tr, fmt(td), 'n'); cell(tr, dec(da), 'n'); cell(tr, dec(dd), 'n');
+    cell(tr, pa + '%', 'n ok'); cell(tr, pd + '%', pd < 80 ? 'n bad' : 'n');
+  });
+  const T = dest.reduce((a, d) => [a[0] + d[1], a[1] + d[2]], [0, 0]);
+  const w = (i, j) => dest.reduce((a, d) => a + d[i] * d[j], 0);
+  const tr = b.insertRow(); tr.className = 'tot';
+  cell(tr, 'Total'); cell(tr, fmt(T[0]), 'n'); cell(tr, fmt(T[1]), 'n'); cell(tr, dec(w(1, 3) / T[0]), 'n'); cell(tr, dec(w(2, 4) / T[1]), 'n');
+  cell(tr, Math.round(w(1, 5) / T[0]) + '%', 'n'); cell(tr, Math.round(w(2, 6) / T[1]) + '%', 'n');
+})();
+
+// ---------- 4. Saturación con la cartera ----------
+(function () {
+  const ramp = ['#cce3fd','#b6d5f8','#9dc8f7','#84b9f3','#6aabf1','#519ced','#338ced','#257de0','#2370cd','#1b64be','#1757ac','#0f4a96','#0e3d7e'];
+  const idx = v => Math.max(0, Math.min(12, Math.round((v - 60) / 5)));
+  const heat = document.getElementById('heat');
+  const hr = heat.createTHead().insertRow();
+  ['Empresa / máquina', ...weeks, 'Media 4 semanas'].forEach((h, i) => { const c = document.createElement('th'); c.textContent = h; if (i) c.className = 'n'; hr.appendChild(c); });
+  const body = heat.createTBody();
+  const hcell = (tr, v) => {
+    const c = tr.insertCell(); c.className = 'h';
+    c.textContent = v + '%' + (v > 100 ? ' ▲' : '');
+    c.style.background = ramp[idx(v)]; c.style.color = idx(v) >= 7 ? '#fff' : '#191919';
+    c.title = v + '% de la capacidad';
+  };
+  ['MGT', 'PDA', 'PDO'].forEach(co => {
+    const ms = mach.filter(m => m[0] === co), cap = ms.reduce((a, m) => a + m[2], 0);
+    const wk = weeks.map((_, i) => Math.round(ms.reduce((a, m) => a + m[2] * m[3][i], 0) / cap));
+    const tr = body.insertRow(); tr.className = 'co';
+    cell(tr, co); wk.forEach(v => hcell(tr, v)); hcell(tr, Math.round(wk.reduce((a, v) => a + v, 0) / 4));
+    if (ms.length > 1) ms.forEach(m => { const r = body.insertRow(); cell(r, '   ' + co + ' · ' + m[1]).style.paddingLeft = '28px'; m[3].forEach(v => hcell(r, v)); hcell(r, Math.round(m[3].reduce((a, v) => a + v, 0) / 4)); });
+  });
+  const sc = document.getElementById('scale'); ramp.forEach(c => { const i = document.createElement('i'); i.style.background = c; sc.appendChild(i); });
+  table('capt', ['Máquina', 'Capacidad 4 semanas (t)', 'Cartera (t)', 'Saturación', 'Hueco (t)'], mach.map(([co, mq, cap, s]) => {
+    const c4 = cap * 4, cart = s.reduce((a, v) => a + cap * v / 100, 0);
+    return [co + ' · ' + mq, fmt(c4), fmt(cart), Math.round(100 * cart / c4) + '%', cart > c4 ? '−' + fmt(cart - c4) : fmt(c4 - cart)];
+  }));
+})();
+
+// ---------- 5. Familias por máquina ----------
+(function () {
+  const lg = document.getElementById('lg-fam');
+  Object.entries(FAM).forEach(([n, c]) => { const sp = document.createElement('span'); const i = document.createElement('i'); i.style.background = c; sp.appendChild(i); sp.appendChild(document.createTextNode(n)); lg.appendChild(sp); });
+  const W = 980, l = 110, r = 110, rowH = 52, top = 8, max = 12;
+  const H = top + rowH * fams.length + 26, X = v => l + v / max * (W - l - r);
+  const s = svg('c-fam', W, H, 'Composición del ciclo de cada máquina por familias');
+  [0, 2, 4, 6, 8, 10, 12].forEach(v => { el('line', {x1: X(v), x2: X(v), y1: 0, y2: H - 22, stroke: v ? '#e7e7e7' : '#c2c2c2'}, s); txt(s, X(v), H - 6, v + ' d', {'text-anchor': 'middle', 'font-size': 11.5}); });
+  fams.forEach(([co, mq, fs], i) => {
+    const y = top + i * rowH + 10, h = 28;
+    txt(s, 0, y + 19, `${co} · ${mq}`, {'font-size': 12.5, 'font-weight': 600, fill: '#191919'});
+    let acc = 0;
+    fs.forEach(([f, d], k) => {
+      const x0 = X(acc) + (k ? 1 : 0), w = X(acc + d) - X(acc) - (k ? 1 : 0) - (k < fs.length - 1 ? 1 : 0);
+      const r = el('rect', {x: x0, y, width: Math.max(0, w), height: h, rx: 4, fill: FAM[f]}, s);
+      hover(r, `${co} · ${mq} · ${f}`, [[FAM[f], dec(d) + ' días', 'por campaña']]);
+      const label = `${f} · ${dec(d)} d`;
+      if (w > label.length * 6.8 + 14) txt(s, x0 + 8, y + 19, label, {'font-size': 12, 'font-weight': 600, fill: FAM_INK[f]});
+      acc += d;
+    });
+    txt(s, X(acc) + 8, y + 19, `Ciclo ${dec(acc, 0)} días`, INK);
+  });
+  const tb = document.getElementById('famt');
+  const th = tb.createTHead().insertRow();
+  ['Empresa', 'Máquina', 'Familias', 'Duración media por familia', 'Ciclo'].forEach((h, i) => { const c = document.createElement('th'); c.textContent = h; if (i >= 3) c.className = 'n'; th.appendChild(c); });
+  const body = tb.createTBody();
+  ['MGT', 'PDA', 'PDO'].forEach(co => {
+    const ms = fams.filter(f => f[0] === co);
+    ms.forEach(([c, mq, fs]) => {
+      const tot = fs.reduce((a, f) => a + f[1], 0), tr = body.insertRow();
+      cell(tr, c, 'k'); cell(tr, mq); cell(tr, fs.map(([f, d]) => `${f} ${dec(d)} d`).join(' · '));
+      cell(tr, dec(tot / fs.length) + ' días', 'n'); cell(tr, dec(tot, 0) + ' días', 'n');
+    });
+    const all = ms.flatMap(m => m[2]), tr = body.insertRow(); tr.className = 'tot';
+    cell(tr, co); cell(tr, ms.length + (ms.length > 1 ? ' máquinas' : ' máquina')); cell(tr, all.length + ' familias');
+    cell(tr, dec(all.reduce((a, f) => a + f[1], 0) / all.length) + ' días', 'n'); cell(tr, '', 'n');
+  });
+})();
+
+// ---------- Pestañas ----------
+const tabs = [...document.querySelectorAll('[role=tab]')];
+function show(id) { tabs.forEach(t => { const on = t.dataset.t === id; t.setAttribute('aria-selected', on); document.getElementById('p-' + t.dataset.t).hidden = !on; }); hideTip(); }
+tabs.forEach(t => t.addEventListener('click', () => { show(t.dataset.t); try { history.replaceState(null, '', '#' + t.dataset.t); } catch (e) {} window.scrollTo({ top: 0 }); }));
+const start = location.hash.slice(1);
+show(tabs.some(t => t.dataset.t === start) ? start : 'mapa');
+</script>
+</body>
+</html>
